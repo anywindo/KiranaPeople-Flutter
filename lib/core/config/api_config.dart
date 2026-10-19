@@ -10,12 +10,16 @@ class ApiConfig {
       'url': 'https://terriblenight.onrender.com/api/v1',
     },
     {
-      'label': 'Android Emulator (10.0.2.2:8000)',
-      'url': 'http://10.0.2.2:8000/api/v1',
+      'label': 'Mac Localhost via Wi-Fi (192.168.1.11:8000)',
+      'url': 'http://192.168.1.11:8000/api/v1',
     },
     {
-      'label': 'iOS Simulator / Localhost (127.0.0.1:8000)',
-      'url': 'http://127.0.0.1:8000/api/v1',
+      'label': 'Android Reverse ADB (localhost:8000)',
+      'url': 'http://localhost:8000/api/v1',
+    },
+    {
+      'label': 'Android Emulator (10.0.2.2:8000)',
+      'url': 'http://10.0.2.2:8000/api/v1',
     },
     {
       'label': 'Laravel Herd (terriblenight.test)',

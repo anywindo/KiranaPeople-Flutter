@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:dio/dio.dart';
 import '../config/api_config.dart';
@@ -13,8 +14,8 @@ class ApiClient {
     SecureStorageService? storage,
   })  : _dio = dio ?? Dio(),
         _storage = storage ?? SecureStorageService() {
-    _dio.options.connectTimeout = const Duration(seconds: 15);
-    _dio.options.receiveTimeout = const Duration(seconds: 15);
+    _dio.options.connectTimeout = const Duration(seconds: 20);
+    _dio.options.receiveTimeout = const Duration(seconds: 20);
     _dio.options.headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
@@ -23,9 +24,11 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Dynamically set Base URL if not set on request
-          final currentBaseUrl = await ApiConfig.getBaseUrl();
-          options.baseUrl = currentBaseUrl;
+          // Construct explicit full URL so Dio doesn't strip baseUrl subpath (e.g. /api/v1)
+          if (!options.path.startsWith('http://') && !options.path.startsWith('https://')) {
+            final currentBaseUrl = await ApiConfig.getBaseUrl();
+            options.path = _resolveFullPath(currentBaseUrl, options.path);
+          }
 
           // Add Bearer Token if present
           final token = await _storage.getToken();
@@ -33,9 +36,24 @@ class ApiClient {
             options.headers['Authorization'] = 'Bearer $token';
           }
 
+          developer.log('[API Request] ${options.method} ${options.path}', name: 'ApiClient');
           return handler.next(options);
         },
+        onResponse: (response, handler) {
+          developer.log(
+            '[API Response] ${response.requestOptions.method} ${response.requestOptions.path} (${response.statusCode})',
+            name: 'ApiClient',
+          );
+          return handler.next(response);
+        },
         onError: (DioException e, handler) {
+          final uri = e.requestOptions.uri;
+          developer.log(
+            '[API Error] ${e.requestOptions.method} $uri -> ${e.type}: ${e.message} (status: ${e.response?.statusCode})',
+            name: 'ApiClient',
+            error: e,
+          );
+
           final response = e.response;
           String message = 'Terjadi kesalahan jaringan. Periksa koneksi Anda.';
           dynamic errors;
@@ -48,11 +66,11 @@ class ApiClient {
                   'Gagal memproses permintaan (${response.statusCode})';
               errors = data['errors'];
             } else if (response.statusCode == 401) {
-              message = 'Sesi telah berakhir. Silakan login kembali.';
+              message = 'Kredensial salah atau sesi telah berakhir.';
             } else if (response.statusCode == 403) {
               message = 'Anda tidak memiliki akses ke fitur ini.';
             } else if (response.statusCode == 404) {
-              message = 'Layanan atau data tidak ditemukan.';
+              message = 'Layanan atau data tidak ditemukan ($uri).';
             } else if (response.statusCode == 422) {
               message = 'Data input tidak valid.';
             } else if (response.statusCode != null && response.statusCode! >= 500) {
@@ -63,7 +81,7 @@ class ApiClient {
               e.type == DioExceptionType.sendTimeout) {
             message = 'Koneksi ke server timeout. Silakan coba lagi.';
           } else if (e.error is SocketException) {
-            message = 'Gagal terhubung ke server. Pastikan URL server benar dan aktif.';
+            message = 'Gagal terhubung ke server ($uri). Pastikan URL server benar dan aktif.';
           }
 
           final customException = ApiException(
@@ -83,6 +101,18 @@ class ApiClient {
         },
       ),
     );
+  }
+
+  static String _resolveFullPath(String baseUrl, String path) {
+    var b = baseUrl.trim();
+    while (b.endsWith('/')) {
+      b = b.substring(0, b.length - 1);
+    }
+    var p = path.trim();
+    if (!p.startsWith('/')) {
+      p = '/$p';
+    }
+    return '$b$p';
   }
 
   Future<Response> get(
