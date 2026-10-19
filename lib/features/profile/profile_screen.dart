@@ -518,7 +518,7 @@ class ProfileScreen extends ConsumerWidget {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 100),
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 40),
         child: Column(
           children: [
             // 1. Profile Avatar & Badges Header (Matches Screenshot 1)

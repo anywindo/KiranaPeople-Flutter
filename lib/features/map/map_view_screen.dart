@@ -387,7 +387,7 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                 // Right Floating Map Controls (Matches Screenshot 1)
                 Positioned(
                   right: 16,
-                  bottom: 290,
+                  bottom: 215,
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -453,7 +453,7 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                 Positioned(
                   left: 16,
                   right: 16,
-                  bottom: 92,
+                  bottom: 16,
                   child: Container(
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
