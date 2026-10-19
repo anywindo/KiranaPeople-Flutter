@@ -14,6 +14,7 @@ class UserModel {
   String? get avatar => avatarUrl;
   final bool? isActive;
   final List<String>? roles;
+  final String? joinedAt;
 
   UserModel({
     required this.id,
@@ -28,6 +29,7 @@ class UserModel {
     this.avatarUrl,
     this.isActive,
     this.roles,
+    this.joinedAt,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -48,6 +50,7 @@ class UserModel {
       roles: json['roles'] is List
           ? (json['roles'] as List).map((e) => e.toString()).toList()
           : null,
+      joinedAt: json['joined_at']?.toString() ?? json['created_at']?.toString(),
     );
   }
 
@@ -65,6 +68,20 @@ class UserModel {
       'avatar_url': avatarUrl,
       'is_active': isActive,
       'roles': roles,
+      'joined_at': joinedAt,
     };
+  }
+
+  String? get fullAvatarUrl {
+    if (avatarUrl == null || avatarUrl!.trim().isEmpty) return null;
+    final trimmed = avatarUrl!.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    final cleanPath = trimmed.startsWith('/') ? trimmed.substring(1) : trimmed;
+    if (cleanPath.startsWith('storage/')) {
+      return 'https://terriblenight.onrender.com/$cleanPath';
+    }
+    return 'https://terriblenight.onrender.com/storage/$cleanPath';
   }
 }

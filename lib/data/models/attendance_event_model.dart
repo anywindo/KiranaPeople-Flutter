@@ -48,7 +48,10 @@ class AttendanceEvent {
       longitude: json['longitude'] is num
           ? (json['longitude'] as num).toDouble()
           : double.tryParse(json['longitude']?.toString() ?? ''),
-      selfieUrl: json['selfie_url']?.toString() ?? json['photo_url']?.toString(),
+      selfieUrl: json['selfie_url']?.toString() ??
+          json['selfie_path']?.toString() ??
+          json['photo_url']?.toString() ??
+          json['photo']?.toString(),
       notes: json['notes']?.toString(),
     );
   }
@@ -63,5 +66,18 @@ class AttendanceEvent {
       'selfie_url': selfieUrl,
       'notes': notes,
     };
+  }
+
+  String? get fullSelfieUrl {
+    if (selfieUrl == null || selfieUrl!.trim().isEmpty) return null;
+    final trimmed = selfieUrl!.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    final cleanPath = trimmed.startsWith('/') ? trimmed.substring(1) : trimmed;
+    if (cleanPath.startsWith('storage/')) {
+      return 'https://terriblenight.onrender.com/$cleanPath';
+    }
+    return 'https://terriblenight.onrender.com/storage/$cleanPath';
   }
 }

@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:latlong2/latlong.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../data/models/attendance_model.dart';
@@ -46,12 +48,46 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     return '$dayName, ${date.day} $monthName ${date.year}';
   }
 
+  String _formatIndoFullDate(DateTime date) {
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    return '${date.day} ${months[date.month - 1]}, ${date.year}';
+  }
+
   String _formatShortTime(String? timeStr) {
     if (timeStr == null || timeStr.isEmpty) return '--:--';
     if (timeStr.length >= 5) {
       return timeStr.substring(0, 5);
     }
     return timeStr;
+  }
+
+  bool _isTimeLate(String? actualTime, String? scheduledTime) {
+    if (actualTime == null || scheduledTime == null) return false;
+    try {
+      final actualParts = actualTime.split(':');
+      final schedParts = scheduledTime.split(':');
+      final actualMin = int.parse(actualParts[0]) * 60 + int.parse(actualParts[1]);
+      final schedMin = int.parse(schedParts[0]) * 60 + int.parse(schedParts[1]);
+      return actualMin > schedMin;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  IconData _getEventIcon(AttendanceEventType type) {
+    switch (type) {
+      case AttendanceEventType.startShift:
+        return Icons.work_rounded;
+      case AttendanceEventType.startBreak:
+        return Icons.coffee_rounded;
+      case AttendanceEventType.endBreak:
+        return Icons.business_center_rounded;
+      case AttendanceEventType.endShift:
+        return Icons.home_rounded;
+    }
   }
 
   void _showLogoutDialog() {
@@ -145,8 +181,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
 
     for (final e in events) {
       final dt = DateTime.tryParse(e.timestamp);
-      final formattedTime = dt != null
-          ? '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}'
+      final localDt = dt != null ? (dt.isUtc ? dt.toLocal() : dt) : null;
+      final formattedTime = localDt != null
+          ? '${localDt.hour.toString().padLeft(2, '0')}:${localDt.minute.toString().padLeft(2, '0')}'
           : e.timestamp;
 
       if (e.eventType == AttendanceEventType.startShift) {
@@ -600,222 +637,48 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                       if (_activeSegment == 0)
                         Row(
                           children: [
-                            // Jam Masuk
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary
-                                          .withValues(alpha: 0.10),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.work_rounded,
-                                      color: AppColors.primary,
-                                      size: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      RichText(
-                                        text: TextSpan(
-                                          text: 'Jam Masuk ',
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            color: Color(0xFF8E8E93),
-                                          ),
-                                          children: [
-                                            if (selectedShift != null)
-                                              TextSpan(
-                                                text: '(${_formatShortTime(selectedShift.startTime)})',
-                                                style: const TextStyle(
-                                                  color: AppColors.primary,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        checkInTime ?? '--:--',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF1C1C1E),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                            _buildTimingColumn(
+                              label: 'Jam Masuk',
+                              scheduledTime: _formatShortTime(selectedShift?.startTime ?? '08:00'),
+                              actualTime: checkInTime,
+                              event: startShiftEvent,
+                              fallbackIcon: Icons.work_rounded,
+                              isCompleted: hasStartedShift,
+                              isLate: _isTimeLate(checkInTime, selectedShift?.startTime ?? '08:00'),
                             ),
-
-                            // Jam Pulang
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary
-                                          .withValues(alpha: 0.10),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.home_rounded,
-                                      color: AppColors.primary,
-                                      size: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      RichText(
-                                        text: TextSpan(
-                                          text: 'Jam Pulang ',
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            color: Color(0xFF8E8E93),
-                                          ),
-                                          children: [
-                                            if (selectedShift != null)
-                                              TextSpan(
-                                                text: '(${_formatShortTime(selectedShift.endTime)})',
-                                                style: const TextStyle(
-                                                  color: AppColors.primary,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        checkOutTime ?? '--:--',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF1C1C1E),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                            const SizedBox(width: 12),
+                            _buildTimingColumn(
+                              label: 'Jam Pulang',
+                              scheduledTime: _formatShortTime(selectedShift?.endTime ?? '16:00'),
+                              actualTime: checkOutTime,
+                              event: endShiftEvent,
+                              fallbackIcon: Icons.home_rounded,
+                              isCompleted: hasEndedShift,
+                              isLate: false,
                             ),
                           ],
                         )
                       else
                         Row(
                           children: [
-                            // Mulai Istirahat
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary
-                                          .withValues(alpha: 0.10),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.work_rounded,
-                                      color: AppColors.primary,
-                                      size: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      RichText(
-                                        text: TextSpan(
-                                          text: 'Mulai Istirahat ',
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            color: Color(0xFF8E8E93),
-                                          ),
-                                          children: [
-                                            TextSpan(
-                                              text: '(${selectedShift?.effectiveBreakStart ?? '12:00'})',
-                                              style: const TextStyle(
-                                                color: AppColors.primary,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        startBreakTime ?? '--:--',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF1C1C1E),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                            _buildTimingColumn(
+                              label: 'Mulai Istirahat',
+                              scheduledTime: selectedShift?.effectiveBreakStart ?? '12:00',
+                              actualTime: startBreakTime,
+                              event: startBreakEvent,
+                              fallbackIcon: Icons.coffee_rounded,
+                              isCompleted: hasStartedBreak,
+                              isLate: false,
                             ),
-
-                            // Selesai Istirahat
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary
-                                          .withValues(alpha: 0.10),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.work_rounded,
-                                      color: AppColors.primary,
-                                      size: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      RichText(
-                                        text: TextSpan(
-                                          text: 'Selesai Istirahat ',
-                                          style: const TextStyle(
-                                            fontSize: 11,
-                                            color: Color(0xFF8E8E93),
-                                          ),
-                                          children: [
-                                            TextSpan(
-                                              text: '(${selectedShift?.effectiveBreakEnd ?? '13:00'})',
-                                              style: const TextStyle(
-                                                color: AppColors.primary,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        endBreakTime ?? '--:--',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF1C1C1E),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                            const SizedBox(width: 12),
+                            _buildTimingColumn(
+                              label: 'Selesai Istirahat',
+                              scheduledTime: selectedShift?.effectiveBreakEnd ?? '13:00',
+                              actualTime: endBreakTime,
+                              event: endBreakEvent,
+                              fallbackIcon: Icons.business_center_rounded,
+                              isCompleted: hasEndedBreak,
+                              isLate: false,
                             ),
                           ],
                         ),
@@ -931,6 +794,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                         isLoading: attendanceState.data.isLoading,
                         hasEndedShift: hasEndedShift,
                         hasStartedShift: hasStartedShift,
+                        hasStartedBreak: hasStartedBreak,
+                        hasEndedBreak: hasEndedBreak,
                         isOnBreak: isOnBreak,
                         targetAction: targetAction,
                         selectedShift: selectedShift,
@@ -941,7 +806,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // 5. Aktivitas Hari Ini Card
+                // 5. Aktivitas Hari Ini Card (Matches Screenshot 2, 3, 4)
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
@@ -1032,41 +897,137 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: events.length,
                           separatorBuilder: (_, _) => const Divider(
-                              height: 16, color: Color(0xFFF2F2F7)),
+                            height: 20,
+                            thickness: 0.8,
+                            color: Color(0xFFF2F2F7),
+                          ),
                           itemBuilder: (context, index) {
-                            final event = events[index];
+                            // Sort newest first
+                            final reversedList = events.reversed.toList();
+                            final event = reversedList[index];
                             final dt = DateTime.tryParse(event.timestamp);
-                            final formatted = dt != null
-                                ? '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')} WIB'
+                            final localDt = dt != null ? (dt.isUtc ? dt.toLocal() : dt) : null;
+                            final formattedTime = localDt != null
+                                ? '${localDt.hour.toString().padLeft(2, '0')}:${localDt.minute.toString().padLeft(2, '0')}'
                                 : event.timestamp;
+                            final formattedDate = localDt != null
+                                ? _formatIndoFullDate(localDt)
+                                : 'Hari Ini';
 
                             return Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
+                                // Circular Selfie or Fallback
                                 Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.primary,
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
                                     shape: BoxShape.circle,
+                                    border: Border.all(
+                                        color: const Color(0xFFE5E7EB), width: 1.5),
+                                  ),
+                                  child: ClipOval(
+                                    child: (event.fullSelfieUrl != null &&
+                                            event.fullSelfieUrl!.isNotEmpty)
+                                        ? CachedNetworkImage(
+                                            imageUrl: event.fullSelfieUrl!,
+                                            fit: BoxFit.cover,
+                                            placeholder: (context, url) => Container(
+                                              color: const Color(0xFFF3F4F6),
+                                              child: const Center(
+                                                child: SizedBox(
+                                                  width: 14,
+                                                  height: 14,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2,
+                                                    color: AppColors.primary,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            errorWidget: (context, url, error) =>
+                                                Container(
+                                              color: const Color(0xFFFFF1F2),
+                                              child: Icon(
+                                                _getEventIcon(event.eventType),
+                                                color: AppColors.primary,
+                                                size: 20,
+                                              ),
+                                            ),
+                                          )
+                                        : Container(
+                                            color: const Color(0xFFFFF1F2),
+                                            child: Icon(
+                                              _getEventIcon(event.eventType),
+                                              color: AppColors.primary,
+                                              size: 20,
+                                            ),
+                                          ),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
-                                  child: Text(
-                                    event.eventType.label,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFF1F2937),
-                                    ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        event.eventType.label,
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF1F2937),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        formattedDate,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFF8E8E93),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      InkWell(
+                                        onTap: () => _showLocationDetail(event),
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFFF1F2),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: const Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.error_outline_rounded,
+                                                size: 13,
+                                                color: Color(0xFFE11D48),
+                                              ),
+                                              SizedBox(width: 4),
+                                              Text(
+                                                'Titik Lokasi',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFFE11D48),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 Text(
-                                  formatted,
+                                  formattedTime,
                                   style: const TextStyle(
-                                    fontSize: 13,
-                                    color: Color(0xFF6B7280),
-                                    fontWeight: FontWeight.w500,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF111827),
                                   ),
                                 ),
                               ],
@@ -1084,17 +1045,280 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
     );
   }
 
+  Widget _buildTimingColumn({
+    required String label,
+    required String scheduledTime,
+    required String? actualTime,
+    required AttendanceEvent? event,
+    required IconData fallbackIcon,
+    required bool isCompleted,
+    bool isLate = false,
+  }) {
+    return Expanded(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Circular selfie avatar or pink icon container
+          if (event?.fullSelfieUrl != null && event!.fullSelfieUrl!.isNotEmpty)
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+              ),
+              child: ClipOval(
+                child: CachedNetworkImage(
+                  imageUrl: event.fullSelfieUrl!,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: const Color(0xFFF3F4F6),
+                    child: const Center(
+                      child: SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: const Color(0xFFFFF1F2),
+                    child: Icon(fallbackIcon, color: AppColors.primary, size: 20),
+                  ),
+                ),
+              ),
+            )
+          else
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF1F2),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFFFE4E6), width: 1.5),
+              ),
+              child: Icon(
+                fallbackIcon,
+                color: AppColors.primary,
+                size: 20,
+              ),
+            ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RichText(
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  text: TextSpan(
+                    text: label,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF6B7280),
+                      fontWeight: FontWeight.normal,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: ' ($scheduledTime)',
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      actualTime ?? '--:--',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF111827),
+                      ),
+                    ),
+                    if (isCompleted && actualTime != null) ...[
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.check_circle_rounded,
+                        size: 15,
+                        color: isLate
+                            ? const Color(0xFFEF4444)
+                            : const Color(0xFF10B981),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLocationDetail(AttendanceEvent event) {
+    final lat = event.latitude ?? -6.9897;
+    final lng = event.longitude ?? 109.8765;
+    final latLng = LatLng(lat, lng);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE5E7EB),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.location_on_rounded,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Titik Presensi: ${event.eventType.label}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1F2937),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Koordinat: ${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: SizedBox(
+                height: 200,
+                child: FlutterMap(
+                  options: MapOptions(
+                    initialCenter: latLng,
+                    initialZoom: 16.5,
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName:
+                          'com.kiranadesainindonesia.kiranapeople',
+                    ),
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: latLng,
+                          width: 44,
+                          height: 44,
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 6,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.person_pin_circle_rounded,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text(
+                  'Tutup',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildMainActionButton({
     required bool isLoading,
     required bool hasEndedShift,
     required bool hasStartedShift,
+    required bool hasStartedBreak,
+    required bool hasEndedBreak,
     required bool isOnBreak,
     required AttendanceEventType targetAction,
     required Shift? selectedShift,
     required dynamic workLocation,
   }) {
     if (isLoading) {
-      // Screenshot 1 loading state
       return Container(
         width: double.infinity,
         height: 50,
@@ -1141,7 +1365,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.check_circle_rounded, color: AppColors.success, size: 18),
+              Icon(Icons.check_circle_rounded,
+                  color: AppColors.success, size: 18),
               SizedBox(width: 8),
               Text(
                 'Presensi Hari Ini Selesai',
@@ -1182,7 +1407,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
           ),
         );
       }
-      if (hasEndedShift) {
+      if (hasEndedBreak) {
         return Container(
           width: double.infinity,
           height: 50,
@@ -1192,7 +1417,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
           ),
           child: const Center(
             child: Text(
-              'Shift Selesai',
+              'Istirahat Selesai',
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
@@ -1203,8 +1428,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
         );
       }
       if (isOnBreak) {
+        // Screenshot 3: User on break, ready to end break
         label = 'Selesai Istirahat';
-        icon = Icons.check_circle_rounded;
+        icon = Icons.sync_rounded;
       } else {
         label = 'Mulai Istirahat';
         icon = Icons.coffee_rounded;
@@ -1214,9 +1440,46 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
       if (!hasStartedShift) {
         label = 'Masuk Kerja';
         icon = Icons.work_rounded;
-      } else if (!isOnBreak && targetAction == AttendanceEventType.endShift) {
-        label = 'Pulang Kerja';
-        icon = Icons.home_rounded;
+      } else if (!hasStartedBreak) {
+        // Screenshot 2: Checked in, but must take break first
+        return Container(
+          width: double.infinity,
+          height: 50,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE5E7EB),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: const Center(
+            child: Text(
+              'Wajib Istirahat Dahulu',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF9CA3AF),
+              ),
+            ),
+          ),
+        );
+      } else if (isOnBreak) {
+        // Screenshot 4: User is on break, must complete break first
+        return Container(
+          width: double.infinity,
+          height: 50,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE5E7EB),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: const Center(
+            child: Text(
+              'Selesaikan Istirahat Dahulu',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF9CA3AF),
+              ),
+            ),
+          ),
+        );
       } else {
         label = 'Pulang Kerja';
         icon = Icons.home_rounded;
@@ -1274,7 +1537,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen> {
       if (parts.length >= 2) {
         initial = '${parts[0][0]}${parts[1][0]}'.toUpperCase();
       } else {
-        initial = parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
+        initial =
+            parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
       }
     }
     return Center(

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/user_model.dart';
 import '../data/repositories/auth_repository.dart';
@@ -131,6 +132,30 @@ class AuthNotifier extends Notifier<AuthState> {
         confirmPassword: confirmPassword,
       );
       state = state.copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString(),
+      );
+      return false;
+    }
+  }
+
+  Future<bool> updateProfile({
+    String? phone,
+    File? avatarFile,
+  }) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final updated = await _repository.updateProfile(
+        phone: phone,
+        avatarFile: avatarFile,
+      );
+      state = state.copyWith(
+        isLoading: false,
+        user: updated,
+      );
       return true;
     } catch (e) {
       state = state.copyWith(

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import '../models/user_model.dart';
 import '../../core/network/api_client.dart';
 import '../../core/constants/api_endpoints.dart';
@@ -62,6 +63,47 @@ class AuthRepository {
       }
     }
     throw Exception('Gagal memuat profil pengguna.');
+  }
+
+  Future<UserModel> updateProfile({
+    String? phone,
+    File? avatarFile,
+  }) async {
+    final formData = FormData();
+    formData.fields.add(const MapEntry('_method', 'PUT'));
+
+    if (phone != null && phone.trim().isNotEmpty) {
+      formData.fields.add(MapEntry('phone', phone.trim()));
+      formData.fields.add(MapEntry('phone_number', phone.trim()));
+    }
+
+    if (avatarFile != null) {
+      formData.files.add(
+        MapEntry(
+          'avatar',
+          await MultipartFile.fromFile(
+            avatarFile.path,
+            filename: 'avatar.jpg',
+          ),
+        ),
+      );
+    }
+
+    final response = await _apiClient.post(
+      ApiEndpoints.profile,
+      data: formData,
+    );
+
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      final userJson = data['data'] ?? data['user'] ?? data;
+      if (userJson is Map<String, dynamic>) {
+        final user = UserModel.fromJson(userJson);
+        await _storage.saveUserJson(jsonEncode(user.toJson()));
+        return user;
+      }
+    }
+    return await getProfile();
   }
 
   Future<void> changePassword({
