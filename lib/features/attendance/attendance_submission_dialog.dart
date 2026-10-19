@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/location_helper.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../providers/attendance_provider.dart';
 
@@ -66,8 +67,18 @@ class _AttendanceSubmissionDialogState
   }
 
   void _submit() async {
+    double lat = 0.0;
+    double lng = 0.0;
+    try {
+      final pos = await LocationHelper.determinePosition();
+      lat = pos.latitude;
+      lng = pos.longitude;
+    } catch (_) {}
+
     final success = await ref.read(todayAttendanceProvider.notifier).submitEvent(
           eventType: widget.eventType,
+          latitude: lat,
+          longitude: lng,
           photoFile: _selfieImage,
           notes: _notesController.text.trim().isEmpty
               ? null

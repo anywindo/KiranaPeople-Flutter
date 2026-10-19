@@ -2,20 +2,31 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../attendance/attendance_screen.dart';
 import '../history/history_screen.dart';
+import '../map/map_view_screen.dart';
 import '../profile/profile_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
   @override
-  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+  State<MainNavigationScreen> createState() => MainNavigationScreenState();
+
+  static MainNavigationScreenState? of(BuildContext context) =>
+      context.findAncestorStateOfType<MainNavigationScreenState>();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
+class MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
+
+  void switchToTab(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   final List<Widget> _screens = const [
     AttendanceScreen(),
+    MapViewScreen(),
     HistoryScreen(),
     ProfileScreen(),
   ];
@@ -29,10 +40,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: AppColors.border, width: 1)),
+          color: Colors.white,
+          border: Border(top: BorderSide(color: Color(0xFFF2F2F7), width: 1)),
         ),
         child: NavigationBar(
           selectedIndex: _currentIndex,
+          backgroundColor: Colors.white,
+          indicatorColor: AppColors.primary.withValues(alpha: 0.12),
+          elevation: 0,
           onDestinationSelected: (index) {
             setState(() {
               _currentIndex = index;
@@ -40,18 +55,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           },
           destinations: const [
             NavigationDestination(
-              icon: Icon(Icons.fingerprint_outlined),
-              selectedIcon: Icon(Icons.fingerprint, color: AppColors.primaryDark),
-              label: 'Presensi',
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home_rounded, color: AppColors.primary),
+              label: 'Beranda',
             ),
             NavigationDestination(
-              icon: Icon(Icons.calendar_today_outlined),
-              selectedIcon: Icon(Icons.calendar_today, color: AppColors.primaryDark),
+              icon: Icon(Icons.map_outlined),
+              selectedIcon: Icon(Icons.map_rounded, color: AppColors.primary),
+              label: 'Peta',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.history_rounded),
+              selectedIcon: Icon(Icons.history_toggle_off_rounded, color: AppColors.primary),
               label: 'Riwayat',
             ),
             NavigationDestination(
-              icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person, color: AppColors.primaryDark),
+              icon: Icon(Icons.person_outline_rounded),
+              selectedIcon: Icon(Icons.person_rounded, color: AppColors.primary),
               label: 'Profil',
             ),
           ],
@@ -60,3 +80,4 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     );
   }
 }
+

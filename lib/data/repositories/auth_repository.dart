@@ -79,6 +79,44 @@ class AuthRepository {
     );
   }
 
+  Future<String> requestForgotPasswordOtp(String email) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.forgotPassword,
+      data: {'email': email.trim()},
+    );
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      return data['meta']?['message'] ??
+          data['message'] ??
+          'Jika email Anda terdaftar, instruksi reset kata sandi dan kode OTP telah dikirimkan ke email Anda.';
+    }
+    return 'Jika email Anda terdaftar, instruksi reset kata sandi dan kode OTP telah dikirimkan ke email Anda.';
+  }
+
+  Future<String> resetPassword({
+    required String email,
+    required String otp,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.resetPassword,
+      data: {
+        'email': email.trim(),
+        'otp': otp.trim(),
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+      },
+    );
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      return data['meta']?['message'] ??
+          data['message'] ??
+          'Kata sandi Anda berhasil diperbarui. Silakan masuk kembali.';
+    }
+    return 'Kata sandi Anda berhasil diperbarui. Silakan masuk kembali.';
+  }
+
   Future<void> logout() async {
     try {
       await _apiClient.post(ApiEndpoints.logout);

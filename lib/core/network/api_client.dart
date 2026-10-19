@@ -60,7 +60,9 @@ class ApiClient {
 
           if (response != null) {
             final data = response.data;
-            if (data is Map<String, dynamic>) {
+            if (response.statusCode == 429) {
+              message = 'Terlalu banyak permintaan (Rate limit). Silakan tunggu beberapa menit sebelum meminta kode baru.';
+            } else if (data is Map<String, dynamic>) {
               errors = data['errors'];
               if (errors is Map<String, dynamic> && errors.isNotEmpty) {
                 final firstVal = errors.values.first;

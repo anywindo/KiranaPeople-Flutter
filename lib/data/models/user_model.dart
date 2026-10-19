@@ -11,6 +11,7 @@ class UserModel {
   final bool mustChangePassword;
   final WorkLocation? location;
   final String? avatarUrl;
+  String? get avatar => avatarUrl;
   final bool? isActive;
   final List<String>? roles;
 

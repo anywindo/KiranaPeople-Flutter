@@ -28,6 +28,7 @@ class AttendanceRepository {
     required double latitude,
     required double longitude,
     File? photoFile,
+    int? shiftId,
     String? notes,
   }) async {
     final formDataMap = <String, dynamic>{
@@ -36,15 +37,22 @@ class AttendanceRepository {
       'longitude': longitude.toString(),
     };
 
+    if (shiftId != null) {
+      formDataMap['shift_id'] = shiftId.toString();
+    }
+
     if (notes != null && notes.isNotEmpty) {
       formDataMap['notes'] = notes;
     }
 
     if (photoFile != null && await photoFile.exists()) {
-      final fileName = photoFile.path.split('/').last;
+      formDataMap['selfie'] = await MultipartFile.fromFile(
+        photoFile.path,
+        filename: 'selfie.jpg',
+      );
       formDataMap['photo'] = await MultipartFile.fromFile(
         photoFile.path,
-        filename: fileName,
+        filename: 'selfie.jpg',
       );
     }
 

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import 'server_settings_sheet.dart';
+import 'forgot_password_sheet.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -52,54 +53,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _showForgotPasswordDialog() {
-    final emailController = TextEditingController(text: _identifierController.text);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Lupa Kata Sandi?',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Masukkan email terdaftar Anda untuk menerima tautan instruksi reset kata sandi.',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'Alamat Email',
-                hintText: 'nama@kiranadesain.com',
-                contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal'),
+    final currentEmail = _identifierController.text.trim();
+    ForgotPasswordSheet.show(
+      context,
+      initialEmail: currentEmail.contains('@') ? currentEmail : '',
+      onResetSuccess: (resetEmail) {
+        setState(() {
+          _identifierController.text = resetEmail;
+          _passwordController.clear();
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Kata sandi berhasil diperbarui. Silakan masuk.'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Instruksi pemulihan telah dikirim jika email terdaftar.'),
-                  backgroundColor: AppColors.success,
-                ),
-              );
-            },
-            child: const Text('Kirim'),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
