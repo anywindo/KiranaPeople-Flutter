@@ -61,10 +61,22 @@ class ApiClient {
           if (response != null) {
             final data = response.data;
             if (data is Map<String, dynamic>) {
-              message = data['message'] ??
-                  data['error'] ??
-                  'Gagal memproses permintaan (${response.statusCode})';
               errors = data['errors'];
+              if (errors is Map<String, dynamic> && errors.isNotEmpty) {
+                final firstVal = errors.values.first;
+                if (firstVal is List && firstVal.isNotEmpty) {
+                  message = firstVal.first.toString();
+                } else if (firstVal is String) {
+                  message = firstVal;
+                } else {
+                  message = data['meta']?['message'] ?? data['message'] ?? 'Input tidak valid.';
+                }
+              } else {
+                message = data['message'] ??
+                    data['meta']?['message'] ??
+                    data['error'] ??
+                    'Gagal memproses permintaan (${response.statusCode})';
+              }
             } else if (response.statusCode == 401) {
               message = 'Kredensial salah atau sesi telah berakhir.';
             } else if (response.statusCode == 403) {
