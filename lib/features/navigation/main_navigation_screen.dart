@@ -1,27 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/attendance_provider.dart';
+import '../../providers/history_provider.dart';
 import '../attendance/attendance_screen.dart';
 import '../history/history_screen.dart';
 import '../map/map_view_screen.dart';
 import '../profile/profile_screen.dart';
 
-class MainNavigationScreen extends StatefulWidget {
+class MainNavigationScreen extends ConsumerStatefulWidget {
   const MainNavigationScreen({super.key});
 
   @override
-  State<MainNavigationScreen> createState() => MainNavigationScreenState();
+  ConsumerState<MainNavigationScreen> createState() => MainNavigationScreenState();
 
   static MainNavigationScreenState? of(BuildContext context) =>
       context.findAncestorStateOfType<MainNavigationScreenState>();
 }
 
-class MainNavigationScreenState extends State<MainNavigationScreen> {
+class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   int _currentIndex = 0;
 
   void switchToTab(int index) {
     setState(() {
       _currentIndex = index;
     });
+    _triggerTabRefresh(index);
+  }
+
+  void _triggerTabRefresh(int index) {
+    if (index == 0) {
+      ref.read(todayAttendanceProvider.notifier).refresh();
+    } else if (index == 2) {
+      ref.read(historyProvider.notifier).refresh();
+    }
   }
 
   final List<Widget> _screens = const [
@@ -52,6 +64,7 @@ class MainNavigationScreenState extends State<MainNavigationScreen> {
             setState(() {
               _currentIndex = index;
             });
+            _triggerTabRefresh(index);
           },
           destinations: const [
             NavigationDestination(

@@ -34,11 +34,30 @@ class LocationHelper {
       throw Exception('Izin akses lokasi ditolak permanen. Buka pengaturan untuk mengaktifkan.');
     }
 
-    return await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        timeLimit: Duration(seconds: 10),
-      ),
-    );
+    Position position;
+    try {
+      position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 12),
+        ),
+      );
+    } catch (_) {
+      // Fallback: If live GPS times out (e.g. indoors), only accept recent cached position (max 10 minutes old)
+      final lastPos = await Geolocator.getLastKnownPosition();
+      final now = DateTime.now();
+      if (lastPos != null &&
+          now.difference(lastPos.timestamp).inMinutes.abs() <= 10) {
+        position = lastPos;
+      } else {
+        throw Exception('Gagal mendapatkan koordinat GPS terkini. Pastikan GPS aktif dan berada di area dengan sinyal yang baik.');
+      }
+    }
+
+    if (position.isMocked) {
+      throw Exception('Terdeteksi lokasi palsu (Fake GPS / Mock Location). Harap nonaktifkan aplikasi pemalsu lokasi untuk melakukan presensi.');
+    }
+
+    return position;
   }
 }

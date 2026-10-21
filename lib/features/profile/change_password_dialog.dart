@@ -9,6 +9,7 @@ class ChangePasswordDialog extends ConsumerStatefulWidget {
   static Future<void> show(BuildContext context) {
     return showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => const ChangePasswordDialog(),
     );
   }
@@ -41,7 +42,9 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
 
       if (mounted) {
         if (success) {
-          Navigator.pop(context);
+          if (Navigator.of(context).canPop()) {
+            Navigator.pop(context);
+          }
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Kata sandi berhasil diubah!'),
@@ -65,7 +68,9 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
 
-    return AlertDialog(
+    return PopScope(
+      canPop: !authState.isLoading,
+      child: AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: const Text(
         'Ubah Kata Sandi',
@@ -133,6 +138,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
               : const Text('Simpan'),
         ),
       ],
-    );
-  }
+    ),
+  );
+}
 }

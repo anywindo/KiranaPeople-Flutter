@@ -100,10 +100,12 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
   }
 
   void _onFieldChanged() {
+    if (!mounted) return;
     setState(() {});
   }
 
   void _onFocusChanged() {
+    if (!mounted) return;
     setState(() {});
   }
 

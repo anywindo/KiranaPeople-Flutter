@@ -51,6 +51,12 @@ class _AttendanceMapModalState extends State<AttendanceMapModal> {
     _mapController = MapController();
   }
 
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
+  }
+
   LatLng get _userLatLng => LatLng(widget.userLatitude, widget.userLongitude);
 
   LatLng get _officeLatLng {
@@ -81,6 +87,14 @@ class _AttendanceMapModalState extends State<AttendanceMapModal> {
             FlutterMap(
               mapController: _mapController,
               options: MapOptions(
+                initialCameraFit: widget.workLocation != null
+                    ? CameraFit.coordinates(
+                        coordinates: [_userLatLng, _officeLatLng],
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 50, vertical: 80),
+                        maxZoom: 17.5,
+                      )
+                    : null,
                 initialCenter: widget.workLocation != null ? _officeLatLng : _userLatLng,
                 initialZoom: 17.5,
                 maxZoom: 19.0,

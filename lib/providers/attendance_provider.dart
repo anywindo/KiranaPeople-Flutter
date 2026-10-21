@@ -4,6 +4,8 @@ import '../data/models/shift_model.dart';
 import '../data/models/attendance_model.dart';
 import '../data/models/attendance_event_model.dart';
 import '../data/repositories/attendance_repository.dart';
+import 'auth_provider.dart';
+import 'history_provider.dart';
 
 final attendanceRepositoryProvider = Provider<AttendanceRepository>((ref) {
   return AttendanceRepository();
@@ -39,16 +41,31 @@ class TodayAttendanceState {
 }
 
 class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
-  late final AttendanceRepository _repository;
+  AttendanceRepository get _repository => ref.read(attendanceRepositoryProvider);
 
   @override
   TodayAttendanceState build() {
-    _repository = ref.read(attendanceRepositoryProvider);
+    // Watch authProvider: when auth changes, build() automatically updates cleanly
+    final authState = ref.watch(authProvider);
+    if (!authState.isAuthenticated || authState.user == null) {
+      return const TodayAttendanceState();
+    }
+
     Future.microtask(() => refresh());
     return const TodayAttendanceState();
   }
 
+  void reset() {
+    state = const TodayAttendanceState();
+  }
+
   Future<void> refresh() async {
+    // Prevent fetching or retaining state when not authenticated
+    if (!ref.read(authProvider).isAuthenticated) {
+      state = const TodayAttendanceState();
+      return;
+    }
+
     state = state.copyWith(data: const AsyncValue.loading());
     try {
       final res = await _repository.getTodayAttendance();
@@ -88,6 +105,8 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
       );
 
       await refresh();
+      // Auto-refresh history so newly submitted attendance event appears instantly
+      ref.read(historyProvider.notifier).refresh();
       state = state.copyWith(isSubmitting: false);
       return true;
     } catch (e) {

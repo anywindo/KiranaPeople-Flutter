@@ -36,7 +36,8 @@ class AttendanceConfirmationView extends ConsumerStatefulWidget {
 class _AttendanceConfirmationViewState
     extends ConsumerState<AttendanceConfirmationView> {
   Position? _currentPosition;
-  bool _isWithinRadius = true;
+  String? _locationError;
+  bool _isWithinRadius = false;
   bool _isLoadingLocation = true;
   bool _isSubmitting = false;
 
@@ -47,6 +48,11 @@ class _AttendanceConfirmationViewState
   }
 
   Future<void> _fetchLocation() async {
+    setState(() {
+      _isLoadingLocation = true;
+      _locationError = null;
+    });
+
     try {
       final pos = await LocationHelper.determinePosition();
       if (!mounted) return;
@@ -68,11 +74,16 @@ class _AttendanceConfirmationViewState
         _currentPosition = pos;
         _isWithinRadius = within;
         _isLoadingLocation = false;
+        _locationError = null;
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
+      final cleanErr = e.toString().replaceFirst('Exception: ', '');
       setState(() {
+        _currentPosition = null;
+        _isWithinRadius = false;
         _isLoadingLocation = false;
+        _locationError = cleanErr;
       });
     }
   }
@@ -85,13 +96,32 @@ class _AttendanceConfirmationViewState
       if (!mounted) return;
       if (_currentPosition == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Gagal mendapatkan lokasi GPS. Pastikan izin lokasi aktif.'),
+          SnackBar(
+            content: Text(_locationError ?? 'Gagal mendapatkan lokasi GPS. Pastikan izin lokasi aktif.'),
             backgroundColor: AppColors.error,
           ),
         );
         return;
       }
+    }
+
+    if (widget.workLocation != null && !_isWithinRadius) {
+      final dist = Geolocator.distanceBetween(
+        _currentPosition!.latitude,
+        _currentPosition!.longitude,
+        widget.workLocation!.latitude,
+        widget.workLocation!.longitude,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Anda berada di luar radius kantor (${dist.round()}m dari batas ${widget.workLocation!.radius.round()}m). Harap berada di area kantor untuk presensi.',
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
     }
 
     setState(() {
@@ -141,7 +171,16 @@ class _AttendanceConfirmationViewState
   }
 
   void _openMap() {
-    if (_currentPosition == null) return;
+    if (_currentPosition == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_locationError ?? 'Lokasi GPS belum tersedia. Menghubungkan ulang...'),
+          backgroundColor: AppColors.primary,
+        ),
+      );
+      _fetchLocation();
+      return;
+    }
     AttendanceMapModal.show(
       context,
       userLatitude: _currentPosition!.latitude,
@@ -271,9 +310,11 @@ class _AttendanceConfirmationViewState
                                     width: 8,
                                     height: 8,
                                     decoration: BoxDecoration(
-                                      color: _isWithinRadius
-                                          ? AppColors.success
-                                          : AppColors.error,
+                                      color: _currentPosition == null
+                                          ? const Color(0xFFF59E0B)
+                                          : (_isWithinRadius
+                                              ? AppColors.success
+                                              : AppColors.error),
                                       shape: BoxShape.circle,
                                     ),
                                   ),
@@ -281,11 +322,15 @@ class _AttendanceConfirmationViewState
                                   Text(
                                     _isLoadingLocation
                                         ? 'Mencari GPS...'
-                                        : 'Akurasi ${accuracyMeters}m • ${_isWithinRadius ? 'Dalam Radius' : 'Diluar Radius'}',
+                                        : (_currentPosition == null
+                                            ? (_locationError ?? 'GPS Tidak Aktif')
+                                            : 'Akurasi ${accuracyMeters}m • ${_isWithinRadius ? 'Dalam Radius' : 'Diluar Radius'}'),
                                     style: TextStyle(
-                                      color: _isWithinRadius
-                                          ? const Color(0xFF4ADE80)
-                                          : const Color(0xFFF87171),
+                                      color: _currentPosition == null
+                                          ? const Color(0xFFFBBF24)
+                                          : (_isWithinRadius
+                                              ? const Color(0xFF4ADE80)
+                                              : const Color(0xFFF87171)),
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
                                     ),

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/attendance_model.dart';
-import 'attendance_provider.dart';
+import '../data/repositories/attendance_repository.dart';
+import 'auth_provider.dart';
 
 class HistoryState {
   final AsyncValue<List<AttendanceRecord>> records;
@@ -29,11 +30,26 @@ class HistoryState {
 class HistoryNotifier extends Notifier<HistoryState> {
   @override
   HistoryState build() {
+    final authState = ref.watch(authProvider);
+    if (!authState.isAuthenticated || authState.user == null) {
+      return const HistoryState();
+    }
+
     Future.microtask(() => loadHistory(page: 1));
     return const HistoryState();
   }
 
+  void reset() {
+    state = const HistoryState();
+  }
+
   Future<void> loadHistory({int page = 1}) async {
+    // Prevent fetching or retaining state when not authenticated
+    if (!ref.read(authProvider).isAuthenticated) {
+      state = const HistoryState();
+      return;
+    }
+
     final repo = ref.read(attendanceRepositoryProvider);
     if (page == 1) {
       state = state.copyWith(records: const AsyncValue.loading());
@@ -45,14 +61,14 @@ class HistoryNotifier extends Notifier<HistoryState> {
         state = state.copyWith(
           records: AsyncValue.data(list),
           currentPage: 1,
-          hasMore: list.isNotEmpty,
+          hasMore: list.length >= 15,
         );
       } else {
         final currentList = state.records.value ?? [];
         state = state.copyWith(
           records: AsyncValue.data([...currentList, ...list]),
           currentPage: page,
-          hasMore: list.isNotEmpty,
+          hasMore: list.length >= 15,
         );
       }
     } catch (e, st) {

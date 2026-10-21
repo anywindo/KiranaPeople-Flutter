@@ -8,8 +8,8 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/location_helper.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../providers/attendance_provider.dart';
+import '../../providers/history_provider.dart';
 import '../attendance/camera_selfie_view.dart';
-import '../attendance/shift_picker_sheet.dart';
 
 class MapViewScreen extends ConsumerStatefulWidget {
   const MapViewScreen({super.key});
@@ -21,6 +21,7 @@ class MapViewScreen extends ConsumerStatefulWidget {
 class _MapViewScreenState extends ConsumerState<MapViewScreen> {
   final MapController _mapController = MapController();
   Position? _currentPosition;
+  String? _locationError;
   bool _isLoading = true;
 
   @override
@@ -29,18 +30,32 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
     _fetchLocation();
   }
 
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
+  }
+
   Future<void> _fetchLocation() async {
+    setState(() {
+      _locationError = null;
+    });
+
     try {
       final pos = await LocationHelper.determinePosition();
       if (!mounted) return;
       setState(() {
         _currentPosition = pos;
         _isLoading = false;
+        _locationError = null;
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
+      final cleanErr = e.toString().replaceFirst('Exception: ', '');
       setState(() {
+        _currentPosition = null;
         _isLoading = false;
+        _locationError = cleanErr;
       });
     }
   }
@@ -111,7 +126,7 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
           )
         : 0.0;
 
-    final bool isInside = distance <= radius;
+    final bool isInside = _currentPosition != null && distance <= radius;
 
     final hasStartedShift =
         events.any((e) => e.eventType == AttendanceEventType.startShift);
@@ -473,20 +488,24 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                         // Row 1: Radius Indicator + Rute Button
                         Row(
                           children: [
-                            // Pulsing green dot
+                            // Pulsing dot
                             Container(
                               width: 10,
                               height: 10,
                               decoration: BoxDecoration(
-                                color: isInside
-                                    ? const Color(0xFF10B981)
-                                    : const Color(0xFFEF4444),
+                                color: _currentPosition == null
+                                    ? const Color(0xFFF59E0B)
+                                    : (isInside
+                                        ? const Color(0xFF10B981)
+                                        : const Color(0xFFEF4444)),
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: (isInside
-                                            ? const Color(0xFF10B981)
-                                            : const Color(0xFFEF4444))
+                                    color: (_currentPosition == null
+                                            ? const Color(0xFFF59E0B)
+                                            : (isInside
+                                                ? const Color(0xFF10B981)
+                                                : const Color(0xFFEF4444)))
                                         .withValues(alpha: 0.35),
                                     blurRadius: 6,
                                     spreadRadius: 2,
@@ -501,20 +520,26 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    isInside
-                                        ? 'Dalam Radius Presensi'
-                                        : 'Di Luar Radius Presensi',
+                                    _currentPosition == null
+                                        ? (_locationError ?? 'Mencari Lokasi GPS...')
+                                        : (isInside
+                                            ? 'Dalam Radius Presensi'
+                                            : 'Di Luar Radius Presensi'),
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
-                                      color: isInside
-                                          ? const Color(0xFF059669)
-                                          : const Color(0xFFEF4444),
+                                      color: _currentPosition == null
+                                          ? const Color(0xFFD97706)
+                                          : (isInside
+                                              ? const Color(0xFF059669)
+                                              : const Color(0xFFEF4444)),
                                     ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    '${distance.round()} m dari titik kantor',
+                                    _currentPosition == null
+                                        ? 'Ketuk tombol refresh untuk memuat koordinat'
+                                        : '${distance.round()} m dari titik kantor',
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: Color(0xFF6B7280),
@@ -594,31 +619,6 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                                   ),
                                 ),
                               ),
-                              if (!hasStartedShift &&
-                                  todayData?.availableShifts?.isNotEmpty == true)
-                                InkWell(
-                                  onTap: () {
-                                    ShiftPickerSheet.show(
-                                      context,
-                                      shifts: todayData!.availableShifts!,
-                                      selectedShift: selectedShift,
-                                      onShiftSelected: (s) {
-                                        ref
-                                            .read(todayAttendanceProvider
-                                                .notifier)
-                                            .selectShift(s);
-                                      },
-                                    );
-                                  },
-                                  child: const Text(
-                                    'Ganti Shift',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                ),
                             ],
                           ),
                         ),
@@ -652,6 +652,9 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                                       ref
                                           .read(
                                               todayAttendanceProvider.notifier)
+                                          .refresh();
+                                      ref
+                                          .read(historyProvider.notifier)
                                           .refresh();
                                     }
                                   },

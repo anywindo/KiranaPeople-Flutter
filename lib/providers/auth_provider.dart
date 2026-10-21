@@ -1,7 +1,12 @@
 import 'dart:io';
+import 'package:flutter/painting.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/network/api_client.dart';
+import '../core/network/api_exception.dart';
 import '../data/models/user_model.dart';
 import '../data/repositories/auth_repository.dart';
+import 'attendance_provider.dart';
+import 'history_provider.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository();
@@ -13,6 +18,9 @@ class AuthState {
   final bool isLoading;
   final UserModel? user;
   final String? errorMessage;
+
+  bool get requiresOnboarding =>
+      isAuthenticated && (user?.mustChangePassword ?? false);
 
   const AuthState({
     this.isCheckingSession = true,
@@ -41,11 +49,15 @@ class AuthState {
 }
 
 class AuthNotifier extends Notifier<AuthState> {
-  late final AuthRepository _repository;
+  AuthRepository get _repository => ref.read(authRepositoryProvider);
 
   @override
   AuthState build() {
-    _repository = ref.read(authRepositoryProvider);
+    // Register auto-logout on unauthorized (401)
+    ApiClient.onUnauthorized = () {
+      logout();
+    };
+
     // Asynchronously check session on initialization
     Future.microtask(() => checkSession());
     return const AuthState(isCheckingSession: true);
@@ -81,6 +93,12 @@ class AuthNotifier extends Notifier<AuthState> {
         user: freshProfile,
       );
     } catch (e) {
+      final isUnauthorized = e is ApiException && e.statusCode == 401;
+      if (isUnauthorized) {
+        // Expired or revoked token: reset session cleanly to login screen
+        await logout();
+        return;
+      }
       state = state.copyWith(
         isCheckingSession: false,
         isAuthenticated: state.user != null,
@@ -93,11 +111,17 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final user = await _repository.login(email: email, password: password);
+
+      // Clear image caches from prior sessions
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
+
       state = state.copyWith(
         isLoading: false,
         isAuthenticated: true,
         user: user,
       );
+
       return true;
     } catch (e) {
       state = state.copyWith(
@@ -109,14 +133,28 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<void> logout() async {
-    state = state.copyWith(isLoading: true);
-    await _repository.logout();
+    // 1. Immediately reset state to unauthenticated so UI redirects to LoginScreen without waiting
     state = const AuthState(
       isCheckingSession: false,
       isAuthenticated: false,
       isLoading: false,
       user: null,
     );
+
+    // 2. Clear image cache
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
+
+    // 3. Reset in-memory attendance and history states
+    try {
+      ref.read(todayAttendanceProvider.notifier).reset();
+      ref.read(historyProvider.notifier).reset();
+    } catch (_) {}
+
+    // 4. Clear storage and notify backend
+    try {
+      await _repository.logout();
+    } catch (_) {}
   }
 
   Future<bool> changePassword({
@@ -132,6 +170,30 @@ class AuthNotifier extends Notifier<AuthState> {
         confirmPassword: confirmPassword,
       );
       state = state.copyWith(isLoading: false);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString(),
+      );
+      return false;
+    }
+  }
+
+  Future<bool> updateOnboardingPassword({
+    required String password,
+    required String confirmPassword,
+  }) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final updatedUser = await _repository.updateOnboardingPassword(
+        password: password,
+        passwordConfirmation: confirmPassword,
+      );
+      state = state.copyWith(
+        isLoading: false,
+        user: updatedUser,
+      );
       return true;
     } catch (e) {
       state = state.copyWith(

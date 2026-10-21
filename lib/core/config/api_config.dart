@@ -27,18 +27,32 @@ class ApiConfig {
     },
   ];
 
+  static String cachedHostOrigin = 'https://terriblenight.onrender.com';
+
+  static String getHostOrigin(String baseUrl) {
+    try {
+      final uri = Uri.parse(baseUrl);
+      final portPart = uri.hasPort && uri.port != 80 && uri.port != 443 ? ':${uri.port}' : '';
+      return '${uri.scheme}://${uri.host}$portPart';
+    } catch (_) {
+      return 'https://terriblenight.onrender.com';
+    }
+  }
+
   static Future<String> getBaseUrl() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString(_keyCustomBaseUrl);
-    if (saved == null || saved.trim().isEmpty) {
-      return defaultBaseUrl;
-    }
-    return sanitizeUrl(saved);
+    final url = (saved == null || saved.trim().isEmpty)
+        ? defaultBaseUrl
+        : sanitizeUrl(saved);
+    cachedHostOrigin = getHostOrigin(url);
+    return url;
   }
 
   static Future<void> setBaseUrl(String url) async {
     final prefs = await SharedPreferences.getInstance();
     final cleaned = sanitizeUrl(url);
+    cachedHostOrigin = getHostOrigin(cleaned);
     await prefs.setString(_keyCustomBaseUrl, cleaned);
   }
 
@@ -82,13 +96,18 @@ class ApiConfig {
       str = str.replaceAll('/api/api/v1', '/api/v1');
     }
 
-    // Append /api/v1 if path is empty
+    // Append /api/v1 if path is empty and validate scheme
     try {
       final uri = Uri.parse(str);
+      if (uri.scheme != 'http' && uri.scheme != 'https') {
+        return defaultBaseUrl;
+      }
       if (uri.path.isEmpty || uri.path == '/') {
         str = '$str/api/v1';
       }
-    } catch (_) {}
+    } catch (_) {
+      return defaultBaseUrl;
+    }
 
     return str;
   }

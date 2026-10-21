@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/location_helper.dart';
 import '../../data/models/attendance_event_model.dart';
@@ -50,8 +51,18 @@ class _AttendanceSubmissionDialogState
         imageQuality: 85,
       );
       if (picked != null) {
+        final file = File(picked.path);
+        try {
+          final bytes = await file.readAsBytes();
+          final decoded = img.decodeImage(bytes);
+          if (decoded != null) {
+            img.Image oriented = img.bakeOrientation(decoded);
+            oriented = img.flipHorizontal(oriented);
+            await file.writeAsBytes(img.encodeJpg(oriented, quality: 85));
+          }
+        } catch (_) {}
         setState(() {
-          _selfieImage = File(picked.path);
+          _selfieImage = file;
         });
       }
     } catch (e) {
@@ -73,7 +84,17 @@ class _AttendanceSubmissionDialogState
       final pos = await LocationHelper.determinePosition();
       lat = pos.latitude;
       lng = pos.longitude;
-    } catch (_) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      return;
+    }
 
     final success = await ref.read(todayAttendanceProvider.notifier).submitEvent(
           eventType: widget.eventType,

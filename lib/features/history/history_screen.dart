@@ -1,14 +1,60 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/models/attendance_event_model.dart';
+import '../../data/models/work_location_model.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/history_provider.dart';
+import '../../core/widgets/auto_oriented_image.dart';
 
-class HistoryScreen extends ConsumerWidget {
+class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
+
+  @override
+  ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends ConsumerState<HistoryScreen> {
+  final _scrollController = ScrollController();
+  bool _isLoadingMore = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() async {
+    if (!_scrollController.hasClients) return;
+    if (_scrollController.position.maxScrollExtent > 0 &&
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 250) {
+      final historyState = ref.read(historyProvider);
+      if (historyState.hasMore && !_isLoadingMore) {
+        setState(() {
+          _isLoadingMore = true;
+        });
+        await ref
+            .read(historyProvider.notifier)
+            .loadHistory(page: historyState.currentPage + 1);
+        if (mounted) {
+          setState(() {
+            _isLoadingMore = false;
+          });
+        }
+      }
+    }
+  }
 
   String _formatIndoDateString(String dateStr) {
     final dt = DateTime.tryParse(dateStr);
@@ -63,151 +109,756 @@ class HistoryScreen extends ConsumerWidget {
     }
   }
 
-  void _showLocationModal(BuildContext context, AttendanceEvent event) {
-    final lat = event.latitude ?? -6.9897;
-    final lng = event.longitude ?? 109.8765;
-    final latLng = LatLng(lat, lng);
+  void _showPhotoPreviewDialog(
+    BuildContext context, {
+    required String imageUrl,
+    required String title,
+    String? subtitle,
+  }) {
+    int rotationTurns = 0;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF1E293B),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (subtitle != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              subtitle,
+                              style: const TextStyle(
+                                color: Color(0xFF94A3B8),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    // Rotate Photo Button
+                    InkWell(
+                      onTap: () {
+                        setDialogState(() {
+                          rotationTurns = (rotationTurns + 1) % 4;
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.rotate_right_rounded,
+                            color: Colors.white, size: 18),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    InkWell(
+                      onTap: () => Navigator.pop(ctx),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close_rounded,
+                            color: Colors.white, size: 18),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(bottom: Radius.circular(20)),
+                child: Container(
+                  color: Colors.black,
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.65,
+                    minHeight: 250,
+                    minWidth: double.infinity,
+                  ),
+                  child: InteractiveViewer(
+                    minScale: 0.8,
+                    maxScale: 4.0,
+                    child: AutoOrientedImage(
+                      imageUrl: imageUrl,
+                      manualTurns: rotationTurns,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLocationModal(BuildContext context, AttendanceEvent event,
+      [WorkLocation? workLocation]) {
+    final lat = event.latitude ?? -7.025648;
+    final lng = event.longitude ?? 109.957296;
+    final userLatLng = LatLng(lat, lng);
+
+    final officeLatLng = workLocation != null
+        ? LatLng(workLocation.latitude, workLocation.longitude)
+        : const LatLng(-7.025801, 109.956894);
+
+    final officeName = (workLocation?.name != null &&
+            workLocation!.name.isNotEmpty)
+        ? workLocation.name
+        : 'Kantor Utama (Tersono, Batang)';
+
+    final radius = workLocation?.radius ?? 50.0;
+
+    final distance = Geolocator.distanceBetween(
+      userLatLng.latitude,
+      userLatLng.longitude,
+      officeLatLng.latitude,
+      officeLatLng.longitude,
+    );
+    final isInside = distance <= radius;
+    final hasPhoto =
+        event.fullSelfieUrl != null && event.fullSelfieUrl!.isNotEmpty;
+    int selectedTab = 0; // 0 = Map, 1 = Foto
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE5E7EB),
-                  borderRadius: BorderRadius.circular(2),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) => Container(
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE5E7EB),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  if (hasPhoto)
+                    GestureDetector(
+                      onTap: () => _showPhotoPreviewDialog(
+                        context,
+                        imageUrl: event.fullSelfieUrl!,
+                        title: 'Foto Presensi: ${event.eventType.label}',
+                        subtitle:
+                            'Koordinat: ${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}',
+                      ),
+                      child: Stack(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: AppColors.primary, width: 2),
+                            ),
+                            child: ClipOval(
+                              child: AutoOrientedImage(
+                                imageUrl: event.fullSelfieUrl!,
+                                width: 44,
+                                height: 44,
+                                fit: BoxFit.cover,
+                                errorWidget: const Icon(
+                                  Icons.person_rounded,
+                                  color: AppColors.primary,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: const BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.search_rounded,
+                                size: 10,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.location_on_rounded,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                    ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Titik Presensi: ${event.eventType.label}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1F2937),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Koordinat: ${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF6B7280),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              if (hasPhoto) ...[
+                const SizedBox(height: 14),
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  height: 38,
+                  padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
-                    Icons.location_on_rounded,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(
-                        'Titik Presensi: ${event.eventType.label}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1F2937),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => setModalState(() => selectedTab = 0),
+                          borderRadius: BorderRadius.circular(9),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: selectedTab == 0
+                                  ? Colors.white
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(9),
+                              boxShadow: selectedTab == 0
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.black
+                                            .withValues(alpha: 0.06),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.map_rounded,
+                                  size: 15,
+                                  color: selectedTab == 0
+                                      ? AppColors.primary
+                                      : const Color(0xFF64748B),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Peta Lokasi (2 Pin)',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: selectedTab == 0
+                                        ? AppColors.primary
+                                        : const Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Koordinat: ${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF6B7280),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => setModalState(() => selectedTab = 1),
+                          borderRadius: BorderRadius.circular(9),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: selectedTab == 1
+                                  ? Colors.white
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(9),
+                              boxShadow: selectedTab == 1
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.black
+                                            .withValues(alpha: 0.06),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 1),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.camera_alt_rounded,
+                                  size: 15,
+                                  color: selectedTab == 1
+                                      ? AppColors.primary
+                                      : const Color(0xFF64748B),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Foto Selfie',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: selectedTab == 1
+                                        ? AppColors.primary
+                                        : const Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 16),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: SizedBox(
-                height: 200,
-                child: FlutterMap(
-                  options: MapOptions(
-                    initialCenter: latLng,
-                    initialZoom: 16.5,
+              const SizedBox(height: 14),
+              if (selectedTab == 1 && hasPhoto)
+                GestureDetector(
+                  onTap: () => _showPhotoPreviewDialog(
+                    context,
+                    imageUrl: event.fullSelfieUrl!,
+                    title: 'Foto Presensi: ${event.eventType.label}',
+                    subtitle:
+                        'Koordinat: ${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}',
                   ),
-                  children: [
-                    TileLayer(
-                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName:
-                          'com.kiranadesainindonesia.kiranapeople',
-                    ),
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: latLng,
-                          width: 44,
-                          height: 44,
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              color: AppColors.primary,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 6,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.person_pin_circle_rounded,
-                              color: Colors.white,
-                              size: 28,
-                            ),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          height: 220,
+                          width: double.infinity,
+                          color: const Color(0xFF0F172A),
+                          child: AutoOrientedImage(
+                            imageUrl: event.fullSelfieUrl!,
+                            fit: BoxFit.contain,
                           ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 10,
+                        right: 10,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.65),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.fullscreen_rounded,
+                                  color: Colors.white, size: 16),
+                              SizedBox(width: 4),
+                              Text(
+                                'Perbesar Foto',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else ...[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: SizedBox(
+                    height: 220,
+                    child: FlutterMap(
+                      options: MapOptions(
+                        initialCameraFit: CameraFit.coordinates(
+                          coordinates: [userLatLng, officeLatLng],
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 48, vertical: 48),
+                          maxZoom: 17.0,
+                        ),
+                        initialCenter: userLatLng,
+                        initialZoom: 16.5,
+                      ),
+                      children: [
+                        TileLayer(
+                          urlTemplate:
+                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          userAgentPackageName:
+                              'com.kiranadesainindonesia.kiranapeople',
+                        ),
+                        CircleLayer(
+                          circles: [
+                            CircleMarker(
+                              point: officeLatLng,
+                              radius: radius,
+                              useRadiusInMeter: true,
+                              color: AppColors.primary
+                                  .withValues(alpha: 0.15),
+                              borderColor: AppColors.primary,
+                              borderStrokeWidth: 1.5,
+                            ),
+                          ],
+                        ),
+                        MarkerLayer(
+                          markers: [
+                            // 1. Office Pin (Kantor)
+                            Marker(
+                              point: officeLatLng,
+                              width: 140,
+                              height: 64,
+                              alignment: Alignment.topCenter,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 7, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary,
+                                      borderRadius: BorderRadius.circular(8),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 4,
+                                          offset: Offset(0, 1),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                            Icons.apartment_rounded,
+                                            color: Colors.white,
+                                            size: 10),
+                                        const SizedBox(width: 4),
+                                        Flexible(
+                                          child: Text(
+                                            officeName,
+                                            maxLines: 1,
+                                            overflow:
+                                                TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color: Colors.white, width: 2),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 6,
+                                          offset: Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Icon(
+                                      Icons.apartment_rounded,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // 2. User Pin (Posisi User)
+                            Marker(
+                              point: userLatLng,
+                              width: 120,
+                              height: 64,
+                              alignment: Alignment.topCenter,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 7, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF007AFF),
+                                      borderRadius: BorderRadius.circular(8),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 4,
+                                          offset: Offset(0, 1),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                            Icons.person_pin_circle_rounded,
+                                            color: Colors.white,
+                                            size: 11),
+                                        SizedBox(width: 3),
+                                        Text(
+                                          'Posisi User',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF007AFF),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color: Colors.white, width: 2),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 6,
+                                          offset: Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Icon(
+                                      Icons.person_rounded,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text(
-                  'Tutup',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F9FF),
+                          borderRadius: BorderRadius.circular(10),
+                          border:
+                              Border.all(color: const Color(0xFFBAE6FD)),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.person_pin_circle_rounded,
+                                size: 16, color: Color(0xFF007AFF)),
+                            SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                'Posisi User',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0369A1),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF1F2),
+                          borderRadius: BorderRadius.circular(10),
+                          border:
+                              Border.all(color: const Color(0xFFFECDD3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.apartment_rounded,
+                                size: 16, color: AppColors.primary),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                officeName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF9FAFB),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFF3F4F6)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        isInside
+                            ? Icons.check_circle_rounded
+                            : Icons.info_outline_rounded,
+                        size: 15,
+                        color: isInside
+                            ? const Color(0xFF059669)
+                            : const Color(0xFFD97706),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          isInside
+                              ? 'Dalam radius presensi (${distance.round()} m dari kantor)'
+                              : 'Jarak ${distance >= 1000 ? '${(distance / 1000).toStringAsFixed(2)} km' : '${distance.round()} m'} dari titik kantor (Radius: ${radius.round()}m)',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: isInside
+                                ? const Color(0xFF059669)
+                                : const Color(0xFFB45309),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text(
+                    'Tutup',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final historyState = ref.watch(historyProvider);
+    final user = ref.watch(authProvider).user;
+    final workLocation = user?.location;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FA),
@@ -303,11 +954,28 @@ class HistoryScreen extends ConsumerWidget {
               );
             }
 
+            final hasMore = historyState.hasMore;
             return ListView.separated(
+              controller: _scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: records.length,
+              itemCount: records.length + (hasMore ? 1 : 0),
               separatorBuilder: (context, index) => const SizedBox(height: 18),
               itemBuilder: (context, index) {
+                if (index == records.length) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Center(
+                      child: SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  );
+                }
                 final item = records[index];
                 final rawStatus = item.status ?? 'Tepat Waktu';
                 String displayStatus = rawStatus;
@@ -407,36 +1075,47 @@ class HistoryScreen extends ConsumerWidget {
                         ),
                         child: Row(
                           children: [
-                            // Circular Selfie Avatar
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                    color: const Color(0xFFE5E7EB), width: 1.5),
-                              ),
-                              child: ClipOval(
-                                child: (event.fullSelfieUrl != null &&
-                                        event.fullSelfieUrl!.isNotEmpty)
-                                    ? CachedNetworkImage(
+                            // Circular Selfie Avatar (Tappable to view full picture)
+                            InkWell(
+                              onTap: (event.fullSelfieUrl != null &&
+                                      event.fullSelfieUrl!.isNotEmpty)
+                                  ? () => _showPhotoPreviewDialog(
+                                        context,
                                         imageUrl: event.fullSelfieUrl!,
-                                        fit: BoxFit.cover,
-                                        placeholder: (context, url) => Container(
-                                          color: const Color(0xFFF3F4F6),
-                                          child: const Center(
-                                            child: SizedBox(
-                                              width: 14,
-                                              height: 14,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: AppColors.primary,
-                                              ),
+                                        title:
+                                            'Foto Presensi: ${event.eventType.label}',
+                                        subtitle:
+                                            '$formattedDate • $timeStr',
+                                      )
+                                  : null,
+                              borderRadius: BorderRadius.circular(22),
+                              child: Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                      color: const Color(0xFFE5E7EB),
+                                      width: 1.5),
+                                ),
+                                child: ClipOval(
+                                  child: (event.fullSelfieUrl != null &&
+                                          event.fullSelfieUrl!.isNotEmpty)
+                                      ? AutoOrientedImage(
+                                          imageUrl: event.fullSelfieUrl!,
+                                          width: 44,
+                                          height: 44,
+                                          fit: BoxFit.cover,
+                                          errorWidget: Container(
+                                            color: const Color(0xFFFFF1F2),
+                                            child: Icon(
+                                              _getEventIcon(event.eventType),
+                                              color: AppColors.primary,
+                                              size: 20,
                                             ),
                                           ),
-                                        ),
-                                        errorWidget: (context, url, error) =>
-                                            Container(
+                                        )
+                                      : Container(
                                           color: const Color(0xFFFFF1F2),
                                           child: Icon(
                                             _getEventIcon(event.eventType),
@@ -444,15 +1123,7 @@ class HistoryScreen extends ConsumerWidget {
                                             size: 20,
                                           ),
                                         ),
-                                      )
-                                    : Container(
-                                        color: const Color(0xFFFFF1F2),
-                                        child: Icon(
-                                          _getEventIcon(event.eventType),
-                                          color: AppColors.primary,
-                                          size: 20,
-                                        ),
-                                      ),
+                                ),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -493,23 +1164,61 @@ class HistoryScreen extends ConsumerWidget {
                               ),
                             ),
 
-                            // Pink Map Button (Matches Screenshot 3)
-                            InkWell(
-                              onTap: () => _showLocationModal(context, event),
-                              borderRadius: BorderRadius.circular(18),
-                              child: Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFF1F5),
-                                  borderRadius: BorderRadius.circular(10),
+                            // Action Buttons: Foto Button & Map Button
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (event.fullSelfieUrl != null &&
+                                    event.fullSelfieUrl!.isNotEmpty) ...[
+                                  InkWell(
+                                    onTap: () => _showPhotoPreviewDialog(
+                                      context,
+                                      imageUrl: event.fullSelfieUrl!,
+                                      title:
+                                          'Foto Presensi: ${event.eventType.label}',
+                                      subtitle:
+                                          '$formattedDate • $timeStr',
+                                    ),
+                                    borderRadius: BorderRadius.circular(18),
+                                    child: Container(
+                                      width: 36,
+                                      height: 36,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF0FDF4),
+                                        borderRadius:
+                                            BorderRadius.circular(10),
+                                        border: Border.all(
+                                            color: const Color(0xFFBBF7D0)),
+                                      ),
+                                      child: const Icon(
+                                        Icons.camera_alt_rounded,
+                                        color: Color(0xFF16A34A),
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                ],
+                                InkWell(
+                                  onTap: () => _showLocationModal(
+                                      context, event, workLocation),
+                                  borderRadius: BorderRadius.circular(18),
+                                  child: Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFF1F5),
+                                      borderRadius:
+                                          BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(
+                                      Icons.map_rounded,
+                                      color: AppColors.primary,
+                                      size: 18,
+                                    ),
+                                  ),
                                 ),
-                                child: const Icon(
-                                  Icons.map_rounded,
-                                  color: AppColors.primary,
-                                  size: 18,
-                                ),
-                              ),
+                              ],
                             ),
                           ],
                         ),

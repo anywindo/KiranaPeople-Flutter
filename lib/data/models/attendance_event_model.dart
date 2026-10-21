@@ -1,3 +1,5 @@
+import '../../core/config/api_config.dart';
+
 enum AttendanceEventType {
   startShift('START_SHIFT', 'Masuk Kerja'),
   startBreak('START_BREAK', 'Mulai Istirahat'),
@@ -75,9 +77,10 @@ class AttendanceEvent {
       return trimmed;
     }
     final cleanPath = trimmed.startsWith('/') ? trimmed.substring(1) : trimmed;
+    final origin = ApiConfig.cachedHostOrigin;
     if (cleanPath.startsWith('storage/')) {
-      return 'https://terriblenight.onrender.com/$cleanPath';
+      return '$origin/$cleanPath';
     }
-    return 'https://terriblenight.onrender.com/storage/$cleanPath';
+    return '$origin/storage/$cleanPath';
   }
 }

@@ -4,6 +4,7 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/server_settings_sheet.dart';
 import 'features/navigation/main_navigation_screen.dart';
+import 'features/onboarding/onboarding_password_screen.dart';
 import 'providers/auth_provider.dart';
 
 void main() {
@@ -38,6 +39,7 @@ class RootScreen extends ConsumerWidget {
 
     // 1. Session checking state (mirroring iOS ContentView)
     if (authState.isCheckingSession) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
       return Scaffold(
         backgroundColor: AppColors.background,
         body: Center(
@@ -50,7 +52,7 @@ class RootScreen extends ConsumerWidget {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: Colors.black,
+                    color: isDark ? Colors.black : Colors.white,
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
@@ -60,11 +62,29 @@ class RootScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
+                  padding: const EdgeInsets.all(6),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: Image.asset(
-                      'assets/images/logoKiranaSquare.jpeg',
-                      fit: BoxFit.cover,
+                      isDark
+                          ? 'assets/images/LogoDark.png'
+                          : 'assets/images/LogoLight.png',
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: isDark ? Colors.black : Colors.white,
+                          child: Center(
+                            child: Text(
+                              'KIRANA',
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 2,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -119,7 +139,10 @@ class RootScreen extends ConsumerWidget {
 
     // 2. Authenticated user
     if (authState.isAuthenticated) {
-      return const MainNavigationScreen();
+      if (authState.requiresOnboarding) {
+        return const OnboardingPasswordScreen();
+      }
+      return MainNavigationScreen(key: ValueKey(authState.user?.id));
     }
 
     // 3. Unauthenticated -> Login

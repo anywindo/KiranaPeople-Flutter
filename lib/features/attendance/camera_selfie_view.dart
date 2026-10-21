@@ -1,10 +1,57 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image/image.dart' as img;
 import '../../core/theme/app_theme.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../data/models/work_location_model.dart';
 import 'attendance_confirmation_view.dart';
+
+class _ImageProcessParams {
+  final String path;
+  final int sensorOrientation;
+  final bool isFrontCamera;
+
+  const _ImageProcessParams({
+    required this.path,
+    required this.sensorOrientation,
+    required this.isFrontCamera,
+  });
+}
+
+// Background isolate image processor to keep UI thread 100% responsive and avoid ANR/OOM
+Future<void> _processImageInIsolate(_ImageProcessParams params) async {
+  final file = File(params.path);
+  if (!await file.exists()) return;
+
+  final bytes = await file.readAsBytes();
+  final decoded = img.decodeImage(bytes);
+  if (decoded == null) return;
+
+  img.Image oriented = img.bakeOrientation(decoded);
+  if (oriented.width > oriented.height) {
+    final rotationAngle = params.sensorOrientation == 90 ? 90 : 270;
+    oriented = img.copyRotate(oriented, angle: rotationAngle);
+  }
+
+  if (params.isFrontCamera) {
+    oriented = img.flipHorizontal(oriented);
+  }
+
+  // Downsample to max 1280px on longest side for optimal speed, quality, and upload efficiency
+  if (oriented.height > 1280 || oriented.width > 1280) {
+    oriented = img.copyResize(
+      oriented,
+      height: oriented.height > oriented.width ? 1280 : null,
+      width: oriented.width >= oriented.height ? 1280 : null,
+    );
+  }
+
+  final encoded = img.encodeJpg(oriented, quality: 85);
+  await file.writeAsBytes(encoded);
+}
 
 class CameraSelfieView extends StatefulWidget {
   final AttendanceEventType action;
@@ -40,7 +87,8 @@ class CameraSelfieView extends StatefulWidget {
   State<CameraSelfieView> createState() => _CameraSelfieViewState();
 }
 
-class _CameraSelfieViewState extends State<CameraSelfieView> {
+class _CameraSelfieViewState extends State<CameraSelfieView>
+    with WidgetsBindingObserver {
   CameraController? _controller;
   List<CameraDescription> _cameras = [];
   int _selectedCameraIndex = 0;
@@ -52,7 +100,37 @@ class _CameraSelfieViewState extends State<CameraSelfieView> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initializeCamera();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final CameraController? cameraController = _controller;
+    if (cameraController == null || !cameraController.value.isInitialized) {
+      return;
+    }
+
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+      cameraController.dispose();
+      _controller = null;
+      if (mounted) {
+        setState(() {
+          _isCameraReady = false;
+        });
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      if (_cameras.isNotEmpty) {
+        _setupCameraController(_cameras[_selectedCameraIndex]);
+      }
+    }
   }
 
   Future<void> _initializeCamera() async {
@@ -95,6 +173,9 @@ class _CameraSelfieViewState extends State<CameraSelfieView> {
     try {
       await _controller!.initialize();
       await _controller!.setFlashMode(_flashMode);
+      try {
+        await _controller!.lockCaptureOrientation(DeviceOrientation.portraitUp);
+      } catch (_) {}
       if (mounted) {
         setState(() {
           _isCameraReady = true;
@@ -107,12 +188,6 @@ class _CameraSelfieViewState extends State<CameraSelfieView> {
         });
       }
     }
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
   }
 
   Future<void> _toggleCamera() async {
@@ -148,7 +223,29 @@ class _CameraSelfieViewState extends State<CameraSelfieView> {
       final image = await _controller!.takePicture();
       final file = File(image.path);
 
+      try {
+        final sensorOrientation = _cameras.isNotEmpty
+            ? _cameras[_selectedCameraIndex].sensorOrientation
+            : 270;
+        final bool isFrontCamera = _cameras.isNotEmpty
+            ? _cameras[_selectedCameraIndex].lensDirection ==
+                CameraLensDirection.front
+            : true;
+
+        await compute(
+          _processImageInIsolate,
+          _ImageProcessParams(
+            path: file.path,
+            sensorOrientation: sensorOrientation,
+            isFrontCamera: isFrontCamera,
+          ),
+        );
+      } catch (_) {}
+
       if (mounted) {
+        try {
+          await _controller?.pausePreview();
+        } catch (_) {}
         setState(() {
           _capturedPhoto = file;
           _isTakingPhoto = false;
@@ -167,19 +264,38 @@ class _CameraSelfieViewState extends State<CameraSelfieView> {
   Widget build(BuildContext context) {
     // If photo captured, transition to Confirmation Screen (Screenshot 4)
     if (_capturedPhoto != null) {
-      return AttendanceConfirmationView(
-        photoFile: _capturedPhoto!,
-        action: widget.action,
-        shiftId: widget.shiftId,
-        workLocation: widget.workLocation,
-        onRetake: () {
-          setState(() {
-            _capturedPhoto = null;
-          });
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) return;
+          try {
+            await _controller?.resumePreview();
+          } catch (_) {}
+          if (mounted) {
+            setState(() {
+              _capturedPhoto = null;
+            });
+          }
         },
-        onSubmittedSuccess: () {
-          Navigator.pop(context, true);
-        },
+        child: AttendanceConfirmationView(
+          photoFile: _capturedPhoto!,
+          action: widget.action,
+          shiftId: widget.shiftId,
+          workLocation: widget.workLocation,
+          onRetake: () async {
+            try {
+              await _controller?.resumePreview();
+            } catch (_) {}
+            if (mounted) {
+              setState(() {
+                _capturedPhoto = null;
+              });
+            }
+          },
+          onSubmittedSuccess: () {
+            Navigator.pop(context, true);
+          },
+        ),
       );
     }
 
@@ -222,13 +338,70 @@ class _CameraSelfieViewState extends State<CameraSelfieView> {
                 fit: StackFit.expand,
                 children: [
                   // Camera Preview or Fallback
-                  if (_isCameraReady && _controller != null)
+                  if (_isCameraReady &&
+                      _controller != null &&
+                      _controller!.value.isInitialized)
                     Center(
                       child: AspectRatio(
                         aspectRatio: 3 / 4,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
-                          child: CameraPreview(_controller!),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final double containerWidth =
+                                  constraints.maxWidth;
+                              final double containerHeight =
+                                  constraints.maxHeight;
+                              final double containerRatio =
+                                  containerWidth / containerHeight;
+
+                              // Calculate camera sensor aspect ratio in portrait
+                              final bool isPortrait = MediaQuery.of(context)
+                                      .orientation ==
+                                  Orientation.portrait;
+                              final double rawAspect =
+                                  _controller!.value.aspectRatio;
+                              final double previewRatio = isPortrait
+                                  ? (rawAspect > 1
+                                      ? 1.0 / rawAspect
+                                      : rawAspect)
+                                  : (rawAspect < 1
+                                      ? 1.0 / rawAspect
+                                      : rawAspect);
+
+                              double targetWidth;
+                              double targetHeight;
+
+                              if (containerRatio > previewRatio) {
+                                // Container is wider than preview -> match width, crop top/bottom
+                                targetWidth = containerWidth;
+                                targetHeight = containerWidth / previewRatio;
+                              } else {
+                                // Container is taller than preview -> match height, crop left/right
+                                targetHeight = containerHeight;
+                                targetWidth = containerHeight * previewRatio;
+                              }
+
+                              return SizedBox(
+                                width: containerWidth,
+                                height: containerHeight,
+                                child: ClipRect(
+                                  child: OverflowBox(
+                                    alignment: Alignment.center,
+                                    maxWidth: targetWidth,
+                                    maxHeight: targetHeight,
+                                    minWidth: targetWidth,
+                                    minHeight: targetHeight,
+                                    child: SizedBox(
+                                      width: targetWidth,
+                                      height: targetHeight,
+                                      child: CameraPreview(_controller!),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     )

@@ -1,3 +1,4 @@
+import '../../core/config/api_config.dart';
 import 'work_location_model.dart';
 
 class UserModel {
@@ -79,9 +80,10 @@ class UserModel {
       return trimmed;
     }
     final cleanPath = trimmed.startsWith('/') ? trimmed.substring(1) : trimmed;
+    final origin = ApiConfig.cachedHostOrigin;
     if (cleanPath.startsWith('storage/')) {
-      return 'https://terriblenight.onrender.com/$cleanPath';
+      return '$origin/$cleanPath';
     }
-    return 'https://terriblenight.onrender.com/storage/$cleanPath';
+    return '$origin/storage/$cleanPath';
   }
 }

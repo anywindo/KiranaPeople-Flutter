@@ -1,11 +1,15 @@
 import 'dart:developer' as developer;
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import '../config/api_config.dart';
 import '../storage/secure_storage_service.dart';
 import 'api_exception.dart';
 
 class ApiClient {
+  static VoidCallback? onUnauthorized;
+
   final Dio _dio;
   final SecureStorageService _storage;
 
@@ -14,8 +18,28 @@ class ApiClient {
     SecureStorageService? storage,
   })  : _dio = dio ?? Dio(),
         _storage = storage ?? SecureStorageService() {
+    // Configure HttpClient to support local HTTPS development / self-signed certs safely
+    _dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        client.badCertificateCallback =
+            (X509Certificate cert, String host, int port) {
+          // Allow self-signed certs in debug mode or for local LAN IP addresses
+          if (kDebugMode) return true;
+          final isLocalHost = host == 'localhost' ||
+              host == '127.0.0.1' ||
+              host == '10.0.2.2' ||
+              host.startsWith('192.168.') ||
+              host.startsWith('10.');
+          return isLocalHost;
+        };
+        return client;
+      },
+    );
+
     _dio.options.connectTimeout = const Duration(seconds: 20);
     _dio.options.receiveTimeout = const Duration(seconds: 20);
+    _dio.options.sendTimeout = const Duration(seconds: 25);
     _dio.options.headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
@@ -48,54 +72,97 @@ class ApiClient {
         },
         onError: (DioException e, handler) {
           final uri = e.requestOptions.uri;
-          developer.log(
-            '[API Error] ${e.requestOptions.method} $uri -> ${e.type}: ${e.message} (status: ${e.response?.statusCode})',
-            name: 'ApiClient',
-            error: e,
-          );
+          if (kDebugMode) {
+            developer.log(
+              '[API Error] ${e.requestOptions.method} $uri -> ${e.type}: ${e.message} (status: ${e.response?.statusCode})',
+              name: 'ApiClient',
+              error: e,
+            );
+            debugPrint('[ApiClient Error] ${e.requestOptions.method} $uri -> ${e.type}: ${e.message} (status: ${e.response?.statusCode}) error: ${e.error}');
+          }
 
           final response = e.response;
-          String message = 'Terjadi kesalahan jaringan. Periksa koneksi Anda.';
+          String message = 'Terjadi kesalahan jaringan. Periksa koneksi internet Anda.';
           dynamic errors;
 
           if (response != null) {
             final data = response.data;
-            if (response.statusCode == 429) {
-              message = 'Terlalu banyak permintaan (Rate limit). Silakan tunggu beberapa menit sebelum meminta kode baru.';
-            } else if (data is Map<String, dynamic>) {
+            bool hasCustomMessage = false;
+
+            // Extract message and validation errors from JSON response if available
+            if (data is Map) {
               errors = data['errors'];
-              if (errors is Map<String, dynamic> && errors.isNotEmpty) {
+              if (errors is Map && errors.isNotEmpty) {
                 final firstVal = errors.values.first;
                 if (firstVal is List && firstVal.isNotEmpty) {
                   message = firstVal.first.toString();
-                } else if (firstVal is String) {
+                  hasCustomMessage = true;
+                } else if (firstVal is String && firstVal.isNotEmpty) {
                   message = firstVal;
+                  hasCustomMessage = true;
                 } else {
-                  message = data['meta']?['message'] ?? data['message'] ?? 'Input tidak valid.';
+                  final m = data['meta']?['message'] ?? data['message'];
+                  if (m != null && m.toString().isNotEmpty) {
+                    message = m.toString();
+                    hasCustomMessage = true;
+                  }
                 }
               } else {
-                message = data['message'] ??
-                    data['meta']?['message'] ??
-                    data['error'] ??
-                    'Gagal memproses permintaan (${response.statusCode})';
+                final m = data['message'] ?? data['meta']?['message'] ?? data['error'];
+                if (m != null && m.toString().isNotEmpty) {
+                  message = m.toString();
+                  hasCustomMessage = true;
+                } else {
+                  message = 'Gagal memproses permintaan (${response.statusCode})';
+                }
               }
-            } else if (response.statusCode == 401) {
-              message = 'Kredensial salah atau sesi telah berakhir.';
+            } else if (data is String && data.isNotEmpty) {
+              message = data;
+              hasCustomMessage = true;
+            }
+
+            // Fallback status messages if no specific custom message was provided
+            if (response.statusCode == 401) {
+              if (!hasCustomMessage) {
+                message = 'Kredensial salah atau sesi telah berakhir.';
+              }
+              if (!e.requestOptions.path.contains('/login')) {
+                onUnauthorized?.call();
+              }
+            } else if (response.statusCode == 429) {
+              if (!hasCustomMessage) {
+                message = 'Terlalu banyak permintaan (Rate limit). Silakan tunggu beberapa saat.';
+              }
             } else if (response.statusCode == 403) {
-              message = 'Anda tidak memiliki akses ke fitur ini.';
+              if (!hasCustomMessage) {
+                message = 'Anda tidak memiliki akses ke fitur ini.';
+              }
             } else if (response.statusCode == 404) {
-              message = 'Layanan atau data tidak ditemukan ($uri).';
+              if (!hasCustomMessage) {
+                message = 'Layanan atau data tidak ditemukan ($uri).';
+              }
             } else if (response.statusCode == 422) {
-              message = 'Data input tidak valid.';
+              if (!hasCustomMessage) {
+                message = 'Data input tidak valid.';
+              }
             } else if (response.statusCode != null && response.statusCode! >= 500) {
-              message = 'Terjadi kesalahan pada server backend.';
+              if (!hasCustomMessage) {
+                message = 'Terjadi kesalahan pada server backend.';
+              }
             }
           } else if (e.type == DioExceptionType.connectionTimeout ||
               e.type == DioExceptionType.receiveTimeout ||
               e.type == DioExceptionType.sendTimeout) {
-            message = 'Koneksi ke server timeout. Silakan coba lagi.';
-          } else if (e.error is SocketException) {
-            message = 'Gagal terhubung ke server ($uri). Pastikan URL server benar dan aktif.';
+            message = 'Koneksi ke server timeout ($uri). Silakan coba lagi.';
+          } else if (e.type == DioExceptionType.connectionError ||
+              e.error is SocketException ||
+              e.error is HandshakeException ||
+              e.error is TlsException) {
+            final errStr = e.error != null ? ' (${e.error.runtimeType}: ${e.error})' : '';
+            message = 'Gagal terhubung ke server ($uri)$errStr. Pastikan URL server benar dan aktif.';
+          } else {
+            final errDetail = e.error != null ? ' (${e.error})' : (e.message != null ? ' (${e.message})' : '');
+            message = 'Gagal terhubung ke server ($uri) [${e.type.name}]$errDetail';
           }
 
           final customException = ApiException(

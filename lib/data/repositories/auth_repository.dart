@@ -121,6 +121,31 @@ class AuthRepository {
     );
   }
 
+  Future<UserModel> updateOnboardingPassword({
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.onboardingPassword,
+      data: {
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+      },
+    );
+
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      final userJson = data['data'] ?? data['user'];
+      if (userJson is Map<String, dynamic>) {
+        final user = UserModel.fromJson(userJson);
+        await _storage.saveUserJson(jsonEncode(user.toJson()));
+        return user;
+      }
+    }
+
+    return await getProfile();
+  }
+
   Future<String> requestForgotPasswordOtp(String email) async {
     final response = await _apiClient.post(
       ApiEndpoints.forgotPassword,
@@ -163,7 +188,7 @@ class AuthRepository {
     try {
       await _apiClient.post(ApiEndpoints.logout);
     } catch (_) {
-      // Ignore network failure on logout
+      // Ignore network failure or already-expired token on logout
     } finally {
       await _storage.clearAll();
     }

@@ -1,9 +1,14 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/attendance_model.dart';
 import '../models/attendance_event_model.dart';
 import '../../core/network/api_client.dart';
 import '../../core/constants/api_endpoints.dart';
+
+final attendanceRepositoryProvider = Provider<AttendanceRepository>((ref) {
+  return AttendanceRepository();
+});
 
 class AttendanceRepository {
   final ApiClient _apiClient;
@@ -47,10 +52,6 @@ class AttendanceRepository {
 
     if (photoFile != null && await photoFile.exists()) {
       formDataMap['selfie'] = await MultipartFile.fromFile(
-        photoFile.path,
-        filename: 'selfie.jpg',
-      );
-      formDataMap['photo'] = await MultipartFile.fromFile(
         photoFile.path,
         filename: 'selfie.jpg',
       );

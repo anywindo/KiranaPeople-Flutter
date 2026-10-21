@@ -425,7 +425,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ),
       ),
-    );
+    ).whenComplete(() => phoneController.dispose());
   }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
@@ -462,7 +462,7 @@ class ProfileScreen extends ConsumerWidget {
               elevation: 0,
             ),
             onPressed: () {
-              Navigator.pop(ctx);
+              Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
               ref.read(authProvider.notifier).logout();
             },
             child: const Text(

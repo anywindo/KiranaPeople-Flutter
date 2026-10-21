@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import 'server_settings_sheet.dart';
@@ -24,10 +25,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _identifierFocus.addListener(() => setState(() {}));
-    _passwordFocus.addListener(() => setState(() {}));
-    _identifierController.addListener(() => setState(() {}));
-    _passwordController.addListener(() => setState(() {}));
+    _identifierFocus.addListener(() { if (mounted) setState(() {}); });
+    _passwordFocus.addListener(() { if (mounted) setState(() {}); });
+    _identifierController.addListener(() { if (mounted) setState(() {}); });
+    _passwordController.addListener(() { if (mounted) setState(() {}); });
+    _loadSavedCredentials();
+  }
+
+  Future<void> _loadSavedCredentials() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedId = prefs.getString('saved_login_identifier');
+      final remember = prefs.getBool('remember_login_credentials') ?? true;
+      if (mounted) {
+        setState(() {
+          _rememberMe = remember;
+          if (remember && savedId != null && savedId.isNotEmpty) {
+            _identifierController.text = savedId;
+          }
+        });
+      }
+    } catch (_) {}
   }
 
   @override
@@ -46,10 +64,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void _submit() async {
     if (!_isFormValid) return;
     FocusScope.of(context).unfocus();
-    await ref.read(authProvider.notifier).login(
-          _identifierController.text.trim(),
+    final identifier = _identifierController.text.trim();
+    final success = await ref.read(authProvider.notifier).login(
+          identifier,
           _passwordController.text,
         );
+    if (success) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('remember_login_credentials', _rememberMe);
+        if (_rememberMe) {
+          await prefs.setString('saved_login_identifier', identifier);
+        } else {
+          await prefs.remove('saved_login_identifier');
+        }
+      } catch (_) {}
+    }
   }
 
   void _showForgotPasswordDialog() {
@@ -123,23 +153,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       const SizedBox(height: 12),
 
-                      // Kirana Logo Square Asset
+                      // Kirana Logo Asset (logoKiranaSquare.jpeg)
                       Container(
                         width: 96,
                         height: 96,
                         decoration: BoxDecoration(
                           color: Colors.black,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.12),
-                              blurRadius: 10,
+                              blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
                           ],
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(16),
                           child: Image.asset(
                             'assets/images/logoKiranaSquare.jpeg',
                             fit: BoxFit.cover,
@@ -233,6 +263,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               color: Color(0xFF222222),
                             ),
                             keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            onSubmitted: (_) {
+                              FocusScope.of(context).requestFocus(_passwordFocus);
+                            },
                             autocorrect: false,
                             decoration: const InputDecoration(
                               hintText: 'Email / ID Karyawan / NIK',
@@ -269,6 +303,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   focusNode: _passwordFocus,
                                   obscureText: !_isPasswordVisible,
                                   cursorColor: AppColors.primary,
+                                  textInputAction: TextInputAction.done,
+                                  onSubmitted: (_) => _submit(),
                                   style: const TextStyle(
                                     fontSize: 15,
                                     color: Color(0xFF222222),
