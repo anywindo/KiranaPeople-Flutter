@@ -256,7 +256,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     final isOnBreak = hasStartedBreak && !hasEndedBreak;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7FA),
+      backgroundColor: context.scaffoldBg,
       body: SafeArea(
         child: RefreshIndicator(
           color: AppColors.primary,
@@ -290,13 +290,13 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'KIRANA GROUP',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.5,
-                        color: Color(0xFF1C1C1E),
+                        color: context.textPrimaryColor,
                       ),
                     ),
                     InkWell(
@@ -306,21 +306,21 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                         width: 38,
                         height: 38,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.surfaceColor,
                           shape: BoxShape.circle,
-                          border: Border.all(color: const Color(0xFFE5E5EA)),
+                          border: Border.all(color: context.borderColor),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.04),
+                              color: Colors.black.withValues(alpha: context.isDarkMode ? 0.2 : 0.04),
                               blurRadius: 6,
                               offset: const Offset(0, 2),
                             ),
                           ],
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.logout_rounded,
                           size: 18,
-                          color: Color(0xFF8E8E93),
+                          color: context.textSecondaryColor,
                         ),
                       ),
                     ),
@@ -338,10 +338,13 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                       decoration: BoxDecoration(
                         color: const Color(0xFF4338CA),
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
+                        border: Border.all(
+                          color: context.isDarkMode ? context.surfaceColor : Colors.white,
+                          width: 2,
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.10),
+                            color: Colors.black.withValues(alpha: context.isDarkMode ? 0.3 : 0.10),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -365,17 +368,17 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                       children: [
                         Text(
                           _getGreeting(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
-                            color: Color(0xFF8E8E93),
+                            color: context.textMutedColor,
                           ),
                         ),
                         Text(
                           user?.name ?? 'User',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1C1C1E),
+                            color: context.textPrimaryColor,
                           ),
                         ),
                       ],
@@ -390,7 +393,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                   clipBehavior: Clip.antiAlias,
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF1F5),
+                    color: context.surfaceSecondaryColor,
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Stack(
@@ -447,7 +450,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                       size: 16,
                                       color: _activeSegment == 0
                                           ? Colors.white
-                                          : const Color(0xFF6B7280),
+                                          : context.textSecondaryColor,
                                     ),
                                     const SizedBox(width: 6),
                                     AnimatedDefaultTextStyle(
@@ -458,7 +461,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                         fontWeight: FontWeight.bold,
                                         color: _activeSegment == 0
                                             ? Colors.white
-                                            : const Color(0xFF6B7280),
+                                            : context.textSecondaryColor,
                                       ),
                                       child: const Text('Kerja'),
                                     ),
@@ -489,7 +492,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                       size: 16,
                                       color: _activeSegment == 1
                                           ? Colors.white
-                                          : const Color(0xFF6B7280),
+                                          : context.textSecondaryColor,
                                     ),
                                     const SizedBox(width: 6),
                                     AnimatedDefaultTextStyle(
@@ -500,7 +503,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                         fontWeight: FontWeight.bold,
                                         color: _activeSegment == 1
                                             ? Colors.white
-                                            : const Color(0xFF6B7280),
+                                            : context.textSecondaryColor,
                                       ),
                                       child: const Text('Istirahat'),
                                     ),
@@ -520,12 +523,12 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.surfaceColor,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFF2F2F7)),
+                    border: Border.all(color: context.borderColor),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
+                        color: Colors.black.withValues(alpha: context.isDarkMode ? 0.25 : 0.03),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -572,10 +575,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF9FAFB),
+                                    color: context.surfaceSecondaryColor,
                                     borderRadius: BorderRadius.circular(14),
                                     border: Border.all(
-                                        color: const Color(0xFFF2F2F7)),
+                                        color: context.borderColor),
                                   ),
                                   child: Row(
                                     children: [
@@ -605,10 +608,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                           selectedShift != null
                                               ? '${selectedShift.name} (${_formatShortTime(selectedShift.startTime)} - ${_formatShortTime(selectedShift.endTime)})'
                                               : 'Pilih Shift Kerja',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,
-                                            color: Color(0xFF1C1C1E),
+                                            color: context.textPrimaryColor,
                                           ),
                                         ),
                                       ),
@@ -673,10 +676,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF9FAFB),
+                                    color: context.surfaceSecondaryColor,
                                     borderRadius: BorderRadius.circular(14),
                                     border: Border.all(
-                                        color: const Color(0xFFF2F2F7)),
+                                        color: context.borderColor),
                                   ),
                                   child: Row(
                                     children: [
@@ -699,10 +702,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                           selectedShift != null
                                               ? 'Jam Istirahat: [${selectedShift.effectiveBreakStart} - ${selectedShift.effectiveBreakEnd}]'
                                               : 'Jam Istirahat: [12:00 - 13:00]',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,
-                                            color: Color(0xFF1C1C1E),
+                                            color: context.textPrimaryColor,
                                           ),
                                         ),
                                       ),
@@ -716,7 +719,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                               : (!hasEndedBreak
                                                   ? AppColors.success
                                                       .withValues(alpha: 0.12)
-                                                  : const Color(0xFFF3F4F6)),
+                                                  : context.surfaceColor),
                                           borderRadius:
                                               BorderRadius.circular(20),
                                         ),
@@ -730,10 +733,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                             fontSize: 11,
                                             fontWeight: FontWeight.bold,
                                             color: !hasStartedBreak
-                                              ? AppColors.primary
-                                              : (!hasEndedBreak
-                                                  ? AppColors.success
-                                                  : const Color(0xFF4B5563)),
+                                                ? AppColors.primary
+                                                : (!hasEndedBreak
+                                                    ? AppColors.success
+                                                    : context.textSecondaryColor),
                                           ),
                                         ),
                                       ),
@@ -936,9 +939,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.surfaceColor,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFF2F2F7)),
+                    border: Border.all(color: context.borderColor),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.03),
@@ -953,12 +956,12 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             'Aktivitas Hari Ini',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF1C1C1E),
+                              color: context.textPrimaryColor,
                             ),
                           ),
                           InkWell(
@@ -996,8 +999,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(12),
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFF9FAFB),
+                                decoration: BoxDecoration(
+                                  color: context.surfaceSecondaryColor,
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
@@ -1007,11 +1010,11 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                 ),
                               ),
                               const SizedBox(height: 10),
-                              const Text(
+                              Text(
                                 'Belum ada riwayat presensi hari ini.',
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Color(0xFF8E8E93),
+                                  color: context.textSecondaryColor,
                                 ),
                               ),
                             ],
@@ -1022,10 +1025,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: events.length,
-                          separatorBuilder: (_, _) => const Divider(
+                          separatorBuilder: (_, _) => Divider(
                             height: 20,
                             thickness: 0.8,
-                            color: Color(0xFFF2F2F7),
+                            color: context.dividerColor,
                           ),
                           itemBuilder: (context, index) {
                             // Sort newest first
@@ -1063,7 +1066,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           border: Border.all(
-                                              color: const Color(0xFFE5E7EB),
+                                              color: context.borderColor,
                                               width: 1.5),
                                         ),
                                         child: ClipOval(
@@ -1075,8 +1078,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                                   height: 44,
                                                   fit: BoxFit.cover,
                                                   errorWidget: Container(
-                                                    color:
-                                                        const Color(0xFFFFF1F2),
+                                                    color: AppColors.primary
+                                                        .withValues(alpha: 0.12),
                                                     child: Icon(
                                                       _getEventIcon(
                                                           event.eventType),
@@ -1086,7 +1089,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                                   ),
                                                 )
                                               : Container(
-                                                  color: const Color(0xFFFFF1F2),
+                                                  color: AppColors.primary
+                                                      .withValues(alpha: 0.12),
                                                   child: Icon(
                                                     _getEventIcon(event.eventType),
                                                     color: AppColors.primary,
@@ -1103,10 +1107,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                           children: [
                                             Text(
                                               event.eventType.label,
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.bold,
-                                                color: Color(0xFF1F2937),
+                                                color: context.textPrimaryColor,
                                               ),
                                             ),
                                             const SizedBox(height: 2),
@@ -1114,9 +1118,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                               children: [
                                                 Text(
                                                   formattedDate,
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                     fontSize: 12,
-                                                    color: Color(0xFF8E8E93),
+                                                    color: context.textSecondaryColor,
                                                   ),
                                                 ),
                                                 if (event.latitude != null &&
@@ -1126,8 +1130,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                                     width: 3,
                                                     height: 3,
                                                     decoration:
-                                                        const BoxDecoration(
-                                                      color: Color(0xFFCBD5E1),
+                                                        BoxDecoration(
+                                                      color: context.borderColor,
                                                       shape: BoxShape.circle,
                                                     ),
                                                   ),
@@ -1138,11 +1142,11 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                                     color: Color(0xFF94A3B8),
                                                   ),
                                                   const SizedBox(width: 2),
-                                                  const Text(
+                                                  Text(
                                                     'Lokasi GPS',
                                                     style: TextStyle(
                                                       fontSize: 11,
-                                                      color: Color(0xFF64748B),
+                                                      color: context.textMutedColor,
                                                       fontWeight:
                                                           FontWeight.w500,
                                                     ),
@@ -1158,17 +1162,17 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                         children: [
                                           Text(
                                             formattedTime,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               fontSize: 15,
                                               fontWeight: FontWeight.bold,
-                                              color: Color(0xFF111827),
+                                              color: context.textPrimaryColor,
                                             ),
                                           ),
                                           const SizedBox(width: 4),
-                                          const Icon(
+                                          Icon(
                                             Icons.chevron_right_rounded,
                                             size: 18,
-                                            color: Color(0xFF9CA3AF),
+                                            color: context.textMutedColor,
                                           ),
                                         ],
                                       ),
@@ -1280,9 +1284,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(
                     text: label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
-                      color: Color(0xFF6B7280),
+                      color: context.textSecondaryColor,
                       fontWeight: FontWeight.normal,
                     ),
                     children: [
@@ -1302,10 +1306,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                   children: [
                     Text(
                       actualTime ?? '--:--',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF111827),
+                        color: context.textPrimaryColor,
                       ),
                     ),
                     if (isCompleted && actualTime != null) ...[
@@ -1480,9 +1484,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setModalState) => Container(
           padding: const EdgeInsets.all(20),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: context.surfaceColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1493,7 +1497,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE5E7EB),
+                    color: context.borderColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -1580,18 +1584,18 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                       children: [
                         Text(
                           'Titik Presensi: ${event.eventType.label}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1F2937),
+                            color: context.textPrimaryColor,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           'Koordinat: ${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF6B7280),
+                            color: context.textSecondaryColor,
                           ),
                         ),
                       ],
@@ -1605,7 +1609,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                   height: 38,
                   padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
+                    color: context.surfaceSecondaryColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -1619,7 +1623,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               color: selectedTab == 0
-                                  ? Colors.white
+                                  ? context.surfaceColor
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(9),
                               boxShadow: selectedTab == 0
@@ -1641,7 +1645,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                   size: 15,
                                   color: selectedTab == 0
                                       ? AppColors.primary
-                                      : const Color(0xFF64748B),
+                                      : context.textSecondaryColor,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
@@ -1650,8 +1654,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     color: selectedTab == 0
-                                        ? AppColors.primary
-                                        : const Color(0xFF64748B),
+                                      ? AppColors.primary
+                                      : context.textSecondaryColor,
                                   ),
                                 ),
                               ],
@@ -1668,7 +1672,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               color: selectedTab == 1
-                                  ? Colors.white
+                                  ? context.surfaceColor
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(9),
                               boxShadow: selectedTab == 1
@@ -1690,7 +1694,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                   size: 15,
                                   color: selectedTab == 1
                                       ? AppColors.primary
-                                      : const Color(0xFF64748B),
+                                      : context.textSecondaryColor,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
@@ -1699,8 +1703,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     color: selectedTab == 1
-                                        ? AppColors.primary
-                                        : const Color(0xFF64748B),
+                                      ? AppColors.primary
+                                      : context.textSecondaryColor,
                                   ),
                                 ),
                               ],
@@ -2021,9 +2025,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 7),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF9FAFB),
+                    color: context.surfaceSecondaryColor,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFF3F4F6)),
+                    border: Border.all(color: context.borderColor),
                   ),
                   child: Row(
                     children: [

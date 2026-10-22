@@ -108,9 +108,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: context.scaffoldBg,
         elevation: 0,
         scrolledUnderElevation: 0,
         automaticallyImplyLeading: false,
@@ -124,14 +124,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF2F2F7),
+                  color: context.surfaceSecondaryColor,
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFE5E5EA), width: 1),
+                  border: Border.all(color: context.borderColor, width: 1),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.settings_outlined,
                   size: 18,
-                  color: Color(0xFF8E8E93),
+                  color: context.textSecondaryColor,
                 ),
               ),
             ),
@@ -194,23 +194,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 28),
 
                       // Title & Subtitle
-                      const Text(
+                      Text(
                         'Masuk ke Akun Anda',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF1C1C1E),
+                          color: context.textPrimaryColor,
                           letterSpacing: -0.3,
                         ),
                       ),
                       const SizedBox(height: 6),
-                      const Text(
+                      Text(
                         'Silakan masukkan identitas dan kata sandi Anda',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,
-                          color: Color(0xFF8E8E93),
+                          color: context.textSecondaryColor,
                         ),
                       ),
                       const SizedBox(height: 32),
@@ -258,9 +258,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             controller: _identifierController,
                             focusNode: _identifierFocus,
                             cursorColor: AppColors.primary,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
-                              color: Color(0xFF222222),
+                              color: context.textPrimaryColor,
                             ),
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
@@ -268,16 +268,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               FocusScope.of(context).requestFocus(_passwordFocus);
                             },
                             autocorrect: false,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               hintText: 'Email / ID Karyawan / NIK',
                               hintStyle: TextStyle(
-                                color: Color(0xFFC7C7CC),
+                                color: context.textMutedColor,
                                 fontSize: 15,
                               ),
                               border: InputBorder.none,
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(vertical: 10),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 10),
                               isDense: true,
                             ),
                           ),
@@ -285,7 +285,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             height: 1.5,
                             color: _identifierFocus.hasFocus
                                 ? AppColors.primary
-                                : const Color(0xFFE5E5EA),
+                                : context.borderColor,
                           ),
                         ],
                       ),
@@ -305,20 +305,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   cursorColor: AppColors.primary,
                                   textInputAction: TextInputAction.done,
                                   onSubmitted: (_) => _submit(),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 15,
-                                    color: Color(0xFF222222),
+                                    color: context.textPrimaryColor,
                                   ),
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     hintText: 'Kata Sandi',
                                     hintStyle: TextStyle(
-                                      color: Color(0xFFC7C7CC),
+                                      color: context.textMutedColor,
                                       fontSize: 15,
                                     ),
                                     border: InputBorder.none,
                                     enabledBorder: InputBorder.none,
                                     focusedBorder: InputBorder.none,
-                                    contentPadding: EdgeInsets.symmetric(vertical: 10),
+                                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
                                     isDense: true,
                                   ),
                                 ),
@@ -336,7 +336,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         ? Icons.visibility_outlined
                                         : Icons.visibility_off_outlined,
                                     size: 20,
-                                    color: const Color(0xFF8E8E93),
+                                    color: context.textMutedColor,
                                   ),
                                 ),
                               ),
@@ -346,7 +346,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             height: 1.5,
                             color: _passwordFocus.hasFocus
                                 ? AppColors.primary
-                                : const Color(0xFFE5E5EA),
+                                : context.borderColor,
                           ),
                         ],
                       ),
@@ -375,14 +375,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     size: 20,
                                     color: _rememberMe
                                         ? AppColors.primary
-                                        : const Color(0xFFC7C7CC),
+                                        : context.borderColor,
                                   ),
                                   const SizedBox(width: 8),
-                                  const Text(
+                                  Text(
                                     'Ingat Saya',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Color(0xFF333333),
+                                      color: context.textPrimaryColor,
                                     ),
                                   ),
                                 ],
@@ -394,13 +394,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           InkWell(
                             onTap: _showForgotPasswordDialog,
                             borderRadius: BorderRadius.circular(6),
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 4),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4),
                               child: Text(
                                 'Lupa Kata Sandi?',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: Color(0xFF333333),
+                                  color: context.textPrimaryColor,
                                 ),
                               ),
                             ),

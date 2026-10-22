@@ -259,9 +259,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setModalState) => Container(
           padding: const EdgeInsets.all(20),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: context.surfaceColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -272,7 +272,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE5E7EB),
+                    color: context.borderColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -352,18 +352,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       children: [
                         Text(
                           'Titik Presensi: ${event.eventType.label}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1F2937),
+                            color: context.textPrimaryColor,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           'Koordinat: ${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF6B7280),
+                            color: context.textSecondaryColor,
                           ),
                         ),
                       ],
@@ -377,7 +377,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   height: 38,
                   padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
+                    color: context.surfaceSecondaryColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -391,7 +391,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               color: selectedTab == 0
-                                  ? Colors.white
+                                  ? context.surfaceColor
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(9),
                               boxShadow: selectedTab == 0
@@ -413,7 +413,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                   size: 15,
                                   color: selectedTab == 0
                                       ? AppColors.primary
-                                      : const Color(0xFF64748B),
+                                      : context.textSecondaryColor,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
@@ -422,8 +422,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     color: selectedTab == 0
-                                        ? AppColors.primary
-                                        : const Color(0xFF64748B),
+                                      ? AppColors.primary
+                                      : context.textSecondaryColor,
                                   ),
                                 ),
                               ],
@@ -440,7 +440,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               color: selectedTab == 1
-                                  ? Colors.white
+                                  ? context.surfaceColor
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(9),
                               boxShadow: selectedTab == 1
@@ -462,7 +462,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                   size: 15,
                                   color: selectedTab == 1
                                       ? AppColors.primary
-                                      : const Color(0xFF64748B),
+                                      : context.textSecondaryColor,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
@@ -471,8 +471,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     color: selectedTab == 1
-                                        ? AppColors.primary
-                                        : const Color(0xFF64748B),
+                                      ? AppColors.primary
+                                      : context.textSecondaryColor,
                                   ),
                                 ),
                               ],
@@ -794,9 +794,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 7),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF9FAFB),
+                    color: context.surfaceSecondaryColor,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFF3F4F6)),
+                    border: Border.all(color: context.borderColor),
                   ),
                   child: Row(
                     children: [
@@ -861,17 +861,17 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final workLocation = user?.location;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7FA),
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF6F7FA),
+        backgroundColor: context.scaffoldBg,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Riwayat Presensi',
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1C1C1E),
+            color: context.textPrimaryColor,
           ),
         ),
         actions: [
@@ -884,9 +884,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF1F5),
+                  color: context.surfaceSecondaryColor,
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFFFFE4E6), width: 1),
+                  border: Border.all(color: context.borderColor, width: 1),
                 ),
                 child: const Icon(
                   Icons.refresh_rounded,
@@ -1017,10 +1017,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       children: [
                         Text(
                           formattedDate,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1F2937),
+                            color: context.textPrimaryColor,
                           ),
                         ),
                         Row(
@@ -1052,15 +1052,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF3F4F6),
+                                color: context.surfaceSecondaryColor,
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
                                 shiftName,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF6B7280),
+                                  color: context.textSecondaryColor,
                                 ),
                               ),
                             ),
@@ -1077,9 +1077,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       return Container(
                         margin: const EdgeInsets.only(bottom: 8),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.surfaceColor,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFF2F2F7)),
+                          border: Border.all(color: context.borderColor),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.02),
@@ -1107,7 +1107,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                          color: const Color(0xFFE5E7EB),
+                                          color: context.borderColor,
                                           width: 1.5),
                                     ),
                                     child: ClipOval(
@@ -1119,7 +1119,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                               height: 44,
                                               fit: BoxFit.cover,
                                               errorWidget: Container(
-                                                color: const Color(0xFFFFF1F2),
+                                                color: AppColors.primary
+                                                    .withValues(alpha: 0.12),
                                                 child: Icon(
                                                   _getEventIcon(event.eventType),
                                                   color: AppColors.primary,
@@ -1128,7 +1129,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                               ),
                                             )
                                           : Container(
-                                              color: const Color(0xFFFFF1F2),
+                                              color: AppColors.primary
+                                                  .withValues(alpha: 0.12),
                                               child: Icon(
                                                 _getEventIcon(event.eventType),
                                                 color: AppColors.primary,
@@ -1147,26 +1149,26 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                       children: [
                                         Text(
                                           event.eventType.label,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,
-                                            color: Color(0xFF1F2937),
+                                            color: context.textPrimaryColor,
                                           ),
                                         ),
                                         const SizedBox(height: 3),
                                         Row(
                                           children: [
-                                            const Icon(
+                                            Icon(
                                               Icons.access_time_rounded,
                                               size: 13,
-                                              color: Color(0xFF8E8E93),
+                                              color: context.textSecondaryColor,
                                             ),
                                             const SizedBox(width: 4),
                                             Text(
                                               timeStr,
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontSize: 12,
-                                                color: Color(0xFF8E8E93),
+                                                color: context.textSecondaryColor,
                                                 fontWeight: FontWeight.w500,
                                               ),
                                             ),
@@ -1176,8 +1178,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                               Container(
                                                 width: 3,
                                                 height: 3,
-                                                decoration: const BoxDecoration(
-                                                  color: Color(0xFFCBD5E1),
+                                                decoration: BoxDecoration(
+                                                  color: context.borderColor,
                                                   shape: BoxShape.circle,
                                                 ),
                                               ),
@@ -1188,11 +1190,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                                 color: Color(0xFF94A3B8),
                                               ),
                                               const SizedBox(width: 2),
-                                              const Text(
+                                              Text(
                                                 'Lokasi GPS',
                                                 style: TextStyle(
                                                   fontSize: 11,
-                                                  color: Color(0xFF64748B),
+                                                  color: context.textMutedColor,
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                               ),
@@ -1208,14 +1210,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                     width: 28,
                                     height: 28,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFF8FAFC),
+                                      color: context.surfaceSecondaryColor,
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                          color: const Color(0xFFF1F5F9)),
+                                          color: context.borderColor),
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.chevron_right_rounded,
-                                      color: Color(0xFF94A3B8),
+                                      color: context.textMutedColor,
                                       size: 18,
                                     ),
                                   ),

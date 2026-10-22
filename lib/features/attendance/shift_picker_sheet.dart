@@ -67,9 +67,9 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
 
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -79,7 +79,7 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
             width: 36,
             height: 4,
             decoration: BoxDecoration(
-              color: const Color(0xFFE5E5EA),
+              color: context.borderColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -91,23 +91,23 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
             child: Row(
               children: [
                 const SizedBox(width: 48),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Pilih Shift Kerja',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1C1C1E),
+                      color: context.textPrimaryColor,
                     ),
                   ),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text(
+                  child: Text(
                     'Batal',
                     style: TextStyle(
-                      color: Color(0xFF8E8E93),
+                      color: context.textSecondaryColor,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -116,7 +116,7 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
               ],
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFF2F2F7)),
+          Divider(height: 1, color: context.dividerColor),
 
           // Info description
           Padding(
@@ -136,12 +136,12 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Pilih shift yang sedang Anda jalani hari ini sebelum presensi masuk.',
                     style: TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF6B7280),
+                      color: context.textSecondaryColor,
                       height: 1.3,
                     ),
                   ),
@@ -175,13 +175,13 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.primary.withValues(alpha: 0.06)
-                          : const Color(0xFFF9FAFB),
+                          ? AppColors.primary.withValues(alpha: 0.08)
+                          : context.surfaceSecondaryColor,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
                         color: isSelected
                             ? AppColors.primary
-                            : const Color(0xFFE5E7EB),
+                            : context.borderColor,
                         width: isSelected ? 1.5 : 1.0,
                       ),
                     ),
@@ -193,7 +193,7 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
                               : Icons.circle_outlined,
                           color: isSelected
                               ? AppColors.primary
-                              : const Color(0xFFD1D5DB),
+                              : context.borderColor,
                           size: 22,
                         ),
                         const SizedBox(width: 14),
@@ -208,15 +208,15 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
                                   fontWeight: FontWeight.bold,
                                   color: isSelected
                                       ? AppColors.primary
-                                      : const Color(0xFF1F2937),
+                                      : context.textPrimaryColor,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 '$start - $end WIB',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
-                                  color: Color(0xFF6B7280),
+                                  color: context.textSecondaryColor,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -228,15 +228,15 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: context.surfaceColor,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: const Color(0xFFE5E7EB)),
+                              border: Border.all(color: context.borderColor),
                             ),
                             child: Text(
                               'Istirahat ${_formatTime(shift.breakStartTime!)} - ${_formatTime(shift.breakEndTime!)}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
-                                color: Color(0xFF9CA3AF),
+                                color: context.textSecondaryColor,
                               ),
                             ),
                           ),

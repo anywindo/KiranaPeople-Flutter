@@ -663,17 +663,17 @@ class ProfileScreen extends ConsumerWidget {
         : 'Belum diatur';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7FA),
+      backgroundColor: context.scaffoldBg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF6F7FA),
+        backgroundColor: context.scaffoldBg,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
+        title: Text(
           'Profil',
           style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1C1C1E),
+            color: context.textPrimaryColor,
           ),
         ),
       ),
@@ -696,12 +696,18 @@ class ProfileScreen extends ConsumerWidget {
                           height: 88,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 3),
-                            boxShadow: const [
+                            border: Border.all(
+                              color: context.isDarkMode
+                                  ? context.surfaceColor
+                                  : Colors.white,
+                              width: 3,
+                            ),
+                            boxShadow: [
                               BoxShadow(
-                                color: Colors.black12,
+                                color: Colors.black.withValues(
+                                    alpha: context.isDarkMode ? 0.35 : 0.12),
                                 blurRadius: 10,
-                                offset: Offset(0, 4),
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
@@ -712,7 +718,7 @@ class ProfileScreen extends ConsumerWidget {
                                     imageUrl: user.fullAvatarUrl!,
                                     fit: BoxFit.cover,
                                     placeholder: (context, url) => Container(
-                                      color: const Color(0xFFE5E7EB),
+                                      color: context.surfaceSecondaryColor,
                                       child: const Center(
                                         child: SizedBox(
                                           width: 16,
@@ -737,7 +743,12 @@ class ProfileScreen extends ConsumerWidget {
                           decoration: BoxDecoration(
                             color: const Color(0xFFFF2D75),
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
+                            border: Border.all(
+                              color: context.isDarkMode
+                                  ? context.surfaceColor
+                                  : Colors.white,
+                              width: 2,
+                            ),
                             boxShadow: const [
                               BoxShadow(
                                 color: Colors.black12,
@@ -760,10 +771,10 @@ class ProfileScreen extends ConsumerWidget {
                   // User Name
                   Text(
                     userName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1C1C1E),
+                      color: context.textPrimaryColor,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -776,12 +787,14 @@ class ProfileScreen extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 3),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFF1F5),
+                          color: context.isDarkMode
+                              ? const Color(0xFF3B1524)
+                              : const Color(0xFFFFF1F5),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(
-                          roleName,
-                          style: const TextStyle(
+                        child: const Text(
+                          'Karyawan',
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFFFF2D75),
@@ -793,15 +806,19 @@ class ProfileScreen extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 3),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFDCFCE7),
+                          color: context.isDarkMode
+                              ? const Color(0xFF063A23)
+                              : const Color(0xFFDCFCE7),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           isActive ? 'Aktif' : 'Non-Aktif',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF15803D),
+                            color: context.isDarkMode
+                                ? const Color(0xFF4ADE80)
+                                : const Color(0xFF15803D),
                           ),
                         ),
                       ),
@@ -812,10 +829,10 @@ class ProfileScreen extends ConsumerWidget {
                   // Employee ID Subtitle
                   Text(
                     employeeId,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF8E8E93),
+                      color: context.textMutedColor,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -825,36 +842,43 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // 2. Section: PENGATURAN AKUN & KEAMANAN
-            _buildSectionHeader('PENGATURAN AKUN & KEAMANAN'),
-            _buildCardGroup([
+            _buildSectionHeader(context, 'PENGATURAN AKUN & KEAMANAN'),
+            _buildCardGroup(context, [
               _buildRow(
-                iconBg: const Color(0xFFE0F2FE),
+                context,
+                iconBg: context.isDarkMode
+                    ? const Color(0xFF143048)
+                    : const Color(0xFFE0F2FE),
                 icon: Icons.phone_rounded,
                 iconColor: const Color(0xFF0284C7),
                 title: 'Nomor Telepon',
-                onTap: () => _showEditPhoneBottomSheet(context, ref, user?.phone),
+                onTap: () =>
+                    _showEditPhoneBottomSheet(context, ref, user?.phone),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       phoneStr,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: Color(0xFF8E8E93),
+                        color: context.textSecondaryColor,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(
+                    Icon(
                       Icons.chevron_right_rounded,
                       size: 16,
-                      color: Color(0xFFC7C7CC),
+                      color: context.borderColor,
                     ),
                   ],
                 ),
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF2F2F7)),
+              Divider(height: 1, indent: 56, color: context.dividerColor),
               _buildRow(
-                iconBg: const Color(0xFFF3E8FF),
+                context,
+                iconBg: context.isDarkMode
+                    ? const Color(0xFF332042)
+                    : const Color(0xFFF3E8FF),
                 icon: Icons.shield_outlined,
                 iconColor: const Color(0xFF9333EA),
                 title: 'Kata Sandi',
@@ -879,9 +903,12 @@ class ProfileScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF2F2F7)),
+              Divider(height: 1, indent: 56, color: context.dividerColor),
               _buildRow(
-                iconBg: const Color(0xFFFEF3C7),
+                context,
+                iconBg: context.isDarkMode
+                    ? const Color(0xFF3A2A14)
+                    : const Color(0xFFFEF3C7),
                 icon: Icons.mail_rounded,
                 iconColor: const Color(0xFFD97706),
                 title: 'Email',
@@ -893,19 +920,20 @@ class ProfileScreen extends ConsumerWidget {
                       child: Text(
                         userEmail,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF6B7280),
+                          color: context.textSecondaryColor,
                         ),
                       ),
                     ),
                     const SizedBox(width: 6),
                     InkWell(
-                      onTap: () => _copyToClipboard(context, userEmail, 'Email'),
-                      child: const Icon(
+                      onTap: () =>
+                          _copyToClipboard(context, userEmail, 'Email'),
+                      child: Icon(
                         Icons.copy_rounded,
                         size: 16,
-                        color: Color(0xFF9CA3AF),
+                        color: context.textMutedColor,
                       ),
                     ),
                   ],
@@ -915,10 +943,13 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 20),
 
             // 3. Section: DATA KEPEGAWAIAN & LOKASI
-            _buildSectionHeader('DATA KEPEGAWAIAN & LOKASI'),
-            _buildCardGroup([
+            _buildSectionHeader(context, 'DATA KEPEGAWAIAN & LOKASI'),
+            _buildCardGroup(context, [
               _buildRow(
-                iconBg: const Color(0xFFFFE4E6),
+                context,
+                iconBg: context.isDarkMode
+                    ? const Color(0xFF3B1524)
+                    : const Color(0xFFFFE4E6),
                 icon: Icons.badge_rounded,
                 iconColor: const Color(0xFFFF2D75),
                 title: 'ID Karyawan',
@@ -927,42 +958,48 @@ class ProfileScreen extends ConsumerWidget {
                   children: [
                     Text(
                       employeeId,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF6B7280),
+                        color: context.textSecondaryColor,
                       ),
                     ),
                     const SizedBox(width: 6),
                     InkWell(
                       onTap: () =>
                           _copyToClipboard(context, employeeId, 'ID Karyawan'),
-                      child: const Icon(
+                      child: Icon(
                         Icons.copy_rounded,
                         size: 16,
-                        color: Color(0xFF9CA3AF),
+                        color: context.textMutedColor,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF2F2F7)),
+              Divider(height: 1, indent: 56, color: context.dividerColor),
               _buildRow(
-                iconBg: const Color(0xFFD1FAE5),
+                context,
+                iconBg: context.isDarkMode
+                    ? const Color(0xFF14372A)
+                    : const Color(0xFFD1FAE5),
                 icon: Icons.work_rounded,
                 iconColor: const Color(0xFF059669),
                 title: 'Jabatan',
                 trailing: Text(
                   roleName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF6B7280),
+                    color: context.textSecondaryColor,
                   ),
                 ),
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF2F2F7)),
+              Divider(height: 1, indent: 56, color: context.dividerColor),
               _buildRow(
-                iconBg: const Color(0xFFDBEAFE),
+                context,
+                iconBg: context.isDarkMode
+                    ? const Color(0xFF162D4A)
+                    : const Color(0xFFDBEAFE),
                 icon: Icons.apartment_rounded,
                 iconColor: const Color(0xFF2563EB),
                 title: 'Lokasi Kantor',
@@ -971,38 +1008,44 @@ class ProfileScreen extends ConsumerWidget {
                   child: Text(
                     officeName,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF6B7280),
+                      color: context.textSecondaryColor,
                     ),
                   ),
                 ),
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF2F2F7)),
+              Divider(height: 1, indent: 56, color: context.dividerColor),
               _buildRow(
-                iconBg: const Color(0xFFCCFBF1),
+                context,
+                iconBg: context.isDarkMode
+                    ? const Color(0xFF133633)
+                    : const Color(0xFFCCFBF1),
                 icon: Icons.near_me_rounded,
                 iconColor: const Color(0xFF0D9488),
                 title: 'Radius Presensi',
                 trailing: Text(
                   radiusStr,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF6B7280),
+                    color: context.textSecondaryColor,
                   ),
                 ),
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF2F2F7)),
+              Divider(height: 1, indent: 56, color: context.dividerColor),
               _buildRow(
-                iconBg: const Color(0xFFFFE4E6),
+                context,
+                iconBg: context.isDarkMode
+                    ? const Color(0xFF3B1524)
+                    : const Color(0xFFFFE4E6),
                 icon: Icons.calendar_month_rounded,
                 iconColor: const Color(0xFFFF2D75),
                 title: 'Bergabung',
                 trailing: Text(
                   joinedStr,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF6B7280),
+                    color: context.textSecondaryColor,
                   ),
                 ),
               ),
@@ -1010,10 +1053,13 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 20),
 
             // 4. Section: IDENTITAS PRIBADI
-            _buildSectionHeader('IDENTITAS PRIBADI'),
-            _buildCardGroup([
+            _buildSectionHeader(context, 'IDENTITAS PRIBADI'),
+            _buildCardGroup(context, [
               _buildRow(
-                iconBg: const Color(0xFFE0E7FF),
+                context,
+                iconBg: context.isDarkMode
+                    ? const Color(0xFF22254D)
+                    : const Color(0xFFE0E7FF),
                 icon: Icons.credit_card_rounded,
                 iconColor: const Color(0xFF4F46E5),
                 title: 'NIK',
@@ -1022,34 +1068,37 @@ class ProfileScreen extends ConsumerWidget {
                   children: [
                     Text(
                       nikStr,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: Color(0xFF6B7280),
+                        color: context.textSecondaryColor,
                       ),
                     ),
                     const SizedBox(width: 6),
                     InkWell(
                       onTap: () => _copyToClipboard(context, nikStr, 'NIK'),
-                      child: const Icon(
+                      child: Icon(
                         Icons.copy_rounded,
                         size: 16,
-                        color: Color(0xFF9CA3AF),
+                        color: context.textMutedColor,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Divider(height: 1, indent: 56, color: Color(0xFFF2F2F7)),
+              Divider(height: 1, indent: 56, color: context.dividerColor),
               _buildRow(
-                iconBg: const Color(0xFFFFE4E6),
+                context,
+                iconBg: context.isDarkMode
+                    ? const Color(0xFF3B1524)
+                    : const Color(0xFFFFE4E6),
                 icon: Icons.card_giftcard_rounded,
                 iconColor: const Color(0xFFFF2D75),
                 title: 'Tanggal Lahir',
                 trailing: Text(
                   dobStr,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF6B7280),
+                    color: context.textSecondaryColor,
                   ),
                 ),
               ),
@@ -1057,9 +1106,12 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 16),
 
             // 5. Section: Tampilan & Versi Aplikasi Card
-            _buildCardGroup([
+            _buildCardGroup(context, [
               _buildRow(
-                iconBg: const Color(0xFFEFF6FF),
+                context,
+                iconBg: context.isDarkMode
+                    ? const Color(0xFF1E3A5F)
+                    : const Color(0xFFEFF6FF),
                 icon: Icons.palette_rounded,
                 iconColor: const Color(0xFF3B82F6),
                 title: 'Tema Tampilan',
@@ -1078,6 +1130,7 @@ class ProfileScreen extends ConsumerWidget {
                           label,
                           style: TextStyle(
                             fontSize: 13,
+                            fontWeight: FontWeight.w600,
                             color: context.textSecondaryColor,
                           ),
                         );
@@ -1093,11 +1146,14 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 onTap: () => _showThemeModeSheet(context, ref),
               ),
-              Divider(height: 1, indent: 56, color: context.borderColor),
+              Divider(height: 1, indent: 56, color: context.dividerColor),
               _buildRow(
-                iconBg: const Color(0xFFF3F4F6),
+                context,
+                iconBg: context.isDarkMode
+                    ? const Color(0xFF283344)
+                    : const Color(0xFFF3F4F6),
                 icon: Icons.info_rounded,
-                iconColor: const Color(0xFF6B7280),
+                iconColor: context.textSecondaryColor,
                 title: 'Versi Aplikasi',
                 trailing: Text(
                   '1.0.0 (Build 1)',
@@ -1118,8 +1174,15 @@ class ProfileScreen extends ConsumerWidget {
                 width: double.infinity,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF1F2),
+                  color: context.isDarkMode
+                      ? const Color(0xFF3B151E)
+                      : const Color(0xFFFFF1F2),
                   borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: context.isDarkMode
+                        ? const Color(0xFF4C1D24)
+                        : const Color(0xFFFFE4E6),
+                  ),
                 ),
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -1148,17 +1211,17 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(BuildContext context, String title) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Padding(
         padding: const EdgeInsets.only(left: 4, bottom: 8),
         child: Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF8E8E93),
+            color: context.textMutedColor,
             letterSpacing: 0.6,
           ),
         ),
@@ -1166,15 +1229,16 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildCardGroup(List<Widget> children) {
+  Widget _buildCardGroup(BuildContext context, List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF2F2F7)),
+        border: Border.all(color: context.borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(
+                alpha: context.isDarkMode ? 0.25 : 0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1186,7 +1250,8 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildRow({
+  Widget _buildRow(
+    BuildContext context, {
     required Color iconBg,
     required IconData icon,
     required Color iconColor,
@@ -1210,10 +1275,10 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(width: 12),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1F2937),
+              color: context.textPrimaryColor,
             ),
           ),
           const Spacer(),
