@@ -898,13 +898,30 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        color: AppColors.primary,
-        onRefresh: () => ref.read(historyProvider.notifier).refresh(),
-        child: historyState.records.when(
-          loading: () => const Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
+      body: Column(
+        children: [
+          AnimatedOpacity(
+            opacity: historyState.isBackgroundSyncing ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 200),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(1),
+              child: LinearProgressIndicator(
+                minHeight: 2,
+                backgroundColor: Colors.transparent,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  AppColors.primary.withValues(alpha: 0.6),
+                ),
+              ),
+            ),
           ),
+          Expanded(
+            child: RefreshIndicator(
+              color: AppColors.primary,
+              onRefresh: () => ref.read(historyProvider.notifier).refresh(),
+              child: historyState.records.when(
+                loading: () => const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                ),
           error: (err, _) => Center(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
@@ -1059,8 +1076,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
                       return Container(
                         margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 12),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
@@ -1073,154 +1088,141 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             ),
                           ],
                         ),
-                        child: Row(
-                          children: [
-                            // Circular Selfie Avatar (Tappable to view full picture)
-                            InkWell(
-                              onTap: (event.fullSelfieUrl != null &&
-                                      event.fullSelfieUrl!.isNotEmpty)
-                                  ? () => _showPhotoPreviewDialog(
-                                        context,
-                                        imageUrl: event.fullSelfieUrl!,
-                                        title:
-                                            'Foto Presensi: ${event.eventType.label}',
-                                        subtitle:
-                                            '$formattedDate • $timeStr',
-                                      )
-                                  : null,
-                              borderRadius: BorderRadius.circular(22),
-                              child: Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                      color: const Color(0xFFE5E7EB),
-                                      width: 1.5),
-                                ),
-                                child: ClipOval(
-                                  child: (event.fullSelfieUrl != null &&
-                                          event.fullSelfieUrl!.isNotEmpty)
-                                      ? AutoOrientedImage(
-                                          imageUrl: event.fullSelfieUrl!,
-                                          width: 44,
-                                          height: 44,
-                                          fit: BoxFit.cover,
-                                          errorWidget: Container(
-                                            color: const Color(0xFFFFF1F2),
-                                            child: Icon(
-                                              _getEventIcon(event.eventType),
-                                              color: AppColors.primary,
-                                              size: 20,
-                                            ),
-                                          ),
-                                        )
-                                      : Container(
-                                          color: const Color(0xFFFFF1F2),
-                                          child: Icon(
-                                            _getEventIcon(event.eventType),
-                                            color: AppColors.primary,
-                                            size: 20,
-                                          ),
-                                        ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-
-                            // Event Title & Time
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Material(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(16),
+                          child: InkWell(
+                            onTap: () => _showLocationModal(
+                                context, event, workLocation),
+                            borderRadius: BorderRadius.circular(16),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 12),
+                              child: Row(
                                 children: [
-                                  Text(
-                                    event.eventType.label,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF1F2937),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 3),
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.access_time_rounded,
-                                        size: 13,
-                                        color: Color(0xFF8E8E93),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        timeStr,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xFF8E8E93),
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            // Action Buttons: Foto Button & Map Button
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (event.fullSelfieUrl != null &&
-                                    event.fullSelfieUrl!.isNotEmpty) ...[
-                                  InkWell(
-                                    onTap: () => _showPhotoPreviewDialog(
-                                      context,
-                                      imageUrl: event.fullSelfieUrl!,
-                                      title:
-                                          'Foto Presensi: ${event.eventType.label}',
-                                      subtitle:
-                                          '$formattedDate • $timeStr',
-                                    ),
-                                    borderRadius: BorderRadius.circular(18),
-                                    child: Container(
-                                      width: 36,
-                                      height: 36,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFF0FDF4),
-                                        borderRadius:
-                                            BorderRadius.circular(10),
-                                        border: Border.all(
-                                            color: const Color(0xFFBBF7D0)),
-                                      ),
-                                      child: const Icon(
-                                        Icons.camera_alt_rounded,
-                                        color: Color(0xFF16A34A),
-                                        size: 18,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                ],
-                                InkWell(
-                                  onTap: () => _showLocationModal(
-                                      context, event, workLocation),
-                                  borderRadius: BorderRadius.circular(18),
-                                  child: Container(
-                                    width: 36,
-                                    height: 36,
+                                  // Circular Selfie Avatar or Event Icon
+                                  Container(
+                                    width: 44,
+                                    height: 44,
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFFFF1F5),
-                                      borderRadius:
-                                          BorderRadius.circular(10),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color: const Color(0xFFE5E7EB),
+                                          width: 1.5),
+                                    ),
+                                    child: ClipOval(
+                                      child: (event.fullSelfieUrl != null &&
+                                              event.fullSelfieUrl!.isNotEmpty)
+                                          ? AutoOrientedImage(
+                                              imageUrl: event.fullSelfieUrl!,
+                                              width: 44,
+                                              height: 44,
+                                              fit: BoxFit.cover,
+                                              errorWidget: Container(
+                                                color: const Color(0xFFFFF1F2),
+                                                child: Icon(
+                                                  _getEventIcon(event.eventType),
+                                                  color: AppColors.primary,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                            )
+                                          : Container(
+                                              color: const Color(0xFFFFF1F2),
+                                              child: Icon(
+                                                _getEventIcon(event.eventType),
+                                                color: AppColors.primary,
+                                                size: 20,
+                                              ),
+                                            ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+
+                                  // Event Title & Time
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          event.eventType.label,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF1F2937),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.access_time_rounded,
+                                              size: 13,
+                                              color: Color(0xFF8E8E93),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              timeStr,
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Color(0xFF8E8E93),
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            if (event.latitude != null &&
+                                                event.longitude != null) ...[
+                                              const SizedBox(width: 8),
+                                              Container(
+                                                width: 3,
+                                                height: 3,
+                                                decoration: const BoxDecoration(
+                                                  color: Color(0xFFCBD5E1),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              const Icon(
+                                                Icons.location_on_rounded,
+                                                size: 12,
+                                                color: Color(0xFF94A3B8),
+                                              ),
+                                              const SizedBox(width: 2),
+                                              const Text(
+                                                'Lokasi GPS',
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: Color(0xFF64748B),
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  // Subtle Chevron Icon
+                                  Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF8FAFC),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color: const Color(0xFFF1F5F9)),
                                     ),
                                     child: const Icon(
-                                      Icons.map_rounded,
-                                      color: AppColors.primary,
+                                      Icons.chevron_right_rounded,
+                                      color: Color(0xFF94A3B8),
                                       size: 18,
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ],
+                          ),
                         ),
                       );
                     }),
@@ -1231,6 +1233,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           },
         ),
       ),
+    ),
+  ],
+),
     );
   }
 }

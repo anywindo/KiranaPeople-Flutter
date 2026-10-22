@@ -6,6 +6,7 @@ import 'features/auth/server_settings_sheet.dart';
 import 'features/navigation/main_navigation_screen.dart';
 import 'features/onboarding/onboarding_password_screen.dart';
 import 'providers/auth_provider.dart';
+import 'providers/theme_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,15 +17,19 @@ void main() {
   );
 }
 
-class KiranaPeopleApp extends StatelessWidget {
+class KiranaPeopleApp extends ConsumerWidget {
   const KiranaPeopleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
+
     return MaterialApp(
       title: 'Kirana People',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       home: const RootScreen(),
     );
   }
@@ -39,9 +44,8 @@ class RootScreen extends ConsumerWidget {
 
     // 1. Session checking state (mirroring iOS ContentView)
     if (authState.isCheckingSession) {
-      final isDark = Theme.of(context).brightness == Brightness.dark;
       return Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.scaffoldBg,
         body: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -49,35 +53,32 @@ class RootScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 80,
-                  height: 80,
+                  width: 88,
+                  height: 88,
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.black : Colors.white,
-                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 14,
+                        offset: const Offset(0, 5),
                       ),
                     ],
                   ),
-                  padding: const EdgeInsets.all(6),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(16),
                     child: Image.asset(
-                      isDark
-                          ? 'assets/images/LogoDark.png'
-                          : 'assets/images/LogoLight.png',
-                      fit: BoxFit.contain,
+                      'assets/images/logoKiranaSquare.jpeg',
+                      fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
-                          color: isDark ? Colors.black : Colors.white,
-                          child: Center(
+                          color: Colors.black,
+                          child: const Center(
                             child: Text(
                               'KIRANA',
                               style: TextStyle(
-                                color: isDark ? Colors.white : Colors.black,
+                                color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 2,
                               ),

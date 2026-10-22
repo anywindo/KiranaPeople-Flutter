@@ -7,22 +7,26 @@ class HistoryState {
   final AsyncValue<List<AttendanceRecord>> records;
   final int currentPage;
   final bool hasMore;
+  final bool isBackgroundSyncing;
 
   const HistoryState({
     this.records = const AsyncValue.loading(),
     this.currentPage = 1,
     this.hasMore = true,
+    this.isBackgroundSyncing = false,
   });
 
   HistoryState copyWith({
     AsyncValue<List<AttendanceRecord>>? records,
     int? currentPage,
     bool? hasMore,
+    bool? isBackgroundSyncing,
   }) {
     return HistoryState(
       records: records ?? this.records,
       currentPage: currentPage ?? this.currentPage,
       hasMore: hasMore ?? this.hasMore,
+      isBackgroundSyncing: isBackgroundSyncing ?? this.isBackgroundSyncing,
     );
   }
 }
@@ -43,7 +47,7 @@ class HistoryNotifier extends Notifier<HistoryState> {
     state = const HistoryState();
   }
 
-  Future<void> loadHistory({int page = 1}) async {
+  Future<void> loadHistory({int page = 1, bool isBackground = false}) async {
     // Prevent fetching or retaining state when not authenticated
     if (!ref.read(authProvider).isAuthenticated) {
       state = const HistoryState();
@@ -51,8 +55,14 @@ class HistoryNotifier extends Notifier<HistoryState> {
     }
 
     final repo = ref.read(attendanceRepositoryProvider);
+    final hasExistingRecords = state.records.hasValue;
+
     if (page == 1) {
-      state = state.copyWith(records: const AsyncValue.loading());
+      if (hasExistingRecords || isBackground) {
+        state = state.copyWith(isBackgroundSyncing: true);
+      } else {
+        state = state.copyWith(records: const AsyncValue.loading());
+      }
     }
 
     try {
@@ -62,6 +72,7 @@ class HistoryNotifier extends Notifier<HistoryState> {
           records: AsyncValue.data(list),
           currentPage: 1,
           hasMore: list.length >= 15,
+          isBackgroundSyncing: false,
         );
       } else {
         final currentList = state.records.value ?? [];
@@ -72,12 +83,19 @@ class HistoryNotifier extends Notifier<HistoryState> {
         );
       }
     } catch (e, st) {
-      state = state.copyWith(records: AsyncValue.error(e, st));
+      if (page == 1 && hasExistingRecords) {
+        state = state.copyWith(isBackgroundSyncing: false);
+      } else {
+        state = state.copyWith(
+          records: AsyncValue.error(e, st),
+          isBackgroundSyncing: false,
+        );
+      }
     }
   }
 
-  Future<void> refresh() async {
-    await loadHistory(page: 1);
+  Future<void> refresh({bool isBackground = false}) async {
+    await loadHistory(page: 1, isBackground: isBackground);
   }
 }
 

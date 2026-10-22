@@ -16,12 +16,14 @@ class TodayAttendanceState {
   final Shift? selectedShift;
   final bool isSubmitting;
   final String? submitError;
+  final bool isBackgroundSyncing;
 
   const TodayAttendanceState({
     this.data = const AsyncValue.loading(),
     this.selectedShift,
     this.isSubmitting = false,
     this.submitError,
+    this.isBackgroundSyncing = false,
   });
 
   TodayAttendanceState copyWith({
@@ -30,12 +32,14 @@ class TodayAttendanceState {
     bool? isSubmitting,
     String? submitError,
     bool clearError = false,
+    bool? isBackgroundSyncing,
   }) {
     return TodayAttendanceState(
       data: data ?? this.data,
       selectedShift: selectedShift ?? this.selectedShift,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       submitError: clearError ? null : (submitError ?? this.submitError),
+      isBackgroundSyncing: isBackgroundSyncing ?? this.isBackgroundSyncing,
     );
   }
 }
@@ -59,14 +63,21 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
     state = const TodayAttendanceState();
   }
 
-  Future<void> refresh() async {
+  Future<void> refresh({bool isBackground = false}) async {
     // Prevent fetching or retaining state when not authenticated
     if (!ref.read(authProvider).isAuthenticated) {
       state = const TodayAttendanceState();
       return;
     }
 
-    state = state.copyWith(data: const AsyncValue.loading());
+    final hasExistingData = state.data.hasValue;
+    if (hasExistingData || isBackground) {
+      // Subtle background sync: do not wipe existing data
+      state = state.copyWith(isBackgroundSyncing: true);
+    } else {
+      state = state.copyWith(data: const AsyncValue.loading());
+    }
+
     try {
       final res = await _repository.getTodayAttendance();
       final initialShift = state.selectedShift ??
@@ -75,9 +86,18 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
       state = state.copyWith(
         data: AsyncValue.data(res),
         selectedShift: initialShift,
+        isBackgroundSyncing: false,
       );
     } catch (e, st) {
-      state = state.copyWith(data: AsyncValue.error(e, st));
+      // If we already have data, preserve it silently and just clear syncing flag
+      if (hasExistingData) {
+        state = state.copyWith(isBackgroundSyncing: false);
+      } else {
+        state = state.copyWith(
+          data: AsyncValue.error(e, st),
+          isBackgroundSyncing: false,
+        );
+      }
     }
   }
 

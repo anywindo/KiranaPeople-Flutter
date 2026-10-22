@@ -25,14 +25,14 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     setState(() {
       _currentIndex = index;
     });
-    _triggerTabRefresh(index);
+    _triggerSubtleTabSync(index);
   }
 
-  void _triggerTabRefresh(int index) {
+  void _triggerSubtleTabSync(int index) {
     if (index == 0) {
-      ref.read(todayAttendanceProvider.notifier).refresh();
+      ref.read(todayAttendanceProvider.notifier).refresh(isBackground: true);
     } else if (index == 2) {
-      ref.read(historyProvider.notifier).refresh();
+      ref.read(historyProvider.notifier).refresh(isBackground: true);
     }
   }
 
@@ -51,20 +51,20 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
         children: _screens,
       ),
       bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Color(0xFFF2F2F7), width: 1)),
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          border: Border(top: BorderSide(color: context.borderColor, width: 1)),
         ),
         child: NavigationBar(
           selectedIndex: _currentIndex,
-          backgroundColor: Colors.white,
-          indicatorColor: AppColors.primary.withValues(alpha: 0.12),
+          backgroundColor: context.surfaceColor,
+          indicatorColor: AppColors.primary.withValues(alpha: context.isDarkMode ? 0.22 : 0.12),
           elevation: 0,
           onDestinationSelected: (index) {
             setState(() {
               _currentIndex = index;
             });
-            _triggerTabRefresh(index);
+            _triggerSubtleTabSync(index);
           },
           destinations: const [
             NavigationDestination(

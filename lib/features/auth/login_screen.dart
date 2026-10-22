@@ -139,7 +139,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ],
       ),
       body: SafeArea(
-        child: LayoutBuilder(
+            child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
               physics: const BouncingScrollPhysics(),

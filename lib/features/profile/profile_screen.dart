@@ -90,7 +90,7 @@ class ProfileScreen extends ConsumerWidget {
   void _showPhotoSourceSheet(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: context.surfaceColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -104,24 +104,24 @@ class ProfileScreen extends ConsumerWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE5E7EB),
+                  color: context.borderColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Pilih Foto Profil',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1C1C1E),
+                  color: context.textPrimaryColor,
                 ),
               ),
               const SizedBox(height: 6),
-              const Text(
+              Text(
                 'Pilih foto baru dari galeri atau ambil langsung dengan kamera.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                style: TextStyle(fontSize: 13, color: context.textSecondaryColor),
               ),
               const SizedBox(height: 20),
               ListTile(
@@ -129,7 +129,7 @@ class ProfileScreen extends ConsumerWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF1F5),
+                    color: context.isDarkMode ? const Color(0xFF332042) : const Color(0xFFFFF1F5),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
@@ -138,13 +138,17 @@ class ProfileScreen extends ConsumerWidget {
                     size: 20,
                   ),
                 ),
-                title: const Text(
+                title: Text(
                   'Buka Galeri Foto',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: context.textPrimaryColor,
+                  ),
                 ),
-                trailing: const Icon(
+                trailing: Icon(
                   Icons.chevron_right_rounded,
-                  color: Color(0xFFC7C7CC),
+                  color: context.borderColor,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -160,7 +164,7 @@ class ProfileScreen extends ConsumerWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF6FF),
+                    color: context.isDarkMode ? const Color(0xFF1E3A5F) : const Color(0xFFEFF6FF),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
@@ -169,13 +173,17 @@ class ProfileScreen extends ConsumerWidget {
                     size: 20,
                   ),
                 ),
-                title: const Text(
+                title: Text(
                   'Ambil dengan Kamera',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: context.textPrimaryColor,
+                  ),
                 ),
-                trailing: const Icon(
+                trailing: Icon(
                   Icons.chevron_right_rounded,
-                  color: Color(0xFFC7C7CC),
+                  color: context.borderColor,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

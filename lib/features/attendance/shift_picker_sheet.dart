@@ -52,8 +52,17 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
     return raw;
   }
 
+  List<Shift> get _uniqueShifts {
+    final seen = <String>{};
+    return widget.shifts.where((s) {
+      final key = '${s.id}_${s.name.trim().toLowerCase()}_${s.startTime}_${s.endTime}';
+      return seen.add(key);
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final uniqueList = _uniqueShifts;
     final maxHeight = MediaQuery.of(context).size.height * 0.70;
 
     return Container(
@@ -146,10 +155,10 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
             child: ListView.separated(
               shrinkWrap: true,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: widget.shifts.length,
+              itemCount: uniqueList.length,
               separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
-                final shift = widget.shifts[index];
+                final shift = uniqueList[index];
                 final isSelected = _currentSelection?.id == shift.id;
                 final start = _formatTime(shift.startTime);
                 final end = _formatTime(shift.endTime);

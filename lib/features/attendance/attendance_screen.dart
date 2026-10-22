@@ -45,10 +45,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
       }
     });
 
-    // Auto-refresh periodically every 45 seconds while open in foreground
-    _autoRefreshTimer = Timer.periodic(const Duration(seconds: 45), (_) {
+    // Auto-refresh periodically every 60 seconds (subtle background sync)
+    _autoRefreshTimer = Timer.periodic(const Duration(seconds: 60), (_) {
       if (mounted && ref.read(authProvider).isAuthenticated) {
-        ref.read(todayAttendanceProvider.notifier).refresh();
+        ref.read(todayAttendanceProvider.notifier).refresh(isBackground: true);
       }
     });
   }
@@ -63,9 +63,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // App resumed from background/lockscreen -> auto-refresh attendance
+      // App resumed from background/lockscreen -> subtle background sync
       if (mounted && ref.read(authProvider).isAuthenticated) {
-        ref.read(todayAttendanceProvider.notifier).refresh();
+        ref.read(todayAttendanceProvider.notifier).refresh(isBackground: true);
       }
     }
   }
@@ -269,6 +269,23 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Subtle background sync indicator (2px, zero layout shift)
+                AnimatedOpacity(
+                  opacity: attendanceState.isBackgroundSyncing ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(1),
+                    child: LinearProgressIndicator(
+                      minHeight: 2,
+                      backgroundColor: Colors.transparent,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.primary.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+
                 // 1. Top Header Bar (KIRANA GROUP + Logout)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1023,189 +1040,142 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                 ? _formatIndoFullDate(localDt)
                                 : 'Hari Ini';
 
-                            return Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                // Circular Selfie or Fallback (Tappable to view full picture)
-                                InkWell(
-                                  onTap: (event.fullSelfieUrl != null &&
-                                          event.fullSelfieUrl!.isNotEmpty)
-                                      ? () => _showPhotoPreviewDialog(
-                                            imageUrl: event.fullSelfieUrl!,
-                                            title:
-                                                'Foto Presensi: ${event.eventType.label}',
-                                            subtitle: formattedDate,
-                                          )
-                                      : null,
-                                  borderRadius: BorderRadius.circular(22),
-                                  child: Container(
-                                    width: 44,
-                                    height: 44,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                          color: const Color(0xFFE5E7EB),
-                                          width: 1.5),
-                                    ),
-                                    child: ClipOval(
-                                      child: (event.fullSelfieUrl != null &&
-                                              event.fullSelfieUrl!.isNotEmpty)
-                                          ? AutoOrientedImage(
-                                              imageUrl: event.fullSelfieUrl!,
-                                              width: 44,
-                                              height: 44,
-                                              fit: BoxFit.cover,
-                                              errorWidget: Container(
-                                                color: const Color(0xFFFFF1F2),
-                                                child: Icon(
-                                                  _getEventIcon(
-                                                      event.eventType),
-                                                  color: AppColors.primary,
-                                                  size: 20,
-                                                ),
-                                              ),
-                                            )
-                                          : Container(
-                                              color: const Color(0xFFFFF1F2),
-                                              child: Icon(
-                                                _getEventIcon(event.eventType),
-                                                color: AppColors.primary,
-                                                size: 20,
-                                              ),
-                                            ),
-                                    ),
-                                  ),
+                            return Material(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                              child: InkWell(
+                                onTap: () => _showLocationDetail(
+                                  event,
+                                  todayData?.workLocation ?? user?.location,
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                borderRadius: BorderRadius.circular(12),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 6, horizontal: 2),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
-                                      Text(
-                                        event.eventType.label,
-                                        style: const TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF1F2937),
+                                      // Circular Selfie or Fallback
+                                      Container(
+                                        width: 44,
+                                        height: 44,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                              color: const Color(0xFFE5E7EB),
+                                              width: 1.5),
                                         ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        formattedDate,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xFF8E8E93),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Wrap(
-                                        spacing: 6,
-                                        runSpacing: 4,
-                                        children: [
-                                          InkWell(
-                                            onTap: () => _showLocationDetail(
-                                              event,
-                                              todayData?.workLocation ??
-                                                  user?.location,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 2),
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFFFFF1F2),
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                              ),
-                                              child: const Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Icon(
-                                                    Icons.error_outline_rounded,
-                                                    size: 13,
-                                                    color: Color(0xFFE11D48),
+                                        child: ClipOval(
+                                          child: (event.fullSelfieUrl != null &&
+                                                  event.fullSelfieUrl!.isNotEmpty)
+                                              ? AutoOrientedImage(
+                                                  imageUrl: event.fullSelfieUrl!,
+                                                  width: 44,
+                                                  height: 44,
+                                                  fit: BoxFit.cover,
+                                                  errorWidget: Container(
+                                                    color:
+                                                        const Color(0xFFFFF1F2),
+                                                    child: Icon(
+                                                      _getEventIcon(
+                                                          event.eventType),
+                                                      color: AppColors.primary,
+                                                      size: 20,
+                                                    ),
                                                   ),
-                                                  SizedBox(width: 4),
-                                                  Text(
-                                                    'Titik Lokasi',
+                                                )
+                                              : Container(
+                                                  color: const Color(0xFFFFF1F2),
+                                                  child: Icon(
+                                                    _getEventIcon(event.eventType),
+                                                    color: AppColors.primary,
+                                                    size: 20,
+                                                  ),
+                                                ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              event.eventType.label,
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF1F2937),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  formattedDate,
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Color(0xFF8E8E93),
+                                                  ),
+                                                ),
+                                                if (event.latitude != null &&
+                                                    event.longitude != null) ...[
+                                                  const SizedBox(width: 6),
+                                                  Container(
+                                                    width: 3,
+                                                    height: 3,
+                                                    decoration:
+                                                        const BoxDecoration(
+                                                      color: Color(0xFFCBD5E1),
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  const Icon(
+                                                    Icons.location_on_rounded,
+                                                    size: 11,
+                                                    color: Color(0xFF94A3B8),
+                                                  ),
+                                                  const SizedBox(width: 2),
+                                                  const Text(
+                                                    'Lokasi GPS',
                                                     style: TextStyle(
                                                       fontSize: 11,
+                                                      color: Color(0xFF64748B),
                                                       fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Color(0xFFE11D48),
+                                                          FontWeight.w500,
                                                     ),
                                                   ),
                                                 ],
-                                              ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            formattedTime,
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF111827),
                                             ),
                                           ),
-                                          if (event.fullSelfieUrl != null &&
-                                              event.fullSelfieUrl!.isNotEmpty)
-                                            InkWell(
-                                              onTap: () =>
-                                                  _showPhotoPreviewDialog(
-                                                imageUrl: event.fullSelfieUrl!,
-                                                title:
-                                                    'Foto Presensi: ${event.eventType.label}',
-                                                subtitle: formattedDate,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 8,
-                                                        vertical: 2),
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      const Color(0xFFF0FDF4),
-                                                  borderRadius:
-                                                      BorderRadius.circular(12),
-                                                  border: Border.all(
-                                                      color: const Color(
-                                                          0xFFBBF7D0)),
-                                                ),
-                                                child: const Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Icon(
-                                                      Icons.camera_alt_rounded,
-                                                      size: 12,
-                                                      color: Color(0xFF16A34A),
-                                                    ),
-                                                    SizedBox(width: 4),
-                                                    Text(
-                                                      'Lihat Foto',
-                                                      style: TextStyle(
-                                                        fontSize: 11,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color:
-                                                            Color(0xFF16A34A),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
+                                          const SizedBox(width: 4),
+                                          const Icon(
+                                            Icons.chevron_right_rounded,
+                                            size: 18,
+                                            color: Color(0xFF9CA3AF),
+                                          ),
                                         ],
                                       ),
                                     ],
                                   ),
                                 ),
-                                Text(
-                                  formattedTime,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF111827),
-                                  ),
-                                ),
-                              ],
+                              ),
                             );
                           },
                         ),

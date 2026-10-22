@@ -92,3 +92,24 @@ Hari ini difokuskan pada penyelarasan aset visual aplikasi, optimasi ukuran & di
 - **Artefak Rilis**:
   `build/app/outputs/flutter-apk/app-arm64-v8a-release.apk` (**35.3 MB**)
 - **Target Device Terverifikasi**: Samsung Galaxy S10 (`RR8M20NS5PF`) - Terinstal & Berjalan Sukses.
+
+### 5. Optimasi UX: Subtle Background Refresh (Stale-While-Revalidate)
+- **Masalah**: Auto-refresh sebelumnya mereset state ke `AsyncValue.loading()`, menyebabkan UI berkedip (*flicker*), menampilkan spinner layar penuh saat berpindah tab, serta menginterupsi interaksi pengguna setiap 45 detik.
+- **Implementasi Solusi**:
+  - **SWR (Stale-While-Revalidate)** pada [attendance_provider.dart](file:///Users/arw/Git/KiranaPeople-Flutter/lib/providers/attendance_provider.dart) & [history_provider.dart](file:///Users/arw/Git/KiranaPeople-Flutter/lib/providers/history_provider.dart): Menambahkan flag `isBackgroundSyncing`. Jika data sudah ada, UI tidak pernah di-reset ke status *loading*, melainkan tetap tampil utuh sambil memperbarui data di latar belakang.
+  - **Non-Intrusive Polling & Tab Sync**: Memperbarui timer background di [attendance_screen.dart](file:///Users/arw/Git/KiranaPeople-Flutter/lib/features/attendance/attendance_screen.dart) dan [main_navigation_screen.dart](file:///Users/arw/Git/KiranaPeople-Flutter/lib/features/navigation/main_navigation_screen.dart) dengan mode `isBackground: true`.
+  - **Micro Progress Bar**: Menambahkan indikator 2px halus di puncak layar yang hanya aktif saat proses sinkronisasi latar belakang berjalan tanpa menyebabkan *layout shift*.
+
+### 6. Pemulihan Homepage Attendance Section Klasik & Pembersihan Login Popup
+- **Pemulihan Attendance Section Beranda**:
+  - Mengembalikan struktur klasik [attendance_screen.dart](file:///Users/arw/Git/KiranaPeople-Flutter/lib/features/attendance/attendance_screen.dart) dengan Segmented Switcher (`Kerja` / `Istirahat`) interaktif, box shift kerja dengan pemilih shift, 2 kolom waktu presensi (`Jam Masuk` / `Jam Pulang` atau `Mulai Istirahat` / `Selesai Istirahat`), thumbnail selfie dinamis, serta tombol aksi kontekstual terintegrasi.
+  - Mempertahankan mekanisme *subtle background sync* 60 detik tanpa flicker atau layout shift.
+- **Pembersihan Overlay Login**:
+  - Menghapus popup/modal overlay saat proses masuk pada [login_screen.dart](file:///Users/arw/Git/KiranaPeople-Flutter/lib/features/auth/login_screen.dart), kembali menggunakan spinner indikator inline yang bersih pada tombol Masuk.
+
+### 7. Penyederhanaan Entry Aktivitas Hari Ini (Beranda)
+- **Penghapusan Badge Terpisah**:
+  - Menghilangkan badge `Titik Lokasi` dan `Lihat Foto` yang sebelumnya memadati baris entri di kartu "Aktivitas Hari Ini".
+- **Interaksi Satu Sentuhan Terpadu**:
+  - Membungkus seluruh baris entri dengan `InkWell` interaktif lengkap dengan feedback ripple dan ikon chevron penunjuk (`>`).
+  - Mengetuk entri mana pun kini langsung memunculkan modal detail kehadiran yang sama persis seperti pada layar Riwayat (`_showLocationDetail`), lengkap dengan peta 2-pin (posisi user & kantor), radius geofence, status jarak, serta tab foto selfie.
