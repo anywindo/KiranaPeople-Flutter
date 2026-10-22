@@ -8,6 +8,7 @@ import '../../core/theme/app_theme.dart';
 import '../../data/models/user_model.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/theme_provider.dart';
 import 'change_password_dialog.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -309,7 +310,7 @@ class ProfileScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: context.surfaceColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -331,51 +332,52 @@ class ProfileScreen extends ConsumerWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE5E7EB),
+                    color: context.borderColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Ubah Nomor Telepon',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1C1C1E),
+                  color: context.textPrimaryColor,
                 ),
               ),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Masukkan nomor telepon aktif untuk verifikasi dan kontak.',
-                style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                style: TextStyle(fontSize: 13, color: context.textSecondaryColor),
               ),
               const SizedBox(height: 20),
               TextFormField(
                 controller: phoneController,
                 keyboardType: TextInputType.phone,
                 autofocus: true,
+                style: TextStyle(color: context.textPrimaryColor),
                 decoration: InputDecoration(
                   hintText: '08xxxxxxxxxx',
+                  hintStyle: TextStyle(color: context.textMutedColor),
                   prefixIcon: const Icon(
                     Icons.phone_rounded,
                     color: AppColors.primary,
                     size: 20,
                   ),
                   filled: true,
-                  fillColor: const Color(0xFFF9FAFB),
+                  fillColor: context.surfaceSecondaryColor,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                    borderSide: BorderSide(color: context.borderColor),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                    borderSide: BorderSide(color: context.borderColor),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        const BorderSide(color: AppColors.primary, width: 2),
+                  focusedBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    borderSide: BorderSide(color: AppColors.primary, width: 2),
                   ),
                 ),
                 validator: (val) {
@@ -440,22 +442,30 @@ class ProfileScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text(
-          'Konfirmasi Keluar',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        backgroundColor: context.surfaceColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: context.borderColor),
         ),
-        content: const Text(
+        title: Text(
+          'Konfirmasi Keluar',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: context.textPrimaryColor,
+          ),
+        ),
+        content: Text(
           'Apakah Anda yakin ingin keluar dari akun ini?',
-          style: TextStyle(fontSize: 14, color: Color(0xFF4B5563)),
+          style: TextStyle(fontSize: 14, color: context.textSecondaryColor),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text(
+            child: Text(
               'Batal',
               style: TextStyle(
-                color: Color(0xFF6B7280),
+                color: context.textSecondaryColor,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -480,6 +490,148 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showThemeModeSheet(BuildContext context, WidgetRef ref) {
+    final currentMode = ref.read(themeProvider);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: context.surfaceColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: context.borderColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Pilih Tema Tampilan',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: context.textPrimaryColor,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Sesuaikan tampilan aplikasi dengan kenyamanan mata Anda.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: context.textSecondaryColor),
+              ),
+              const SizedBox(height: 20),
+              _buildThemeOptionTile(
+                context,
+                title: 'Otomatis (Ikuti Sistem)',
+                subtitle: 'Menyesuaikan otomatis dengan tema perangkat',
+                icon: Icons.brightness_auto_rounded,
+                iconBg: context.isDarkMode
+                    ? const Color(0xFF1E293B)
+                    : const Color(0xFFF1F5F9),
+                iconColor: const Color(0xFF3B82F6),
+                isSelected: currentMode == ThemeMode.system,
+                onTap: () {
+                  ref.read(themeProvider.notifier).setThemeMode(ThemeMode.system);
+                  Navigator.pop(ctx);
+                },
+              ),
+              const SizedBox(height: 8),
+              _buildThemeOptionTile(
+                context,
+                title: 'Mode Terang (Light)',
+                subtitle: 'Tampilan bersih dan kontras cerah',
+                icon: Icons.light_mode_rounded,
+                iconBg: const Color(0xFFFEF3C7),
+                iconColor: const Color(0xFFD97706),
+                isSelected: currentMode == ThemeMode.light,
+                onTap: () {
+                  ref.read(themeProvider.notifier).setThemeMode(ThemeMode.light);
+                  Navigator.pop(ctx);
+                },
+              ),
+              const SizedBox(height: 8),
+              _buildThemeOptionTile(
+                context,
+                title: 'Mode Gelap (Dark)',
+                subtitle: 'Nuansa gelap elegan yang nyaman di mata',
+                icon: Icons.dark_mode_rounded,
+                iconBg: const Color(0xFF2E1065),
+                iconColor: const Color(0xFFA855F7),
+                isSelected: currentMode == ThemeMode.dark,
+                onTap: () {
+                  ref.read(themeProvider.notifier).setThemeMode(ThemeMode.dark);
+                  Navigator.pop(ctx);
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeOptionTile(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color iconBg,
+    required Color iconColor,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      onTap: onTap,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(
+          color: isSelected ? AppColors.primary : context.borderColor,
+          width: isSelected ? 1.5 : 1,
+        ),
+      ),
+      tileColor: isSelected
+          ? AppColors.primary.withValues(alpha: context.isDarkMode ? 0.15 : 0.06)
+          : context.surfaceColor,
+      leading: Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          color: iconBg,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: iconColor, size: 20),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+          color: context.textPrimaryColor,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          fontSize: 12,
+          color: context.textSecondaryColor,
+        ),
+      ),
+      trailing: isSelected
+          ? const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 22)
+          : Icon(Icons.radio_button_unchecked_rounded, color: context.borderColor, size: 22),
     );
   }
 
@@ -904,18 +1056,54 @@ class ProfileScreen extends ConsumerWidget {
             ]),
             const SizedBox(height: 16),
 
-            // 5. Section: Versi Aplikasi Card
+            // 5. Section: Tampilan & Versi Aplikasi Card
             _buildCardGroup([
+              _buildRow(
+                iconBg: const Color(0xFFEFF6FF),
+                icon: Icons.palette_rounded,
+                iconColor: const Color(0xFF3B82F6),
+                title: 'Tema Tampilan',
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final mode = ref.watch(themeProvider);
+                        final label = switch (mode) {
+                          ThemeMode.light => 'Terang',
+                          ThemeMode.dark => 'Gelap',
+                          ThemeMode.system => 'Sistem',
+                        };
+                        return Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: context.textSecondaryColor,
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 18,
+                      color: context.textMutedColor,
+                    ),
+                  ],
+                ),
+                onTap: () => _showThemeModeSheet(context, ref),
+              ),
+              Divider(height: 1, indent: 56, color: context.borderColor),
               _buildRow(
                 iconBg: const Color(0xFFF3F4F6),
                 icon: Icons.info_rounded,
                 iconColor: const Color(0xFF6B7280),
                 title: 'Versi Aplikasi',
-                trailing: const Text(
+                trailing: Text(
                   '1.0.0 (Build 1)',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF6B7280),
+                    color: context.textSecondaryColor,
                   ),
                 ),
               ),
