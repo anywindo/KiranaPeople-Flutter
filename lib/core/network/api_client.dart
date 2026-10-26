@@ -1,8 +1,10 @@
 import 'dart:developer' as developer;
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+
 import '../config/api_config.dart';
 import '../storage/secure_storage_service.dart';
 import 'api_exception.dart';
@@ -13,26 +15,17 @@ class ApiClient {
   final Dio _dio;
   final SecureStorageService _storage;
 
-  ApiClient({
-    Dio? dio,
-    SecureStorageService? storage,
-  })  : _dio = dio ?? Dio(),
-        _storage = storage ?? SecureStorageService() {
-    // Configure HttpClient to support local HTTPS development / self-signed certs safely
+  ApiClient({Dio? dio, SecureStorageService? storage})
+    : _dio = dio ?? Dio(),
+      _storage = storage ?? SecureStorageService() {
+    // Configure HttpClient to support local HTTPS development safely without exposing production to MitM
     _dio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
         final client = HttpClient();
         client.badCertificateCallback =
             (X509Certificate cert, String host, int port) {
-          // Allow self-signed certs in debug mode or for local LAN IP addresses
-          if (kDebugMode) return true;
-          final isLocalHost = host == 'localhost' ||
-              host == '127.0.0.1' ||
-              host == '10.0.2.2' ||
-              host.startsWith('192.168.') ||
-              host.startsWith('10.');
-          return isLocalHost;
-        };
+              return shouldAcceptBadCertificate(host);
+            };
         return client;
       },
     );
@@ -49,7 +42,8 @@ class ApiClient {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           // Construct explicit full URL so Dio doesn't strip baseUrl subpath (e.g. /api/v1)
-          if (!options.path.startsWith('http://') && !options.path.startsWith('https://')) {
+          if (!options.path.startsWith('http://') &&
+              !options.path.startsWith('https://')) {
             final currentBaseUrl = await ApiConfig.getBaseUrl();
             options.path = _resolveFullPath(currentBaseUrl, options.path);
           }
@@ -60,7 +54,10 @@ class ApiClient {
             options.headers['Authorization'] = 'Bearer $token';
           }
 
-          developer.log('[API Request] ${options.method} ${options.path}', name: 'ApiClient');
+          developer.log(
+            '[API Request] ${options.method} ${options.path}',
+            name: 'ApiClient',
+          );
           return handler.next(options);
         },
         onResponse: (response, handler) {
@@ -78,11 +75,14 @@ class ApiClient {
               name: 'ApiClient',
               error: e,
             );
-            debugPrint('[ApiClient Error] ${e.requestOptions.method} $uri -> ${e.type}: ${e.message} (status: ${e.response?.statusCode}) error: ${e.error}');
+            debugPrint(
+              '[ApiClient Error] ${e.requestOptions.method} $uri -> ${e.type}: ${e.message} (status: ${e.response?.statusCode}) error: ${e.error}',
+            );
           }
 
           final response = e.response;
-          String message = 'Terjadi kesalahan jaringan. Periksa koneksi internet Anda.';
+          String message =
+              'Terjadi kesalahan jaringan. Periksa koneksi internet Anda.';
           dynamic errors;
 
           if (response != null) {
@@ -108,12 +108,16 @@ class ApiClient {
                   }
                 }
               } else {
-                final m = data['message'] ?? data['meta']?['message'] ?? data['error'];
+                final m =
+                    data['message'] ??
+                    data['meta']?['message'] ??
+                    data['error'];
                 if (m != null && m.toString().isNotEmpty) {
                   message = m.toString();
                   hasCustomMessage = true;
                 } else {
-                  message = 'Gagal memproses permintaan (${response.statusCode})';
+                  message =
+                      'Gagal memproses permintaan (${response.statusCode})';
                 }
               }
             } else if (data is String && data.isNotEmpty) {
@@ -145,7 +149,8 @@ class ApiClient {
               if (!hasCustomMessage) {
                 message = 'Data input tidak valid.';
               }
-            } else if (response.statusCode != null && response.statusCode! >= 500) {
+            } else if (response.statusCode != null &&
+                response.statusCode! >= 500) {
               if (!hasCustomMessage) {
                 message = 'Terjadi kesalahan pada server backend.';
               }
@@ -158,11 +163,17 @@ class ApiClient {
               e.error is SocketException ||
               e.error is HandshakeException ||
               e.error is TlsException) {
-            final errStr = e.error != null ? ' (${e.error.runtimeType}: ${e.error})' : '';
-            message = 'Gagal terhubung ke server ($uri)$errStr. Pastikan URL server benar dan aktif.';
+            final errStr = e.error != null
+                ? ' (${e.error.runtimeType}: ${e.error})'
+                : '';
+            message =
+                'Gagal terhubung ke server ($uri)$errStr. Pastikan URL server benar dan aktif.';
           } else {
-            final errDetail = e.error != null ? ' (${e.error})' : (e.message != null ? ' (${e.message})' : '');
-            message = 'Gagal terhubung ke server ($uri) [${e.type.name}]$errDetail';
+            final errDetail = e.error != null
+                ? ' (${e.error})'
+                : (e.message != null ? ' (${e.message})' : '');
+            message =
+                'Gagal terhubung ke server ($uri) [${e.type.name}]$errDetail';
           }
 
           final customException = ApiException(
@@ -182,6 +193,25 @@ class ApiClient {
         },
       ),
     );
+  }
+
+  /// SECURITY: Validates whether an invalid/self-signed certificate should be accepted.
+  /// In release builds (production), invalid certificates are NEVER accepted to prevent MitM attacks.
+  /// In debug mode, self-signed certs are restricted strictly to recognized local development hosts.
+  @visibleForTesting
+  static bool shouldAcceptBadCertificate(
+    String host, {
+    bool isDebug = kDebugMode,
+  }) {
+    if (!isDebug) return false;
+    final isLocalDev =
+        host == 'localhost' ||
+        host == '127.0.0.1' ||
+        host == '10.0.2.2' ||
+        host.endsWith('.test') ||
+        host.startsWith('192.168.') ||
+        host.startsWith('10.');
+    return isLocalDev;
   }
 
   static String _resolveFullPath(String baseUrl, String path) {
@@ -245,9 +275,7 @@ class ApiClient {
       return await _dio.post(
         path,
         data: formData,
-        options: Options(
-          contentType: 'multipart/form-data',
-        ),
+        options: Options(contentType: 'multipart/form-data'),
         onSendProgress: onSendProgress,
       );
     } on DioException catch (e) {
