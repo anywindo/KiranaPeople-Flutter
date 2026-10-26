@@ -1,14 +1,12 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../data/repositories/auth_repository.dart';
 
-enum ForgotPasswordStep {
-  inputEmail,
-  inputOtp,
-  resetPassword,
-}
+enum ForgotPasswordStep { inputEmail, inputOtp, resetPassword }
 
 class ForgotPasswordSheet extends StatefulWidget {
   final String initialEmail;
@@ -49,7 +47,8 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
   late final TextEditingController _emailController;
   final TextEditingController _otpController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   // Focus nodes
   final FocusNode _emailFocus = FocusNode();
@@ -136,7 +135,11 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
   }
 
   bool get _isResetFormValid =>
-      _isOtpValid && _hasMinLength && _hasMixedCase && _hasNumber && _isPasswordMatching;
+      _isOtpValid &&
+      _hasMinLength &&
+      _hasMixedCase &&
+      _hasNumber &&
+      _isPasswordMatching;
 
   void _startCooldown(int seconds) {
     _cooldownTimer?.cancel();
@@ -165,7 +168,7 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
     final email = _emailController.text.trim();
     if (!_isEmailValid) {
       setState(() {
-        _errorMessage = 'Format alamat email tidak valid.';
+        _errorMessage = 'Invalid email address format.';
       });
       return;
     }
@@ -227,7 +230,7 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
   void _proceedToResetPassword() {
     if (!_isOtpValid) {
       setState(() {
-        _errorMessage = 'Kode OTP harus terdiri dari 6 digit angka.';
+        _errorMessage = 'OTP code must be 6 digits.';
       });
       return;
     }
@@ -243,15 +246,16 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
   Future<void> _submitResetPassword() async {
     if (!_isResetFormValid) {
       if (!_isOtpValid) {
-        _errorMessage = 'Kode OTP tidak valid atau belum diisi (harus 6 digit angka).';
+        _errorMessage = 'OTP code is invalid or empty (must be 6 digits).';
       } else if (!_hasMinLength) {
-        _errorMessage = 'Kata sandi baru minimal 8 karakter.';
+        _errorMessage = 'New password must be at least 8 characters.';
       } else if (!_hasMixedCase) {
-        _errorMessage = 'Kata sandi harus mengandung kombinasi huruf besar dan kecil.';
+        _errorMessage =
+            'Password must contain uppercase and lowercase letters.';
       } else if (!_hasNumber) {
-        _errorMessage = 'Kata sandi harus mengandung minimal 1 angka.';
+        _errorMessage = 'Password must contain at least 1 number.';
       } else if (!_isPasswordMatching) {
-        _errorMessage = 'Konfirmasi kata sandi tidak cocok.';
+        _errorMessage = 'Password confirmation does not match.';
       }
       setState(() {});
       return;
@@ -314,9 +318,7 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
           ],
         ),
         content: Text(
-          message.isNotEmpty
-              ? message
-              : 'Kata sandi Anda berhasil diperbarui. Silakan masuk menggunakan kata sandi baru.',
+          message.isNotEmpty ? message : 'Kata sandi Anda berhasil diperbarui. Silakan masuk menggunakan kata sandi baru.',
           style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
         actions: [
@@ -406,7 +408,10 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
                     onTap: _goBack,
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
@@ -454,7 +459,10 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
                   onTap: () => Navigator.pop(context),
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
@@ -545,11 +553,7 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
         const Text(
           'Kami akan mengirimkan 6 digit kode OTP ke alamat email terdaftar untuk memverifikasi permintaan reset kata sandi Anda.',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 13,
-            color: Color(0xFF8E8E93),
-            height: 1.4,
-          ),
+          style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93), height: 1.4),
         ),
         const SizedBox(height: 24),
 
@@ -788,10 +792,7 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
             decoration: BoxDecoration(
               color: const Color(0xFFE8F5E9),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: const Color(0xFFA5D6A7),
-                width: 1,
-              ),
+              border: Border.all(color: const Color(0xFFA5D6A7), width: 1),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -890,7 +891,9 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: _isOtpValid && !_isLoading ? _proceedToResetPassword : null,
+                onTap: _isOtpValid && !_isLoading
+                    ? _proceedToResetPassword
+                    : null,
                 borderRadius: BorderRadius.circular(12),
                 child: Center(
                   child: Row(
@@ -984,8 +987,10 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
             children: List.generate(6, (index) {
               final otpText = _otpController.text;
               final char = index < otpText.length ? otpText[index] : '';
-              final isFocused = _otpFocus.hasFocus &&
-                  (otpText.length == index || (index == 5 && otpText.length == 6));
+              final isFocused =
+                  _otpFocus.hasFocus &&
+                  (otpText.length == index ||
+                      (index == 5 && otpText.length == 6));
 
               return Container(
                 width: 48,
@@ -1242,11 +1247,17 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
             children: [
               _buildRequirementRow('Minimal 8 karakter', _hasMinLength),
               const SizedBox(height: 8),
-              _buildRequirementRow('Kombinasi huruf besar & huruf kecil', _hasMixedCase),
+              _buildRequirementRow(
+                'Kombinasi huruf besar & huruf kecil',
+                _hasMixedCase,
+              ),
               const SizedBox(height: 8),
               _buildRequirementRow('Mengandung minimal 1 angka', _hasNumber),
               const SizedBox(height: 8),
-              _buildRequirementRow('Konfirmasi kata sandi cocok', _isPasswordMatching),
+              _buildRequirementRow(
+                'Konfirmasi kata sandi cocok',
+                _isPasswordMatching,
+              ),
             ],
           ),
         ),

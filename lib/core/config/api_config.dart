@@ -1,114 +1,23 @@
-import 'package:shared_preferences/shared_preferences.dart';
-
 class ApiConfig {
-  static const String defaultBaseUrl = 'https://terriblenight.onrender.com/api/v1';
-  static const String _keyCustomBaseUrl = 'custom_api_base_url';
+  static const String defaultBaseUrl = 'https://kp.krtekstile.com/api/v1';
+  static const String cachedHostOrigin = 'https://kp.krtekstile.com';
 
-  static final List<Map<String, String>> presets = [
-    {
-      'label': 'Render Cloud (Produksi)',
-      'url': 'https://terriblenight.onrender.com/api/v1',
-    },
-    {
-      'label': 'Mac Localhost via Wi-Fi (192.168.1.11:8000)',
-      'url': 'http://192.168.1.11:8000/api/v1',
-    },
-    {
-      'label': 'Android Reverse ADB (localhost:8000)',
-      'url': 'http://localhost:8000/api/v1',
-    },
-    {
-      'label': 'Android Emulator (10.0.2.2:8000)',
-      'url': 'http://10.0.2.2:8000/api/v1',
-    },
-    {
-      'label': 'Laravel Herd (terriblenight.test)',
-      'url': 'https://terriblenight.test/api/v1',
-    },
-  ];
-
-  static String cachedHostOrigin = 'https://terriblenight.onrender.com';
-
-  static String getHostOrigin(String baseUrl) {
+  static String getHostOrigin([String? baseUrl]) {
+    if (baseUrl == null || baseUrl.isEmpty) {
+      return cachedHostOrigin;
+    }
     try {
       final uri = Uri.parse(baseUrl);
-      final portPart = uri.hasPort && uri.port != 80 && uri.port != 443 ? ':${uri.port}' : '';
+      final portPart = uri.hasPort && uri.port != 80 && uri.port != 443
+          ? ':${uri.port}'
+          : '';
       return '${uri.scheme}://${uri.host}$portPart';
     } catch (_) {
-      return 'https://terriblenight.onrender.com';
+      return cachedHostOrigin;
     }
   }
 
   static Future<String> getBaseUrl() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString(_keyCustomBaseUrl);
-    final url = (saved == null || saved.trim().isEmpty)
-        ? defaultBaseUrl
-        : sanitizeUrl(saved);
-    cachedHostOrigin = getHostOrigin(url);
-    return url;
-  }
-
-  static Future<void> setBaseUrl(String url) async {
-    final prefs = await SharedPreferences.getInstance();
-    final cleaned = sanitizeUrl(url);
-    cachedHostOrigin = getHostOrigin(cleaned);
-    await prefs.setString(_keyCustomBaseUrl, cleaned);
-  }
-
-  static Future<void> resetToDefault() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_keyCustomBaseUrl);
-  }
-
-  static String sanitizeUrl(String raw) {
-    var str = raw.trim();
-    if (str.isEmpty) {
-      return defaultBaseUrl;
-    }
-
-    // Auto-correct common typos
-    if (str.contains('arwdnoprtma.space')) {
-      str = str.replaceAll('arwdnoprtma.space', 'arwndoprtma.space');
-    }
-
-    // Add http/https scheme if missing
-    if (!str.startsWith('http://') && !str.startsWith('https://')) {
-      if (str.startsWith('localhost') ||
-          str.startsWith('127.0.0.1') ||
-          str.startsWith('10.0.2.2') ||
-          str.startsWith('192.168.') ||
-          str.startsWith('10.') ||
-          str.startsWith('172.')) {
-        str = 'http://$str';
-      } else {
-        str = 'https://$str';
-      }
-    }
-
-    // Remove trailing slashes
-    while (str.endsWith('/')) {
-      str = str.substring(0, str.length - 1);
-    }
-
-    // Fix duplicated /api/api/v1
-    if (str.contains('/api/api/v1')) {
-      str = str.replaceAll('/api/api/v1', '/api/v1');
-    }
-
-    // Append /api/v1 if path is empty and validate scheme
-    try {
-      final uri = Uri.parse(str);
-      if (uri.scheme != 'http' && uri.scheme != 'https') {
-        return defaultBaseUrl;
-      }
-      if (uri.path.isEmpty || uri.path == '/') {
-        str = '$str/api/v1';
-      }
-    } catch (_) {
-      return defaultBaseUrl;
-    }
-
-    return str;
+    return defaultBaseUrl;
   }
 }

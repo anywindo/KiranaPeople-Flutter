@@ -82,7 +82,7 @@ class ApiClient {
 
           final response = e.response;
           String message =
-              'Terjadi kesalahan jaringan. Periksa koneksi internet Anda.';
+              'A network error occurred. Please check your internet connection.';
           dynamic errors;
 
           if (response != null) {
@@ -117,7 +117,7 @@ class ApiClient {
                   hasCustomMessage = true;
                 } else {
                   message =
-                      'Gagal memproses permintaan (${response.statusCode})';
+                      'Failed to process request (${response.statusCode})';
                 }
               }
             } else if (data is String && data.isNotEmpty) {
@@ -128,52 +128,45 @@ class ApiClient {
             // Fallback status messages if no specific custom message was provided
             if (response.statusCode == 401) {
               if (!hasCustomMessage) {
-                message = 'Kredensial salah atau sesi telah berakhir.';
+                message = 'Invalid credentials or session has expired.';
               }
               if (!e.requestOptions.path.contains('/login')) {
                 onUnauthorized?.call();
               }
             } else if (response.statusCode == 429) {
               if (!hasCustomMessage) {
-                message = 'Terlalu banyak permintaan (Rate limit). Silakan tunggu beberapa saat.';
+                message =
+                    'Too many requests (Rate limit). Please wait a moment.';
               }
             } else if (response.statusCode == 403) {
               if (!hasCustomMessage) {
-                message = 'Anda tidak memiliki akses ke fitur ini.';
+                message = 'You do not have permission to access this resource.';
               }
             } else if (response.statusCode == 404) {
               if (!hasCustomMessage) {
-                message = 'Layanan atau data tidak ditemukan ($uri).';
+                message = 'Requested resource not found.';
               }
             } else if (response.statusCode == 422) {
               if (!hasCustomMessage) {
-                message = 'Data input tidak valid.';
+                message = 'Invalid input data.';
               }
             } else if (response.statusCode != null &&
                 response.statusCode! >= 500) {
               if (!hasCustomMessage) {
-                message = 'Terjadi kesalahan pada server backend.';
+                message = 'An internal server error occurred.';
               }
             }
           } else if (e.type == DioExceptionType.connectionTimeout ||
               e.type == DioExceptionType.receiveTimeout ||
               e.type == DioExceptionType.sendTimeout) {
-            message = 'Koneksi ke server timeout ($uri). Silakan coba lagi.';
+            message = 'Connection to server timed out. Please try again.';
           } else if (e.type == DioExceptionType.connectionError ||
               e.error is SocketException ||
               e.error is HandshakeException ||
               e.error is TlsException) {
-            final errStr = e.error != null
-                ? ' (${e.error.runtimeType}: ${e.error})'
-                : '';
-            message =
-                'Gagal terhubung ke server ($uri)$errStr. Pastikan URL server benar dan aktif.';
+            message = 'Failed to connect to server. Please check your internet connection.';
           } else {
-            final errDetail = e.error != null
-                ? ' (${e.error})'
-                : (e.message != null ? ' (${e.message})' : '');
-            message =
-                'Gagal terhubung ke server ($uri) [${e.type.name}]$errDetail';
+            message = 'Failed to communicate with server. Please try again.';
           }
 
           final customException = ApiException(

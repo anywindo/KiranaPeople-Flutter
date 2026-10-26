@@ -19,19 +19,23 @@ class LocationHelper {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      throw Exception('Layanan GPS/Lokasi perangkat dinonaktifkan. Silakan aktifkan GPS.');
+      throw Exception(
+        'Device location service is disabled. Please enable GPS.',
+      );
     }
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        throw Exception('Izin akses lokasi ditolak oleh pengguna.');
+        throw Exception('Location permission was denied.');
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      throw Exception('Izin akses lokasi ditolak permanen. Buka pengaturan untuk mengaktifkan.');
+      throw Exception(
+        'Location permission is permanently denied. Please enable it in system settings.',
+      );
     }
 
     Position position;
@@ -50,12 +54,16 @@ class LocationHelper {
           now.difference(lastPos.timestamp).inMinutes.abs() <= 10) {
         position = lastPos;
       } else {
-        throw Exception('Gagal mendapatkan koordinat GPS terkini. Pastikan GPS aktif dan berada di area dengan sinyal yang baik.');
+        throw Exception(
+          'Failed to acquire current GPS location. Please ensure GPS is active and you have good signal.',
+        );
       }
     }
 
     if (position.isMocked) {
-      throw Exception('Terdeteksi lokasi palsu (Fake GPS / Mock Location). Harap nonaktifkan aplikasi pemalsu lokasi untuk melakukan presensi.');
+      throw Exception(
+        'Mock location detected (Fake GPS). Please disable mock location apps to record attendance.',
+      );
     }
 
     return position;

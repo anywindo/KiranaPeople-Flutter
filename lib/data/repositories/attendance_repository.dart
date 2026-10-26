@@ -1,6 +1,8 @@
 import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../models/attendance_model.dart';
 import '../models/attendance_event_model.dart';
 import '../../core/network/api_client.dart';
@@ -14,7 +16,7 @@ class AttendanceRepository {
   final ApiClient _apiClient;
 
   AttendanceRepository({ApiClient? apiClient})
-      : _apiClient = apiClient ?? ApiClient();
+    : _apiClient = apiClient ?? ApiClient();
 
   Future<TodayAttendanceData> getTodayAttendance() async {
     final response = await _apiClient.get(ApiEndpoints.todayAttendance);
@@ -25,7 +27,7 @@ class AttendanceRepository {
         return TodayAttendanceData.fromJson(payload);
       }
     }
-    throw Exception('Gagal memuat status presensi hari ini.');
+    throw Exception("Failed to load today's attendance status.");
   }
 
   Future<void> submitAttendanceEvent({

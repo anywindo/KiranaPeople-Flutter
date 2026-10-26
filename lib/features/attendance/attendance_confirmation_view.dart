@@ -1,7 +1,9 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/location_helper.dart';
 import '../../data/models/attendance_event_model.dart';
@@ -97,7 +99,9 @@ class _AttendanceConfirmationViewState
       if (_currentPosition == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_locationError ?? 'Gagal mendapatkan lokasi GPS. Pastikan izin lokasi aktif.'),
+            content: Text(
+              _locationError ?? 'Failed to acquire GPS location. Please ensure location permissions are enabled.',
+            ),
             backgroundColor: AppColors.error,
           ),
         );
@@ -115,7 +119,7 @@ class _AttendanceConfirmationViewState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Anda berada di luar radius kantor (${dist.round()}m dari batas ${widget.workLocation!.radius.round()}m). Harap berada di area kantor untuk presensi.',
+            'You are outside the office radius (${dist.round()}m from allowed ${widget.workLocation!.radius.round()}m limit). You must be within the office area to record attendance.',
           ),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
@@ -128,7 +132,9 @@ class _AttendanceConfirmationViewState
       _isSubmitting = true;
     });
 
-    final success = await ref.read(todayAttendanceProvider.notifier).submitEvent(
+    final success = await ref
+        .read(todayAttendanceProvider.notifier)
+        .submitEvent(
           eventType: widget.action,
           latitude: _currentPosition!.latitude,
           longitude: _currentPosition!.longitude,
@@ -151,18 +157,24 @@ class _AttendanceConfirmationViewState
       );
       widget.onSubmittedSuccess();
     } else {
-      final error = ref.read(todayAttendanceProvider).submitError ??
-          'Gagal mencatat presensi.';
+      final error =
+          ref.read(todayAttendanceProvider).submitError ??
+          'Failed to record attendance.';
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Presensi Gagal', style: TextStyle(fontWeight: FontWeight.bold)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Attendance Failed',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           content: Text(error),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Tutup'),
+              child: const Text('Close'),
             ),
           ],
         ),
@@ -174,7 +186,10 @@ class _AttendanceConfirmationViewState
     if (_currentPosition == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_locationError ?? 'Lokasi GPS belum tersedia. Menghubungkan ulang...'),
+          content: Text(
+            _locationError ??
+                'Lokasi GPS belum tersedia. Menghubungkan ulang...',
+          ),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -279,10 +294,7 @@ class _AttendanceConfirmationViewState
                     fit: StackFit.expand,
                     children: [
                       // Photo Image
-                      Image.file(
-                        widget.photoFile,
-                        fit: BoxFit.cover,
-                      ),
+                      Image.file(widget.photoFile, fit: BoxFit.cover),
 
                       // Top Badges (Radius & Peta)
                       Positioned(
@@ -295,7 +307,9 @@ class _AttendanceConfirmationViewState
                             // Geofence status pill
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.black.withValues(alpha: 0.65),
                                 borderRadius: BorderRadius.circular(20),
@@ -313,8 +327,8 @@ class _AttendanceConfirmationViewState
                                       color: _currentPosition == null
                                           ? const Color(0xFFF59E0B)
                                           : (_isWithinRadius
-                                              ? AppColors.success
-                                              : AppColors.error),
+                                                ? AppColors.success
+                                                : AppColors.error),
                                       shape: BoxShape.circle,
                                     ),
                                   ),
@@ -323,14 +337,15 @@ class _AttendanceConfirmationViewState
                                     _isLoadingLocation
                                         ? 'Mencari GPS...'
                                         : (_currentPosition == null
-                                            ? (_locationError ?? 'GPS Tidak Aktif')
-                                            : 'Akurasi ${accuracyMeters}m • ${_isWithinRadius ? 'Dalam Radius' : 'Diluar Radius'}'),
+                                              ? (_locationError ??
+                                                    'GPS Tidak Aktif')
+                                              : 'Akurasi ${accuracyMeters}m • ${_isWithinRadius ? 'Dalam Radius' : 'Diluar Radius'}'),
                                     style: TextStyle(
                                       color: _currentPosition == null
                                           ? const Color(0xFFFBBF24)
                                           : (_isWithinRadius
-                                              ? const Color(0xFF4ADE80)
-                                              : const Color(0xFFF87171)),
+                                                ? const Color(0xFF4ADE80)
+                                                : const Color(0xFFF87171)),
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -345,7 +360,9 @@ class _AttendanceConfirmationViewState
                               borderRadius: BorderRadius.circular(20),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.black.withValues(alpha: 0.65),
                                   borderRadius: BorderRadius.circular(20),
@@ -427,7 +444,9 @@ class _AttendanceConfirmationViewState
                               // Office Location Badge
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 6),
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.black.withValues(alpha: 0.60),
                                   borderRadius: BorderRadius.circular(12),
@@ -445,8 +464,9 @@ class _AttendanceConfirmationViewState
                                     ),
                                     const SizedBox(width: 6),
                                     ConstrainedBox(
-                                      constraints:
-                                          const BoxConstraints(maxWidth: 140),
+                                      constraints: const BoxConstraints(
+                                        maxWidth: 140,
+                                      ),
                                       child: Text(
                                         locationName,
                                         maxLines: 2,
@@ -522,8 +542,9 @@ class _AttendanceConfirmationViewState
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           elevation: 6,
-                          shadowColor:
-                              AppColors.primary.withValues(alpha: 0.50),
+                          shadowColor: AppColors.primary.withValues(
+                            alpha: 0.50,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),
@@ -566,8 +587,18 @@ class _AttendanceConfirmationViewState
 
   String _monthName(int month) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-      'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agt',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
     ];
     if (month >= 1 && month <= 12) {
       return months[month - 1];

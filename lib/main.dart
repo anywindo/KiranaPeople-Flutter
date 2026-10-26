@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'core/theme/app_theme.dart';
 import 'features/auth/login_screen.dart';
-import 'features/auth/server_settings_sheet.dart';
 import 'features/navigation/main_navigation_screen.dart';
 import 'features/onboarding/onboarding_password_screen.dart';
 import 'providers/auth_provider.dart';
@@ -10,11 +10,7 @@ import 'providers/theme_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(
-    const ProviderScope(
-      child: KiranaPeopleApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: KiranaPeopleApp()));
 }
 
 class KiranaPeopleApp extends ConsumerWidget {
@@ -117,17 +113,6 @@ class RootScreen extends ConsumerWidget {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppColors.primaryDark,
-                    ),
-                  ),
-                ),
-                TextButton.icon(
-                  onPressed: () => ServerSettingsSheet.show(context),
-                  icon: const Icon(Icons.settings, size: 16, color: AppColors.textSecondary),
-                  label: const Text(
-                    'Pengaturan Server',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
                     ),
                   ),
                 ),

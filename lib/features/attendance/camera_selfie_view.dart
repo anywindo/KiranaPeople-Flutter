@@ -94,8 +94,17 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
   int _selectedCameraIndex = 0;
   bool _isCameraReady = false;
   bool _isTakingPhoto = false;
-  FlashMode _flashMode = FlashMode.off;
+  bool _isFlashOn = false;
+  bool _isScreenFlashing = false;
   File? _capturedPhoto;
+
+  bool get _isCurrentCameraFront {
+    if (_cameras.isEmpty || _selectedCameraIndex >= _cameras.length) {
+      return true;
+    }
+    return _cameras[_selectedCameraIndex].lensDirection ==
+        CameraLensDirection.front;
+  }
 
   @override
   void initState() {
@@ -172,7 +181,22 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
 
     try {
       await _controller!.initialize();
-      await _controller!.setFlashMode(_flashMode);
+
+      // Configure hardware flash safely only if enabled and on rear camera
+      if (_isFlashOn && description.lensDirection != CameraLensDirection.front) {
+        try {
+          await _controller!.setFlashMode(FlashMode.always);
+        } catch (_) {
+          try {
+            await _controller!.setFlashMode(FlashMode.torch);
+          } catch (_) {}
+        }
+      } else {
+        try {
+          await _controller!.setFlashMode(FlashMode.off);
+        } catch (_) {}
+      }
+
       try {
         await _controller!.lockCaptureOrientation(DeviceOrientation.portraitUp);
       } catch (_) {}
@@ -202,14 +226,35 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
 
   Future<void> _toggleFlash() async {
     if (_controller == null || !_isCameraReady) return;
-    final nextMode =
-        _flashMode == FlashMode.off ? FlashMode.always : FlashMode.off;
-    try {
-      await _controller!.setFlashMode(nextMode);
+
+    final nextFlashState = !_isFlashOn;
+
+    // For rear camera, attempt to configure physical hardware flash
+    if (!_isCurrentCameraFront) {
+      try {
+        await _controller!.setFlashMode(
+          nextFlashState ? FlashMode.always : FlashMode.off,
+        );
+      } catch (_) {
+        try {
+          await _controller!.setFlashMode(
+            nextFlashState ? FlashMode.torch : FlashMode.off,
+          );
+        } catch (_) {}
+      }
+    } else {
+      // Front camera uses Screen Flash.
+      // Ensure hardware flash mode is off so driver never throws error.
+      try {
+        await _controller!.setFlashMode(FlashMode.off);
+      } catch (_) {}
+    }
+
+    if (mounted) {
       setState(() {
-        _flashMode = nextMode;
+        _isFlashOn = nextFlashState;
       });
-    } catch (_) {}
+    }
   }
 
   Future<void> _takePicture() async {
@@ -220,6 +265,18 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
         _isTakingPhoto = true;
       });
 
+      final bool isFront = _isCurrentCameraFront;
+      final bool needsScreenFlash = _isFlashOn && isFront;
+
+      if (needsScreenFlash) {
+        setState(() {
+          _isScreenFlashing = true;
+        });
+        // 250ms delay gives the screen time to render 100% white light and illuminate the face,
+        // allowing the camera sensor AE (Auto Exposure) to adjust properly.
+        await Future.delayed(const Duration(milliseconds: 250));
+      }
+
       final image = await _controller!.takePicture();
       final file = File(image.path);
 
@@ -227,17 +284,13 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
         final sensorOrientation = _cameras.isNotEmpty
             ? _cameras[_selectedCameraIndex].sensorOrientation
             : 270;
-        final bool isFrontCamera = _cameras.isNotEmpty
-            ? _cameras[_selectedCameraIndex].lensDirection ==
-                CameraLensDirection.front
-            : true;
 
         await compute(
           _processImageInIsolate,
           _ImageProcessParams(
             path: file.path,
             sensorOrientation: sensorOrientation,
-            isFrontCamera: isFrontCamera,
+            isFrontCamera: isFront,
           ),
         );
       } catch (_) {}
@@ -249,12 +302,14 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
         setState(() {
           _capturedPhoto = file;
           _isTakingPhoto = false;
+          _isScreenFlashing = false;
         });
       }
     } catch (_) {
       if (mounted) {
         setState(() {
           _isTakingPhoto = false;
+          _isScreenFlashing = false;
         });
       }
     }
@@ -300,230 +355,315 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
     }
 
     // Live Camera Screen (Screenshot 3)
+    final bool isFront = _isCurrentCameraFront;
+    final bool isScreenFlashWarmup = _isFlashOn && isFront;
+    final Color textColor = isScreenFlashWarmup ? Colors.black87 : Colors.white;
+
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top Navigation Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.chevron_left_rounded,
-                        color: Colors.white, size: 28),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  Expanded(
-                    child: Text(
-                      widget.action.label,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
+      backgroundColor:
+          isScreenFlashWarmup ? const Color(0xFFFBFBFB) : Colors.black,
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                // Top Navigation Bar
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.chevron_left_rounded,
+                            color: textColor, size: 28),
+                        onPressed: () => Navigator.pop(context),
                       ),
+                      Expanded(
+                        child: Text(
+                          widget.action.label,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 48), // Spacer to balance back button
+                    ],
+                  ),
+                ),
+
+                if (isScreenFlashWarmup)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade100,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.amber.shade400),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.flash_on_rounded,
+                            size: 14, color: Color(0xFFB45309)),
+                        SizedBox(width: 4),
+                        Text(
+                          'Screen Flash Active',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFFB45309),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 48), // Spacer to balance back button
-                ],
-              ),
-            ),
 
-            // Camera Viewport + Headroom Overlay
-            Expanded(
-              child: Stack(
-                alignment: Alignment.center,
-                fit: StackFit.expand,
-                children: [
-                  // Camera Preview or Fallback
-                  if (_isCameraReady &&
-                      _controller != null &&
-                      _controller!.value.isInitialized)
-                    Center(
-                      child: AspectRatio(
-                        aspectRatio: 3 / 4,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              final double containerWidth =
-                                  constraints.maxWidth;
-                              final double containerHeight =
-                                  constraints.maxHeight;
-                              final double containerRatio =
-                                  containerWidth / containerHeight;
+                // Camera Viewport + Headroom Overlay
+                Expanded(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    fit: StackFit.expand,
+                    children: [
+                      // Camera Preview or Fallback
+                      if (_isCameraReady &&
+                          _controller != null &&
+                          _controller!.value.isInitialized)
+                        Center(
+                          child: AspectRatio(
+                            aspectRatio: 3 / 4,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final double containerWidth =
+                                      constraints.maxWidth;
+                                  final double containerHeight =
+                                      constraints.maxHeight;
+                                  final double containerRatio =
+                                      containerWidth / containerHeight;
 
-                              // Calculate camera sensor aspect ratio in portrait
-                              final bool isPortrait = MediaQuery.of(context)
-                                      .orientation ==
-                                  Orientation.portrait;
-                              final double rawAspect =
-                                  _controller!.value.aspectRatio;
-                              final double previewRatio = isPortrait
-                                  ? (rawAspect > 1
-                                      ? 1.0 / rawAspect
-                                      : rawAspect)
-                                  : (rawAspect < 1
-                                      ? 1.0 / rawAspect
-                                      : rawAspect);
+                                  // Calculate camera sensor aspect ratio in portrait
+                                  final bool isPortrait = MediaQuery.of(context)
+                                          .orientation ==
+                                      Orientation.portrait;
+                                  final double rawAspect =
+                                      _controller!.value.aspectRatio;
+                                  final double previewRatio = isPortrait
+                                      ? (rawAspect > 1
+                                          ? 1.0 / rawAspect
+                                          : rawAspect)
+                                      : (rawAspect < 1
+                                          ? 1.0 / rawAspect
+                                          : rawAspect);
 
-                              double targetWidth;
-                              double targetHeight;
+                                  double targetWidth;
+                                  double targetHeight;
 
-                              if (containerRatio > previewRatio) {
-                                // Container is wider than preview -> match width, crop top/bottom
-                                targetWidth = containerWidth;
-                                targetHeight = containerWidth / previewRatio;
-                              } else {
-                                // Container is taller than preview -> match height, crop left/right
-                                targetHeight = containerHeight;
-                                targetWidth = containerHeight * previewRatio;
-                              }
+                                  if (containerRatio > previewRatio) {
+                                    targetWidth = containerWidth;
+                                    targetHeight =
+                                        containerWidth / previewRatio;
+                                  } else {
+                                    targetHeight = containerHeight;
+                                    targetWidth =
+                                        containerHeight * previewRatio;
+                                  }
 
-                              return SizedBox(
-                                width: containerWidth,
-                                height: containerHeight,
-                                child: ClipRect(
-                                  child: OverflowBox(
-                                    alignment: Alignment.center,
-                                    maxWidth: targetWidth,
-                                    maxHeight: targetHeight,
-                                    minWidth: targetWidth,
-                                    minHeight: targetHeight,
-                                    child: SizedBox(
-                                      width: targetWidth,
-                                      height: targetHeight,
-                                      child: CameraPreview(_controller!),
+                                  return SizedBox(
+                                    width: containerWidth,
+                                    height: containerHeight,
+                                    child: ClipRect(
+                                      child: OverflowBox(
+                                        alignment: Alignment.center,
+                                        maxWidth: targetWidth,
+                                        maxHeight: targetHeight,
+                                        minWidth: targetWidth,
+                                        minHeight: targetHeight,
+                                        child: SizedBox(
+                                          width: targetWidth,
+                                          height: targetHeight,
+                                          child: CameraPreview(_controller!),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        const Center(
+                          child:
+                              CircularProgressIndicator(color: AppColors.primary),
+                        ),
+
+                      // Headroom Face Guide Overlay
+                      Center(
+                        child: FractionallySizedBox(
+                          widthFactor: 0.85,
+                          child: Image.asset(
+                            'assets/images/Headroom.png',
+                            fit: BoxFit.contain,
+                            color: isScreenFlashWarmup ? Colors.black45 : null,
+                            errorBuilder: (context, error, stackTrace) {
+                              return CustomPaint(
+                                painter: _SilhouettePainter(
+                                  strokeColor: isScreenFlashWarmup
+                                      ? Colors.black54
+                                      : Colors.white.withValues(alpha: 0.70),
                                 ),
+                                size: const Size(260, 360),
                               );
                             },
                           ),
                         ),
                       ),
-                    )
-                  else
-                    const Center(
-                      child: CircularProgressIndicator(color: AppColors.primary),
-                    ),
-
-                  // Headroom Face Guide Overlay
-                  Center(
-                    child: FractionallySizedBox(
-                      widthFactor: 0.85,
-                      child: Image.asset(
-                        'assets/images/Headroom.png',
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) {
-                          // Fallback custom paint silhouette if asset fails
-                          return CustomPaint(
-                            painter: _SilhouettePainter(),
-                            size: const Size(260, 360),
-                          );
-                        },
-                      ),
-                    ),
+                    ],
                   ),
+                ),
 
-                  // Flash effect during capture
-                  if (_isTakingPhoto)
-                    Container(
-                      color: Colors.white.withValues(alpha: 0.8),
-                    ),
-                ],
-              ),
-            ),
-
-            // Bottom Controls Bar (Flash, Shutter, Switch Camera)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(28, 16, 28, 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Flash toggle
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF27272A),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: Icon(
-                        _flashMode == FlashMode.off
-                            ? Icons.flash_off_rounded
-                            : Icons.flash_on_rounded,
-                        color: _flashMode == FlashMode.off
-                            ? Colors.white70
-                            : AppColors.warning,
-                        size: 22,
-                      ),
-                      onPressed: _toggleFlash,
-                    ),
-                  ),
-
-                  // Center Shutter Button (concentric circles + camera icon)
-                  GestureDetector(
-                    onTap: _takePicture,
-                    child: Container(
-                      width: 76,
-                      height: 76,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 4),
-                      ),
-                      padding: const EdgeInsets.all(5),
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
+                // Bottom Controls Bar (Flash, Shutter, Switch Camera)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(28, 16, 28, 24),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Flash toggle
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: _isFlashOn
+                              ? AppColors.warning.withValues(alpha: 0.2)
+                              : (isScreenFlashWarmup
+                                  ? const Color(0xFFE4E4E7)
+                                  : const Color(0xFF27272A)),
                           shape: BoxShape.circle,
+                          border: _isFlashOn
+                              ? Border.all(color: AppColors.warning, width: 2)
+                              : null,
                         ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.camera_alt_rounded,
-                            color: Colors.black,
-                            size: 28,
+                        child: IconButton(
+                          tooltip: _isFlashOn ? 'Flash On' : 'Flash Off',
+                          icon: Icon(
+                            _isFlashOn
+                                ? Icons.flash_on_rounded
+                                : Icons.flash_off_rounded,
+                            color: _isFlashOn
+                                ? AppColors.warning
+                                : (isScreenFlashWarmup
+                                    ? Colors.black54
+                                    : Colors.white70),
+                            size: 22,
+                          ),
+                          onPressed: _toggleFlash,
+                        ),
+                      ),
+
+                      // Center Shutter Button (concentric circles + camera icon)
+                      GestureDetector(
+                        onTap: _takePicture,
+                        child: Container(
+                          width: 76,
+                          height: 76,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isScreenFlashWarmup
+                                  ? Colors.black87
+                                  : Colors.white,
+                              width: 4,
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(5),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: isScreenFlashWarmup
+                                  ? Colors.black87
+                                  : Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: _isTakingPhoto
+                                  ? SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        color: isScreenFlashWarmup
+                                            ? Colors.white
+                                            : Colors.black,
+                                      ),
+                                    )
+                                  : Icon(
+                                      Icons.camera_alt_rounded,
+                                      color: isScreenFlashWarmup
+                                          ? Colors.white
+                                          : Colors.black,
+                                      size: 28,
+                                    ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
 
-                  // Flip camera
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF27272A),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.cameraswitch_rounded,
-                        color: Colors.white70,
-                        size: 22,
+                      // Flip camera
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: isScreenFlashWarmup
+                              ? const Color(0xFFE4E4E7)
+                              : const Color(0xFF27272A),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.cameraswitch_rounded,
+                            color: isScreenFlashWarmup
+                                ? Colors.black54
+                                : Colors.white70,
+                            size: 22,
+                          ),
+                          onPressed: _toggleCamera,
+                        ),
                       ),
-                      onPressed: _toggleCamera,
-                    ),
+                    ],
                   ),
-                ],
+                ),
+              ],
+            ),
+          ),
+
+          // Full-screen blinding white burst during screen flash capture
+          if (_isScreenFlashing)
+            Positioned.fill(
+              child: Container(
+                color: Colors.white,
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
 }
 
 class _SilhouettePainter extends CustomPainter {
+  final Color strokeColor;
+
+  const _SilhouettePainter({
+    this.strokeColor = const Color(0xB3FFFFFF),
+  });
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.70)
+      ..color = strokeColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5;
 
@@ -553,5 +693,6 @@ class _SilhouettePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _SilhouettePainter oldDelegate) =>
+      oldDelegate.strokeColor != strokeColor;
 }

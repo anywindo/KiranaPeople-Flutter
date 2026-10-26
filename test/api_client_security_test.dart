@@ -1,7 +1,23 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kirana_people/core/config/api_config.dart';
 import 'package:kirana_people/core/network/api_client.dart';
 
 void main() {
+  group('ApiConfig Tests', () {
+    test('ApiConfig is fixed to kp.krtekstile.com', () async {
+      expect(
+        ApiConfig.defaultBaseUrl,
+        equals('https://kp.krtekstile.com/api/v1'),
+      );
+      expect(ApiConfig.cachedHostOrigin, equals('https://kp.krtekstile.com'));
+      expect(
+        await ApiConfig.getBaseUrl(),
+        equals('https://kp.krtekstile.com/api/v1'),
+      );
+      expect(ApiConfig.getHostOrigin(), equals('https://kp.krtekstile.com'));
+    });
+  });
+
   group('ApiClient SSL / TLS Certificate Validation Security Tests', () {
     test('Release mode strictly rejects invalid certificates for all hosts (prevents MitM)', () {
       const releaseMode = false;
@@ -9,7 +25,7 @@ void main() {
       // Remote cloud / production endpoints
       expect(
         ApiClient.shouldAcceptBadCertificate(
-          'terriblenight.onrender.com',
+          'kp.krtekstile.com',
           isDebug: releaseMode,
         ),
         isFalse,
@@ -63,7 +79,7 @@ void main() {
         // Remote production / third-party endpoints must still enforce valid certificates in debug mode
         expect(
           ApiClient.shouldAcceptBadCertificate(
-            'terriblenight.onrender.com',
+            'kp.krtekstile.com',
             isDebug: debugMode,
           ),
           isFalse,

@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../data/models/work_location_model.dart';
@@ -71,7 +72,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         'September',
         'Oktober',
         'November',
-        'Desember'
+        'Desember',
       ];
       return '${dt.day} ${months[dt.month - 1]}, ${dt.year}';
     }
@@ -122,14 +123,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => Dialog(
           backgroundColor: Colors.transparent,
-          insetPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 24,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: const BoxDecoration(
                   color: Color(0xFF1E293B),
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -175,8 +180,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           color: Colors.white.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.rotate_right_rounded,
-                            color: Colors.white, size: 18),
+                        child: const Icon(
+                          Icons.rotate_right_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -189,16 +197,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           color: Colors.white.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.close_rounded,
-                            color: Colors.white, size: 18),
+                        child: const Icon(
+                          Icons.close_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
               ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(bottom: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(20),
+                ),
                 child: Container(
                   color: Colors.black,
                   constraints: BoxConstraints(
@@ -224,8 +236,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
-  void _showLocationModal(BuildContext context, AttendanceEvent event,
-      [WorkLocation? workLocation]) {
+  void _showLocationModal(
+    BuildContext context,
+    AttendanceEvent event, [
+    WorkLocation? workLocation,
+  ]) {
     final lat = event.latitude ?? -7.025648;
     final lng = event.longitude ?? 109.957296;
     final userLatLng = LatLng(lat, lng);
@@ -234,8 +249,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         ? LatLng(workLocation.latitude, workLocation.longitude)
         : const LatLng(-7.025801, 109.956894);
 
-    final officeName = (workLocation?.name != null &&
-            workLocation!.name.isNotEmpty)
+    final officeName =
+        (workLocation?.name != null && workLocation!.name.isNotEmpty)
         ? workLocation.name
         : 'Kantor Utama (Tersono, Batang)';
 
@@ -297,7 +312,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                  color: AppColors.primary, width: 2),
+                                color: AppColors.primary,
+                                width: 2,
+                              ),
                             ),
                             child: ClipOval(
                               child: AutoOrientedImage(
@@ -397,8 +414,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                               boxShadow: selectedTab == 0
                                   ? [
                                       BoxShadow(
-                                        color: Colors.black
-                                            .withValues(alpha: 0.06),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.06,
+                                        ),
                                         blurRadius: 4,
                                         offset: const Offset(0, 1),
                                       ),
@@ -422,8 +440,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     color: selectedTab == 0
-                                      ? AppColors.primary
-                                      : context.textSecondaryColor,
+                                        ? AppColors.primary
+                                        : context.textSecondaryColor,
                                   ),
                                 ),
                               ],
@@ -446,8 +464,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                               boxShadow: selectedTab == 1
                                   ? [
                                       BoxShadow(
-                                        color: Colors.black
-                                            .withValues(alpha: 0.06),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.06,
+                                        ),
                                         blurRadius: 4,
                                         offset: const Offset(0, 1),
                                       ),
@@ -471,8 +490,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     color: selectedTab == 1
-                                      ? AppColors.primary
-                                      : context.textSecondaryColor,
+                                        ? AppColors.primary
+                                        : context.textSecondaryColor,
                                   ),
                                 ),
                               ],
@@ -513,7 +532,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         right: 10,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.black.withValues(alpha: 0.65),
                             borderRadius: BorderRadius.circular(20),
@@ -521,8 +542,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.fullscreen_rounded,
-                                  color: Colors.white, size: 16),
+                              Icon(
+                                Icons.fullscreen_rounded,
+                                color: Colors.white,
+                                size: 16,
+                              ),
                               SizedBox(width: 4),
                               Text(
                                 'Perbesar Foto',
@@ -549,7 +573,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         initialCameraFit: CameraFit.coordinates(
                           coordinates: [userLatLng, officeLatLng],
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 48, vertical: 48),
+                            horizontal: 48,
+                            vertical: 48,
+                          ),
                           maxZoom: 17.0,
                         ),
                         initialCenter: userLatLng,
@@ -568,8 +594,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                               point: officeLatLng,
                               radius: radius,
                               useRadiusInMeter: true,
-                              color: AppColors.primary
-                                  .withValues(alpha: 0.15),
+                              color: AppColors.primary.withValues(alpha: 0.15),
                               borderColor: AppColors.primary,
                               borderStrokeWidth: 1.5,
                             ),
@@ -588,7 +613,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                 children: [
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 7, vertical: 3),
+                                      horizontal: 7,
+                                      vertical: 3,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: AppColors.primary,
                                       borderRadius: BorderRadius.circular(8),
@@ -604,16 +631,16 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         const Icon(
-                                            Icons.apartment_rounded,
-                                            color: Colors.white,
-                                            size: 10),
+                                          Icons.apartment_rounded,
+                                          color: Colors.white,
+                                          size: 10,
+                                        ),
                                         const SizedBox(width: 4),
                                         Flexible(
                                           child: Text(
                                             officeName,
                                             maxLines: 1,
-                                            overflow:
-                                                TextOverflow.ellipsis,
+                                            overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 10,
@@ -631,7 +658,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                       color: AppColors.primary,
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                          color: Colors.white, width: 2),
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
                                       boxShadow: const [
                                         BoxShadow(
                                           color: Colors.black26,
@@ -661,7 +690,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                 children: [
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 7, vertical: 3),
+                                      horizontal: 7,
+                                      vertical: 3,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFF007AFF),
                                       borderRadius: BorderRadius.circular(8),
@@ -677,9 +708,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Icon(
-                                            Icons.person_pin_circle_rounded,
-                                            color: Colors.white,
-                                            size: 11),
+                                          Icons.person_pin_circle_rounded,
+                                          color: Colors.white,
+                                          size: 11,
+                                        ),
                                         SizedBox(width: 3),
                                         Text(
                                           'Posisi User',
@@ -699,7 +731,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                       color: const Color(0xFF007AFF),
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                          color: Colors.white, width: 2),
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
                                       boxShadow: const [
                                         BoxShadow(
                                           color: Colors.black26,
@@ -729,17 +763,21 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     Expanded(
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 8),
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF0F9FF),
                           borderRadius: BorderRadius.circular(10),
-                          border:
-                              Border.all(color: const Color(0xFFBAE6FD)),
+                          border: Border.all(color: const Color(0xFFBAE6FD)),
                         ),
                         child: const Row(
                           children: [
-                            Icon(Icons.person_pin_circle_rounded,
-                                size: 16, color: Color(0xFF007AFF)),
+                            Icon(
+                              Icons.person_pin_circle_rounded,
+                              size: 16,
+                              color: Color(0xFF007AFF),
+                            ),
                             SizedBox(width: 6),
                             Expanded(
                               child: Text(
@@ -759,17 +797,21 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     Expanded(
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 8),
+                          horizontal: 10,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFFF1F2),
                           borderRadius: BorderRadius.circular(10),
-                          border:
-                              Border.all(color: const Color(0xFFFECDD3)),
+                          border: Border.all(color: const Color(0xFFFECDD3)),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.apartment_rounded,
-                                size: 16, color: AppColors.primary),
+                            const Icon(
+                              Icons.apartment_rounded,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
@@ -792,7 +834,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 7),
+                    horizontal: 10,
+                    vertical: 7,
+                  ),
                   decoration: BoxDecoration(
                     color: context.surfaceSecondaryColor,
                     borderRadius: BorderRadius.circular(8),
@@ -922,322 +966,369 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 loading: () => const Center(
                   child: CircularProgressIndicator(color: AppColors.primary),
                 ),
-          error: (err, _) => Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.history_toggle_off,
-                      size: 48, color: AppColors.textMuted),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Gagal memuat riwayat: $err',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 14, color: AppColors.error),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                    ),
-                    onPressed: () =>
-                        ref.read(historyProvider.notifier).refresh(),
-                    child: const Text('Muat Ulang'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          data: (records) {
-            if (records.isEmpty) {
-              return const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.calendar_today_outlined,
-                        size: 48, color: AppColors.textMuted),
-                    SizedBox(height: 12),
-                    Text(
-                      'Belum ada riwayat presensi tercatat.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            final hasMore = historyState.hasMore;
-            return ListView.separated(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: records.length + (hasMore ? 1 : 0),
-              separatorBuilder: (context, index) => const SizedBox(height: 18),
-              itemBuilder: (context, index) {
-                if (index == records.length) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20),
-                    child: Center(
-                      child: SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  );
-                }
-                final item = records[index];
-                final rawStatus = item.status ?? 'Tepat Waktu';
-                String displayStatus = rawStatus;
-                if (rawStatus.toUpperCase() == 'LATE') {
-                  displayStatus = 'Terlambat';
-                } else if (rawStatus.toUpperCase() == 'ON_TIME' ||
-                    rawStatus.toUpperCase() == 'ONTIME' ||
-                    rawStatus.toUpperCase() == 'HADIR') {
-                  displayStatus = 'Tepat Waktu';
-                }
-                final isLate = rawStatus.toUpperCase() == 'LATE' ||
-                    rawStatus.toLowerCase().contains('terlambat');
-                final shiftName = item.shift?.name ?? 'OFFICE';
-                final formattedDate = _formatIndoDateString(item.date);
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Section Header: Date + Badges (Matches Screenshot 3)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                error: (err, _) => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        const Icon(
+                          Icons.history_toggle_off,
+                          size: 48,
+                          color: AppColors.textMuted,
+                        ),
+                        const SizedBox(height: 12),
                         Text(
-                          formattedDate,
-                          style: TextStyle(
+                          'Failed to load history: $err',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
                             fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: context.textPrimaryColor,
+                            color: AppColors.error,
                           ),
                         ),
-                        Row(
-                          children: [
-                            // Status Badge (Terlambat)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: isLate
-                                    ? const Color(0xFFFFF1F2)
-                                    : const Color(0xFFDCFCE7),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                displayStatus,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: isLate
-                                      ? const Color(0xFFE11D48)
-                                      : const Color(0xFF15803D),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            // Shift Badge (OFFICE)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: context.surfaceSecondaryColor,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                shiftName,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.textSecondaryColor,
-                                ),
-                              ),
-                            ),
-                          ],
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () =>
+                              ref.read(historyProvider.notifier).refresh(),
+                          child: const Text('Muat Ulang'),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-
-                    // Event Cards for that date (Matches Screenshot 3)
-                    ...item.events.map((event) {
-                      final timeStr = _formatShortTime(event.timestamp);
-
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        decoration: BoxDecoration(
-                          color: context.surfaceColor,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: context.borderColor),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+                  ),
+                ),
+                data: (records) {
+                  if (records.isEmpty) {
+                    return const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            size: 48,
+                            color: AppColors.textMuted,
+                          ),
+                          SizedBox(height: 12),
+                          Text(
+                            'Belum ada riwayat presensi tercatat.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textSecondary,
                             ),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(16),
-                          child: InkWell(
-                            onTap: () => _showLocationModal(
-                                context, event, workLocation),
-                            borderRadius: BorderRadius.circular(16),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 12),
-                              child: Row(
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  final hasMore = historyState.hasMore;
+                  return ListView.separated(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    itemCount: records.length + (hasMore ? 1 : 0),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 18),
+                    itemBuilder: (context, index) {
+                      if (index == records.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: Center(
+                            child: SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      final item = records[index];
+                      final rawStatus = item.status ?? 'Tepat Waktu';
+                      String displayStatus = rawStatus;
+                      if (rawStatus.toUpperCase() == 'LATE') {
+                        displayStatus = 'Terlambat';
+                      } else if (rawStatus.toUpperCase() == 'ON_TIME' ||
+                          rawStatus.toUpperCase() == 'ONTIME' ||
+                          rawStatus.toUpperCase() == 'HADIR') {
+                        displayStatus = 'Tepat Waktu';
+                      }
+                      final isLate =
+                          rawStatus.toUpperCase() == 'LATE' ||
+                          rawStatus.toLowerCase().contains('terlambat');
+                      final shiftName = item.shift?.name ?? 'OFFICE';
+                      final formattedDate = _formatIndoDateString(item.date);
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Section Header: Date + Badges (Matches Screenshot 3)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                formattedDate,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: context.textPrimaryColor,
+                                ),
+                              ),
+                              Row(
                                 children: [
-                                  // Circular Selfie Avatar or Event Icon
+                                  // Status Badge (Terlambat)
                                   Container(
-                                    width: 44,
-                                    height: 44,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
                                     decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                          color: context.borderColor,
-                                          width: 1.5),
+                                      color: isLate
+                                          ? const Color(0xFFFFF1F2)
+                                          : const Color(0xFFDCFCE7),
+                                      borderRadius: BorderRadius.circular(6),
                                     ),
-                                    child: ClipOval(
-                                      child: (event.fullSelfieUrl != null &&
-                                              event.fullSelfieUrl!.isNotEmpty)
-                                          ? AutoOrientedImage(
-                                              imageUrl: event.fullSelfieUrl!,
-                                              width: 44,
-                                              height: 44,
-                                              fit: BoxFit.cover,
-                                              errorWidget: Container(
-                                                color: AppColors.primary
-                                                    .withValues(alpha: 0.12),
-                                                child: Icon(
-                                                  _getEventIcon(event.eventType),
-                                                  color: AppColors.primary,
-                                                  size: 20,
-                                                ),
-                                              ),
-                                            )
-                                          : Container(
-                                              color: AppColors.primary
-                                                  .withValues(alpha: 0.12),
-                                              child: Icon(
-                                                _getEventIcon(event.eventType),
-                                                color: AppColors.primary,
-                                                size: 20,
-                                              ),
-                                            ),
+                                    child: Text(
+                                      displayStatus,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: isLate
+                                            ? const Color(0xFFE11D48)
+                                            : const Color(0xFF15803D),
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
-
-                                  // Event Title & Time
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          event.eventType.label,
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: context.textPrimaryColor,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 3),
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.access_time_rounded,
-                                              size: 13,
-                                              color: context.textSecondaryColor,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              timeStr,
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: context.textSecondaryColor,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                            if (event.latitude != null &&
-                                                event.longitude != null) ...[
-                                              const SizedBox(width: 8),
-                                              Container(
-                                                width: 3,
-                                                height: 3,
-                                                decoration: BoxDecoration(
-                                                  color: context.borderColor,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              const Icon(
-                                                Icons.location_on_rounded,
-                                                size: 12,
-                                                color: Color(0xFF94A3B8),
-                                              ),
-                                              const SizedBox(width: 2),
-                                              Text(
-                                                'Lokasi GPS',
-                                                style: TextStyle(
-                                                  fontSize: 11,
-                                                  color: context.textMutedColor,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            ],
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  // Subtle Chevron Icon
+                                  const SizedBox(width: 6),
+                                  // Shift Badge (OFFICE)
                                   Container(
-                                    width: 28,
-                                    height: 28,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: context.surfaceSecondaryColor,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                          color: context.borderColor),
+                                      borderRadius: BorderRadius.circular(6),
                                     ),
-                                    child: Icon(
-                                      Icons.chevron_right_rounded,
-                                      color: context.textMutedColor,
-                                      size: 18,
+                                    child: Text(
+                                      shiftName,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: context.textSecondaryColor,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
+                            ],
                           ),
-                        ),
+                          const SizedBox(height: 8),
+
+                          // Event Cards for that date (Matches Screenshot 3)
+                          ...item.events.map((event) {
+                            final timeStr = _formatShortTime(event.timestamp);
+
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              decoration: BoxDecoration(
+                                color: context.surfaceColor,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: context.borderColor),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.02),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(16),
+                                child: InkWell(
+                                  onTap: () => _showLocationModal(
+                                    context,
+                                    event,
+                                    workLocation,
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 12,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        // Circular Selfie Avatar or Event Icon
+                                        Container(
+                                          width: 44,
+                                          height: 44,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: context.borderColor,
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                          child: ClipOval(
+                                            child:
+                                                (event.fullSelfieUrl != null &&
+                                                    event
+                                                        .fullSelfieUrl!
+                                                        .isNotEmpty)
+                                                ? AutoOrientedImage(
+                                                    imageUrl:
+                                                        event.fullSelfieUrl!,
+                                                    width: 44,
+                                                    height: 44,
+                                                    fit: BoxFit.cover,
+                                                    errorWidget: Container(
+                                                      color: AppColors.primary
+                                                          .withValues(
+                                                            alpha: 0.12,
+                                                          ),
+                                                      child: Icon(
+                                                        _getEventIcon(
+                                                          event.eventType,
+                                                        ),
+                                                        color:
+                                                            AppColors.primary,
+                                                        size: 20,
+                                                      ),
+                                                    ),
+                                                  )
+                                                : Container(
+                                                    color: AppColors.primary
+                                                        .withValues(
+                                                          alpha: 0.12,
+                                                        ),
+                                                    child: Icon(
+                                                      _getEventIcon(
+                                                        event.eventType,
+                                                      ),
+                                                      color: AppColors.primary,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+
+                                        // Event Title & Time
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                event.eventType.label,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color:
+                                                      context.textPrimaryColor,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 3),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.access_time_rounded,
+                                                    size: 13,
+                                                    color: context
+                                                        .textSecondaryColor,
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    timeStr,
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: context
+                                                          .textSecondaryColor,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                  if (event.latitude != null &&
+                                                      event.longitude !=
+                                                          null) ...[
+                                                    const SizedBox(width: 8),
+                                                    Container(
+                                                      width: 3,
+                                                      height: 3,
+                                                      decoration: BoxDecoration(
+                                                        color:
+                                                            context.borderColor,
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    const Icon(
+                                                      Icons.location_on_rounded,
+                                                      size: 12,
+                                                      color: Color(0xFF94A3B8),
+                                                    ),
+                                                    const SizedBox(width: 2),
+                                                    Text(
+                                                      'Lokasi GPS',
+                                                      style: TextStyle(
+                                                        fontSize: 11,
+                                                        color: context
+                                                            .textMutedColor,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+
+                                        // Subtle Chevron Icon
+                                        Container(
+                                          width: 28,
+                                          height: 28,
+                                          decoration: BoxDecoration(
+                                            color:
+                                                context.surfaceSecondaryColor,
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: context.borderColor,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            Icons.chevron_right_rounded,
+                                            color: context.textMutedColor,
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
                       );
-                    }),
-                  ],
-                );
-              },
-            );
-          },
-        ),
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
-    ),
-  ],
-),
     );
   }
 }

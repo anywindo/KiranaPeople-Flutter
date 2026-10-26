@@ -1,8 +1,10 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
+
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/location_helper.dart';
 import '../../data/models/attendance_event_model.dart';
@@ -11,10 +13,7 @@ import '../../providers/attendance_provider.dart';
 class AttendanceSubmissionDialog extends ConsumerStatefulWidget {
   final AttendanceEventType eventType;
 
-  const AttendanceSubmissionDialog({
-    super.key,
-    required this.eventType,
-  });
+  const AttendanceSubmissionDialog({super.key, required this.eventType});
 
   static Future<bool?> show(BuildContext context, AttendanceEventType type) {
     return showDialog<bool>(
@@ -69,7 +68,7 @@ class _AttendanceSubmissionDialogState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal membuka kamera: $e'),
+            content: Text('Failed to open camera: $e'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -96,7 +95,9 @@ class _AttendanceSubmissionDialogState
       return;
     }
 
-    final success = await ref.read(todayAttendanceProvider.notifier).submitEvent(
+    final success = await ref
+        .read(todayAttendanceProvider.notifier)
+        .submitEvent(
           eventType: widget.eventType,
           latitude: lat,
           longitude: lng,
@@ -116,13 +117,11 @@ class _AttendanceSubmissionDialogState
           ),
         );
       } else {
-        final err = ref.read(todayAttendanceProvider).submitError ??
-            'Gagal mengirim presensi.';
+        final err =
+            ref.read(todayAttendanceProvider).submitError ??
+            'Failed to submit attendance.';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(err),
-            backgroundColor: AppColors.error,
-          ),
+          SnackBar(content: Text(err), backgroundColor: AppColors.error),
         );
       }
     }
@@ -151,10 +150,7 @@ class _AttendanceSubmissionDialogState
           Expanded(
             child: Text(
               'Konfirmasi ${widget.eventType.label}',
-              style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -191,16 +187,15 @@ class _AttendanceSubmissionDialogState
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            Image.file(
-                              _selfieImage!,
-                              fit: BoxFit.cover,
-                            ),
+                            Image.file(_selfieImage!, fit: BoxFit.cover),
                             Positioned(
                               bottom: 8,
                               right: 8,
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.black.withValues(alpha: 0.6),
                                   borderRadius: BorderRadius.circular(8),
@@ -208,13 +203,18 @@ class _AttendanceSubmissionDialogState
                                 child: const Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.camera_alt,
-                                        size: 14, color: Colors.white),
+                                    Icon(
+                                      Icons.camera_alt,
+                                      size: 14,
+                                      color: Colors.white,
+                                    ),
                                     SizedBox(width: 4),
                                     Text(
                                       'Ubah Foto',
                                       style: TextStyle(
-                                          color: Colors.white, fontSize: 11),
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -267,8 +267,10 @@ class _AttendanceSubmissionDialogState
               decoration: const InputDecoration(
                 labelText: 'Catatan (Opsional)',
                 hintText: 'Misal: Bekerja dari kantor...',
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
               ),
               maxLines: 2,
             ),

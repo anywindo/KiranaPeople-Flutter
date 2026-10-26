@@ -1,9 +1,11 @@
 import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../data/models/user_model.dart';
 import '../../providers/attendance_provider.dart';
@@ -30,7 +32,7 @@ class ProfileScreen extends ConsumerWidget {
         'September',
         'Oktober',
         'November',
-        'Desember'
+        'Desember',
       ];
       return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
     }
@@ -49,7 +51,11 @@ class ProfileScreen extends ConsumerWidget {
     return 'Karyawan';
   }
 
-  void _showCustomToast(BuildContext context, String message, {bool isError = false}) {
+  void _showCustomToast(
+    BuildContext context,
+    String message, {
+    bool isError = false,
+  }) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -58,7 +64,9 @@ class ProfileScreen extends ConsumerWidget {
           children: [
             Icon(
               isError ? Icons.error_rounded : Icons.check_circle_rounded,
-              color: isError ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+              color: isError
+                  ? const Color(0xFFEF4444)
+                  : const Color(0xFF10B981),
               size: 18,
             ),
             const SizedBox(width: 8),
@@ -122,7 +130,10 @@ class ProfileScreen extends ConsumerWidget {
               Text(
                 'Pilih foto baru dari galeri atau ambil langsung dengan kamera.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: context.textSecondaryColor),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: context.textSecondaryColor,
+                ),
               ),
               const SizedBox(height: 20),
               ListTile(
@@ -130,7 +141,9 @@ class ProfileScreen extends ConsumerWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: context.isDarkMode ? const Color(0xFF332042) : const Color(0xFFFFF1F5),
+                    color: context.isDarkMode
+                        ? const Color(0xFF332042)
+                        : const Color(0xFFFFF1F5),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
@@ -165,7 +178,9 @@ class ProfileScreen extends ConsumerWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: context.isDarkMode ? const Color(0xFF1E3A5F) : const Color(0xFFEFF6FF),
+                    color: context.isDarkMode
+                        ? const Color(0xFF1E3A5F)
+                        : const Color(0xFFEFF6FF),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
@@ -280,21 +295,22 @@ class ProfileScreen extends ConsumerWidget {
 
       if (confirm != true) return;
 
-      final success = await ref.read(authProvider.notifier).updateProfile(
-            avatarFile: file,
-          );
+      final success = await ref
+          .read(authProvider.notifier)
+          .updateProfile(avatarFile: file);
       if (context.mounted) {
         if (success) {
           _showCustomToast(context, 'Foto profil berhasil diperbarui!');
         } else {
-          final err = ref.read(authProvider).errorMessage ??
-              'Gagal memperbarui foto profil.';
+          final err =
+              ref.read(authProvider).errorMessage ??
+              'Failed to update profile photo.';
           _showCustomToast(context, err, isError: true);
         }
       }
     } catch (e) {
       if (context.mounted) {
-        _showCustomToast(context, 'Gagal memilih foto: $e', isError: true);
+        _showCustomToast(context, 'Failed to pick photo: $e', isError: true);
       }
     }
   }
@@ -349,7 +365,10 @@ class ProfileScreen extends ConsumerWidget {
               const SizedBox(height: 4),
               Text(
                 'Masukkan nomor telepon aktif untuk verifikasi dan kontak.',
-                style: TextStyle(fontSize: 13, color: context.textSecondaryColor),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: context.textSecondaryColor,
+                ),
               ),
               const SizedBox(height: 20),
               TextFormField(
@@ -407,10 +426,9 @@ class ProfileScreen extends ConsumerWidget {
                   onPressed: () async {
                     if (formKey.currentState?.validate() ?? false) {
                       Navigator.pop(ctx);
-                      final success =
-                          await ref.read(authProvider.notifier).updateProfile(
-                                phone: phoneController.text.trim(),
-                              );
+                      final success = await ref
+                          .read(authProvider.notifier)
+                          .updateProfile(phone: phoneController.text.trim());
                       if (context.mounted) {
                         if (success) {
                           _showCustomToast(
@@ -418,8 +436,9 @@ class ProfileScreen extends ConsumerWidget {
                             'Nomor telepon berhasil diperbarui!',
                           );
                         } else {
-                          final err = ref.read(authProvider).errorMessage ??
-                              'Gagal memperbarui nomor telepon.';
+                          final err =
+                              ref.read(authProvider).errorMessage ??
+                              'Failed to update phone number.';
                           _showCustomToast(context, err, isError: true);
                         }
                       }
@@ -480,7 +499,10 @@ class ProfileScreen extends ConsumerWidget {
               elevation: 0,
             ),
             onPressed: () {
-              Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+              Navigator.of(
+                context,
+                rootNavigator: true,
+              ).popUntil((route) => route.isFirst);
               ref.read(authProvider.notifier).logout();
             },
             child: const Text(
@@ -529,7 +551,10 @@ class ProfileScreen extends ConsumerWidget {
               Text(
                 'Sesuaikan tampilan aplikasi dengan kenyamanan mata Anda.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: context.textSecondaryColor),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: context.textSecondaryColor,
+                ),
               ),
               const SizedBox(height: 20),
               _buildThemeOptionTile(
@@ -543,7 +568,9 @@ class ProfileScreen extends ConsumerWidget {
                 iconColor: const Color(0xFF3B82F6),
                 isSelected: currentMode == ThemeMode.system,
                 onTap: () {
-                  ref.read(themeProvider.notifier).setThemeMode(ThemeMode.system);
+                  ref
+                      .read(themeProvider.notifier)
+                      .setThemeMode(ThemeMode.system);
                   Navigator.pop(ctx);
                 },
               ),
@@ -557,7 +584,9 @@ class ProfileScreen extends ConsumerWidget {
                 iconColor: const Color(0xFFD97706),
                 isSelected: currentMode == ThemeMode.light,
                 onTap: () {
-                  ref.read(themeProvider.notifier).setThemeMode(ThemeMode.light);
+                  ref
+                      .read(themeProvider.notifier)
+                      .setThemeMode(ThemeMode.light);
                   Navigator.pop(ctx);
                 },
               ),
@@ -603,7 +632,9 @@ class ProfileScreen extends ConsumerWidget {
         ),
       ),
       tileColor: isSelected
-          ? AppColors.primary.withValues(alpha: context.isDarkMode ? 0.15 : 0.06)
+          ? AppColors.primary.withValues(
+              alpha: context.isDarkMode ? 0.15 : 0.06,
+            )
           : context.surfaceColor,
       leading: Container(
         width: 38,
@@ -624,14 +655,19 @@ class ProfileScreen extends ConsumerWidget {
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(
-          fontSize: 12,
-          color: context.textSecondaryColor,
-        ),
+        style: TextStyle(fontSize: 12, color: context.textSecondaryColor),
       ),
       trailing: isSelected
-          ? const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 22)
-          : Icon(Icons.radio_button_unchecked_rounded, color: context.borderColor, size: 22),
+          ? const Icon(
+              Icons.check_circle_rounded,
+              color: AppColors.primary,
+              size: 22,
+            )
+          : Icon(
+              Icons.radio_button_unchecked_rounded,
+              color: context.borderColor,
+              size: 22,
+            ),
     );
   }
 
@@ -640,16 +676,14 @@ class ProfileScreen extends ConsumerWidget {
     final authState = ref.watch(authProvider);
     final user = authState.user;
     final attendanceState = ref.watch(todayAttendanceProvider);
-    final workLoc =
-        attendanceState.data.value?.workLocation ?? user?.location;
+    final workLoc = attendanceState.data.value?.workLocation ?? user?.location;
 
     final userName = user?.name ?? 'User Testing';
     final userEmail = user?.email ?? 'balmacedam...r@gmail.com';
     final employeeId = user?.employeeId ?? 'TEST';
     final roleName = _getDisplayRole(user);
     final isActive = user?.isActive ?? true;
-    final officeName =
-        workLoc?.name ?? 'Kantor Utama (Tersono, Batang)';
+    final officeName = workLoc?.name ?? 'Kantor Utama (Tersono, Batang)';
     final radiusStr = '${workLoc?.radius.round() ?? 100} meter';
     final joinedStr = user?.joinedAt != null
         ? _formatIndoDate(user!.joinedAt)
@@ -678,7 +712,12 @@ class ProfileScreen extends ConsumerWidget {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 40),
+        padding: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 10,
+          bottom: 40,
+        ),
         child: Column(
           children: [
             // 1. Profile Avatar & Badges Header (Matches Screenshot 1)
@@ -705,14 +744,16 @@ class ProfileScreen extends ConsumerWidget {
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withValues(
-                                    alpha: context.isDarkMode ? 0.35 : 0.12),
+                                  alpha: context.isDarkMode ? 0.35 : 0.12,
+                                ),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
                             ],
                           ),
                           child: ClipOval(
-                            child: (user?.fullAvatarUrl != null &&
+                            child:
+                                (user?.fullAvatarUrl != null &&
                                     user!.fullAvatarUrl!.isNotEmpty)
                                 ? CachedNetworkImage(
                                     imageUrl: user.fullAvatarUrl!,
@@ -785,7 +826,9 @@ class ProfileScreen extends ConsumerWidget {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 3),
+                          horizontal: 10,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: context.isDarkMode
                               ? const Color(0xFF3B1524)
@@ -804,7 +847,9 @@ class ProfileScreen extends ConsumerWidget {
                       const SizedBox(width: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 3),
+                          horizontal: 10,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: context.isDarkMode
                               ? const Color(0xFF063A23)
@@ -1238,15 +1283,14 @@ class ProfileScreen extends ConsumerWidget {
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(
-                alpha: context.isDarkMode ? 0.25 : 0.02),
+              alpha: context.isDarkMode ? 0.25 : 0.02,
+            ),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 

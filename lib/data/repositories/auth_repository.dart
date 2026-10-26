@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:dio/dio.dart';
+
 import '../models/user_model.dart';
 import '../../core/network/api_client.dart';
 import '../../core/constants/api_endpoints.dart';
@@ -10,17 +12,17 @@ class AuthRepository {
   final ApiClient _apiClient;
   final SecureStorageService _storage;
 
-  AuthRepository({
-    ApiClient? apiClient,
-    SecureStorageService? storage,
-  })  : _apiClient = apiClient ?? ApiClient(),
-        _storage = storage ?? SecureStorageService();
+  AuthRepository({ApiClient? apiClient, SecureStorageService? storage})
+    : _apiClient = apiClient ?? ApiClient(),
+      _storage = storage ?? SecureStorageService();
 
   Future<UserModel> login({
     required String email,
     required String password,
   }) async {
-    final deviceName = Platform.isAndroid ? 'KiranaPeople-Android' : 'KiranaPeople-iOS';
+    final deviceName = Platform.isAndroid
+        ? 'KiranaPeople-Android'
+        : 'KiranaPeople-iOS';
 
     final response = await _apiClient.post(
       ApiEndpoints.login,
@@ -48,7 +50,7 @@ class AuthRepository {
       }
     }
 
-    throw Exception('Format respon login tidak valid.');
+    throw Exception('Invalid login response format.');
   }
 
   Future<UserModel> getProfile() async {
@@ -62,13 +64,10 @@ class AuthRepository {
         return user;
       }
     }
-    throw Exception('Gagal memuat profil pengguna.');
+    throw Exception('Failed to load user profile.');
   }
 
-  Future<UserModel> updateProfile({
-    String? phone,
-    File? avatarFile,
-  }) async {
+  Future<UserModel> updateProfile({String? phone, File? avatarFile}) async {
     final formData = FormData();
     formData.fields.add(const MapEntry('_method', 'PUT'));
 
@@ -81,10 +80,7 @@ class AuthRepository {
       formData.files.add(
         MapEntry(
           'avatar',
-          await MultipartFile.fromFile(
-            avatarFile.path,
-            filename: 'avatar.jpg',
-          ),
+          await MultipartFile.fromFile(avatarFile.path, filename: 'avatar.jpg'),
         ),
       );
     }

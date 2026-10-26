@@ -1,6 +1,8 @@
 import 'dart:io';
+
 import 'package:flutter/painting.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../core/network/api_client.dart';
 import '../core/network/api_exception.dart';
 import '../data/models/user_model.dart';
@@ -79,10 +81,7 @@ class AuthNotifier extends Notifier<AuthState> {
       // Check cached user first for instant display
       final cachedUser = await _repository.getCachedUser();
       if (cachedUser != null) {
-        state = state.copyWith(
-          isAuthenticated: true,
-          user: cachedUser,
-        );
+        state = state.copyWith(isAuthenticated: true, user: cachedUser);
       }
 
       // Refresh latest profile from backend
@@ -102,7 +101,7 @@ class AuthNotifier extends Notifier<AuthState> {
       state = state.copyWith(
         isCheckingSession: false,
         isAuthenticated: state.user != null,
-        errorMessage: state.user == null ? e.toString() : null,
+        errorMessage: state.user == null ? _formatErrorMessage(e) : null,
       );
     }
   }
@@ -126,7 +125,7 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: e.toString(),
+        errorMessage: _formatErrorMessage(e),
       );
       return false;
     }
@@ -174,7 +173,7 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: e.toString(),
+        errorMessage: _formatErrorMessage(e),
       );
       return false;
     }
@@ -190,50 +189,45 @@ class AuthNotifier extends Notifier<AuthState> {
         password: password,
         passwordConfirmation: confirmPassword,
       );
-      state = state.copyWith(
-        isLoading: false,
-        user: updatedUser,
-      );
+      state = state.copyWith(isLoading: false, user: updatedUser);
       return true;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: e.toString(),
+        errorMessage: _formatErrorMessage(e),
       );
       return false;
     }
   }
 
-  Future<bool> updateProfile({
-    String? phone,
-    File? avatarFile,
-  }) async {
+  Future<bool> updateProfile({String? phone, File? avatarFile}) async {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final updated = await _repository.updateProfile(
         phone: phone,
         avatarFile: avatarFile,
       );
-      state = state.copyWith(
-        isLoading: false,
-        user: updated,
-      );
+      state = state.copyWith(isLoading: false, user: updated);
       return true;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: e.toString(),
+        errorMessage: _formatErrorMessage(e),
       );
       return false;
     }
   }
 
   void cancelSessionCheck() {
-    state = state.copyWith(
-      isCheckingSession: false,
-      isAuthenticated: false,
-    );
+    state = state.copyWith(isCheckingSession: false, isAuthenticated: false);
   }
 }
 
-final authProvider = NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);
+String _formatErrorMessage(Object error) {
+  final str = error.toString();
+  return str.startsWith('Exception: ') ? str.substring(11) : str;
+}
+
+final authProvider = NotifierProvider<AuthNotifier, AuthState>(
+  AuthNotifier.new,
+);

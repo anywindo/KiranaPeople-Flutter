@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
-import 'server_settings_sheet.dart';
 import 'forgot_password_sheet.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -25,10 +25,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _identifierFocus.addListener(() { if (mounted) setState(() {}); });
-    _passwordFocus.addListener(() { if (mounted) setState(() {}); });
-    _identifierController.addListener(() { if (mounted) setState(() {}); });
-    _passwordController.addListener(() { if (mounted) setState(() {}); });
+    _identifierFocus.addListener(() {
+      if (mounted) setState(() {});
+    });
+    _passwordFocus.addListener(() {
+      if (mounted) setState(() {});
+    });
+    _identifierController.addListener(() {
+      if (mounted) setState(() {});
+    });
+    _passwordController.addListener(() {
+      if (mounted) setState(() {});
+    });
     _loadSavedCredentials();
   }
 
@@ -65,10 +73,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_isFormValid) return;
     FocusScope.of(context).unfocus();
     final identifier = _identifierController.text.trim();
-    final success = await ref.read(authProvider.notifier).login(
-          identifier,
-          _passwordController.text,
-        );
+    final success = await ref
+        .read(authProvider.notifier)
+        .login(identifier, _passwordController.text);
     if (success) {
       try {
         final prefs = await SharedPreferences.getInstance();
@@ -114,40 +121,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         automaticallyImplyLeading: false,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: InkWell(
-              onTap: () => ServerSettingsSheet.show(context),
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: context.surfaceSecondaryColor,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: context.borderColor, width: 1),
-                ),
-                child: Icon(
-                  Icons.settings_outlined,
-                  size: 18,
-                  color: context.textSecondaryColor,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
-            child: LayoutBuilder(
+        child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: IntrinsicHeight(
                   child: Column(
                     children: [
@@ -218,12 +200,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       // Error message banner if any
                       if (authState.errorMessage != null) ...[
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEF4444).withValues(alpha: 0.08),
+                            color: const Color(0xFFEF4444)
+                                .withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: const Color(0xFFEF4444).withValues(alpha: 0.25),
+                              color: const Color(0xFFEF4444)
+                                  .withValues(alpha: 0.25),
                             ),
                           ),
                           child: Row(
@@ -265,7 +252,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
                             onSubmitted: (_) {
-                              FocusScope.of(context).requestFocus(_passwordFocus);
+                              FocusScope.of(context)
+                                  .requestFocus(_passwordFocus);
                             },
                             autocorrect: false,
                             decoration: InputDecoration(
@@ -277,7 +265,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               border: InputBorder.none,
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 10,
+                              ),
                               isDense: true,
                             ),
                           ),
@@ -318,7 +308,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     border: InputBorder.none,
                                     enabledBorder: InputBorder.none,
                                     focusedBorder: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 10,
+                                    ),
                                     isDense: true,
                                   ),
                                 ),
@@ -423,7 +415,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             boxShadow: _isFormValid && !authState.isLoading
                                 ? [
                                     BoxShadow(
-                                      color: AppColors.primary.withValues(alpha: 0.35),
+                                      color: AppColors.primary.withValues(
+                                        alpha: 0.35,
+                                      ),
                                       blurRadius: 8,
                                       offset: const Offset(0, 3),
                                     ),
