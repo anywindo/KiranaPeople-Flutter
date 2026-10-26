@@ -20,7 +20,7 @@ class LocationHelper {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       throw Exception(
-        'Device location service is disabled. Please enable GPS.',
+        'Layanan lokasi (GPS) nonaktif. Silakan aktifkan GPS pada perangkat Anda.',
       );
     }
 
@@ -28,13 +28,13 @@ class LocationHelper {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        throw Exception('Location permission was denied.');
+        throw Exception('Izin lokasi ditolak oleh pengguna.');
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
       throw Exception(
-        'Location permission is permanently denied. Please enable it in system settings.',
+        'Izin lokasi ditolak permanen. Silakan aktifkan izin lokasi di Pengaturan Sistem.',
       );
     }
 
@@ -55,14 +55,14 @@ class LocationHelper {
         position = lastPos;
       } else {
         throw Exception(
-          'Failed to acquire current GPS location. Please ensure GPS is active and you have good signal.',
+          'Gagal mendapatkan lokasi GPS terkini. Pastikan GPS aktif dan sinyal memadai.',
         );
       }
     }
 
     if (position.isMocked) {
       throw Exception(
-        'Mock location detected (Fake GPS). Please disable mock location apps to record attendance.',
+        'Terdeteksi lokasi palsu (Fake GPS). Harap nonaktifkan aplikasi Fake GPS untuk presensi.',
       );
     }
 

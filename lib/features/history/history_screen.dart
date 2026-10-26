@@ -979,7 +979,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Failed to load history: $err',
+                          'Gagal memuat riwayat: $err',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 14,

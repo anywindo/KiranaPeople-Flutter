@@ -2272,13 +2272,6 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
         if (targetAction == AttendanceEventType.startShift &&
             selectedShift == null &&
             availableShifts?.isNotEmpty == true) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Silakan pilih shift kerja terlebih dahulu.'),
-              backgroundColor: AppColors.error,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
           ShiftPickerSheet.show(
             context,
             shifts: availableShifts!,
@@ -2296,7 +2289,15 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
           shiftId: selectedShift?.id,
           workLocation: workLocation,
         );
-        if (res == true) {
+        if (res == true && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${targetAction.label} berhasil dicatat!'),
+              backgroundColor: AppColors.success,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 4),
+            ),
+          );
           ref.read(todayAttendanceProvider.notifier).refresh();
           ref.read(historyProvider.notifier).refresh();
         }

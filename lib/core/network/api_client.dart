@@ -82,7 +82,7 @@ class ApiClient {
 
           final response = e.response;
           String message =
-              'A network error occurred. Please check your internet connection.';
+              'Terjadi kesalahan koneksi. Periksa koneksi internet Anda.';
           dynamic errors;
 
           if (response != null) {
@@ -117,7 +117,7 @@ class ApiClient {
                   hasCustomMessage = true;
                 } else {
                   message =
-                      'Failed to process request (${response.statusCode})';
+                      'Gagal memproses permintaan (${response.statusCode})';
                 }
               }
             } else if (data is String && data.isNotEmpty) {
@@ -128,7 +128,7 @@ class ApiClient {
             // Fallback status messages if no specific custom message was provided
             if (response.statusCode == 401) {
               if (!hasCustomMessage) {
-                message = 'Invalid credentials or session has expired.';
+                message = 'Sesi Anda telah berakhir atau identitas login salah.';
               }
               if (!e.requestOptions.path.contains('/login')) {
                 onUnauthorized?.call();
@@ -136,41 +136,41 @@ class ApiClient {
             } else if (response.statusCode == 429) {
               if (!hasCustomMessage) {
                 message =
-                    'Too many requests (Rate limit). Please wait a moment.';
+                    'Terlalu banyak permintaan. Silakan tunggu beberapa saat.';
               }
             } else if (response.statusCode == 403) {
               if (!hasCustomMessage) {
-                message = 'You do not have permission to access this resource.';
+                message = 'Anda tidak memiliki izin untuk mengakses fitur ini.';
               }
             } else if (response.statusCode == 404) {
               if (!hasCustomMessage) {
-                message = 'Requested resource not found.';
+                message = 'Data yang diminta tidak ditemukan.';
               }
             } else if (response.statusCode == 422) {
               if (!hasCustomMessage) {
-                message = 'Invalid input data.';
+                message = 'Data yang dimasukkan tidak valid.';
               }
             } else if (response.statusCode != null &&
                 response.statusCode! >= 500) {
               if (!hasCustomMessage) {
-                message = 'An internal server error occurred.';
+                message = 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
               }
             }
           } else if (e.type == DioExceptionType.connectionTimeout ||
               e.type == DioExceptionType.receiveTimeout ||
               e.type == DioExceptionType.sendTimeout) {
-            message = 'Connection to server timed out. Please try again.';
+            message = 'Koneksi ke server terputus (waktu habis). Silakan coba lagi.';
           } else if (e.type == DioExceptionType.connectionError ||
               e.error is SocketException ||
               e.error is HandshakeException ||
               e.error is TlsException) {
-            message = 'Failed to connect to server. Please check your internet connection.';
+            message = 'Gagal terhubung ke server. Periksa koneksi internet Anda.';
           } else {
-            message = 'Failed to communicate with server. Please try again.';
+            message = 'Terjadi gangguan saat berkomunikasi dengan server. Silakan coba lagi.';
           }
 
           final customException = ApiException(
-            message: message,
+            message: _localizeBackendMessage(message),
             statusCode: response?.statusCode,
             errors: errors,
           );
@@ -234,7 +234,9 @@ class ApiClient {
       if (e.error is ApiException) {
         throw e.error as ApiException;
       }
-      throw ApiException(message: e.message ?? 'Unknown error');
+      throw ApiException(
+        message: e.message ?? 'Terjadi kesalahan tidak terduga.',
+      );
     }
   }
 
@@ -255,7 +257,9 @@ class ApiClient {
       if (e.error is ApiException) {
         throw e.error as ApiException;
       }
-      throw ApiException(message: e.message ?? 'Unknown error');
+      throw ApiException(
+        message: e.message ?? 'Terjadi kesalahan tidak terduga.',
+      );
     }
   }
 
@@ -275,7 +279,74 @@ class ApiClient {
       if (e.error is ApiException) {
         throw e.error as ApiException;
       }
-      throw ApiException(message: e.message ?? 'Unknown error');
+      throw ApiException(
+        message: e.message ?? 'Terjadi kesalahan tidak terduga.',
+      );
     }
   }
+}
+
+String _localizeBackendMessage(String raw) {
+  final trimmed = raw.trim();
+  final lower = trimmed.toLowerCase();
+
+  if (lower.contains('provided credentials are incorrect') ||
+      lower.contains('credentials do not match') ||
+      lower.contains('invalid credentials') ||
+      lower.contains('these credentials')) {
+    return 'Identitas login atau kata sandi yang Anda masukkan salah.';
+  }
+  if (lower.contains('unauthenticated') ||
+      lower.contains('session has expired')) {
+    return 'Sesi Anda telah berakhir. Silakan masuk kembali.';
+  }
+  if (lower.contains('too many attempts') ||
+      lower.contains('too many requests')) {
+    return 'Terlalu banyak percobaan. Silakan coba lagi dalam beberapa saat.';
+  }
+  if (lower.contains('given data was invalid') ||
+      lower.contains('invalid input')) {
+    return 'Data yang dimasukkan tidak valid.';
+  }
+  if (lower.contains('server error') ||
+      lower.contains('internal server error')) {
+    return 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
+  }
+  if (lower.contains('email has already been taken') ||
+      lower.contains('email already exists')) {
+    return 'Alamat email sudah terdaftar.';
+  }
+  if (lower.contains('password must be at least') ||
+      lower.contains('password must contain')) {
+    return 'Kata sandi minimal 8 karakter.';
+  }
+  if (lower.contains('password confirmation does not match') ||
+      lower.contains('passwords do not match')) {
+    return 'Konfirmasi kata sandi tidak cocok.';
+  }
+  if (lower.contains('field is required')) {
+    return 'Kolom ini wajib diisi.';
+  }
+  if (lower.contains('user not found') || lower.contains('account not found')) {
+    return 'Pengguna tidak ditemukan.';
+  }
+  if (lower.contains('token has expired') || lower.contains('expired token')) {
+    return 'Token kedaluwarsa. Silakan ajukan permintaan ulang.';
+  }
+  if (lower.contains('token is invalid') || lower.contains('invalid token')) {
+    return 'Token tidak valid.';
+  }
+  if (lower.contains('outside the office radius') ||
+      lower.contains('outside radius')) {
+    return 'Anda berada di luar radius kantor.';
+  }
+  if (lower.contains('mock location') || lower.contains('fake gps')) {
+    return 'Terdeteksi lokasi palsu (Fake GPS). Harap nonaktifkan Fake GPS.';
+  }
+  if (lower.contains('permission was denied') ||
+      lower.contains('location permission')) {
+    return 'Izin lokasi ditolak.';
+  }
+
+  return trimmed;
 }

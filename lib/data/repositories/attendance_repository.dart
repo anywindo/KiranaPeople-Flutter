@@ -27,7 +27,7 @@ class AttendanceRepository {
         return TodayAttendanceData.fromJson(payload);
       }
     }
-    throw Exception("Failed to load today's attendance status.");
+    throw Exception('Gagal memuat status presensi hari ini.');
   }
 
   Future<void> submitAttendanceEvent({

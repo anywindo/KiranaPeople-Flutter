@@ -99,7 +99,7 @@ class _OnboardingPasswordScreenState
       } else {
         final authError = ref.read(authProvider).errorMessage;
         setState(() {
-          _localError = authError ?? 'Failed to update password.';
+          _localError = authError ?? 'Gagal memperbarui kata sandi.';
         });
       }
     }

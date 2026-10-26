@@ -50,7 +50,7 @@ class AuthRepository {
       }
     }
 
-    throw Exception('Invalid login response format.');
+    throw Exception('Format respon login tidak valid.');
   }
 
   Future<UserModel> getProfile() async {
@@ -64,7 +64,7 @@ class AuthRepository {
         return user;
       }
     }
-    throw Exception('Failed to load user profile.');
+    throw Exception('Gagal memuat profil pengguna.');
   }
 
   Future<UserModel> updateProfile({String? phone, File? avatarFile}) async {

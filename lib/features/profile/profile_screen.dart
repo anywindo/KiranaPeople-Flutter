@@ -304,13 +304,13 @@ class ProfileScreen extends ConsumerWidget {
         } else {
           final err =
               ref.read(authProvider).errorMessage ??
-              'Failed to update profile photo.';
+              'Gagal memperbarui foto profil.';
           _showCustomToast(context, err, isError: true);
         }
       }
     } catch (e) {
       if (context.mounted) {
-        _showCustomToast(context, 'Failed to pick photo: $e', isError: true);
+        _showCustomToast(context, 'Gagal memilih foto: $e', isError: true);
       }
     }
   }
@@ -438,7 +438,7 @@ class ProfileScreen extends ConsumerWidget {
                         } else {
                           final err =
                               ref.read(authProvider).errorMessage ??
-                              'Failed to update phone number.';
+                              'Gagal memperbarui nomor telepon.';
                           _showCustomToast(context, err, isError: true);
                         }
                       }

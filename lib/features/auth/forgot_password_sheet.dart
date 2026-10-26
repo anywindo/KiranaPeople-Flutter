@@ -168,7 +168,7 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
     final email = _emailController.text.trim();
     if (!_isEmailValid) {
       setState(() {
-        _errorMessage = 'Invalid email address format.';
+        _errorMessage = 'Format alamat email tidak valid.';
       });
       return;
     }
@@ -230,7 +230,7 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
   void _proceedToResetPassword() {
     if (!_isOtpValid) {
       setState(() {
-        _errorMessage = 'OTP code must be 6 digits.';
+        _errorMessage = 'Kode OTP harus berupa 6 digit angka.';
       });
       return;
     }
@@ -246,16 +246,16 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
   Future<void> _submitResetPassword() async {
     if (!_isResetFormValid) {
       if (!_isOtpValid) {
-        _errorMessage = 'OTP code is invalid or empty (must be 6 digits).';
+        _errorMessage = 'Kode OTP tidak valid (harus 6 digit angka).';
       } else if (!_hasMinLength) {
-        _errorMessage = 'New password must be at least 8 characters.';
+        _errorMessage = 'Kata sandi baru minimal 8 karakter.';
       } else if (!_hasMixedCase) {
         _errorMessage =
-            'Password must contain uppercase and lowercase letters.';
+            'Kata sandi harus memuat kombinasi huruf besar dan kecil.';
       } else if (!_hasNumber) {
-        _errorMessage = 'Password must contain at least 1 number.';
+        _errorMessage = 'Kata sandi harus memuat minimal 1 angka.';
       } else if (!_isPasswordMatching) {
-        _errorMessage = 'Password confirmation does not match.';
+        _errorMessage = 'Konfirmasi kata sandi tidak cocok.';
       }
       setState(() {});
       return;

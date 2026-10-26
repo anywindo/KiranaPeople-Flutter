@@ -649,6 +649,15 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                                       workLocation: workLocation,
                                     );
                                     if (res == true) {
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('${targetAction.label} berhasil dicatat!'),
+                                          backgroundColor: AppColors.success,
+                                          behavior: SnackBarBehavior.floating,
+                                          duration: const Duration(seconds: 4),
+                                        ),
+                                      );
                                       ref
                                           .read(
                                               todayAttendanceProvider.notifier)

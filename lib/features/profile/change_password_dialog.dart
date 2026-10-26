@@ -25,6 +25,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
   final _currentController = TextEditingController();
   final _newController = TextEditingController();
   final _confirmController = TextEditingController();
+  String? _dialogError;
 
   @override
   void dispose() {
@@ -35,6 +36,10 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
   }
 
   void _submit() async {
+    setState(() {
+      _dialogError = null;
+    });
+
     if (_formKey.currentState?.validate() ?? false) {
       final success = await ref
           .read(authProvider.notifier)
@@ -53,15 +58,17 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
             const SnackBar(
               content: Text('Kata sandi berhasil diubah!'),
               backgroundColor: AppColors.success,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 4),
             ),
           );
         } else {
           final err =
               ref.read(authProvider).errorMessage ??
-              'Failed to change password.';
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(err), backgroundColor: AppColors.error),
-          );
+              'Gagal mengubah kata sandi.';
+          setState(() {
+            _dialogError = err;
+          });
         }
       }
     }
@@ -85,6 +92,42 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (_dialogError != null) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    margin: const EdgeInsets.only(bottom: 14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEF4444).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: const Color(0xFFEF4444).withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.error_outline_rounded,
+                          color: Color(0xFFEF4444),
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _dialogError!,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFFEF4444),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 TextFormField(
                   controller: _currentController,
                   obscureText: true,
@@ -110,8 +153,8 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                     ),
                   ),
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'This field is required';
-                    if (v.length < 8) return 'Minimum 8 characters';
+                    if (v == null || v.isEmpty) return 'Kolom ini wajib diisi';
+                    if (v.length < 8) return 'Minimal 8 karakter';
                     return null;
                   },
                 ),
@@ -128,7 +171,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                   ),
                   validator: (v) {
                     if (v != _newController.text) {
-                      return 'Passwords do not match';
+                      return 'Konfirmasi kata sandi tidak cocok';
                     }
                     return null;
                   },

@@ -97,12 +97,27 @@ class _AttendanceConfirmationViewState
       await _fetchLocation();
       if (!mounted) return;
       if (_currentPosition == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _locationError ?? 'Failed to acquire GPS location. Please ensure location permissions are enabled.',
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
-            backgroundColor: AppColors.error,
+            title: const Text(
+              'Lokasi GPS Tidak Ditemukan',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: Text(
+              _locationError ??
+                  'Gagal mendapatkan lokasi GPS. Pastikan GPS dan izin lokasi telah diaktifkan.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Tutup'),
+              ),
+            ],
           ),
         );
         return;
@@ -116,13 +131,26 @@ class _AttendanceConfirmationViewState
         widget.workLocation!.latitude,
         widget.workLocation!.longitude,
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'You are outside the office radius (${dist.round()}m from allowed ${widget.workLocation!.radius.round()}m limit). You must be within the office area to record attendance.',
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
+          title: const Text(
+            'Di Luar Radius Kantor',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            'Anda berada di luar radius kantor (${dist.round()}m dari batas yang diizinkan ${widget.workLocation!.radius.round()}m). Anda harus berada di area kantor untuk melakukan presensi.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Mengerti'),
+            ),
+          ],
         ),
       );
       return;
@@ -148,33 +176,27 @@ class _AttendanceConfirmationViewState
     });
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${widget.action.label} berhasil dicatat!'),
-          backgroundColor: AppColors.success,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
       widget.onSubmittedSuccess();
     } else {
       final error =
           ref.read(todayAttendanceProvider).submitError ??
-          'Failed to record attendance.';
+          'Gagal mencatat presensi.';
       showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (ctx) => AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           title: const Text(
-            'Attendance Failed',
+            'Presensi Gagal',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           content: Text(error),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Close'),
+              child: const Text('Tutup'),
             ),
           ],
         ),

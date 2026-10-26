@@ -66,17 +66,20 @@ class _AttendanceSubmissionDialogState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to open camera: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        setState(() {
+          _dialogError = 'Gagal membuka kamera: $e';
+        });
       }
     }
   }
 
+  String? _dialogError;
+
   void _submit() async {
+    setState(() {
+      _dialogError = null;
+    });
+
     double lat = 0.0;
     double lng = 0.0;
     try {
@@ -85,12 +88,9 @@ class _AttendanceSubmissionDialogState
       lng = pos.longitude;
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString().replaceFirst('Exception: ', '')),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        setState(() {
+          _dialogError = e.toString().replaceFirst('Exception: ', '');
+        });
       }
       return;
     }
@@ -114,15 +114,17 @@ class _AttendanceSubmissionDialogState
           SnackBar(
             content: Text('${widget.eventType.label} berhasil dicatat!'),
             backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
           ),
         );
       } else {
         final err =
             ref.read(todayAttendanceProvider).submitError ??
-            'Failed to submit attendance.';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(err), backgroundColor: AppColors.error),
-        );
+            'Gagal mencatat presensi.';
+        setState(() {
+          _dialogError = err;
+        });
       }
     }
   }
@@ -160,6 +162,42 @@ class _AttendanceSubmissionDialogState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (_dialogError != null) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEF4444).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFFEF4444).withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.error_outline_rounded,
+                      color: Color(0xFFEF4444),
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _dialogError!,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFFEF4444),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const Text(
               'Silakan ambil foto selfie untuk verifikasi presensi Anda. GPS lokasi akan dicatat secara otomatis.',
               style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
