@@ -4,12 +4,9 @@ import '../data/models/shift_model.dart';
 import '../data/models/attendance_model.dart';
 import '../data/models/attendance_event_model.dart';
 import '../data/repositories/attendance_repository.dart';
+import '../core/network/api_exception.dart';
 import 'auth_provider.dart';
 import 'history_provider.dart';
-
-final attendanceRepositoryProvider = Provider<AttendanceRepository>((ref) {
-  return AttendanceRepository();
-});
 
 class TodayAttendanceState {
   final AsyncValue<TodayAttendanceData> data;
@@ -109,6 +106,11 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
     required AttendanceEventType eventType,
     required double latitude,
     required double longitude,
+    double? accuracy,
+    double? altitude,
+    DateTime? deviceTimestamp,
+    bool isMocked = false,
+    bool? isDeviceRooted,
     File? photoFile,
     int? shiftId,
     String? notes,
@@ -119,6 +121,11 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
         eventType: eventType,
         latitude: latitude,
         longitude: longitude,
+        accuracy: accuracy,
+        altitude: altitude,
+        deviceTimestamp: deviceTimestamp,
+        isMocked: isMocked,
+        isDeviceRooted: isDeviceRooted,
         photoFile: photoFile,
         shiftId: shiftId ?? state.selectedShift?.id,
         notes: notes,
@@ -130,6 +137,49 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
       state = state.copyWith(isSubmitting: false);
       return true;
     } catch (e) {
+      // Reconcile timeout or connection error:
+      // If the server received and processed the request before the client connection was aborted,
+      // or if the event was already registered, verify if today's attendance actually contains the submitted event.
+      final errorMessage = e.toString().toLowerCase();
+      final isTimeoutOrNetworkError = e is ApiException &&
+          (e.message.contains('waktu habis') ||
+              e.message.contains('koneksi') ||
+              e.message.contains('terputus') ||
+              e.statusCode == null ||
+              e.statusCode == 504);
+
+      final isAlreadyRecordedError = errorMessage.contains('sudah dilakukan') ||
+          errorMessage.contains('sudah dimulai') ||
+          errorMessage.contains('sudah dicatat');
+
+      if (isTimeoutOrNetworkError || isAlreadyRecordedError) {
+        try {
+          final res = await _repository.getTodayAttendance();
+          final hasEventRecorded = res.events?.any(
+                (event) => event.eventType == eventType,
+              ) ??
+              false;
+
+          if (hasEventRecorded) {
+            final initialShift = state.selectedShift ??
+                res.shift ??
+                (res.availableShifts?.isNotEmpty == true
+                    ? res.availableShifts!.first
+                    : null);
+            state = state.copyWith(
+              data: AsyncValue.data(res),
+              selectedShift: initialShift,
+              isSubmitting: false,
+              clearError: true,
+            );
+            ref.read(historyProvider.notifier).refresh();
+            return true;
+          }
+        } catch (_) {
+          // If server check fails, proceed to standard error state
+        }
+      }
+
       state = state.copyWith(
         isSubmitting: false,
         submitError: e.toString().replaceFirst('Exception: ', ''),

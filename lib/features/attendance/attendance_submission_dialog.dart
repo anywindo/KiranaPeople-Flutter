@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
 
+import '../../core/security/device_security_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/location_helper.dart';
 import '../../data/models/attendance_event_model.dart';
@@ -15,7 +16,30 @@ class AttendanceSubmissionDialog extends ConsumerStatefulWidget {
 
   const AttendanceSubmissionDialog({super.key, required this.eventType});
 
-  static Future<bool?> show(BuildContext context, AttendanceEventType type) {
+  static Future<bool?> show(BuildContext context, AttendanceEventType type) async {
+    final isCompromised = await DeviceSecurityService().isDeviceCompromised();
+    if (isCompromised && context.mounted) {
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Perangkat Tidak Didukung', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: const Text(
+            'Aplikasi mendeteksi bahwa perangkat ini telah di-root atau di-jailbreak. Demi keamanan data dan keaslian presensi, presensi tidak dapat dilakukan pada perangkat yang dimodifikasi.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Mengerti'),
+            ),
+          ],
+        ),
+      );
+      return false;
+    }
+
+    if (!context.mounted) return false;
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -37,6 +61,13 @@ class _AttendanceSubmissionDialogState
   @override
   void dispose() {
     _notesController.dispose();
+    if (_selfieImage != null) {
+      try {
+        if (_selfieImage!.existsSync()) {
+          _selfieImage!.deleteSync();
+        }
+      } catch (_) {}
+    }
     super.dispose();
   }
 
@@ -45,11 +76,19 @@ class _AttendanceSubmissionDialogState
       final picked = await _picker.pickImage(
         source: ImageSource.camera,
         preferredCameraDevice: CameraDevice.front,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 85,
+        maxWidth: 960,
+        maxHeight: 960,
+        imageQuality: 75,
       );
       if (picked != null) {
+        // Clean up previously captured selfie before replacing
+        if (_selfieImage != null) {
+          try {
+            if (_selfieImage!.existsSync()) {
+              _selfieImage!.deleteSync();
+            }
+          } catch (_) {}
+        }
         final file = File(picked.path);
         try {
           final bytes = await file.readAsBytes();
@@ -57,7 +96,7 @@ class _AttendanceSubmissionDialogState
           if (decoded != null) {
             img.Image oriented = img.bakeOrientation(decoded);
             oriented = img.flipHorizontal(oriented);
-            await file.writeAsBytes(img.encodeJpg(oriented, quality: 85));
+            await file.writeAsBytes(img.encodeJpg(oriented, quality: 75));
           }
         } catch (_) {}
         setState(() {
@@ -82,10 +121,18 @@ class _AttendanceSubmissionDialogState
 
     double lat = 0.0;
     double lng = 0.0;
+    double? acc;
+    double? alt;
+    DateTime? timestamp;
+    bool isMock = false;
     try {
       final pos = await LocationHelper.determinePosition();
       lat = pos.latitude;
       lng = pos.longitude;
+      acc = pos.accuracy;
+      alt = pos.altitude;
+      timestamp = pos.timestamp;
+      isMock = pos.isMocked;
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -101,6 +148,10 @@ class _AttendanceSubmissionDialogState
           eventType: widget.eventType,
           latitude: lat,
           longitude: lng,
+          accuracy: acc,
+          altitude: alt,
+          deviceTimestamp: timestamp,
+          isMocked: isMock,
           photoFile: _selfieImage,
           notes: _notesController.text.trim().isEmpty
               ? null
@@ -109,6 +160,12 @@ class _AttendanceSubmissionDialogState
 
     if (mounted) {
       if (success) {
+        // Purge temporary selfie image from local storage
+        try {
+          if (_selfieImage != null && _selfieImage!.existsSync()) {
+            _selfieImage!.deleteSync();
+          }
+        } catch (_) {}
         Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

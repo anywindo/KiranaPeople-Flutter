@@ -30,9 +30,9 @@ class ApiClient {
       },
     );
 
-    _dio.options.connectTimeout = const Duration(seconds: 20);
-    _dio.options.receiveTimeout = const Duration(seconds: 20);
-    _dio.options.sendTimeout = const Duration(seconds: 25);
+    _dio.options.connectTimeout = const Duration(seconds: 30);
+    _dio.options.receiveTimeout = const Duration(seconds: 30);
+    _dio.options.sendTimeout = const Duration(seconds: 30);
     _dio.options.headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
@@ -267,12 +267,18 @@ class ApiClient {
     String path, {
     required FormData formData,
     ProgressCallback? onSendProgress,
+    Duration? sendTimeout,
+    Duration? receiveTimeout,
   }) async {
     try {
       return await _dio.post(
         path,
         data: formData,
-        options: Options(contentType: 'multipart/form-data'),
+        options: Options(
+          contentType: 'multipart/form-data',
+          sendTimeout: sendTimeout ?? const Duration(seconds: 60),
+          receiveTimeout: receiveTimeout ?? const Duration(seconds: 60),
+        ),
         onSendProgress: onSendProgress,
       );
     } on DioException catch (e) {

@@ -66,6 +66,20 @@ class LocationHelper {
       );
     }
 
+    if (position.accuracy < 0) {
+      throw Exception(
+        'Akurasi sinyal GPS tidak valid. Pastikan GPS aktif dan berada di area terbuka.',
+      );
+    }
+
+    // Anti-replay / Clock skew protection: Reject fixes with timestamps far in the future
+    final now = DateTime.now();
+    if (position.timestamp.difference(now).inSeconds > 60) {
+      throw Exception(
+        'Waktu perangkat tidak sinkron. Harap aktifkan pengaturan waktu otomatis sistem.',
+      );
+    }
+
     return position;
   }
 }

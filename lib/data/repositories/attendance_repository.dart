@@ -7,6 +7,7 @@ import '../models/attendance_model.dart';
 import '../models/attendance_event_model.dart';
 import '../../core/network/api_client.dart';
 import '../../core/constants/api_endpoints.dart';
+import '../../core/security/device_security_service.dart';
 
 final attendanceRepositoryProvider = Provider<AttendanceRepository>((ref) {
   return AttendanceRepository();
@@ -34,6 +35,11 @@ class AttendanceRepository {
     required AttendanceEventType eventType,
     required double latitude,
     required double longitude,
+    double? accuracy,
+    double? altitude,
+    DateTime? deviceTimestamp,
+    bool isMocked = false,
+    bool? isDeviceRooted,
     File? photoFile,
     int? shiftId,
     String? notes,
@@ -42,7 +48,26 @@ class AttendanceRepository {
       'event_type': eventType.value,
       'latitude': latitude.toString(),
       'longitude': longitude.toString(),
+      'is_mocked': isMocked ? '1' : '0',
     };
+
+    final isRooted = isDeviceRooted ?? await DeviceSecurityService().isDeviceCompromised();
+    if (isRooted) {
+      formDataMap['is_rooted'] = '1';
+    }
+
+    if (accuracy != null) {
+      formDataMap['accuracy'] = accuracy.toString();
+    }
+
+    if (altitude != null) {
+      formDataMap['altitude'] = altitude.toString();
+    }
+
+    if (deviceTimestamp != null) {
+      formDataMap['device_timestamp'] =
+          deviceTimestamp.toUtc().toIso8601String();
+    }
 
     if (shiftId != null) {
       formDataMap['shift_id'] = shiftId.toString();

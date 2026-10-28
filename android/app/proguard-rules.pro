@@ -22,3 +22,6 @@
 -keepattributes *Annotation*,InnerClasses,Signature,EnclosingMethod,Exceptions
 -keep class kotlin.coroutines.** { *; }
 -keep class kotlinx.coroutines.** { *; }
+
+# Flutter Deferred Components & Google Play Core
+-dontwarn com.google.android.play.core.**

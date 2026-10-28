@@ -166,6 +166,10 @@ class _AttendanceConfirmationViewState
           eventType: widget.action,
           latitude: _currentPosition!.latitude,
           longitude: _currentPosition!.longitude,
+          accuracy: _currentPosition!.accuracy,
+          altitude: _currentPosition!.altitude,
+          deviceTimestamp: _currentPosition!.timestamp,
+          isMocked: _currentPosition!.isMocked,
           photoFile: widget.photoFile,
           shiftId: widget.shiftId,
         );
@@ -176,6 +180,12 @@ class _AttendanceConfirmationViewState
     });
 
     if (success) {
+      // Purge local selfie cache file upon successful server reception (GDPR / Data Minimization)
+      try {
+        if (await widget.photoFile.exists()) {
+          await widget.photoFile.delete();
+        }
+      } catch (_) {}
       widget.onSubmittedSuccess();
     } else {
       final error =

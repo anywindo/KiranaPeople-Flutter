@@ -293,19 +293,34 @@ class ProfileScreen extends ConsumerWidget {
         ),
       );
 
-      if (confirm != true) return;
+      if (confirm != true) {
+        if (source == ImageSource.camera) {
+          try {
+            if (file.existsSync()) file.deleteSync();
+          } catch (_) {}
+        }
+        return;
+      }
 
-      final success = await ref
-          .read(authProvider.notifier)
-          .updateProfile(avatarFile: file);
-      if (context.mounted) {
-        if (success) {
-          _showCustomToast(context, 'Foto profil berhasil diperbarui!');
-        } else {
-          final err =
-              ref.read(authProvider).errorMessage ??
-              'Gagal memperbarui foto profil.';
-          _showCustomToast(context, err, isError: true);
+      try {
+        final success = await ref
+            .read(authProvider.notifier)
+            .updateProfile(avatarFile: file);
+        if (context.mounted) {
+          if (success) {
+            _showCustomToast(context, 'Foto profil berhasil diperbarui!');
+          } else {
+            final err =
+                ref.read(authProvider).errorMessage ??
+                'Gagal memperbarui foto profil.';
+            _showCustomToast(context, err, isError: true);
+          }
+        }
+      } finally {
+        if (source == ImageSource.camera) {
+          try {
+            if (file.existsSync()) file.deleteSync();
+          } catch (_) {}
         }
       }
     } catch (e) {

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
+import '../../core/security/device_security_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../data/models/work_location_model.dart';
@@ -40,16 +41,16 @@ Future<void> _processImageInIsolate(_ImageProcessParams params) async {
     oriented = img.flipHorizontal(oriented);
   }
 
-  // Downsample to max 1280px on longest side for optimal speed, quality, and upload efficiency
-  if (oriented.height > 1280 || oriented.width > 1280) {
+  // Downsample to max 960px on longest side for optimal speed, quality, and upload efficiency
+  if (oriented.height > 960 || oriented.width > 960) {
     oriented = img.copyResize(
       oriented,
-      height: oriented.height > oriented.width ? 1280 : null,
-      width: oriented.width >= oriented.height ? 1280 : null,
+      height: oriented.height > oriented.width ? 960 : null,
+      width: oriented.width >= oriented.height ? 960 : null,
     );
   }
 
-  final encoded = img.encodeJpg(oriented, quality: 85);
+  final encoded = img.encodeJpg(oriented, quality: 75);
   await file.writeAsBytes(encoded);
 }
 
@@ -70,7 +71,31 @@ class CameraSelfieView extends StatefulWidget {
     required AttendanceEventType action,
     int? shiftId,
     WorkLocation? workLocation,
-  }) {
+  }) async {
+    // Root / Jailbreak device integrity protection (MASVS-RESILIENCE)
+    final isCompromised = await DeviceSecurityService().isDeviceCompromised();
+    if (isCompromised && context.mounted) {
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Perangkat Tidak Didukung', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: const Text(
+            'Aplikasi mendeteksi bahwa perangkat ini telah di-root atau di-jailbreak. Demi keamanan data dan keaslian presensi, presensi tidak dapat dilakukan pada perangkat yang dimodifikasi.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Mengerti'),
+            ),
+          ],
+        ),
+      );
+      return false;
+    }
+
+    if (!context.mounted) return false;
     return Navigator.push<bool>(
       context,
       MaterialPageRoute(
@@ -117,6 +142,13 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _controller?.dispose();
+    if (_capturedPhoto != null) {
+      try {
+        if (_capturedPhoto!.existsSync()) {
+          _capturedPhoto!.deleteSync();
+        }
+      } catch (_) {}
+    }
     super.dispose();
   }
 
@@ -299,6 +331,14 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
         try {
           await _controller?.pausePreview();
         } catch (_) {}
+        // Clean up previously captured file before storing the new one
+        if (_capturedPhoto != null && _capturedPhoto!.path != file.path) {
+          try {
+            if (_capturedPhoto!.existsSync()) {
+              _capturedPhoto!.deleteSync();
+            }
+          } catch (_) {}
+        }
         setState(() {
           _capturedPhoto = file;
           _isTakingPhoto = false;
@@ -323,6 +363,13 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
         canPop: false,
         onPopInvokedWithResult: (didPop, result) async {
           if (didPop) return;
+          if (_capturedPhoto != null) {
+            try {
+              if (await _capturedPhoto!.exists()) {
+                await _capturedPhoto!.delete();
+              }
+            } catch (_) {}
+          }
           try {
             await _controller?.resumePreview();
           } catch (_) {}
@@ -338,6 +385,13 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
           shiftId: widget.shiftId,
           workLocation: widget.workLocation,
           onRetake: () async {
+            if (_capturedPhoto != null) {
+              try {
+                if (await _capturedPhoto!.exists()) {
+                  await _capturedPhoto!.delete();
+                }
+              } catch (_) {}
+            }
             try {
               await _controller?.resumePreview();
             } catch (_) {}

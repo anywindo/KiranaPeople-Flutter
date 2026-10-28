@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- By default, disallow unencrypted cleartext HTTP traffic -->
+    <!-- By default, disallow unencrypted cleartext HTTP traffic and trust only system CAs in production -->
     <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
             <certificates src="system" />
-            <certificates src="user" />
         </trust-anchors>
     </base-config>
 
@@ -15,9 +14,13 @@
         <domain includeSubdomains="true">127.0.0.1</domain>
         <domain includeSubdomains="true">192.168.1.11</domain>
         <domain includeSubdomains="true">terriblenight.test</domain>
+    </domain-config>
+
+    <!-- User-installed certificates (e.g. debugging proxies) are only trusted in debuggable builds -->
+    <debug-overrides>
         <trust-anchors>
             <certificates src="system" />
             <certificates src="user" />
         </trust-anchors>
-    </domain-config>
+    </debug-overrides>
 </network-security-config>
