@@ -48,17 +48,27 @@ Future<void> _processImageFast({
     );
 
     if (compressedBytes != null && compressedBytes.isNotEmpty) {
-      if (isFrontCamera) {
-        // Fast in-memory mirror flip of the already small (1000px, ~70KB) JPEG (< 15ms)
-        final decoded = img.decodeJpg(compressedBytes);
-        if (decoded != null) {
-          final flipped = img.flipHorizontal(decoded);
-          final finalJpg = img.encodeJpg(flipped, quality: 75);
-          await file.writeAsBytes(finalJpg);
-          return;
+      final decoded = img.decodeJpg(compressedBytes);
+      if (decoded != null) {
+        img.Image working = img.bakeOrientation(decoded);
+        if (working.width > working.height) {
+          final rotationAngle = sensorOrientation == 90 ? 90 : 270;
+          working = img.copyRotate(working, angle: rotationAngle);
         }
+        if (isFrontCamera) {
+          working = img.flipHorizontal(working);
+        }
+        final finalJpg = img.encodeJpg(working, quality: 75);
+        final tmpFile = File('$path.tmp');
+        await tmpFile.writeAsBytes(finalJpg, flush: true);
+        await tmpFile.rename(path);
+        await FileImage(file).evict();
+        return;
       }
-      await file.writeAsBytes(compressedBytes);
+      final tmpFile = File('$path.tmp');
+      await tmpFile.writeAsBytes(compressedBytes, flush: true);
+      await tmpFile.rename(path);
+      await FileImage(file).evict();
       return;
     }
   } catch (_) {
@@ -74,6 +84,7 @@ Future<void> _processImageFast({
       isFrontCamera: isFrontCamera,
     ),
   );
+  await FileImage(file).evict();
 }
 
 // Background isolate image processor to keep UI thread 100% responsive and avoid ANR/OOM
@@ -109,9 +120,11 @@ Future<void> _processImageInIsolate(_ImageProcessParams params) async {
     working = img.flipHorizontal(working);
   }
 
-  // Compress at quality 65 (ideal for biometric selfie verification, ~50KB payload)
-  final encoded = img.encodeJpg(working, quality: 65);
-  await file.writeAsBytes(encoded);
+  // Compress at quality 75 and write atomically via temp file
+  final encoded = img.encodeJpg(working, quality: 75);
+  final tmpFile = File('${params.path}.tmp');
+  await tmpFile.writeAsBytes(encoded, flush: true);
+  await tmpFile.rename(params.path);
 }
 
 class CameraSelfieView extends StatefulWidget {
@@ -386,12 +399,15 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
             ? _cameras[_selectedCameraIndex].sensorOrientation
             : 270;
 
-        // Run hardware-accelerated downsampling and mirroring concurrently (< 80ms)
-        _imageProcessFuture = _processImageFast(
+        // Await hardware-accelerated downsampling and mirroring (~60ms) before displaying
+        // so the file is 100% written, mirrored, and never accessed concurrently.
+        final future = _processImageFast(
           path: file.path,
           sensorOrientation: sensorOrientation,
           isFrontCamera: isFront,
         );
+        _imageProcessFuture = future;
+        await future;
       } catch (_) {}
 
       if (mounted) {
@@ -548,108 +564,107 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
                     ),
                   ),
 
-                // Camera Viewport + Headroom Overlay
+                // Camera Viewport + Headroom Overlay (Matches AttendanceConfirmationView frame)
                 Expanded(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    fit: StackFit.expand,
-                    children: [
-                      // Camera Preview or Fallback
-                      if (_isCameraReady &&
-                          _controller != null &&
-                          _controller!.value.isInitialized)
-                        Center(
-                          child: AspectRatio(
-                            aspectRatio: 3 / 4,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: LayoutBuilder(
-                                builder: (context, constraints) {
-                                  final double containerWidth =
-                                      constraints.maxWidth;
-                                  final double containerHeight =
-                                      constraints.maxHeight;
-                                  final double containerRatio =
-                                      containerWidth / containerHeight;
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        fit: StackFit.expand,
+                        children: [
+                          // Camera Preview or Fallback
+                          if (_isCameraReady &&
+                              _controller != null &&
+                              _controller!.value.isInitialized)
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final double containerWidth =
+                                    constraints.maxWidth;
+                                final double containerHeight =
+                                    constraints.maxHeight;
+                                final double containerRatio =
+                                    containerWidth / containerHeight;
 
-                                  // Calculate camera sensor aspect ratio in portrait
-                                  final bool isPortrait = MediaQuery.of(context)
-                                          .orientation ==
-                                      Orientation.portrait;
-                                  final double rawAspect =
-                                      _controller!.value.aspectRatio;
-                                  final double previewRatio = isPortrait
-                                      ? (rawAspect > 1
-                                          ? 1.0 / rawAspect
-                                          : rawAspect)
-                                      : (rawAspect < 1
-                                          ? 1.0 / rawAspect
-                                          : rawAspect);
+                                // Calculate camera sensor aspect ratio in portrait
+                                final bool isPortrait = MediaQuery.of(context)
+                                        .orientation ==
+                                    Orientation.portrait;
+                                final double rawAspect =
+                                    _controller!.value.aspectRatio;
+                                final double previewRatio = isPortrait
+                                    ? (rawAspect > 1
+                                        ? 1.0 / rawAspect
+                                        : rawAspect)
+                                    : (rawAspect < 1
+                                        ? 1.0 / rawAspect
+                                        : rawAspect);
 
-                                  double targetWidth;
-                                  double targetHeight;
+                                double targetWidth;
+                                double targetHeight;
 
-                                  if (containerRatio > previewRatio) {
-                                    targetWidth = containerWidth;
-                                    targetHeight =
-                                        containerWidth / previewRatio;
-                                  } else {
-                                    targetHeight = containerHeight;
-                                    targetWidth =
-                                        containerHeight * previewRatio;
-                                  }
+                                if (containerRatio > previewRatio) {
+                                  targetWidth = containerWidth;
+                                  targetHeight =
+                                      containerWidth / previewRatio;
+                                } else {
+                                  targetHeight = containerHeight;
+                                  targetWidth =
+                                      containerHeight * previewRatio;
+                                }
 
-                                  return SizedBox(
-                                    width: containerWidth,
-                                    height: containerHeight,
-                                    child: ClipRect(
-                                      child: OverflowBox(
-                                        alignment: Alignment.center,
-                                        maxWidth: targetWidth,
-                                        maxHeight: targetHeight,
-                                        minWidth: targetWidth,
-                                        minHeight: targetHeight,
-                                        child: SizedBox(
-                                          width: targetWidth,
-                                          height: targetHeight,
-                                          child: CameraPreview(_controller!),
-                                        ),
+                                return SizedBox(
+                                  width: containerWidth,
+                                  height: containerHeight,
+                                  child: ClipRect(
+                                    child: OverflowBox(
+                                      alignment: Alignment.center,
+                                      maxWidth: targetWidth,
+                                      maxHeight: targetHeight,
+                                      minWidth: targetWidth,
+                                      minHeight: targetHeight,
+                                      child: SizedBox(
+                                        width: targetWidth,
+                                        height: targetHeight,
+                                        child: CameraPreview(_controller!),
                                       ),
                                     ),
+                                  ),
+                                );
+                              },
+                            )
+                          else
+                            const Center(
+                              child: CircularProgressIndicator(
+                                  color: AppColors.primary),
+                            ),
+
+                          // Headroom Face Guide Overlay
+                          Center(
+                            child: FractionallySizedBox(
+                              widthFactor: 0.85,
+                              child: Image.asset(
+                                'assets/images/Headroom.png',
+                                fit: BoxFit.contain,
+                                color:
+                                    isScreenFlashWarmup ? Colors.black45 : null,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return CustomPaint(
+                                    painter: _SilhouettePainter(
+                                      strokeColor: isScreenFlashWarmup
+                                          ? Colors.black54
+                                          : Colors.white.withValues(alpha: 0.70),
+                                    ),
+                                    size: const Size(260, 360),
                                   );
                                 },
                               ),
                             ),
                           ),
-                        )
-                      else
-                        const Center(
-                          child:
-                              CircularProgressIndicator(color: AppColors.primary),
-                        ),
-
-                      // Headroom Face Guide Overlay
-                      Center(
-                        child: FractionallySizedBox(
-                          widthFactor: 0.85,
-                          child: Image.asset(
-                            'assets/images/Headroom.png',
-                            fit: BoxFit.contain,
-                            color: isScreenFlashWarmup ? Colors.black45 : null,
-                            errorBuilder: (context, error, stackTrace) {
-                              return CustomPaint(
-                                painter: _SilhouettePainter(
-                                  strokeColor: isScreenFlashWarmup
-                                      ? Colors.black54
-                                      : Colors.white.withValues(alpha: 0.70),
-                                ),
-                                size: const Size(260, 360),
-                              );
-                            },
-                          ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
 

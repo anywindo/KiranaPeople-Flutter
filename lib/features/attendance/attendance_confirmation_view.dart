@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -338,20 +337,11 @@ class _AttendanceConfirmationViewState
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      // Photo Image (Mirrored for front camera to match camera viewfinder exactly)
-                      widget.isFrontCamera
-                          ? Transform(
-                              alignment: Alignment.center,
-                              transform: Matrix4.rotationY(math.pi),
-                              child: Image.file(
-                                widget.photoFile,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : Image.file(
-                              widget.photoFile,
-                              fit: BoxFit.cover,
-                            ),
+                      // Photo Image (Already deterministically mirrored on disk for front camera)
+                      Image.file(
+                        widget.photoFile,
+                        fit: BoxFit.cover,
+                      ),
 
                       // Top Badges (Radius & Peta)
                       Positioned(

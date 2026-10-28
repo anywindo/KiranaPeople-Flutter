@@ -301,9 +301,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
           color: AppColors.primary,
           onRefresh: () => ref.read(todayAttendanceProvider.notifier).refresh(),
           child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -325,7 +323,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                 ),
                 const SizedBox(height: 6),
 
-                // 1. Top Header Bar (KIRANA GROUP + Logout)
+                // 1. Top Header Bar (KIRANA GROUP + Refresh + Logout)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -338,30 +336,75 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                         color: context.textPrimaryColor,
                       ),
                     ),
-                    InkWell(
-                      onTap: _showLogoutDialog,
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: context.surfaceColor,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: context.borderColor),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: context.isDarkMode ? 0.2 : 0.04),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            ref.read(todayAttendanceProvider.notifier).refresh();
+                          },
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: context.surfaceColor,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: context.borderColor),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(
+                                    alpha: context.isDarkMode ? 0.2 : 0.04,
+                                  ),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                          ],
+                            child: attendanceState.isBackgroundSyncing
+                                ? const Padding(
+                                    padding: EdgeInsets.all(10),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.primary,
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.refresh_rounded,
+                                    size: 18,
+                                    color: context.textSecondaryColor,
+                                  ),
+                          ),
                         ),
-                        child: Icon(
-                          Icons.logout_rounded,
-                          size: 18,
-                          color: context.textSecondaryColor,
+                        const SizedBox(width: 8),
+                        InkWell(
+                          onTap: _showLogoutDialog,
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: context.surfaceColor,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: context.borderColor),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(
+                                    alpha: context.isDarkMode ? 0.2 : 0.04,
+                                  ),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.logout_rounded,
+                              size: 18,
+                              color: context.textSecondaryColor,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
