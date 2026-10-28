@@ -32,6 +32,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
   // Mode: 0 = Kerja, 1 = Istirahat
   int _activeSegment = 0;
   Timer? _autoRefreshTimer;
+  Timer? _minuteTicker;
 
   @override
   void initState() {
@@ -52,12 +53,18 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
         ref.read(todayAttendanceProvider.notifier).refresh(isBackground: true);
       }
     });
+
+    // Minute ticker to dynamically update time-based button states (e.g. break availability)
+    _minuteTicker = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _autoRefreshTimer?.cancel();
+    _minuteTicker?.cancel();
     super.dispose();
   }
 
@@ -715,8 +722,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                             horizontal: 8, vertical: 4),
                                         decoration: BoxDecoration(
                                           color: !hasStartedBreak
-                                              ? AppColors.primary
-                                                  .withValues(alpha: 0.10)
+                                              ? (Shift.isBeforeBreakTime(selectedShift)
+                                                  ? const Color(0xFFF3F4F6)
+                                                  : AppColors.primary
+                                                      .withValues(alpha: 0.10))
                                               : (!hasEndedBreak
                                                   ? AppColors.success
                                                       .withValues(alpha: 0.12)
@@ -726,7 +735,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                         ),
                                         child: Text(
                                           !hasStartedBreak
-                                              ? 'Belum Mulai'
+                                              ? (Shift.isBeforeBreakTime(selectedShift)
+                                                  ? 'Belum Waktunya'
+                                                  : 'Belum Mulai')
                                               : (!hasEndedBreak
                                                   ? 'Sedang Istirahat'
                                                   : 'Selesai'),
@@ -734,7 +745,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                             fontSize: 11,
                                             fontWeight: FontWeight.bold,
                                             color: !hasStartedBreak
-                                                ? AppColors.primary
+                                                ? (Shift.isBeforeBreakTime(selectedShift)
+                                                    ? const Color(0xFF6B7280)
+                                                    : AppColors.primary)
                                                 : (!hasEndedBreak
                                                     ? AppColors.success
                                                     : context.textSecondaryColor),
@@ -852,6 +865,62 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                               fontSize: 12,
                                               fontWeight: FontWeight.bold,
                                               color: AppColors.primary,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                               ] else if (_activeSegment == 1 &&
+                                  hasStartedShift &&
+                                  !hasStartedBreak &&
+                                  Shift.isBeforeBreakTime(selectedShift)) ...[
+                                const SizedBox(height: 14),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFFBEB),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                        color: const Color(0xFFFDE68A)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.access_time_rounded,
+                                        color: Color(0xFFD97706),
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'Belum waktunya istirahat. Jadwal istirahat dimulai pukul ${selectedShift?.effectiveBreakStart ?? "12:00"}.',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Color(0xFFB45309),
+                                            fontWeight: FontWeight.w500,
+                                            height: 1.3,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            _activeSegment = 0;
+                                          });
+                                        },
+                                        child: const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 4, vertical: 2),
+                                          child: Text(
+                                            'Ke Kerja',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFFD97706),
                                             ),
                                           ),
                                         ),
@@ -2211,6 +2280,41 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
         label = 'Selesai Istirahat';
         icon = Icons.sync_rounded;
       } else {
+        if (Shift.isBeforeBreakTime(selectedShift)) {
+          return InkWell(
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Belum waktunya istirahat. Jadwal istirahat: ${selectedShift?.effectiveBreakStart ?? "12:00"} - ${selectedShift?.effectiveBreakEnd ?? "13:00"}',
+                  ),
+                  backgroundColor: const Color(0xFF4B5563),
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            },
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              width: double.infinity,
+              height: 50,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE5E7EB),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Center(
+                child: Text(
+                  'Belum Waktunya Istirahat',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF9CA3AF),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
         label = 'Mulai Istirahat';
         icon = Icons.coffee_rounded;
       }

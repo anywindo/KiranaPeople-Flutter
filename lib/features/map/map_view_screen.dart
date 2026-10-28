@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/location_helper.dart';
 import '../../data/models/attendance_event_model.dart';
+import '../../data/models/shift_model.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/history_provider.dart';
 import '../attendance/camera_selfie_view.dart';
@@ -140,13 +141,19 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
         events.any((e) => e.eventType == AttendanceEventType.endBreak);
     final isOnBreak = hasStartedBreak && !hasEndedBreak;
 
+    final isBeforeBreak = Shift.isBeforeBreakTime(selectedShift);
+    final isBreakActionDisabled =
+        hasStartedShift && !hasStartedBreak && isBeforeBreak;
+
     final targetAction = _resolveTargetAction(events);
 
     String actionBtnLabel = 'Ambil Presensi: Masuk Kerja';
     if (!hasStartedShift) {
       actionBtnLabel = 'Ambil Presensi: Masuk Kerja';
     } else if (!hasStartedBreak) {
-      actionBtnLabel = 'Ambil Presensi: Mulai Istirahat';
+      actionBtnLabel = isBreakActionDisabled
+          ? 'Belum Waktunya Istirahat'
+          : 'Ambil Presensi: Mulai Istirahat';
     } else if (isOnBreak) {
       actionBtnLabel = 'Ambil Presensi: Selesai Istirahat';
     } else if (!hasEndedShift) {
@@ -632,6 +639,8 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               foregroundColor: Colors.white,
+                              disabledBackgroundColor: const Color(0xFFE5E7EB),
+                              disabledForegroundColor: const Color(0xFF9CA3AF),
                               elevation: 4,
                               shadowColor:
                                   AppColors.primary.withValues(alpha: 0.35),
@@ -639,7 +648,7 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                            onPressed: hasEndedShift
+                            onPressed: (hasEndedShift || isBreakActionDisabled)
                                 ? null
                                 : () async {
                                     final res = await CameraSelfieView.push(

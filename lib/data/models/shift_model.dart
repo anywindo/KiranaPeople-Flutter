@@ -72,4 +72,44 @@ class Shift {
     final endH = (h + 1) % 24;
     return '${endH.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
   }
+
+  /// Returns whether [currentTime] (defaults to DateTime.now()) is before the scheduled break start time.
+  bool isBeforeBreak([DateTime? currentTime]) {
+    final now = currentTime ?? DateTime.now();
+    final breakStr = effectiveBreakStart;
+    final startStr = startTime;
+
+    try {
+      final breakParts = breakStr.split(':');
+      final breakMinutes = int.parse(breakParts[0]) * 60 + int.parse(breakParts[1]);
+
+      final startParts = startStr.split(':');
+      final startMinutes = int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
+
+      final nowMinutes = now.hour * 60 + now.minute;
+
+      if (breakMinutes >= startMinutes) {
+        // Normal daytime shift: break is on the same calendar day as shift start
+        return nowMinutes < breakMinutes;
+      } else {
+        // Overnight shift: break is on the next calendar day
+        if (nowMinutes >= startMinutes) {
+          return true; // Still on the shift-start evening, break is after midnight
+        }
+        return nowMinutes < breakMinutes;
+      }
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Helper to check whether it is before break time for a shift (or default 12:00 if shift is null).
+  static bool isBeforeBreakTime(Shift? shift, [DateTime? currentTime]) {
+    if (shift != null) {
+      return shift.isBeforeBreak(currentTime);
+    }
+    final now = currentTime ?? DateTime.now();
+    final nowMinutes = now.hour * 60 + now.minute;
+    return nowMinutes < (12 * 60); // Default break start at 12:00
+  }
 }
