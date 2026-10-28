@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/shift_model.dart';
@@ -131,10 +132,54 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
         notes: notes,
       );
 
-      await refresh();
-      // Auto-refresh history so newly submitted attendance event appears instantly
-      ref.read(historyProvider.notifier).refresh();
-      state = state.copyWith(isSubmitting: false);
+      // Optimistically update local state so UI reflects the submitted event in 0ms
+      // without waiting for a second GET /attendance/today round-trip.
+      final currentData = state.data.value;
+      if (currentData != null) {
+        final optimisticEvent = AttendanceEvent(
+          eventType: eventType,
+          timestamp: (deviceTimestamp ?? DateTime.now()).toIso8601String(),
+          latitude: latitude,
+          longitude: longitude,
+          notes: notes,
+        );
+        final updatedEvents = <AttendanceEvent>[
+          ...(currentData.events ?? const []),
+          optimisticEvent,
+        ];
+        final String? nextAction = switch (eventType) {
+          AttendanceEventType.startShift => AttendanceEventType.endShift.value,
+          AttendanceEventType.startBreak => AttendanceEventType.endBreak.value,
+          AttendanceEventType.endBreak => AttendanceEventType.endShift.value,
+          AttendanceEventType.endShift => null,
+        };
+        final updatedData = TodayAttendanceData(
+          date: currentData.date,
+          status: eventType == AttendanceEventType.endShift
+              ? 'COMPLETED'
+              : currentData.status,
+          nextAllowedAction: nextAction,
+          activeBreak: eventType == AttendanceEventType.startBreak
+              ? true
+              : (eventType == AttendanceEventType.endBreak
+                    ? false
+                    : currentData.activeBreak),
+          shift: currentData.shift ?? state.selectedShift,
+          availableShifts: currentData.availableShifts,
+          workLocation: currentData.workLocation,
+          events: updatedEvents,
+        );
+        state = state.copyWith(
+          data: AsyncValue.data(updatedData),
+          isSubmitting: false,
+        );
+      } else {
+        state = state.copyWith(isSubmitting: false);
+      }
+
+      // Sync canonical state and history in the background without blocking UI navigation
+      unawaited(refresh(isBackground: true));
+      unawaited(ref.read(historyProvider.notifier).refresh());
       return true;
     } catch (e) {
       // Reconcile timeout or connection error:

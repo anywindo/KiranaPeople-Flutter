@@ -93,10 +93,17 @@ class _AttendanceConfirmationViewState
   Future<void> _submitAttendance() async {
     if (_isSubmitting) return;
 
+    setState(() {
+      _isSubmitting = true;
+    });
+
     if (_currentPosition == null) {
       await _fetchLocation();
       if (!mounted) return;
       if (_currentPosition == null) {
+        setState(() {
+          _isSubmitting = false;
+        });
         showDialog(
           context: context,
           barrierDismissible: false,
@@ -125,6 +132,9 @@ class _AttendanceConfirmationViewState
     }
 
     if (widget.workLocation != null && !_isWithinRadius) {
+      setState(() {
+        _isSubmitting = false;
+      });
       final dist = Geolocator.distanceBetween(
         _currentPosition!.latitude,
         _currentPosition!.longitude,
@@ -155,10 +165,6 @@ class _AttendanceConfirmationViewState
       );
       return;
     }
-
-    setState(() {
-      _isSubmitting = true;
-    });
 
     final success = await ref
         .read(todayAttendanceProvider.notifier)

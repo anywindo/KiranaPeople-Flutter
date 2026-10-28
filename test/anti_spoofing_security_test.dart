@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kirana_people/core/security/device_security_service.dart';
 import 'package:kirana_people/core/constants/api_endpoints.dart';
 import 'package:kirana_people/core/network/api_client.dart';
 import 'package:kirana_people/data/models/attendance_event_model.dart';
@@ -94,6 +96,51 @@ void main() {
 
       final fields = Map.fromEntries(mockClient.lastFormData!.fields);
       expect(fields['is_rooted'], equals('1'));
+    });
+
+    test('integrity flags are always sent explicitly, never omitted', () async {
+      DeviceSecurityService().resetCache();
+      final mockClient = MockApiClient();
+      final repository = AttendanceRepository(apiClient: mockClient);
+
+      await repository.submitAttendanceEvent(
+        eventType: AttendanceEventType.startShift,
+        latitude: -6.914744,
+        longitude: 107.609810,
+      );
+
+      final fields = Map.fromEntries(mockClient.lastFormData!.fields);
+      expect(fields['is_rooted'], equals('0'));
+      expect(fields['is_hooked'], equals('0'));
+      expect(fields.containsKey('integrity_status'), isTrue);
+      expect(fields['integrity_signals'], contains('debug_bypass'));
+    });
+
+    test('submission is refused client-side when the device is compromised', () async {
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      const channel =
+          MethodChannel('com.kiranadesainindonesia.kiranapeople/security');
+      messenger.setMockMethodCallHandler(
+        channel,
+        (_) async => {'rooted': false, 'hooked': true},
+      );
+      DeviceSecurityService().resetCache();
+      final mockClient = MockApiClient();
+      final repository = AttendanceRepository(apiClient: mockClient);
+
+      await expectLater(
+        repository.submitAttendanceEvent(
+          eventType: AttendanceEventType.startShift,
+          latitude: -6.914744,
+          longitude: 107.609810,
+        ),
+        throwsException,
+      );
+      expect(mockClient.lastFormData, isNull);
+
+      messenger.setMockMethodCallHandler(channel, null);
+      DeviceSecurityService().resetCache();
     });
 
     test('Selfie image cleanup purges temporary file on disk (MED-02)', () async {

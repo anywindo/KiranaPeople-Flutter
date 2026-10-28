@@ -49,6 +49,38 @@
 
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
+        <!-- Package visibility for device integrity checks (see MainActivity companion lists) -->
+        <package android:name="com.topjohnwu.magisk" />
+        <package android:name="io.github.vvb2060.magisk" />
+        <package android:name="io.github.huskydg.magisk" />
+        <package android:name="me.weishu.kernelsu" />
+        <package android:name="me.bmax.apatch" />
+        <package android:name="eu.chainfire.supersu" />
+        <package android:name="com.noshufou.android.su" />
+        <package android:name="com.koushikdutta.superuser" />
+        <package android:name="com.thirdparty.superuser" />
+        <package android:name="com.yellowes.su" />
+        <package android:name="com.kingroot.kinguser" />
+        <package android:name="com.kingo.root" />
+        <package android:name="de.robv.android.xposed.installer" />
+        <package android:name="org.lsposed.manager" />
+        <package android:name="io.github.lsposed.manager" />
+        <package android:name="org.meowcat.edxposed.manager" />
+        <package android:name="com.saurik.substrate" />
+        <package android:name="com.devadvance.rootcloak" />
+        <package android:name="com.devadvance.rootcloakplus" />
+        <package android:name="com.formyhm.hideroot" />
+        <package android:name="com.amphoras.hidemyroot" />
+        <package android:name="com.lexa.fakegps" />
+        <package android:name="com.incorporateapps.fakegps.fre" />
+        <package android:name="com.blogspot.newapphorizons.fakegps" />
+        <package android:name="com.theappninjas.fakegpsjoystick" />
+        <package android:name="com.rosteam.gpsemulator" />
+        <package android:name="com.evezzon.fakegps" />
+        <package android:name="com.fakegps.mock" />
+        <package android:name="com.gsmartstudio.fakegps" />
+        <package android:name="com.hopefactory2021.fakegpslocation" />
+        <package android:name="ru.gavrikov.mocklocations" />
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>

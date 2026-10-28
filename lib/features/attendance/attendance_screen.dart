@@ -12,8 +12,8 @@ import '../../data/models/shift_model.dart';
 import '../../data/models/work_location_model.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/history_provider.dart';
 import 'package:flutter/services.dart';
+import '../../core/security/device_security_service.dart';
 import '../../core/widgets/auto_oriented_image.dart';
 import '../../core/widgets/bouncing_button.dart';
 import '../navigation/main_navigation_screen.dart';
@@ -38,8 +38,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    // Auto-refresh immediately when screen is mounted
+    // Pre-warm device integrity report and auto-refresh when screen is mounted
     Future.microtask(() {
+      DeviceSecurityService().getReport();
       if (mounted && ref.read(authProvider).isAuthenticated) {
         ref.read(todayAttendanceProvider.notifier).refresh();
       }
@@ -2298,8 +2299,6 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
               duration: const Duration(seconds: 4),
             ),
           );
-          ref.read(todayAttendanceProvider.notifier).refresh();
-          ref.read(historyProvider.notifier).refresh();
         }
       },
       child: Container(

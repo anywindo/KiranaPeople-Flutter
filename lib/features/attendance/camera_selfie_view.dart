@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import '../../core/security/device_security_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/location_helper.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../data/models/work_location_model.dart';
 import 'attendance_confirmation_view.dart';
@@ -41,16 +42,16 @@ Future<void> _processImageInIsolate(_ImageProcessParams params) async {
     oriented = img.flipHorizontal(oriented);
   }
 
-  // Downsample to max 960px on longest side for optimal speed, quality, and upload efficiency
-  if (oriented.height > 960 || oriented.width > 960) {
+  // Downsample to max 720px on longest side for fast isolate processing and quick multipart upload
+  if (oriented.height > 720 || oriented.width > 720) {
     oriented = img.copyResize(
       oriented,
-      height: oriented.height > oriented.width ? 960 : null,
-      width: oriented.width >= oriented.height ? 960 : null,
+      height: oriented.height > oriented.width ? 720 : null,
+      width: oriented.width >= oriented.height ? 720 : null,
     );
   }
 
-  final encoded = img.encodeJpg(oriented, quality: 75);
+  final encoded = img.encodeJpg(oriented, quality: 70);
   await file.writeAsBytes(encoded);
 }
 
@@ -135,6 +136,8 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Pre-warm GPS in parallel while the user is framing their selfie
+    LocationHelper.warmupPosition();
     _initializeCamera();
   }
 
@@ -206,7 +209,7 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
 
     _controller = CameraController(
       description,
-      ResolutionPreset.high,
+      ResolutionPreset.medium,
       enableAudio: false,
       imageFormatGroup: ImageFormatGroup.jpeg,
     );

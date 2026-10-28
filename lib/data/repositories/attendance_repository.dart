@@ -51,9 +51,17 @@ class AttendanceRepository {
       'is_mocked': isMocked ? '1' : '0',
     };
 
-    final isRooted = isDeviceRooted ?? await DeviceSecurityService().isDeviceCompromised();
-    if (isRooted) {
-      formDataMap['is_rooted'] = '1';
+    // Device integrity telemetry: always sent explicitly (never omitted) so the
+    // backend can distinguish clean / compromised / unverified devices.
+    final report = await DeviceSecurityService().getReport();
+    formDataMap.addAll(report.toFormFields());
+    if (isDeviceRooted != null) {
+      formDataMap['is_rooted'] = isDeviceRooted ? '1' : '0';
+    }
+    if (report.shouldBlock) {
+      throw Exception(
+        'Perangkat tidak lolos pemeriksaan keamanan. Presensi tidak dapat dilakukan pada perangkat yang dimodifikasi.',
+      );
     }
 
     if (accuracy != null) {
