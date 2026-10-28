@@ -117,6 +117,49 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
     String? notes,
   }) async {
     state = state.copyWith(isSubmitting: true, clearError: true);
+
+    // Snapshot existing data for instant optimistic UI update (0ms latency)
+    // and safe rollback in case of hard server rejection.
+    final originalData = state.data.value;
+    if (originalData != null) {
+      final optimisticEvent = AttendanceEvent(
+        eventType: eventType,
+        timestamp: (deviceTimestamp ?? DateTime.now()).toIso8601String(),
+        latitude: latitude,
+        longitude: longitude,
+        notes: notes,
+      );
+      final updatedEvents = <AttendanceEvent>[
+        ...(originalData.events ?? const []),
+        optimisticEvent,
+      ];
+      final String? nextAction = switch (eventType) {
+        AttendanceEventType.startShift => AttendanceEventType.endShift.value,
+        AttendanceEventType.startBreak => AttendanceEventType.endBreak.value,
+        AttendanceEventType.endBreak => AttendanceEventType.endShift.value,
+        AttendanceEventType.endShift => null,
+      };
+      final updatedData = TodayAttendanceData(
+        date: originalData.date,
+        status: eventType == AttendanceEventType.endShift
+            ? 'COMPLETED'
+            : originalData.status,
+        nextAllowedAction: nextAction,
+        activeBreak: eventType == AttendanceEventType.startBreak
+            ? true
+            : (eventType == AttendanceEventType.endBreak
+                ? false
+                : originalData.activeBreak),
+        shift: originalData.shift ?? state.selectedShift,
+        availableShifts: originalData.availableShifts,
+        workLocation: originalData.workLocation,
+        events: updatedEvents,
+      );
+      state = state.copyWith(
+        data: AsyncValue.data(updatedData),
+      );
+    }
+
     try {
       await _repository.submitAttendanceEvent(
         eventType: eventType,
@@ -132,50 +175,7 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
         notes: notes,
       );
 
-      // Optimistically update local state so UI reflects the submitted event in 0ms
-      // without waiting for a second GET /attendance/today round-trip.
-      final currentData = state.data.value;
-      if (currentData != null) {
-        final optimisticEvent = AttendanceEvent(
-          eventType: eventType,
-          timestamp: (deviceTimestamp ?? DateTime.now()).toIso8601String(),
-          latitude: latitude,
-          longitude: longitude,
-          notes: notes,
-        );
-        final updatedEvents = <AttendanceEvent>[
-          ...(currentData.events ?? const []),
-          optimisticEvent,
-        ];
-        final String? nextAction = switch (eventType) {
-          AttendanceEventType.startShift => AttendanceEventType.endShift.value,
-          AttendanceEventType.startBreak => AttendanceEventType.endBreak.value,
-          AttendanceEventType.endBreak => AttendanceEventType.endShift.value,
-          AttendanceEventType.endShift => null,
-        };
-        final updatedData = TodayAttendanceData(
-          date: currentData.date,
-          status: eventType == AttendanceEventType.endShift
-              ? 'COMPLETED'
-              : currentData.status,
-          nextAllowedAction: nextAction,
-          activeBreak: eventType == AttendanceEventType.startBreak
-              ? true
-              : (eventType == AttendanceEventType.endBreak
-                    ? false
-                    : currentData.activeBreak),
-          shift: currentData.shift ?? state.selectedShift,
-          availableShifts: currentData.availableShifts,
-          workLocation: currentData.workLocation,
-          events: updatedEvents,
-        );
-        state = state.copyWith(
-          data: AsyncValue.data(updatedData),
-          isSubmitting: false,
-        );
-      } else {
-        state = state.copyWith(isSubmitting: false);
-      }
+      state = state.copyWith(isSubmitting: false);
 
       // Sync canonical state and history in the background without blocking UI navigation
       unawaited(refresh(isBackground: true));
@@ -226,6 +226,7 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
       }
 
       state = state.copyWith(
+        data: originalData != null ? AsyncValue.data(originalData) : state.data,
         isSubmitting: false,
         submitError: e.toString().replaceFirst('Exception: ', ''),
       );

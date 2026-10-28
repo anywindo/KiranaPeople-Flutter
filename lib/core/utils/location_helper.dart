@@ -32,7 +32,7 @@ class LocationHelper {
     if (!forceRefresh &&
         _cachedPosition != null &&
         _cachedAt != null &&
-        now.difference(_cachedAt!).inSeconds < 20) {
+        now.difference(_cachedAt!).inSeconds < 60) {
       return _validatePosition(_cachedPosition!);
     }
 
@@ -81,14 +81,14 @@ class LocationHelper {
       lastPos = await Geolocator.getLastKnownPosition();
     } catch (_) {}
 
-    // If OS already has a very fresh fix (< 20s old, reasonable accuracy) and not forcing refresh, use it immediately
+    // If OS already has a fresh fix (< 60s old, reasonable accuracy) and not forcing refresh, use it immediately
     final checkTime = DateTime.now();
     if (!forceRefresh &&
         lastPos != null &&
         !lastPos.isMocked &&
         lastPos.accuracy >= 0 &&
         lastPos.accuracy <= 65 &&
-        checkTime.difference(lastPos.timestamp).inSeconds.abs() <= 20) {
+        checkTime.difference(lastPos.timestamp).inSeconds.abs() <= 60) {
       final validated = _validatePosition(lastPos);
       _cachedPosition = validated;
       _cachedAt = checkTime;

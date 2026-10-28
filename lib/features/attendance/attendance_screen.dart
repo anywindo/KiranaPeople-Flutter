@@ -14,6 +14,7 @@ import '../../providers/attendance_provider.dart';
 import '../../providers/auth_provider.dart';
 import 'package:flutter/services.dart';
 import '../../core/security/device_security_service.dart';
+import '../../core/utils/location_helper.dart';
 import '../../core/widgets/auto_oriented_image.dart';
 import '../../core/widgets/bouncing_button.dart';
 import '../navigation/main_navigation_screen.dart';
@@ -39,9 +40,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    // Pre-warm device integrity report and auto-refresh when screen is mounted
+    // Pre-warm device integrity report, GPS location, and auto-refresh when screen is mounted
     Future.microtask(() {
       DeviceSecurityService().getReport();
+      LocationHelper.warmupPosition();
       if (mounted && ref.read(authProvider).isAuthenticated) {
         ref.read(todayAttendanceProvider.notifier).refresh();
       }
