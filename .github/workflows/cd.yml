@@ -71,15 +71,27 @@ jobs:
               echo "$KEY_PROPERTIES" > android/key.properties
             elif [ -n "$KEY_ALIAS" ] && [ -n "$STORE_PASSWORD" ]; then
               cat <<EOF > android/key.properties
-          storePassword=$STORE_PASSWORD
-          keyPassword=${KEY_PASSWORD:-$STORE_PASSWORD}
-          keyAlias=$KEY_ALIAS
-          storeFile=upload-keystore.jks
-          EOF
+storePassword=$STORE_PASSWORD
+keyPassword=${KEY_PASSWORD:-$STORE_PASSWORD}
+keyAlias=$KEY_ALIAS
+storeFile=upload-keystore.jks
+EOF
             fi
             echo "Release keystore configured successfully."
           else
-            echo "No ANDROID_KEYSTORE_BASE64 secret found. Falling back to debug signing for this build."
+            echo "No ANDROID_KEYSTORE_BASE64 secret found. Generating CI fallback signing keystore..."
+            keytool -genkey -v -keystore android/app/ci-fallback-keystore.jks \
+              -alias cikey -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass android -keypass android \
+              -dname "CN=CI Fallback, OU=KiranaPeople, O=Kirana, L=Jakarta, C=ID"
+            
+            cat <<EOF > android/key.properties
+storePassword=android
+keyPassword=android
+keyAlias=cikey
+storeFile=ci-fallback-keystore.jks
+EOF
+            echo "CI fallback keystore generated and configured successfully."
           fi
 
       - name: Build Universal APK

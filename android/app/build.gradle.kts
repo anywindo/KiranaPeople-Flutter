@@ -47,7 +47,22 @@ android {
                 storePassword = keystoreProperties.getProperty("storePassword")
             } else {
                 // Fallback to debug keystore for local development until key.properties is configured
-                initWith(getByName("debug"))
+                val debugConfig = getByName("debug")
+                val debugStore = debugConfig.storeFile
+                if (debugStore != null && !debugStore.exists()) {
+                    debugStore.parentFile?.mkdirs()
+                    try {
+                        ProcessBuilder(
+                            "keytool", "-genkey", "-v",
+                            "-keystore", debugStore.absolutePath,
+                            "-alias", "androiddebugkey",
+                            "-keyalg", "RSA", "-keysize", "2048", "-validity", "10000",
+                            "-storepass", "android", "-keypass", "android",
+                            "-dname", "CN=Android Debug,O=Android,C=US"
+                        ).start().waitFor()
+                    } catch (_: Exception) {}
+                }
+                initWith(debugConfig)
             }
         }
     }
