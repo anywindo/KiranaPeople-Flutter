@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,6 +21,9 @@ class AttendanceConfirmationView extends ConsumerStatefulWidget {
   final WorkLocation? workLocation;
   final VoidCallback onRetake;
   final VoidCallback onSubmittedSuccess;
+  final Position? initialPosition;
+  final Future<void>? imageProcessFuture;
+  final bool isFrontCamera;
 
   const AttendanceConfirmationView({
     super.key,
@@ -28,6 +33,9 @@ class AttendanceConfirmationView extends ConsumerStatefulWidget {
     this.workLocation,
     required this.onRetake,
     required this.onSubmittedSuccess,
+    this.initialPosition,
+    this.imageProcessFuture,
+    this.isFrontCamera = true,
   });
 
   @override
@@ -46,7 +54,28 @@ class _AttendanceConfirmationViewState
   @override
   void initState() {
     super.initState();
-    _fetchLocation();
+    if (widget.initialPosition != null) {
+      final pos = widget.initialPosition!;
+      double dist = 0.0;
+      bool within = true;
+
+      if (widget.workLocation != null) {
+        dist = Geolocator.distanceBetween(
+          pos.latitude,
+          pos.longitude,
+          widget.workLocation!.latitude,
+          widget.workLocation!.longitude,
+        );
+        within = dist <= widget.workLocation!.radius;
+      }
+
+      _currentPosition = pos;
+      _isWithinRadius = within;
+      _isLoadingLocation = false;
+      _locationError = null;
+    } else {
+      _fetchLocation();
+    }
   }
 
   Future<void> _fetchLocation() async {
@@ -166,58 +195,36 @@ class _AttendanceConfirmationViewState
       return;
     }
 
-    final success = await ref
-        .read(todayAttendanceProvider.notifier)
-        .submitEvent(
-          eventType: widget.action,
-          latitude: _currentPosition!.latitude,
-          longitude: _currentPosition!.longitude,
-          accuracy: _currentPosition!.accuracy,
-          altitude: _currentPosition!.altitude,
-          deviceTimestamp: _currentPosition!.timestamp,
-          isMocked: _currentPosition!.isMocked,
-          photoFile: widget.photoFile,
-          shiftId: widget.shiftId,
-        );
-
-    if (!mounted) return;
     setState(() {
-      _isSubmitting = false;
+      _isSubmitting = true;
     });
 
-    if (success) {
-      // Purge local selfie cache file upon successful server reception (GDPR / Data Minimization)
+    // If downsampling in isolate is still executing, await it briefly
+    if (widget.imageProcessFuture != null) {
       try {
-        if (await widget.photoFile.exists()) {
-          await widget.photoFile.delete();
-        }
+        await widget.imageProcessFuture;
       } catch (_) {}
-      widget.onSubmittedSuccess();
-    } else {
-      final error =
-          ref.read(todayAttendanceProvider).submitError ??
-          'Gagal mencatat presensi.';
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Text(
-            'Presensi Gagal',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          content: Text(error),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Tutup'),
-            ),
-          ],
-        ),
-      );
     }
+
+    // Trigger submission:
+    // todayAttendanceProvider applies optimistic state update synchronously (0ms)
+    // and handles background network transmission and auto-cleanup of photoFile.
+    unawaited(
+      ref.read(todayAttendanceProvider.notifier).submitEvent(
+        eventType: widget.action,
+        latitude: _currentPosition!.latitude,
+        longitude: _currentPosition!.longitude,
+        accuracy: _currentPosition!.accuracy,
+        altitude: _currentPosition!.altitude,
+        deviceTimestamp: _currentPosition!.timestamp,
+        isMocked: _currentPosition!.isMocked,
+        photoFile: widget.photoFile,
+        shiftId: widget.shiftId,
+      ),
+    );
+
+    // Instant return to dashboard with 0ms perceived delay!
+    widget.onSubmittedSuccess();
   }
 
   void _openMap() {
@@ -331,8 +338,20 @@ class _AttendanceConfirmationViewState
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      // Photo Image
-                      Image.file(widget.photoFile, fit: BoxFit.cover),
+                      // Photo Image (Mirrored for front camera to match camera viewfinder exactly)
+                      widget.isFrontCamera
+                          ? Transform(
+                              alignment: Alignment.center,
+                              transform: Matrix4.rotationY(math.pi),
+                              child: Image.file(
+                                widget.photoFile,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Image.file(
+                              widget.photoFile,
+                              fit: BoxFit.cover,
+                            ),
 
                       // Top Badges (Radius & Peta)
                       Positioned(

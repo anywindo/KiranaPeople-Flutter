@@ -212,6 +212,35 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final attendanceState = ref.watch(todayAttendanceProvider);
+
+    ref.listen<TodayAttendanceState>(todayAttendanceProvider, (previous, next) {
+      if (next.submitError != null && previous?.submitError != next.submitError) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text(
+              'Presensi Belum Tersimpan',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: Text(next.submitError!),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  ref.read(todayAttendanceProvider.notifier).clearError();
+                  Navigator.pop(ctx);
+                },
+                child: const Text('Tutup'),
+              ),
+            ],
+          ),
+        );
+      }
+    });
+
     final user = authState.user;
 
     final todayData = attendanceState.data.value;
@@ -547,14 +576,42 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Subtitle: Hari Ini (Sen, 19 Okt 2026)
-                      Text(
-                        'Hari Ini (${_formatIndoDate(DateTime.now())})',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF8E8E93),
-                          fontWeight: FontWeight.w500,
-                        ),
+                      // Subtitle: Hari Ini (Sen, 19 Okt 2026) + Background sync status badge
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Hari Ini (${_formatIndoDate(DateTime.now())})',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF8E8E93),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          if (attendanceState.isSubmitting)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const SizedBox(
+                                  width: 12,
+                                  height: 12,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                const Text(
+                                  'Menyinkronkan...',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
                       ),
                       const SizedBox(height: 12),
 

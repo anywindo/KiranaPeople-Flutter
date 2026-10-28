@@ -175,13 +175,30 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
         notes: notes,
       );
 
-      state = state.copyWith(isSubmitting: false);
+      state = state.copyWith(isSubmitting: false, clearError: true);
+
+      // Purge local selfie cache file upon successful server reception (GDPR / Data Minimization)
+      if (photoFile != null) {
+        try {
+          if (await photoFile.exists()) {
+            await photoFile.delete();
+          }
+        } catch (_) {}
+      }
 
       // Sync canonical state and history in the background without blocking UI navigation
       unawaited(refresh(isBackground: true));
       unawaited(ref.read(historyProvider.notifier).refresh());
       return true;
     } catch (e) {
+      // Clean up temporary photo file on failure as well to avoid storage clutter
+      if (photoFile != null) {
+        try {
+          if (await photoFile.exists()) {
+            await photoFile.delete();
+          }
+        } catch (_) {}
+      }
       // Reconcile timeout or connection error:
       // If the server received and processed the request before the client connection was aborted,
       // or if the event was already registered, verify if today's attendance actually contains the submitted event.
@@ -232,6 +249,10 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
       );
       return false;
     }
+  }
+
+  void clearError() {
+    state = state.copyWith(clearError: true);
   }
 }
 
