@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/attendance_provider.dart';
@@ -46,21 +47,40 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: context.scaffoldBg,
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
       ),
-      bottomNavigationBar: Container(
+      bottomNavigationBar: DecoratedBox(
         decoration: BoxDecoration(
           color: context.surfaceColor,
-          border: Border(top: BorderSide(color: context.borderColor, width: 1)),
+          border: Border(
+            top: BorderSide(color: context.borderColor, width: 1),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(
+                alpha: context.isDarkMode ? 0.25 : 0.04,
+              ),
+              blurRadius: 12,
+              offset: const Offset(0, -2),
+            ),
+          ],
         ),
         child: NavigationBar(
           selectedIndex: _currentIndex,
           backgroundColor: context.surfaceColor,
-          indicatorColor: AppColors.primary.withValues(alpha: context.isDarkMode ? 0.22 : 0.12),
+          surfaceTintColor: Colors.transparent,
+          indicatorColor: AppColors.primary.withValues(
+            alpha: context.isDarkMode ? 0.22 : 0.14,
+          ),
+          indicatorShape: const StadiumBorder(),
+          animationDuration: const Duration(milliseconds: 350),
           elevation: 0,
           onDestinationSelected: (index) {
+            if (_currentIndex == index) return;
+            HapticFeedback.selectionClick();
             setState(() {
               _currentIndex = index;
             });
@@ -79,7 +99,10 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
             ),
             NavigationDestination(
               icon: Icon(Icons.history_rounded),
-              selectedIcon: Icon(Icons.history_toggle_off_rounded, color: AppColors.primary),
+              selectedIcon: Icon(
+                Icons.history_toggle_off_rounded,
+                color: AppColors.primary,
+              ),
               label: 'Riwayat',
             ),
             NavigationDestination(

@@ -406,93 +406,96 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                   ),
                 ),
 
-                // Right Floating Map Controls (Matches Screenshot 1)
-                Positioned(
-                  right: 16,
-                  bottom: 215,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.10),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.near_me_rounded,
-                            color: AppColors.primary,
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            if (_currentPosition != null) {
-                              _mapController.move(userLatLng, 17.5);
-                            } else {
-                              _fetchLocation();
-                            }
-                          },
-                        ),
-                        Container(
-                          width: 24,
-                          height: 1,
-                          color: const Color(0xFFF2F2F7),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.zoom_out_map_rounded,
-                            color: Color(0xFF1F2937),
-                            size: 18,
-                          ),
-                          onPressed: () {
-                            if (_currentPosition != null && workLocation != null) {
-                              final bounds = LatLngBounds.fromPoints(
-                                  [userLatLng, officeLatLng]);
-                              _mapController.fitCamera(
-                                CameraFit.bounds(
-                                  bounds: bounds,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 60, vertical: 120),
-                                ),
-                              );
-                            } else {
-                              _mapController.move(officeLatLng, 16.5);
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Bottom Floating Sheet Card (Matches Screenshot 1)
+                // Bottom Floating Sheet Card + Right Map Controls
                 Positioned(
                   left: 16,
                   right: 16,
                   bottom: 16,
-                  child: Container(
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.12),
-                          blurRadius: 20,
-                          offset: const Offset(0, 6),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // Right Floating Map Controls
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.10),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Row 1: Radius Indicator + Rute Button
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.near_me_rounded,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                if (_currentPosition != null) {
+                                  _mapController.move(userLatLng, 17.5);
+                                } else {
+                                  _fetchLocation();
+                                }
+                              },
+                            ),
+                            Container(
+                              width: 24,
+                              height: 1,
+                              color: const Color(0xFFF2F2F7),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.zoom_out_map_rounded,
+                                color: Color(0xFF1F2937),
+                                size: 18,
+                              ),
+                              onPressed: () {
+                                if (_currentPosition != null &&
+                                    workLocation != null) {
+                                  final bounds = LatLngBounds.fromPoints(
+                                      [userLatLng, officeLatLng]);
+                                  _mapController.fitCamera(
+                                    CameraFit.bounds(
+                                      bounds: bounds,
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 60, vertical: 120),
+                                    ),
+                                  );
+                                } else {
+                                  _mapController.move(officeLatLng, 16.5);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Bottom Floating Sheet Card (Matches Screenshot 1)
+                      Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.12),
+                              blurRadius: 20,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Row 1: Radius Indicator + Rute Button
                         Row(
                           children: [
                             // Pulsing dot
@@ -699,6 +702,8 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                         ),
                       ],
                     ),
+                  ),
+                    ],
                   ),
                 ),
               ],

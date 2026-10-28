@@ -186,28 +186,32 @@ class AppTheme {
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
+        height: 70,
         backgroundColor: Colors.white,
-        elevation: 8,
-        indicatorColor: AppColors.primaryLight,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        indicatorColor: AppColors.primary.withValues(alpha: 0.14),
+        indicatorShape: const StadiumBorder(),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primaryDark,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primary,
             );
           }
           return const TextStyle(
             fontSize: 12,
-            fontWeight: FontWeight.normal,
+            fontWeight: FontWeight.w500,
             color: AppColors.textSecondary,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(color: AppColors.primaryDark);
+            return const IconThemeData(color: AppColors.primary, size: 24);
           }
-          return const IconThemeData(color: AppColors.textSecondary);
+          return const IconThemeData(color: AppColors.textSecondary, size: 24);
         }),
       ),
     );
@@ -346,28 +350,32 @@ class AppTheme {
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
+        height: 70,
         backgroundColor: AppColors.darkSurface,
-        elevation: 8,
-        indicatorColor: AppColors.primary.withValues(alpha: 0.2),
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        indicatorColor: AppColors.primary.withValues(alpha: 0.22),
+        indicatorShape: const StadiumBorder(),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: AppColors.primary,
             );
           }
           return const TextStyle(
             fontSize: 12,
-            fontWeight: FontWeight.normal,
+            fontWeight: FontWeight.w500,
             color: AppColors.darkTextSecondary,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(color: AppColors.primary);
+            return const IconThemeData(color: AppColors.primary, size: 24);
           }
-          return const IconThemeData(color: AppColors.darkTextSecondary);
+          return const IconThemeData(color: AppColors.darkTextSecondary, size: 24);
         }),
       ),
     );

@@ -1216,7 +1216,7 @@ class ProfileScreen extends ConsumerWidget {
                 iconColor: context.textSecondaryColor,
                 title: 'Versi Aplikasi',
                 trailing: Text(
-                  '1.0.0 (Build 1)',
+                  '1.0.1 (Build 1)',
                   style: TextStyle(
                     fontSize: 13,
                     color: context.textSecondaryColor,

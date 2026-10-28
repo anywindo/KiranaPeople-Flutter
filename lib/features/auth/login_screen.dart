@@ -113,6 +113,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final isDark = context.isDarkMode;
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
@@ -127,7 +128,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           builder: (context, constraints) {
             return SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: IntrinsicHeight(
@@ -137,322 +138,368 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                       // Kirana Logo Asset (logoKiranaSquare.jpeg)
                       Container(
-                        width: 96,
-                        height: 96,
+                        width: 88,
+                        height: 88,
                         decoration: BoxDecoration(
                           color: Colors.black,
-                          borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.12),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
+                              color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
                             ),
                           ],
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.asset(
-                            'assets/images/logoKiranaSquare.jpeg',
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: Colors.black,
-                                child: const Center(
-                                  child: Text(
-                                    'KIRANA',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 2,
-                                    ),
+                        child: Image.asset(
+                          'assets/images/logoKiranaSquare.jpeg',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.black,
+                              child: const Center(
+                                child: Text(
+                                  'KIRANA',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 2,
                                   ),
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
                         ),
                       ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 24),
 
                       // Title & Subtitle
                       Text(
                         'Masuk ke Akun Anda',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: context.textPrimaryColor,
-                          letterSpacing: -0.3,
-                        ),
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: context.textPrimaryColor,
+                              letterSpacing: -0.3,
+                            ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         'Silakan masukkan identitas dan kata sandi Anda',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: context.textSecondaryColor,
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-
-                      // Error message banner if any
-                      if (authState.errorMessage != null) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEF4444)
-                                .withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: const Color(0xFFEF4444)
-                                  .withValues(alpha: 0.25),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: context.textSecondaryColor,
                             ),
-                          ),
-                          child: Row(
+                      ),
+                      const SizedBox(height: 28),
+
+                      // Material 3 Form Card Surface
+                      Card(
+                        elevation: 0,
+                        margin: EdgeInsets.zero,
+                        color: context.surfaceColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          side: BorderSide(color: context.borderColor),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const Icon(
-                                Icons.error_outline_rounded,
-                                color: Color(0xFFEF4444),
-                                size: 18,
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  authState.errorMessage!,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: Color(0xFFEF4444),
-                                    fontWeight: FontWeight.w500,
+                              // Error message banner if any
+                              if (authState.errorMessage != null) ...[
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.error.withValues(alpha: 0.10),
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: AppColors.error.withValues(alpha: 0.30),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.error_outline_rounded,
+                                        color: AppColors.error,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(
+                                          authState.errorMessage!,
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            color: AppColors.error,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
+                                const SizedBox(height: 18),
+                              ],
 
-                      // Field 1: Email / ID Karyawan / NIK
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextField(
-                            controller: _identifierController,
-                            focusNode: _identifierFocus,
-                            cursorColor: AppColors.primary,
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: context.textPrimaryColor,
-                            ),
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.next,
-                            onSubmitted: (_) {
-                              FocusScope.of(context)
-                                  .requestFocus(_passwordFocus);
-                            },
-                            autocorrect: false,
-                            decoration: InputDecoration(
-                              hintText: 'Email / ID Karyawan / NIK',
-                              hintStyle: TextStyle(
-                                color: context.textMutedColor,
-                                fontSize: 15,
-                              ),
-                              border: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 10,
-                              ),
-                              isDense: true,
-                            ),
-                          ),
-                          Container(
-                            height: 1.5,
-                            color: _identifierFocus.hasFocus
-                                ? AppColors.primary
-                                : context.borderColor,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Field 2: Kata Sandi
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _passwordController,
-                                  focusNode: _passwordFocus,
-                                  obscureText: !_isPasswordVisible,
-                                  cursorColor: AppColors.primary,
-                                  textInputAction: TextInputAction.done,
-                                  onSubmitted: (_) => _submit(),
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: context.textPrimaryColor,
-                                  ),
-                                  decoration: InputDecoration(
-                                    hintText: 'Kata Sandi',
-                                    hintStyle: TextStyle(
-                                      color: context.textMutedColor,
-                                      fontSize: 15,
-                                    ),
-                                    border: InputBorder.none,
-                                    enabledBorder: InputBorder.none,
-                                    focusedBorder: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      vertical: 10,
-                                    ),
-                                    isDense: true,
-                                  ),
+                              // Field 1: Email / ID Karyawan / NIK (M3 Outlined TextField)
+                              TextField(
+                                controller: _identifierController,
+                                focusNode: _identifierFocus,
+                                cursorColor: AppColors.primary,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                  color: context.textPrimaryColor,
                                 ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _isPasswordVisible = !_isPasswordVisible;
-                                  });
+                                keyboardType: TextInputType.emailAddress,
+                                textInputAction: TextInputAction.next,
+                                onSubmitted: (_) {
+                                  FocusScope.of(context)
+                                      .requestFocus(_passwordFocus);
                                 },
-                                child: Padding(
-                                  padding: const EdgeInsets.only(bottom: 2),
-                                  child: Icon(
-                                    _isPasswordVisible
-                                        ? Icons.visibility_outlined
-                                        : Icons.visibility_off_outlined,
+                                autocorrect: false,
+                                decoration: InputDecoration(
+                                  labelText: 'Email / ID Karyawan / NIK',
+                                  hintText: 'Masukkan email, ID, atau NIK',
+                                  labelStyle: TextStyle(
+                                    color: _identifierFocus.hasFocus
+                                        ? AppColors.primary
+                                        : context.textSecondaryColor,
+                                    fontSize: 14,
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.badge_outlined,
                                     size: 20,
-                                    color: context.textMutedColor,
+                                    color: _identifierFocus.hasFocus
+                                        ? AppColors.primary
+                                        : context.textMutedColor,
+                                  ),
+                                  suffixIcon: _identifierController.text.isNotEmpty
+                                      ? IconButton(
+                                          icon: Icon(
+                                            Icons.cancel_rounded,
+                                            size: 18,
+                                            color: context.textMutedColor,
+                                          ),
+                                          onPressed: () {
+                                            _identifierController.clear();
+                                          },
+                                        )
+                                      : null,
+                                  filled: true,
+                                  fillColor: isDark
+                                      ? AppColors.darkBackground.withValues(alpha: 0.5)
+                                      : AppColors.background,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                    borderSide: BorderSide(color: context.borderColor),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                    borderSide: BorderSide(color: context.borderColor),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                    borderSide: const BorderSide(
+                                      color: AppColors.primary,
+                                      width: 2,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
-                          Container(
-                            height: 1.5,
-                            color: _passwordFocus.hasFocus
-                                ? AppColors.primary
-                                : context.borderColor,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
+                              const SizedBox(height: 16),
 
-                      // Options Row: Ingat Saya + Lupa Kata Sandi?
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Ingat Saya Checkbox
-                          InkWell(
-                            onTap: () {
-                              setState(() {
-                                _rememberMe = !_rememberMe;
-                              });
-                            },
-                            borderRadius: BorderRadius.circular(6),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    _rememberMe
-                                        ? Icons.check_circle_rounded
-                                        : Icons.circle_outlined,
-                                    size: 20,
-                                    color: _rememberMe
+                              // Field 2: Kata Sandi (M3 Outlined TextField)
+                              TextField(
+                                controller: _passwordController,
+                                focusNode: _passwordFocus,
+                                obscureText: !_isPasswordVisible,
+                                cursorColor: AppColors.primary,
+                                textInputAction: TextInputAction.done,
+                                onSubmitted: (_) => _submit(),
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                  color: context.textPrimaryColor,
+                                ),
+                                decoration: InputDecoration(
+                                  labelText: 'Kata Sandi',
+                                  hintText: 'Masukkan kata sandi',
+                                  labelStyle: TextStyle(
+                                    color: _passwordFocus.hasFocus
                                         ? AppColors.primary
-                                        : context.borderColor,
+                                        : context.textSecondaryColor,
+                                    fontSize: 14,
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Ingat Saya',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: context.textPrimaryColor,
+                                  prefixIcon: Icon(
+                                    Icons.lock_outline_rounded,
+                                    size: 20,
+                                    color: _passwordFocus.hasFocus
+                                        ? AppColors.primary
+                                        : context.textMutedColor,
+                                  ),
+                                  suffixIcon: IconButton(
+                                    tooltip: _isPasswordVisible
+                                        ? 'Sembunyikan sandi'
+                                        : 'Tampilkan sandi',
+                                    onPressed: () {
+                                      setState(() {
+                                        _isPasswordVisible = !_isPasswordVisible;
+                                      });
+                                    },
+                                    icon: Icon(
+                                      _isPasswordVisible
+                                          ? Icons.visibility_outlined
+                                          : Icons.visibility_off_outlined,
+                                      size: 20,
+                                      color: context.textMutedColor,
+                                    ),
+                                  ),
+                                  filled: true,
+                                  fillColor: isDark
+                                      ? AppColors.darkBackground.withValues(alpha: 0.5)
+                                      : AppColors.background,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                    borderSide: BorderSide(color: context.borderColor),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                    borderSide: BorderSide(color: context.borderColor),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                    borderSide: const BorderSide(
+                                      color: AppColors.primary,
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Options Row: M3 Checkbox (Ingat Saya) + M3 TextButton (Lupa Kata Sandi?)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        _rememberMe = !_rememberMe;
+                                      });
+                                    },
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(right: 8),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            width: 24,
+                                            height: 24,
+                                            child: Checkbox(
+                                              value: _rememberMe,
+                                              activeColor: AppColors.primary,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(5),
+                                              ),
+                                              side: BorderSide(
+                                                color: context.textMutedColor,
+                                                width: 1.5,
+                                              ),
+                                              onChanged: (val) {
+                                                setState(() {
+                                                  _rememberMe = val ?? true;
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Ingat Saya',
+                                            style: TextStyle(
+                                              fontSize: 13.5,
+                                              fontWeight: FontWeight.w500,
+                                              color: context.textPrimaryColor,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: _showForgotPasswordDialog,
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: AppColors.primary,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 6,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Lupa Kata Sandi?',
+                                      style: TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ),
+                              const SizedBox(height: 16),
 
-                          // Lupa Kata Sandi?
-                          InkWell(
-                            onTap: _showForgotPasswordDialog,
-                            borderRadius: BorderRadius.circular(6),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4),
-                              child: Text(
-                                'Lupa Kata Sandi?',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: context.textPrimaryColor,
+                              // Material 3 FilledButton (Masuk)
+                              SizedBox(
+                                width: double.infinity,
+                                height: 52,
+                                child: FilledButton(
+                                  onPressed: _isFormValid && !authState.isLoading
+                                      ? _submit
+                                      : null,
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    foregroundColor: Colors.white,
+                                    disabledBackgroundColor: isDark
+                                        ? AppColors.darkSurfaceSecondary
+                                        : const Color(0xFFE5E7EB),
+                                    disabledForegroundColor: isDark
+                                        ? AppColors.darkTextMuted
+                                        : const Color(0xFF9CA3AF),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    textStyle: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  child: authState.isLoading
+                                      ? const SizedBox(
+                                          height: 22,
+                                          width: 22,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : const Text('Masuk'),
                                 ),
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 28),
-
-                      // Masuk Button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 48,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          decoration: BoxDecoration(
-                            color: _isFormValid && !authState.isLoading
-                                ? AppColors.primary
-                                : const Color(0xFFE5E7EB),
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: _isFormValid && !authState.isLoading
-                                ? [
-                                    BoxShadow(
-                                      color: AppColors.primary.withValues(
-                                        alpha: 0.35,
-                                      ),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 3),
-                                    ),
-                                  ]
-                                : [],
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: _isFormValid && !authState.isLoading
-                                  ? _submit
-                                  : null,
-                              borderRadius: BorderRadius.circular(12),
-                              child: Center(
-                                child: authState.isLoading
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2.5,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : Text(
-                                        'Masuk',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: _isFormValid
-                                              ? Colors.white
-                                              : const Color(0xFF9CA3AF),
-                                        ),
-                                      ),
-                              ),
-                            ),
+                            ],
                           ),
                         ),
                       ),
@@ -461,11 +508,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 32),
 
                       // Version section
-                      const Text(
-                        'Versi 1.0.0 (1)',
+                      Text(
+                        'Versi 1.0.1 (Build 1)',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF8E8E93),
+                          fontWeight: FontWeight.w500,
+                          color: context.textMutedColor,
                         ),
                       ),
                       const SizedBox(height: 16),
