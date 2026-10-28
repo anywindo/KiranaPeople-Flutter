@@ -907,10 +907,10 @@ class ProfileScreen extends ConsumerWidget {
               _buildRow(
                 context,
                 iconBg: context.isDarkMode
-                    ? const Color(0xFF143048)
-                    : const Color(0xFFE0F2FE),
+                    ? const Color(0xFF3B1524)
+                    : const Color(0xFFFFF1F5),
                 icon: Icons.phone_rounded,
-                iconColor: const Color(0xFF0284C7),
+                iconColor: AppColors.primary,
                 title: 'Nomor Telepon',
                 onTap: () =>
                     _showEditPhoneBottomSheet(context, ref, user?.phone),
@@ -937,10 +937,10 @@ class ProfileScreen extends ConsumerWidget {
               _buildRow(
                 context,
                 iconBg: context.isDarkMode
-                    ? const Color(0xFF332042)
-                    : const Color(0xFFF3E8FF),
+                    ? const Color(0xFF3B1524)
+                    : const Color(0xFFFFF1F5),
                 icon: Icons.shield_outlined,
-                iconColor: const Color(0xFF9333EA),
+                iconColor: AppColors.primary,
                 title: 'Kata Sandi',
                 onTap: () => ChangePasswordDialog.show(context),
                 trailing: const Row(
@@ -967,10 +967,10 @@ class ProfileScreen extends ConsumerWidget {
               _buildRow(
                 context,
                 iconBg: context.isDarkMode
-                    ? const Color(0xFF3A2A14)
-                    : const Color(0xFFFEF3C7),
+                    ? const Color(0xFF3B1524)
+                    : const Color(0xFFFFF1F5),
                 icon: Icons.mail_rounded,
-                iconColor: const Color(0xFFD97706),
+                iconColor: AppColors.primary,
                 title: 'Email',
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1009,9 +1009,9 @@ class ProfileScreen extends ConsumerWidget {
                 context,
                 iconBg: context.isDarkMode
                     ? const Color(0xFF3B1524)
-                    : const Color(0xFFFFE4E6),
+                    : const Color(0xFFFFF1F5),
                 icon: Icons.badge_rounded,
-                iconColor: const Color(0xFFFF2D75),
+                iconColor: AppColors.primary,
                 title: 'ID Karyawan',
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1041,10 +1041,10 @@ class ProfileScreen extends ConsumerWidget {
               _buildRow(
                 context,
                 iconBg: context.isDarkMode
-                    ? const Color(0xFF14372A)
-                    : const Color(0xFFD1FAE5),
+                    ? const Color(0xFF3B1524)
+                    : const Color(0xFFFFF1F5),
                 icon: Icons.work_rounded,
-                iconColor: const Color(0xFF059669),
+                iconColor: AppColors.primary,
                 title: 'Jabatan',
                 trailing: Text(
                   roleName,
@@ -1058,10 +1058,10 @@ class ProfileScreen extends ConsumerWidget {
               _buildRow(
                 context,
                 iconBg: context.isDarkMode
-                    ? const Color(0xFF162D4A)
-                    : const Color(0xFFDBEAFE),
+                    ? const Color(0xFF3B1524)
+                    : const Color(0xFFFFF1F5),
                 icon: Icons.apartment_rounded,
-                iconColor: const Color(0xFF2563EB),
+                iconColor: AppColors.primary,
                 title: 'Lokasi Kantor',
                 trailing: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 160),
@@ -1079,10 +1079,10 @@ class ProfileScreen extends ConsumerWidget {
               _buildRow(
                 context,
                 iconBg: context.isDarkMode
-                    ? const Color(0xFF133633)
-                    : const Color(0xFFCCFBF1),
+                    ? const Color(0xFF3B1524)
+                    : const Color(0xFFFFF1F5),
                 icon: Icons.near_me_rounded,
-                iconColor: const Color(0xFF0D9488),
+                iconColor: AppColors.primary,
                 title: 'Radius Presensi',
                 trailing: Text(
                   radiusStr,
@@ -1097,9 +1097,9 @@ class ProfileScreen extends ConsumerWidget {
                 context,
                 iconBg: context.isDarkMode
                     ? const Color(0xFF3B1524)
-                    : const Color(0xFFFFE4E6),
+                    : const Color(0xFFFFF1F5),
                 icon: Icons.calendar_month_rounded,
-                iconColor: const Color(0xFFFF2D75),
+                iconColor: AppColors.primary,
                 title: 'Bergabung',
                 trailing: Text(
                   joinedStr,
@@ -1118,10 +1118,10 @@ class ProfileScreen extends ConsumerWidget {
               _buildRow(
                 context,
                 iconBg: context.isDarkMode
-                    ? const Color(0xFF22254D)
-                    : const Color(0xFFE0E7FF),
+                    ? const Color(0xFF3B1524)
+                    : const Color(0xFFFFF1F5),
                 icon: Icons.credit_card_rounded,
-                iconColor: const Color(0xFF4F46E5),
+                iconColor: AppColors.primary,
                 title: 'NIK',
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1150,9 +1150,9 @@ class ProfileScreen extends ConsumerWidget {
                 context,
                 iconBg: context.isDarkMode
                     ? const Color(0xFF3B1524)
-                    : const Color(0xFFFFE4E6),
+                    : const Color(0xFFFFF1F5),
                 icon: Icons.card_giftcard_rounded,
-                iconColor: const Color(0xFFFF2D75),
+                iconColor: AppColors.primary,
                 title: 'Tanggal Lahir',
                 trailing: Text(
                   dobStr,
@@ -1170,10 +1170,10 @@ class ProfileScreen extends ConsumerWidget {
               _buildRow(
                 context,
                 iconBg: context.isDarkMode
-                    ? const Color(0xFF1E3A5F)
-                    : const Color(0xFFEFF6FF),
+                    ? const Color(0xFF3B1524)
+                    : const Color(0xFFFFF1F5),
                 icon: Icons.palette_rounded,
-                iconColor: const Color(0xFF3B82F6),
+                iconColor: AppColors.primary,
                 title: 'Tema Tampilan',
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
