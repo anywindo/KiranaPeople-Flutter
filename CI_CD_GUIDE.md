@@ -64,3 +64,4 @@ Pipeline telah dirancang aman:
 - **Token Permissions:** Menggunakan prinsip least privilege (`contents: write` hanya pada job rilis).
 - **Concurrency Control:** Membatalkan build lama secara otomatis jika ada commit baru pada PR yang sama (`cancel-in-progress: true`).
 - **Dependency Caching:** Cache cerdas untuk Flutter SDK dan Gradle dependencies guna memangkas waktu build hingga 60%.
+
