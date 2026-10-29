@@ -898,6 +898,1004 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
+  String _formatDateRangeLabel(DateTimeRange range) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agt',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
+    final startDay = range.start.day;
+    final startMonth = months[range.start.month - 1];
+    final endDay = range.end.day;
+    final endMonth = months[range.end.month - 1];
+
+    if (range.start.year == range.end.year &&
+        range.start.month == range.end.month &&
+        range.start.day == range.end.day) {
+      return '$startDay $startMonth ${range.start.year}';
+    }
+    if (range.start.year == range.end.year) {
+      return '$startDay $startMonth - $endDay $endMonth';
+    }
+    return '$startDay $startMonth ${range.start.year} - $endDay $endMonth ${range.end.year}';
+  }
+
+  Future<void> _pickCustomDateRange(
+    BuildContext context,
+    HistoryState historyState,
+  ) async {
+    final now = DateTime.now();
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(now.year - 3),
+      lastDate: DateTime(now.year + 1),
+      initialDateRange: historyState.filter.dateRange ??
+          DateTimeRange(
+            start: now.subtract(const Duration(days: 30)),
+            end: now,
+          ),
+      cancelText: 'Batal',
+      confirmText: 'Pilih',
+      saveText: 'Simpan',
+      helpText: 'Pilih Rentang Tanggal',
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              surface: context.surfaceColor,
+              onSurface: context.textPrimaryColor,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      final label = _formatDateRangeLabel(picked);
+      ref.read(historyProvider.notifier).setDateRangeFilter(picked, label);
+    }
+  }
+
+  void _showDateFilterSheet(BuildContext context, HistoryState historyState) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: context.borderColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Filter Periode Tanggal',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: context.textPrimaryColor,
+                  ),
+                ),
+                if (historyState.filter.dateRange != null)
+                  TextButton(
+                    onPressed: () {
+                      ref
+                          .read(historyProvider.notifier)
+                          .setDateRangeFilter(null);
+                      Navigator.pop(ctx);
+                    },
+                    child: const Text(
+                      'Hapus Filter',
+                      style: TextStyle(color: AppColors.primary),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildSheetOption(
+              context,
+              title: 'Semua Waktu',
+              subtitle: 'Tampilkan seluruh riwayat presensi',
+              isSelected: historyState.filter.dateRange == null,
+              onTap: () {
+                ref.read(historyProvider.notifier).setDateRangeFilter(null);
+                Navigator.pop(ctx);
+              },
+            ),
+            _buildSheetOption(
+              context,
+              title: 'Hari Ini',
+              subtitle:
+                  '${today.day} ${_formatIndoDateString(today.toIso8601String()).split(', ').last}',
+              isSelected: historyState.filter.dateRangeLabel == 'Hari Ini',
+              onTap: () {
+                final range = DateTimeRange(start: today, end: today);
+                ref
+                    .read(historyProvider.notifier)
+                    .setDateRangeFilter(range, 'Hari Ini');
+                Navigator.pop(ctx);
+              },
+            ),
+            _buildSheetOption(
+              context,
+              title: '7 Hari Terakhir',
+              subtitle: 'Presensi satu minggu ke belakang',
+              isSelected:
+                  historyState.filter.dateRangeLabel == '7 Hari Terakhir',
+              onTap: () {
+                final range = DateTimeRange(
+                  start: today.subtract(const Duration(days: 6)),
+                  end: today,
+                );
+                ref
+                    .read(historyProvider.notifier)
+                    .setDateRangeFilter(range, '7 Hari Terakhir');
+                Navigator.pop(ctx);
+              },
+            ),
+            _buildSheetOption(
+              context,
+              title: 'Bulan Ini',
+              subtitle:
+                  '1 - ${today.day} ${_formatIndoDateString(today.toIso8601String()).split(', ').last}',
+              isSelected: historyState.filter.dateRangeLabel == 'Bulan Ini',
+              onTap: () {
+                final startOfMonth = DateTime(today.year, today.month, 1);
+                final range = DateTimeRange(start: startOfMonth, end: today);
+                ref
+                    .read(historyProvider.notifier)
+                    .setDateRangeFilter(range, 'Bulan Ini');
+                Navigator.pop(ctx);
+              },
+            ),
+            _buildSheetOption(
+              context,
+              title: 'Pilih Rentang Tanggal Manual...',
+              subtitle: 'Tentukan tanggal mulai dan selesai sendiri',
+              isSelected: historyState.filter.dateRange != null &&
+                  historyState.filter.dateRangeLabel != 'Hari Ini' &&
+                  historyState.filter.dateRangeLabel != '7 Hari Terakhir' &&
+                  historyState.filter.dateRangeLabel != 'Bulan Ini',
+              icon: Icons.date_range_rounded,
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickCustomDateRange(context, historyState);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showShiftFilterSheet(
+    BuildContext context,
+    List<String> shifts,
+    HistoryState historyState,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: context.borderColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Filter Shift Kerja',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: context.textPrimaryColor,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...shifts.map((s) {
+              final isSelected =
+                  (historyState.filter.shift ?? 'Semua Shift') == s;
+              return _buildSheetOption(
+                context,
+                title: s,
+                isSelected: isSelected,
+                onTap: () {
+                  ref
+                      .read(historyProvider.notifier)
+                      .setShiftFilter(s == 'Semua Shift' ? null : s);
+                  Navigator.pop(ctx);
+                },
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSheetOption(
+    BuildContext context, {
+    required String title,
+    String? subtitle,
+    required bool isSelected,
+    IconData? icon,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        margin: const EdgeInsets.only(bottom: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withValues(alpha: 0.08)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            if (icon != null) ...[
+              Icon(
+                icon,
+                size: 20,
+                color:
+                    isSelected ? AppColors.primary : context.textSecondaryColor,
+              ),
+              const SizedBox(width: 12),
+            ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.w500,
+                      color: isSelected
+                          ? AppColors.primary
+                          : context.textPrimaryColor,
+                    ),
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.textMutedColor,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (isSelected)
+              const Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.primary,
+                size: 20,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showFullFilterSheet(BuildContext context) {
+    final historyState = ref.read(historyProvider);
+    var tempStatus = historyState.filter.status;
+    var tempRange = historyState.filter.dateRange;
+    var tempRangeLabel = historyState.filter.dateRangeLabel;
+    var tempShift = historyState.filter.shift ?? 'Semua Shift';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) {
+          return Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.85,
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            decoration: BoxDecoration(
+              color: context.surfaceColor,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: context.borderColor,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Filter Riwayat Presensi',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: context.textPrimaryColor,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        icon: const Icon(Icons.close_rounded, size: 20),
+                        color: context.textSecondaryColor,
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 1),
+                  const SizedBox(height: 16),
+
+                  // 1. Status Filter
+                  Text(
+                    'Status Kehadiran',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: context.textSecondaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildChipChoice(
+                        context,
+                        label: 'Semua Status',
+                        isSelected:
+                            tempStatus == AttendanceHistoryStatusFilter.all,
+                        onTap: () => setSheetState(
+                          () =>
+                              tempStatus = AttendanceHistoryStatusFilter.all,
+                        ),
+                      ),
+                      _buildChipChoice(
+                        context,
+                        label: 'Tepat Waktu',
+                        isSelected:
+                            tempStatus == AttendanceHistoryStatusFilter.onTime,
+                        selectedColor: const Color(0xFF15803D),
+                        selectedBg: const Color(0xFFDCFCE7),
+                        onTap: () => setSheetState(
+                          () =>
+                              tempStatus = AttendanceHistoryStatusFilter.onTime,
+                        ),
+                      ),
+                      _buildChipChoice(
+                        context,
+                        label: 'Terlambat',
+                        isSelected:
+                            tempStatus == AttendanceHistoryStatusFilter.late,
+                        selectedColor: const Color(0xFFE11D48),
+                        selectedBg: const Color(0xFFFFF1F2),
+                        onTap: () => setSheetState(
+                          () =>
+                              tempStatus = AttendanceHistoryStatusFilter.late,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 2. Periode / Tanggal
+                  Text(
+                    'Periode Tanggal',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: context.textSecondaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildChipChoice(
+                        context,
+                        label: 'Semua',
+                        isSelected: tempRange == null,
+                        onTap: () => setSheetState(() {
+                          tempRange = null;
+                          tempRangeLabel = null;
+                        }),
+                      ),
+                      _buildChipChoice(
+                        context,
+                        label: 'Hari Ini',
+                        isSelected: tempRangeLabel == 'Hari Ini',
+                        onTap: () {
+                          final now = DateTime.now();
+                          final today = DateTime(now.year, now.month, now.day);
+                          setSheetState(() {
+                            tempRange =
+                                DateTimeRange(start: today, end: today);
+                            tempRangeLabel = 'Hari Ini';
+                          });
+                        },
+                      ),
+                      _buildChipChoice(
+                        context,
+                        label: '7 Hari Terakhir',
+                        isSelected: tempRangeLabel == '7 Hari Terakhir',
+                        onTap: () {
+                          final now = DateTime.now();
+                          final today = DateTime(now.year, now.month, now.day);
+                          setSheetState(() {
+                            tempRange = DateTimeRange(
+                              start: today.subtract(const Duration(days: 6)),
+                              end: today,
+                            );
+                            tempRangeLabel = '7 Hari Terakhir';
+                          });
+                        },
+                      ),
+                      _buildChipChoice(
+                        context,
+                        label: 'Bulan Ini',
+                        isSelected: tempRangeLabel == 'Bulan Ini',
+                        onTap: () {
+                          final now = DateTime.now();
+                          final today = DateTime(now.year, now.month, now.day);
+                          setSheetState(() {
+                            tempRange = DateTimeRange(
+                              start: DateTime(today.year, today.month, 1),
+                              end: today,
+                            );
+                            tempRangeLabel = 'Bulan Ini';
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: BorderSide(
+                        color: tempRange != null &&
+                                tempRangeLabel != 'Hari Ini' &&
+                                tempRangeLabel != '7 Hari Terakhir' &&
+                                tempRangeLabel != 'Bulan Ini'
+                            ? AppColors.primary
+                            : context.borderColor,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                    ),
+                    onPressed: () async {
+                      final now = DateTime.now();
+                      final picked = await showDateRangePicker(
+                        context: context,
+                        firstDate: DateTime(now.year - 3),
+                        lastDate: DateTime(now.year + 1),
+                        initialDateRange: tempRange ??
+                            DateTimeRange(
+                              start: now.subtract(const Duration(days: 30)),
+                              end: now,
+                            ),
+                        cancelText: 'Batal',
+                        confirmText: 'Pilih',
+                        saveText: 'Simpan',
+                        helpText: 'Pilih Rentang Tanggal',
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              colorScheme: ColorScheme.light(
+                                primary: AppColors.primary,
+                                onPrimary: Colors.white,
+                                surface: context.surfaceColor,
+                                onSurface: context.textPrimaryColor,
+                              ),
+                            ),
+                            child: child!,
+                          );
+                        },
+                      );
+                      if (picked != null) {
+                        setSheetState(() {
+                          tempRange = picked;
+                          tempRangeLabel = _formatDateRangeLabel(picked);
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.date_range_rounded, size: 18),
+                    label: Text(
+                      tempRange != null &&
+                              tempRangeLabel != 'Hari Ini' &&
+                              tempRangeLabel != '7 Hari Terakhir' &&
+                              tempRangeLabel != 'Bulan Ini'
+                          ? 'Rentang: $tempRangeLabel'
+                          : 'Pilih Rentang Tanggal Manual...',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // 3. Shift Filter
+                  if (historyState.availableShifts.length > 1) ...[
+                    Text(
+                      'Shift Kerja',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: context.textSecondaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: historyState.availableShifts.map((s) {
+                        final isSelected = tempShift == s;
+                        return _buildChipChoice(
+                          context,
+                          label: s,
+                          isSelected: isSelected,
+                          onTap: () => setSheetState(() => tempShift = s),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
+                  // Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: context.textSecondaryColor,
+                            side: BorderSide(color: context.borderColor),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          onPressed: () {
+                            ref.read(historyProvider.notifier).resetFilter();
+                            Navigator.pop(ctx);
+                          },
+                          child: const Text(
+                            'Reset',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          onPressed: () {
+                            final notifier =
+                                ref.read(historyProvider.notifier);
+                            notifier.setStatusFilter(tempStatus);
+                            notifier.setDateRangeFilter(
+                              tempRange,
+                              tempRangeLabel,
+                            );
+                            notifier.setShiftFilter(
+                              tempShift == 'Semua Shift' ? null : tempShift,
+                            );
+                            Navigator.pop(ctx);
+                          },
+                          child: const Text(
+                            'Terapkan Filter',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildChipChoice(
+    BuildContext context, {
+    required String label,
+    required bool isSelected,
+    Color? selectedColor,
+    Color? selectedBg,
+    required VoidCallback onTap,
+  }) {
+    final activeBg =
+        selectedBg ?? AppColors.primary.withValues(alpha: 0.12);
+    final activeText = selectedColor ?? AppColors.primary;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? activeBg : context.surfaceSecondaryColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? activeText : context.borderColor,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            color: isSelected ? activeText : context.textSecondaryColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterBar(BuildContext context, HistoryState historyState) {
+    final filter = historyState.filter;
+    final notifier = ref.read(historyProvider.notifier);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: context.scaffoldBg,
+        border: Border(
+          bottom: BorderSide(
+            color: context.borderColor.withValues(alpha: 0.6),
+            width: 1,
+          ),
+        ),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          children: [
+            // Status: Semua
+            _buildQuickFilterPill(
+              context,
+              label: 'Semua',
+              isSelected: filter.status == AttendanceHistoryStatusFilter.all,
+              onTap: () =>
+                  notifier.setStatusFilter(AttendanceHistoryStatusFilter.all),
+            ),
+            const SizedBox(width: 8),
+
+            // Status: Tepat Waktu
+            _buildQuickFilterPill(
+              context,
+              label: 'Tepat Waktu',
+              icon: Icons.check_circle_rounded,
+              isSelected: filter.status == AttendanceHistoryStatusFilter.onTime,
+              activeColor: const Color(0xFF15803D),
+              activeBg: const Color(0xFFDCFCE7),
+              onTap: () => notifier.setStatusFilter(
+                filter.status == AttendanceHistoryStatusFilter.onTime
+                    ? AttendanceHistoryStatusFilter.all
+                    : AttendanceHistoryStatusFilter.onTime,
+              ),
+            ),
+            const SizedBox(width: 8),
+
+            // Status: Terlambat
+            _buildQuickFilterPill(
+              context,
+              label: 'Terlambat',
+              icon: Icons.alarm_rounded,
+              isSelected: filter.status == AttendanceHistoryStatusFilter.late,
+              activeColor: const Color(0xFFE11D48),
+              activeBg: const Color(0xFFFFF1F2),
+              onTap: () => notifier.setStatusFilter(
+                filter.status == AttendanceHistoryStatusFilter.late
+                    ? AttendanceHistoryStatusFilter.all
+                    : AttendanceHistoryStatusFilter.late,
+              ),
+            ),
+            const SizedBox(width: 8),
+
+            // Date Range Chip
+            _buildQuickFilterPill(
+              context,
+              label: filter.dateRange != null
+                  ? (filter.dateRangeLabel ?? 'Rentang Tanggal')
+                  : 'Tanggal',
+              icon: Icons.calendar_month_rounded,
+              trailingIcon: filter.dateRange != null
+                  ? Icons.close_rounded
+                  : Icons.keyboard_arrow_down_rounded,
+              isSelected: filter.dateRange != null,
+              onTap: () => _showDateFilterSheet(context, historyState),
+              onTrailingTap: filter.dateRange != null
+                  ? () => notifier.setDateRangeFilter(null)
+                  : null,
+            ),
+
+            // Shift Chip (if shifts available)
+            if (historyState.availableShifts.length > 2) ...[
+              const SizedBox(width: 8),
+              _buildQuickFilterPill(
+                context,
+                label: filter.shift != null && filter.shift != 'Semua Shift'
+                    ? filter.shift!
+                    : 'Shift',
+                icon: Icons.access_time_rounded,
+                trailingIcon:
+                    filter.shift != null && filter.shift != 'Semua Shift'
+                        ? Icons.close_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                isSelected:
+                    filter.shift != null && filter.shift != 'Semua Shift',
+                onTap: () => _showShiftFilterSheet(
+                  context,
+                  historyState.availableShifts,
+                  historyState,
+                ),
+                onTrailingTap:
+                    filter.shift != null && filter.shift != 'Semua Shift'
+                        ? () => notifier.setShiftFilter(null)
+                        : null,
+              ),
+            ],
+
+            // Reset chip (when filter active)
+            if (filter.isActive) ...[
+              const SizedBox(width: 8),
+              InkWell(
+                onTap: () => notifier.resetFilter(),
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: context.surfaceSecondaryColor,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: context.borderColor),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.refresh_rounded,
+                        size: 14,
+                        color: context.textSecondaryColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Reset',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: context.textSecondaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickFilterPill(
+    BuildContext context, {
+    required String label,
+    IconData? icon,
+    IconData? trailingIcon,
+    required bool isSelected,
+    Color? activeColor,
+    Color? activeBg,
+    required VoidCallback onTap,
+    VoidCallback? onTrailingTap,
+  }) {
+    final textColor = isSelected
+        ? (activeColor ?? Colors.white)
+        : context.textSecondaryColor;
+    final bgColor = isSelected
+        ? (activeBg ?? AppColors.primary)
+        : context.surfaceColor;
+    final borderColor = isSelected
+        ? (activeColor ?? AppColors.primary)
+        : context.borderColor;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: borderColor, width: 1),
+          boxShadow: [
+            if (!isSelected)
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
+              ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 14, color: textColor),
+              const SizedBox(width: 5),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                color: textColor,
+              ),
+            ),
+            if (trailingIcon != null) ...[
+              const SizedBox(width: 4),
+              GestureDetector(
+                onTap: onTrailingTap ?? onTap,
+                child: Icon(trailingIcon, size: 14, color: textColor),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyFilterState(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 48.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.filter_list_off_rounded,
+                size: 40,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Tidak Ada Riwayat Sesuai Filter',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: context.textPrimaryColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Coba ubah status, shift, atau rentang tanggal yang dipilih.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                color: context.textMutedColor,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+              ),
+              onPressed: () {
+                ref.read(historyProvider.notifier).resetFilter();
+              },
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text(
+                'Reset Semua Filter',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final historyState = ref.watch(historyProvider);
@@ -919,6 +1917,70 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           ),
         ),
         actions: [
+          // Filter Button with Badge
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                InkWell(
+                  onTap: () => _showFullFilterSheet(context),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: historyState.filter.isActive
+                          ? AppColors.primary.withValues(alpha: 0.12)
+                          : context.surfaceSecondaryColor,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: historyState.filter.isActive
+                            ? AppColors.primary
+                            : context.borderColor,
+                        width: 1,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.tune_rounded,
+                      color: historyState.filter.isActive
+                          ? AppColors.primary
+                          : context.textSecondaryColor,
+                      size: 18,
+                    ),
+                  ),
+                ),
+                if (historyState.filter.isActive)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${historyState.filter.activeFilterCount}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            height: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          // Refresh Button
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: InkWell(
@@ -944,6 +2006,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       ),
       body: Column(
         children: [
+          // Filter Chips Bar
+          _buildFilterBar(context, historyState),
+
+          // Background Syncing Indicator
           AnimatedOpacity(
             opacity: historyState.isBackgroundSyncing ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 200),
@@ -958,6 +2024,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               ),
             ),
           ),
+
+          // History List
           Expanded(
             child: RefreshIndicator(
               color: AppColors.primary,
@@ -1024,18 +2092,30 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     );
                   }
 
-                  final hasMore = historyState.hasMore;
+                  final filteredList = historyState.filteredRecords;
+                  if (filteredList.isEmpty) {
+                    return ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        const SizedBox(height: 40),
+                        _buildEmptyFilterState(context),
+                      ],
+                    );
+                  }
+
+                  final showLoadingMore =
+                      historyState.hasMore && !historyState.filter.isActive;
                   return ListView.separated(
                     controller: _scrollController,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 12,
                     ),
-                    itemCount: records.length + (hasMore ? 1 : 0),
+                    itemCount: filteredList.length + (showLoadingMore ? 1 : 0),
                     separatorBuilder: (context, index) =>
                         const SizedBox(height: 18),
                     itemBuilder: (context, index) {
-                      if (index == records.length) {
+                      if (index == filteredList.length) {
                         return const Padding(
                           padding: EdgeInsets.symmetric(vertical: 20),
                           child: Center(
@@ -1050,7 +2130,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           ),
                         );
                       }
-                      final item = records[index];
+                      final item = filteredList[index];
                       final rawStatus = item.status ?? 'Tepat Waktu';
                       String displayStatus = rawStatus;
                       if (rawStatus.toUpperCase() == 'LATE') {

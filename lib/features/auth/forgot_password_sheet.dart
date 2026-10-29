@@ -11,17 +11,20 @@ enum ForgotPasswordStep { inputEmail, inputOtp, resetPassword }
 class ForgotPasswordSheet extends StatefulWidget {
   final String initialEmail;
   final Function(String email)? onResetSuccess;
+  final AuthRepository? repository;
 
   const ForgotPasswordSheet({
     super.key,
     this.initialEmail = '',
     this.onResetSuccess,
+    this.repository,
   });
 
   static Future<void> show(
     BuildContext context, {
     String initialEmail = '',
     Function(String email)? onResetSuccess,
+    AuthRepository? repository,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -30,6 +33,7 @@ class ForgotPasswordSheet extends StatefulWidget {
       builder: (context) => ForgotPasswordSheet(
         initialEmail: initialEmail,
         onResetSuccess: onResetSuccess,
+        repository: repository,
       ),
     );
   }
@@ -39,7 +43,7 @@ class ForgotPasswordSheet extends StatefulWidget {
 }
 
 class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
-  final AuthRepository _repository = AuthRepository();
+  late final AuthRepository _repository;
 
   ForgotPasswordStep _step = ForgotPasswordStep.inputEmail;
 
@@ -70,6 +74,7 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
   @override
   void initState() {
     super.initState();
+    _repository = widget.repository ?? AuthRepository();
     _emailController = TextEditingController(text: widget.initialEmail.trim());
 
     _emailController.addListener(_onFieldChanged);
@@ -227,20 +232,42 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
     }
   }
 
-  void _proceedToResetPassword() {
-    if (!_isOtpValid) {
-      setState(() {
-        _errorMessage = 'Kode OTP harus berupa 6 digit angka.';
-      });
+  Future<void> _proceedToResetPassword() async {
+    if (!_isOtpValid || _isLoading) {
+      if (!_isOtpValid) {
+        setState(() {
+          _errorMessage = 'Kode OTP harus berupa 6 digit angka.';
+        });
+      }
       return;
     }
+
     setState(() {
+      _isLoading = true;
       _errorMessage = null;
-      _step = ForgotPasswordStep.resetPassword;
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _newPasswordFocus.requestFocus();
-    });
+
+    try {
+      await _repository.verifyOtp(
+        email: _emailController.text.trim(),
+        otp: _otpController.text.trim(),
+      );
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = null;
+        _step = ForgotPasswordStep.resetPassword;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _newPasswordFocus.requestFocus();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      });
+    }
   }
 
   Future<void> _submitResetPassword() async {
@@ -597,6 +624,7 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: TextField(
+                      key: const Key('email_text_field'),
                       controller: _emailController,
                       focusNode: _emailFocus,
                       keyboardType: TextInputType.emailAddress,
@@ -896,29 +924,39 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
                     : null,
                 borderRadius: BorderRadius.circular(12),
                 child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Lanjutkan',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: _isOtpValid
-                              ? Colors.white
-                              : const Color(0xFF9CA3AF),
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Lanjutkan',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: _isOtpValid
+                                    ? Colors.white
+                                    : const Color(0xFF9CA3AF),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 16,
+                              color: _isOtpValid
+                                  ? Colors.white
+                                  : const Color(0xFF9CA3AF),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        Icons.arrow_forward_rounded,
-                        size: 16,
-                        color: _isOtpValid
-                            ? Colors.white
-                            : const Color(0xFF9CA3AF),
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ),
@@ -961,6 +999,7 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
         Opacity(
           opacity: 0.01,
           child: TextField(
+            key: const Key('otp_text_field'),
             controller: _otpController,
             focusNode: _otpFocus,
             keyboardType: TextInputType.number,

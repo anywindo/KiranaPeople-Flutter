@@ -13,6 +13,69 @@ class LoginScreen extends ConsumerStatefulWidget {
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
+class _IslamicWorkQuote {
+  final String quote;
+  final String source;
+  final String topic;
+
+  const _IslamicWorkQuote({
+    required this.quote,
+    required this.source,
+    required this.topic,
+  });
+}
+
+const List<_IslamicWorkQuote> _islamicQuotes = [
+  _IslamicWorkQuote(
+    quote:
+        'Sesungguhnya Allah mencintai seorang hamba yang apabila bekerja, ia melakukannya dengan itqan (sungguh-sungguh, rapi, dan profesional).',
+    source: 'HR. Al-Baihaqi & Ath-Thabrani',
+    topic: 'Profesionalisme',
+  ),
+  _IslamicWorkQuote(
+    quote:
+        'Dan katakanlah, "Bekerjalah kamu, maka Allah dan Rasul-Nya serta orang-orang mukmin akan melihat pekerjaanmu itu."',
+    source: 'QS. At-Taubah: 105',
+    topic: 'Etos Kerja',
+  ),
+  _IslamicWorkQuote(
+    quote:
+        'Tidaklah seseorang memakan suatu makanan yang lebih baik daripada makanan dari hasil usaha dan keringatnya sendiri.',
+    source: 'HR. Bukhari no. 2072',
+    topic: 'Kemandirian',
+  ),
+  _IslamicWorkQuote(
+    quote:
+        'Barangsiapa di sore hari merasa lelah karena bekerja mencari rezeki yang halal, maka pada saat itu diampuni dosa-dosanya.',
+    source: 'HR. Ath-Thabrani',
+    topic: 'Penggugur Dosa',
+  ),
+  _IslamicWorkQuote(
+    quote:
+        'Mencari rezeki yang halal adalah kewajiban setelah kewajiban pokok beribadah.',
+    source: 'HR. Al-Baihaqi & Ath-Thabrani',
+    topic: 'Nafkah Halal',
+  ),
+  _IslamicWorkQuote(
+    quote:
+        'Maka apabila engkau telah selesai (dari suatu urusan), tetaplah bekerja keras (untuk urusan yang lain), dan hanya kepada Tuhanmulah engkau berharap.',
+    source: 'QS. Al-Insyirah: 7-8',
+    topic: 'Pantang Menyerah',
+  ),
+  _IslamicWorkQuote(
+    quote:
+        'Bersemangatlah terhadap hal-hal yang bermanfaat bagimu, mohonlah pertolongan kepada Allah, dan janganlah merasa lemah.',
+    source: 'HR. Muslim no. 2664',
+    topic: 'Optimisme',
+  ),
+  _IslamicWorkQuote(
+    quote:
+        'Sesungguhnya Allah suka melihat hamba-Nya bersungguh-sungguh dalam mencari nafkah yang halal.',
+    source: 'HR. Ad-Dailami',
+    topic: 'Keberkahan',
+  ),
+];
+
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _identifierController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -21,10 +84,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   bool _isPasswordVisible = false;
   bool _rememberMe = true;
+  int _quoteIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    _quoteIndex = DateTime.now().day % _islamicQuotes.length;
     _identifierFocus.addListener(() {
       if (mounted) setState(() {});
     });
@@ -503,9 +568,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 20),
+
+                      // Islamic Motivation Card
+                      _buildIslamicMotivationCard(context, isDark),
 
                       const Spacer(),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 24),
 
                       // Version section
                       Text(
@@ -523,6 +592,81 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+
+  void _nextQuote() {
+    setState(() {
+      _quoteIndex = (_quoteIndex + 1) % _islamicQuotes.length;
+    });
+  }
+
+  Widget _buildIslamicMotivationCard(BuildContext context, bool isDark) {
+    final quote = _islamicQuotes[_quoteIndex];
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? context.borderColor : const Color(0xFFE5E7EB),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _nextQuote,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              transitionBuilder: (child, animation) => FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+              child: Column(
+                key: ValueKey<int>(_quoteIndex),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '“${quote.quote}”',
+                    style: TextStyle(
+                      fontSize: 13,
+                      height: 1.5,
+                      fontStyle: FontStyle.italic,
+                      color: context.textSecondaryColor,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      quote.source,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: isDark
+                            ? AppColors.primary.withValues(alpha: 0.9)
+                            : AppColors.primaryDark,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

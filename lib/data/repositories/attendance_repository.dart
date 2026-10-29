@@ -99,10 +99,24 @@ class AttendanceRepository {
     );
   }
 
-  Future<List<AttendanceRecord>> getAttendanceHistory({int page = 1}) async {
+  Future<List<AttendanceRecord>> getAttendanceHistory({
+    int page = 1,
+    String? status,
+    String? startDate,
+    String? endDate,
+  }) async {
+    final queryParams = <String, dynamic>{'page': page};
+    if (status != null && status.isNotEmpty) queryParams['status'] = status;
+    if (startDate != null && startDate.isNotEmpty) {
+      queryParams['start_date'] = startDate;
+    }
+    if (endDate != null && endDate.isNotEmpty) {
+      queryParams['end_date'] = endDate;
+    }
+
     final response = await _apiClient.get(
       ApiEndpoints.attendanceHistory,
-      queryParameters: {'page': page},
+      queryParameters: queryParams,
     );
 
     final data = response.data;

@@ -151,9 +151,29 @@ class AuthRepository {
     if (data is Map<String, dynamic>) {
       return data['meta']?['message'] ??
           data['message'] ??
-          'Jika email Anda terdaftar, instruksi reset kata sandi dan kode OTP telah dikirimkan ke email Anda.';
+          'Kode OTP verifikasi telah dikirimkan ke email Anda.';
     }
-    return 'Jika email Anda terdaftar, instruksi reset kata sandi dan kode OTP telah dikirimkan ke email Anda.';
+    return 'Kode OTP verifikasi telah dikirimkan ke email Anda.';
+  }
+
+  Future<String> verifyOtp({
+    required String email,
+    required String otp,
+  }) async {
+    final response = await _apiClient.post(
+      ApiEndpoints.verifyOtp,
+      data: {
+        'email': email.trim(),
+        'otp': otp.trim(),
+      },
+    );
+    final data = response.data;
+    if (data is Map<String, dynamic>) {
+      return data['meta']?['message'] ??
+          data['message'] ??
+          'Kode OTP valid.';
+    }
+    return 'Kode OTP valid.';
   }
 
   Future<String> resetPassword({

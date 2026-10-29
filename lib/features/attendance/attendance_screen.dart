@@ -18,6 +18,7 @@ import '../../core/utils/location_helper.dart';
 import '../../core/widgets/auto_oriented_image.dart';
 import '../../core/widgets/bouncing_button.dart';
 import '../navigation/main_navigation_screen.dart';
+import '../profile/profile_screen.dart';
 import 'camera_selfie_view.dart';
 import 'shift_picker_sheet.dart';
 
@@ -410,62 +411,94 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                 ),
                 const SizedBox(height: 16),
 
-                // 2. User Greeting Row
-                Row(
-                  children: [
-                    // Avatar photo or initials
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF4338CA),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: context.isDarkMode ? context.surfaceColor : Colors.white,
-                          width: 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: context.isDarkMode ? 0.3 : 0.10),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
+                // 2. User Greeting Section (tap redirects to Profile)
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      final mainNav = MainNavigationScreen.of(context);
+                      if (mainNav != null) {
+                        mainNav.switchToTab(3);
+                      } else {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ProfileScreen(),
+                          ),
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 4,
+                        horizontal: 4,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Avatar photo or initials
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4338CA),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: context.isDarkMode
+                                    ? context.surfaceColor
+                                    : Colors.white,
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(
+                                    alpha: context.isDarkMode ? 0.3 : 0.10,
+                                  ),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: ClipOval(
+                              child: user?.avatar != null &&
+                                      user!.avatar!.isNotEmpty
+                                  ? CachedNetworkImage(
+                                      imageUrl: user.avatar!,
+                                      fit: BoxFit.cover,
+                                      errorWidget: (_, _, _) =>
+                                          _buildUserInitial(user.name),
+                                    )
+                                  : _buildUserInitial(user?.name ?? 'User'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+
+                          // Greeting + Name
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _getGreeting(),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: context.textMutedColor,
+                                ),
+                              ),
+                              Text(
+                                user?.name ?? 'User',
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                  color: context.textPrimaryColor,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                      child: ClipOval(
-                        child: user?.avatar != null && user!.avatar!.isNotEmpty
-                            ? CachedNetworkImage(
-                                imageUrl: user.avatar!,
-                                fit: BoxFit.cover,
-                                errorWidget: (_, _, _) => _buildUserInitial(user.name),
-                              )
-                            : _buildUserInitial(user?.name ?? 'User'),
-                      ),
                     ),
-                    const SizedBox(width: 12),
-
-                    // Greeting + Name
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _getGreeting(),
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: context.textMutedColor,
-                          ),
-                        ),
-                        Text(
-                          user?.name ?? 'User',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                            color: context.textPrimaryColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
                 const SizedBox(height: 16),
 

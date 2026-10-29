@@ -96,6 +96,106 @@ class ProfileScreen extends ConsumerWidget {
     _showCustomToast(context, '$label berhasil disalin');
   }
 
+  void _showEnlargedPhotoDialog(
+    BuildContext context,
+    UserModel? user,
+    String userName,
+  ) {
+    final avatarUrl = user?.fullAvatarUrl;
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.85),
+      builder: (ctx) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        userName,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () => Navigator.of(ctx).pop(),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.7,
+                    minHeight: 250,
+                    minWidth: double.infinity,
+                  ),
+                  color: Colors.black,
+                  child: InteractiveViewer(
+                    minScale: 0.8,
+                    maxScale: 4.0,
+                    child: (avatarUrl != null && avatarUrl.isNotEmpty)
+                        ? CachedNetworkImage(
+                            imageUrl: avatarUrl,
+                            fit: BoxFit.contain,
+                            placeholder: (context, url) => const SizedBox(
+                              height: 300,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => SizedBox(
+                              height: 300,
+                              width: double.infinity,
+                              child: _buildInitialAvatar(userName),
+                            ),
+                          )
+                        : SizedBox(
+                            height: 300,
+                            width: double.infinity,
+                            child: _buildInitialAvatar(userName),
+                          ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _showPhotoSourceSheet(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
@@ -693,579 +793,641 @@ class ProfileScreen extends ConsumerWidget {
     final attendanceState = ref.watch(todayAttendanceProvider);
     final workLoc = attendanceState.data.value?.workLocation ?? user?.location;
 
-    final userName = user?.name ?? 'User Testing';
-    final userEmail = user?.email ?? 'balmacedam...r@gmail.com';
-    final employeeId = user?.employeeId ?? 'TEST';
+    final userName = (user?.name != null && user!.name.trim().isNotEmpty)
+        ? user.name.trim()
+        : (user?.employeeId ?? '-');
+    final userEmail = user?.email ?? '-';
+    final employeeId = user?.employeeId ?? '-';
     final roleName = _getDisplayRole(user);
-    final isActive = user?.isActive ?? true;
-    final officeName = workLoc?.name ?? 'Kantor Utama (Tersono, Batang)';
-    final radiusStr = '${workLoc?.radius.round() ?? 100} meter';
+    final officeName = workLoc?.name ?? '-';
+    final radiusStr = workLoc?.radius != null
+        ? '${workLoc!.radius.round()} meter'
+        : '-';
     final joinedStr = user?.joinedAt != null
         ? _formatIndoDate(user!.joinedAt)
-        : '15 Oktober 2026';
-    final nikStr = user?.nik ?? '1234567890123456';
-    final dobStr = user?.dob != null
-        ? _formatIndoDate(user!.dob)
-        : '1 Januari 2000';
-    final phoneStr = (user?.phone != null && user!.phone!.isNotEmpty)
-        ? user.phone!
+        : '-';
+    final nikStr = user?.nik ?? '-';
+    final dobStr = user?.dob != null ? _formatIndoDate(user!.dob) : '-';
+    final phoneStr = (user?.phone != null && user!.phone!.trim().isNotEmpty)
+        ? user.phone!.trim()
         : 'Belum diatur';
 
-    return Scaffold(
-      backgroundColor: context.scaffoldBg,
-      appBar: AppBar(
-        backgroundColor: context.scaffoldBg,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'Profil',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.bold,
-            color: context.textPrimaryColor,
-          ),
-        ),
+    final username =
+        (user?.employeeId != null && user!.employeeId!.trim().isNotEmpty)
+            ? user.employeeId!.trim()
+            : '';
+    final userHandle = username;
+
+    final topPadding = MediaQuery.of(context).padding.top;
+    final bannerHeight = 125.0 + topPadding;
+    const avatarDiameter = 96.0;
+    const avatarHalf = avatarDiameter / 2; // 48.0
+    final headerTotalHeight = bannerHeight + avatarHalf;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 10,
-          bottom: 40,
-        ),
-        child: Column(
-          children: [
-            // 1. Profile Avatar & Badges Header (Matches Screenshot 1)
-            Center(
-              child: Column(
-                children: [
-                  // Circular Avatar with Camera Badge
-                  GestureDetector(
-                    onTap: () => _showPhotoSourceSheet(context, ref),
-                    child: Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        Container(
-                          width: 88,
-                          height: 88,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: context.isDarkMode
-                                  ? context.surfaceColor
-                                  : Colors.white,
-                              width: 3,
+      child: Scaffold(
+        backgroundColor: context.scaffoldBg,
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 40),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Header Banner with Avatar
+              SizedBox(
+                height: headerTotalHeight,
+                width: double.infinity,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Banner Image
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: bannerHeight,
+                      child: Image.asset(
+                        'assets/images/header-bar.jpeg',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Color(0xFFFF21A4),
+                                  Color(0xFF7C3AED),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(
-                                  alpha: context.isDarkMode ? 0.35 : 0.12,
+                          );
+                        },
+                      ),
+                    ),
+
+                    // Avatar overlapping the banner bottom (Left aligned)
+                    Positioned(
+                      left: 20,
+                      top: bannerHeight - avatarHalf,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          // 1. Tapping avatar enlarges the photo
+                          GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => _showEnlargedPhotoDialog(
+                              context,
+                              user,
+                              userName,
+                            ),
+                            child: Container(
+                              width: avatarDiameter,
+                              height: avatarDiameter,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: context.isDarkMode
+                                      ? context.scaffoldBg
+                                      : Colors.white,
+                                  width: 3.5,
                                 ),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.18),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          child: ClipOval(
-                            child:
-                                (user?.fullAvatarUrl != null &&
-                                    user!.fullAvatarUrl!.isNotEmpty)
-                                ? CachedNetworkImage(
-                                    imageUrl: user.fullAvatarUrl!,
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) => Container(
-                                      color: context.surfaceSecondaryColor,
-                                      child: const Center(
-                                        child: SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: AppColors.primary,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    errorWidget: (context, url, error) =>
-                                        _buildInitialAvatar(userName),
-                                  )
-                                : _buildInitialAvatar(userName),
-                          ),
-                        ),
-                        // Camera Icon Badge
-                        Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFF2D75),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: context.isDarkMode
-                                  ? context.surfaceColor
-                                  : Colors.white,
-                              width: 2,
+                              child: ClipOval(
+                                child:
+                                    (user?.fullAvatarUrl != null &&
+                                            user!.fullAvatarUrl!.isNotEmpty)
+                                        ? CachedNetworkImage(
+                                            imageUrl: user.fullAvatarUrl!,
+                                            fit: BoxFit.cover,
+                                            placeholder: (context, url) =>
+                                                Container(
+                                              color:
+                                                  context.surfaceSecondaryColor,
+                                              child: const Center(
+                                                child: SizedBox(
+                                                  width: 16,
+                                                  height: 16,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    strokeWidth: 2,
+                                                    color: AppColors.primary,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    _buildInitialAvatar(
+                                                      userName,
+                                                    ),
+                                          )
+                                        : _buildInitialAvatar(userName),
+                              ),
                             ),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
+                          ),
+
+                          // 2. Tapping camera badge opens photo source modal
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => _showPhotoSourceSheet(context, ref),
+                              child: Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFF2D75),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: context.isDarkMode
+                                        ? context.scaffoldBg
+                                        : Colors.white,
+                                    width: 2.5,
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.camera_alt_rounded,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
                               ),
-                            ],
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.camera_alt_rounded,
-                            color: Colors.white,
-                            size: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // User Name
-                  Text(
-                    userName,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: context.textPrimaryColor,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-
-                  // Badges: Karyawan & Aktif
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: context.isDarkMode
-                              ? const Color(0xFF3B1524)
-                              : const Color(0xFFFFF1F5),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Text(
-                          'Karyawan',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFFFF2D75),
-                          ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: context.isDarkMode
-                              ? const Color(0xFF063A23)
-                              : const Color(0xFFDCFCE7),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          isActive ? 'Aktif' : 'Non-Aktif',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: context.isDarkMode
-                                ? const Color(0xFF4ADE80)
-                                : const Color(0xFF15803D),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-
-                  // Employee ID Subtitle
-                  Text(
-                    employeeId,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: context.textMutedColor,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // 2. Section: PENGATURAN AKUN & KEAMANAN
-            _buildSectionHeader(context, 'PENGATURAN AKUN & KEAMANAN'),
-            _buildCardGroup(context, [
-              _buildRow(
-                context,
-                iconBg: context.isDarkMode
-                    ? const Color(0xFF3B1524)
-                    : const Color(0xFFFFF1F5),
-                icon: Icons.phone_rounded,
-                iconColor: AppColors.primary,
-                title: 'Nomor Telepon',
-                onTap: () =>
-                    _showEditPhoneBottomSheet(context, ref, user?.phone),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      phoneStr,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: context.textSecondaryColor,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      size: 16,
-                      color: context.borderColor,
                     ),
                   ],
                 ),
               ),
-              Divider(height: 1, indent: 56, color: context.dividerColor),
-              _buildRow(
-                context,
-                iconBg: context.isDarkMode
-                    ? const Color(0xFF3B1524)
-                    : const Color(0xFFFFF1F5),
-                icon: Icons.shield_outlined,
-                iconColor: AppColors.primary,
-                title: 'Kata Sandi',
-                onTap: () => ChangePasswordDialog.show(context),
-                trailing: const Row(
-                  mainAxisSize: MainAxisSize.min,
+
+              // Clearance for overlapping avatar
+              const SizedBox(height: 12),
+
+              // User Name & Handle (Left aligned as per reference)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Ubah Sandi',
+                      userName,
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFFFF2D75),
+                        color: context.textPrimaryColor,
+                        letterSpacing: -0.3,
                       ),
                     ),
-                    SizedBox(width: 4),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      size: 16,
-                      color: Color(0xFFFF2D75),
-                    ),
-                  ],
-                ),
-              ),
-              Divider(height: 1, indent: 56, color: context.dividerColor),
-              _buildRow(
-                context,
-                iconBg: context.isDarkMode
-                    ? const Color(0xFF3B1524)
-                    : const Color(0xFFFFF1F5),
-                icon: Icons.mail_rounded,
-                iconColor: AppColors.primary,
-                title: 'Email',
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 160),
-                      child: Text(
-                        userEmail,
-                        overflow: TextOverflow.ellipsis,
+                    if (userHandle.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        userHandle,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                           color: context.textSecondaryColor,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    InkWell(
-                      onTap: () =>
-                          _copyToClipboard(context, userEmail, 'Email'),
-                      child: Icon(
-                        Icons.copy_rounded,
-                        size: 16,
-                        color: context.textMutedColor,
-                      ),
-                    ),
+                    ],
                   ],
                 ),
               ),
-            ]),
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            // 3. Section: DATA KEPEGAWAIAN & LOKASI
-            _buildSectionHeader(context, 'DATA KEPEGAWAIAN & LOKASI'),
-            _buildCardGroup(context, [
-              _buildRow(
-                context,
-                iconBg: context.isDarkMode
-                    ? const Color(0xFF3B1524)
-                    : const Color(0xFFFFF1F5),
-                icon: Icons.badge_rounded,
-                iconColor: AppColors.primary,
-                title: 'ID Karyawan',
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
+              // Sections in horizontal padding
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
                   children: [
-                    Text(
-                      employeeId,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: context.textSecondaryColor,
+                    // 2. Section: PENGATURAN AKUN & KEAMANAN
+                    _buildSectionHeader(context, 'PENGATURAN AKUN & KEAMANAN'),
+                    _buildCardGroup(context, [
+                      _buildRow(
+                        context,
+                        iconBg: context.isDarkMode
+                            ? const Color(0xFF3B1524)
+                            : const Color(0xFFFFF1F5),
+                        icon: Icons.phone_rounded,
+                        iconColor: AppColors.primary,
+                        title: 'Nomor Telepon',
+                        onTap: () => _showEditPhoneBottomSheet(
+                          context,
+                          ref,
+                          user?.phone,
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              phoneStr,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: context.textSecondaryColor,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              size: 16,
+                              color: context.borderColor,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    InkWell(
-                      onTap: () =>
-                          _copyToClipboard(context, employeeId, 'ID Karyawan'),
-                      child: Icon(
-                        Icons.copy_rounded,
-                        size: 16,
-                        color: context.textMutedColor,
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: context.dividerColor,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              Divider(height: 1, indent: 56, color: context.dividerColor),
-              _buildRow(
-                context,
-                iconBg: context.isDarkMode
-                    ? const Color(0xFF3B1524)
-                    : const Color(0xFFFFF1F5),
-                icon: Icons.work_rounded,
-                iconColor: AppColors.primary,
-                title: 'Jabatan',
-                trailing: Text(
-                  roleName,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.textSecondaryColor,
-                  ),
-                ),
-              ),
-              Divider(height: 1, indent: 56, color: context.dividerColor),
-              _buildRow(
-                context,
-                iconBg: context.isDarkMode
-                    ? const Color(0xFF3B1524)
-                    : const Color(0xFFFFF1F5),
-                icon: Icons.apartment_rounded,
-                iconColor: AppColors.primary,
-                title: 'Lokasi Kantor',
-                trailing: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 160),
-                  child: Text(
-                    officeName,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: context.textSecondaryColor,
-                    ),
-                  ),
-                ),
-              ),
-              Divider(height: 1, indent: 56, color: context.dividerColor),
-              _buildRow(
-                context,
-                iconBg: context.isDarkMode
-                    ? const Color(0xFF3B1524)
-                    : const Color(0xFFFFF1F5),
-                icon: Icons.near_me_rounded,
-                iconColor: AppColors.primary,
-                title: 'Radius Presensi',
-                trailing: Text(
-                  radiusStr,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.textSecondaryColor,
-                  ),
-                ),
-              ),
-              Divider(height: 1, indent: 56, color: context.dividerColor),
-              _buildRow(
-                context,
-                iconBg: context.isDarkMode
-                    ? const Color(0xFF3B1524)
-                    : const Color(0xFFFFF1F5),
-                icon: Icons.calendar_month_rounded,
-                iconColor: AppColors.primary,
-                title: 'Bergabung',
-                trailing: Text(
-                  joinedStr,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.textSecondaryColor,
-                  ),
-                ),
-              ),
-            ]),
-            const SizedBox(height: 20),
+                      _buildRow(
+                        context,
+                        iconBg: context.isDarkMode
+                            ? const Color(0xFF3B1524)
+                            : const Color(0xFFFFF1F5),
+                        icon: Icons.shield_outlined,
+                        iconColor: AppColors.primary,
+                        title: 'Kata Sandi',
+                        onTap: () => ChangePasswordDialog.show(context),
+                        trailing: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Ubah Sandi',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFFF2D75),
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              size: 16,
+                              color: Color(0xFFFF2D75),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: context.dividerColor,
+                      ),
+                      _buildRow(
+                        context,
+                        iconBg: context.isDarkMode
+                            ? const Color(0xFF3B1524)
+                            : const Color(0xFFFFF1F5),
+                        icon: Icons.mail_rounded,
+                        iconColor: AppColors.primary,
+                        title: 'Email',
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 160),
+                              child: Text(
+                                userEmail,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: context.textSecondaryColor,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            InkWell(
+                              onTap: () =>
+                                  _copyToClipboard(context, userEmail, 'Email'),
+                              child: Icon(
+                                Icons.copy_rounded,
+                                size: 16,
+                                color: context.textMutedColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ]),
+                    const SizedBox(height: 20),
 
-            // 4. Section: IDENTITAS PRIBADI
-            _buildSectionHeader(context, 'IDENTITAS PRIBADI'),
-            _buildCardGroup(context, [
-              _buildRow(
-                context,
-                iconBg: context.isDarkMode
-                    ? const Color(0xFF3B1524)
-                    : const Color(0xFFFFF1F5),
-                icon: Icons.credit_card_rounded,
-                iconColor: AppColors.primary,
-                title: 'NIK',
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      nikStr,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: context.textSecondaryColor,
+                    // 3. Section: DATA KEPEGAWAIAN & LOKASI
+                    _buildSectionHeader(context, 'DATA KEPEGAWAIAN & LOKASI'),
+                    _buildCardGroup(context, [
+                      _buildRow(
+                        context,
+                        iconBg: context.isDarkMode
+                            ? const Color(0xFF3B1524)
+                            : const Color(0xFFFFF1F5),
+                        icon: Icons.badge_rounded,
+                        iconColor: AppColors.primary,
+                        title: 'ID Karyawan',
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              employeeId,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: context.textSecondaryColor,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            InkWell(
+                              onTap: () => _copyToClipboard(
+                                context,
+                                employeeId,
+                                'ID Karyawan',
+                              ),
+                              child: Icon(
+                                Icons.copy_rounded,
+                                size: 16,
+                                color: context.textMutedColor,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    InkWell(
-                      onTap: () => _copyToClipboard(context, nikStr, 'NIK'),
-                      child: Icon(
-                        Icons.copy_rounded,
-                        size: 16,
-                        color: context.textMutedColor,
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: context.dividerColor,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              Divider(height: 1, indent: 56, color: context.dividerColor),
-              _buildRow(
-                context,
-                iconBg: context.isDarkMode
-                    ? const Color(0xFF3B1524)
-                    : const Color(0xFFFFF1F5),
-                icon: Icons.card_giftcard_rounded,
-                iconColor: AppColors.primary,
-                title: 'Tanggal Lahir',
-                trailing: Text(
-                  dobStr,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.textSecondaryColor,
-                  ),
-                ),
-              ),
-            ]),
-            const SizedBox(height: 16),
-
-            // 5. Section: Tampilan & Versi Aplikasi Card
-            _buildCardGroup(context, [
-              _buildRow(
-                context,
-                iconBg: context.isDarkMode
-                    ? const Color(0xFF3B1524)
-                    : const Color(0xFFFFF1F5),
-                icon: Icons.palette_rounded,
-                iconColor: AppColors.primary,
-                title: 'Tema Tampilan',
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Consumer(
-                      builder: (context, ref, _) {
-                        final mode = ref.watch(themeProvider);
-                        final label = switch (mode) {
-                          ThemeMode.light => 'Terang',
-                          ThemeMode.dark => 'Gelap',
-                          ThemeMode.system => 'Sistem',
-                        };
-                        return Text(
-                          label,
+                      _buildRow(
+                        context,
+                        iconBg: context.isDarkMode
+                            ? const Color(0xFF3B1524)
+                            : const Color(0xFFFFF1F5),
+                        icon: Icons.work_rounded,
+                        iconColor: AppColors.primary,
+                        title: 'Jabatan',
+                        trailing: Text(
+                          roleName,
                           style: TextStyle(
                             fontSize: 13,
-                            fontWeight: FontWeight.w600,
                             color: context.textSecondaryColor,
                           ),
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      size: 18,
-                      color: context.textMutedColor,
-                    ),
-                  ],
-                ),
-                onTap: () => _showThemeModeSheet(context, ref),
-              ),
-              Divider(height: 1, indent: 56, color: context.dividerColor),
-              _buildRow(
-                context,
-                iconBg: context.isDarkMode
-                    ? const Color(0xFF283344)
-                    : const Color(0xFFF3F4F6),
-                icon: Icons.info_rounded,
-                iconColor: context.textSecondaryColor,
-                title: 'Versi Aplikasi',
-                trailing: Text(
-                  '1.0.1 (Build 1)',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.textSecondaryColor,
-                  ),
-                ),
-              ),
-            ]),
-            const SizedBox(height: 16),
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: context.dividerColor,
+                      ),
+                      _buildRow(
+                        context,
+                        iconBg: context.isDarkMode
+                            ? const Color(0xFF3B1524)
+                            : const Color(0xFFFFF1F5),
+                        icon: Icons.apartment_rounded,
+                        iconColor: AppColors.primary,
+                        title: 'Lokasi Kantor',
+                        trailing: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 160),
+                          child: Text(
+                            officeName,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: context.textSecondaryColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: context.dividerColor,
+                      ),
+                      _buildRow(
+                        context,
+                        iconBg: context.isDarkMode
+                            ? const Color(0xFF3B1524)
+                            : const Color(0xFFFFF1F5),
+                        icon: Icons.near_me_rounded,
+                        iconColor: AppColors.primary,
+                        title: 'Radius Presensi',
+                        trailing: Text(
+                          radiusStr,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: context.textSecondaryColor,
+                          ),
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: context.dividerColor,
+                      ),
+                      _buildRow(
+                        context,
+                        iconBg: context.isDarkMode
+                            ? const Color(0xFF3B1524)
+                            : const Color(0xFFFFF1F5),
+                        icon: Icons.calendar_month_rounded,
+                        iconColor: AppColors.primary,
+                        title: 'Bergabung',
+                        trailing: Text(
+                          joinedStr,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: context.textSecondaryColor,
+                          ),
+                        ),
+                      ),
+                    ]),
+                    const SizedBox(height: 20),
 
-            // 6. Logout Button (Matches Screenshot 2)
-            InkWell(
-              onTap: () => _showLogoutDialog(context, ref),
-              borderRadius: BorderRadius.circular(14),
-              child: Container(
-                width: double.infinity,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: context.isDarkMode
-                      ? const Color(0xFF3B151E)
-                      : const Color(0xFFFFF1F2),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: context.isDarkMode
-                        ? const Color(0xFF4C1D24)
-                        : const Color(0xFFFFE4E6),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.logout_rounded,
-                      color: Color(0xFFEF4444),
-                      size: 18,
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'Keluar dari Akun',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFEF4444),
+                    // 4. Section: IDENTITAS PRIBADI
+                    _buildSectionHeader(context, 'IDENTITAS PRIBADI'),
+                    _buildCardGroup(context, [
+                      _buildRow(
+                        context,
+                        iconBg: context.isDarkMode
+                            ? const Color(0xFF3B1524)
+                            : const Color(0xFFFFF1F5),
+                        icon: Icons.credit_card_rounded,
+                        iconColor: AppColors.primary,
+                        title: 'NIK',
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              nikStr,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: context.textSecondaryColor,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            InkWell(
+                              onTap: () =>
+                                  _copyToClipboard(context, nikStr, 'NIK'),
+                              child: Icon(
+                                Icons.copy_rounded,
+                                size: 16,
+                                color: context.textMutedColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: context.dividerColor,
+                      ),
+                      _buildRow(
+                        context,
+                        iconBg: context.isDarkMode
+                            ? const Color(0xFF3B1524)
+                            : const Color(0xFFFFF1F5),
+                        icon: Icons.card_giftcard_rounded,
+                        iconColor: AppColors.primary,
+                        title: 'Tanggal Lahir',
+                        trailing: Text(
+                          dobStr,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: context.textSecondaryColor,
+                          ),
+                        ),
+                      ),
+                    ]),
+                    const SizedBox(height: 16),
+
+                    // 5. Section: Tampilan & Versi Aplikasi Card
+                    _buildCardGroup(context, [
+                      _buildRow(
+                        context,
+                        iconBg: context.isDarkMode
+                            ? const Color(0xFF3B1524)
+                            : const Color(0xFFFFF1F5),
+                        icon: Icons.palette_rounded,
+                        iconColor: AppColors.primary,
+                        title: 'Tema Tampilan',
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Consumer(
+                              builder: (context, ref, _) {
+                                final mode = ref.watch(themeProvider);
+                                final label = switch (mode) {
+                                  ThemeMode.light => 'Terang',
+                                  ThemeMode.dark => 'Gelap',
+                                  ThemeMode.system => 'Sistem',
+                                };
+                                return Text(
+                                  label,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: context.textSecondaryColor,
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              size: 18,
+                              color: context.textMutedColor,
+                            ),
+                          ],
+                        ),
+                        onTap: () => _showThemeModeSheet(context, ref),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: context.dividerColor,
+                      ),
+                      _buildRow(
+                        context,
+                        iconBg: context.isDarkMode
+                            ? const Color(0xFF283344)
+                            : const Color(0xFFF3F4F6),
+                        icon: Icons.info_rounded,
+                        iconColor: context.textSecondaryColor,
+                        title: 'Versi Aplikasi',
+                        trailing: Text(
+                          '1.0.1 (Build 1)',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: context.textSecondaryColor,
+                          ),
+                        ),
+                      ),
+                    ]),
+                    const SizedBox(height: 16),
+
+                    // 6. Logout Button (Matches Screenshot 2)
+                    InkWell(
+                      onTap: () => _showLogoutDialog(context, ref),
+                      borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        width: double.infinity,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: context.isDarkMode
+                              ? const Color(0xFF3B151E)
+                              : const Color(0xFFFFF1F2),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: context.isDarkMode
+                                ? const Color(0xFF4C1D24)
+                                : const Color(0xFFFFE4E6),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.logout_rounded,
+                              color: Color(0xFFEF4444),
+                              size: 18,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Keluar dari Akun',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFEF4444),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
