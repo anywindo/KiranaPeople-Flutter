@@ -1450,21 +1450,41 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildCardGroup(BuildContext context, List<Widget> children) {
+    final isDark = context.isDarkMode;
     return Container(
       decoration: BoxDecoration(
         color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: context.isDarkMode ? 0.25 : 0.02,
-            ),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark
+              ? context.borderColor.withValues(alpha: 0.5)
+              : const Color(0xFFE2E8F0).withValues(alpha: 0.75),
+          width: 1,
+        ),
+        boxShadow: isDark
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: const Color(0xFF0F172A).withValues(alpha: 0.05),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                  spreadRadius: -1,
+                ),
+                BoxShadow(
+                  color: const Color(0xFF0F172A).withValues(alpha: 0.025),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                  spreadRadius: 0,
+                ),
+              ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(children: children),
     );
   }
@@ -1520,7 +1540,7 @@ class ProfileScreen extends ConsumerWidget {
     if (onTap != null) {
       return InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         child: content,
       );
     }

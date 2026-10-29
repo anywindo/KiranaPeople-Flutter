@@ -134,6 +134,33 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     }
   }
 
+  bool _isBreakTimeLate(
+    String? actualTime,
+    String? breakStartTime,
+    String? breakEndTime,
+  ) {
+    if (actualTime == null || breakStartTime == null || breakEndTime == null) {
+      return false;
+    }
+    try {
+      final actualParts = actualTime.split(':');
+      final startParts = breakStartTime.split(':');
+      final endParts = breakEndTime.split(':');
+      final actualMin =
+          int.parse(actualParts[0]) * 60 + int.parse(actualParts[1]);
+      final startMin = int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
+      final endMin = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+      if (endMin >= startMin) {
+        return actualMin < startMin || actualMin > endMin;
+      } else {
+        // Overnight break window crossing midnight
+        return actualMin < startMin && actualMin > endMin;
+      }
+    } catch (_) {
+      return false;
+    }
+  }
+
   IconData _getEventIcon(AttendanceEventType type) {
     switch (type) {
       case AttendanceEventType.startShift:
@@ -937,7 +964,13 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                       event: startBreakEvent,
                                       fallbackIcon: Icons.coffee_rounded,
                                       isCompleted: hasStartedBreak,
-                                      isLate: false,
+                                      isLate: _isBreakTimeLate(
+                                        startBreakTime,
+                                        selectedShift?.effectiveBreakStart ??
+                                            '12:00',
+                                        selectedShift?.effectiveBreakEnd ??
+                                            '13:00',
+                                      ),
                                     ),
                                     const SizedBox(width: 12),
                                     _buildTimingColumn(
@@ -950,7 +983,13 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                       fallbackIcon:
                                           Icons.business_center_rounded,
                                       isCompleted: hasEndedBreak,
-                                      isLate: false,
+                                      isLate: _isBreakTimeLate(
+                                        endBreakTime,
+                                        selectedShift?.effectiveBreakStart ??
+                                            '12:00',
+                                        selectedShift?.effectiveBreakEnd ??
+                                            '13:00',
+                                      ),
                                     ),
                                   ],
                                 ),
