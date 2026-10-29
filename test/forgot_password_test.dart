@@ -173,5 +173,40 @@ void main() {
       expect(find.text('Atur Kata Sandi Baru'), findsOneWidget);
       expect(find.text('Perbarui Kata Sandi'), findsOneWidget);
     });
+
+    testWidgets('ambiguous backend message (Jika email Anda terdaftar...) is blocked from OTP step on UI', (tester) async {
+      final mockRepo = AmbiguousMockAuthRepository();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ForgotPasswordSheet(
+              initialEmail: 'this@fake.email',
+              repository: mockRepo,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final sendOtpBtn = find.text('Kirim Kode OTP');
+      expect(sendOtpBtn, findsOneWidget);
+
+      await tester.tap(sendOtpBtn);
+      await tester.pump();
+
+      // Ensure error is shown on UI and it does NOT advance to OTP step
+      expect(find.text('Email tidak terdaftar dalam sistem.'), findsOneWidget);
+      expect(find.text('Verifikasi OTP'), findsNothing);
+      expect(find.text('Kirim Kode OTP'), findsOneWidget);
+    });
   });
+}
+
+class AmbiguousMockAuthRepository extends AuthRepository {
+  @override
+  Future<String> requestForgotPasswordOtp(String email) async {
+    // Simulates legacy backend returning ambiguous anti-enumeration string
+    return 'Jika email Anda terdaftar, instruksi reset kata sandi dan kode OTP telah dikirimkan ke email Anda.';
+  }
 }

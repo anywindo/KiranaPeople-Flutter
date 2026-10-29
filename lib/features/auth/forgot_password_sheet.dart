@@ -185,6 +185,15 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
 
     try {
       final msg = await _repository.requestForgotPasswordOtp(email);
+      if (msg.toLowerCase().contains('jika email anda terdaftar')) {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Email tidak terdaftar dalam sistem.';
+        });
+        return;
+      }
+
       if (!mounted) return;
       setState(() {
         _isLoading = false;
@@ -217,6 +226,15 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
 
     try {
       final msg = await _repository.requestForgotPasswordOtp(email);
+      if (msg.toLowerCase().contains('jika email anda terdaftar')) {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Email tidak terdaftar dalam sistem.';
+        });
+        return;
+      }
+
       if (!mounted) return;
       setState(() {
         _isLoading = false;

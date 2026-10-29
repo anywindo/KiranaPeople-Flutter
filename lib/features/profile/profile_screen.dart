@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/continuous_marquee_text.dart';
 import '../../data/models/user_model.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -1204,15 +1205,12 @@ class ProfileScreen extends ConsumerWidget {
                         icon: Icons.apartment_rounded,
                         iconColor: AppColors.primary,
                         title: 'Lokasi Kantor',
-                        trailing: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 160),
-                          child: Text(
-                            officeName,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: context.textSecondaryColor,
-                            ),
+                        isTrailingExpanded: true,
+                        trailing: ContinuousMarqueeText(
+                          text: officeName,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: context.textSecondaryColor,
                           ),
                         ),
                       ),
@@ -1479,6 +1477,7 @@ class ProfileScreen extends ConsumerWidget {
     required String title,
     required Widget trailing,
     VoidCallback? onTap,
+    bool isTrailingExpanded = false,
   }) {
     final content = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -1502,8 +1501,18 @@ class ProfileScreen extends ConsumerWidget {
               color: context.textPrimaryColor,
             ),
           ),
-          const Spacer(),
-          trailing,
+          const SizedBox(width: 12),
+          if (isTrailingExpanded)
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: trailing,
+              ),
+            )
+          else ...[
+            const Spacer(),
+            trailing,
+          ],
         ],
       ),
     );

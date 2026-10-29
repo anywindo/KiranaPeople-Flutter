@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 
 import '../models/user_model.dart';
 import '../../core/network/api_client.dart';
+import '../../core/network/api_exception.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/storage/secure_storage_service.dart';
 
@@ -149,9 +150,25 @@ class AuthRepository {
     );
     final data = response.data;
     if (data is Map<String, dynamic>) {
-      return data['meta']?['message'] ??
-          data['message'] ??
-          'Kode OTP verifikasi telah dikirimkan ke email Anda.';
+      final message = (data['meta']?['message'] ??
+              data['message'] ??
+              'Kode OTP verifikasi telah dikirimkan ke email Anda.')
+          .toString();
+
+      // Guard against unconfirmed/legacy anti-enumeration responses:
+      // If the backend message contains "Jika email Anda terdaftar", the email is NOT confirmed.
+      // Reject on the UI so unauthorized/unregistered emails cannot advance to the OTP screen.
+      if (message.toLowerCase().contains('jika email anda terdaftar')) {
+        throw ApiException(
+          message: 'Email tidak terdaftar dalam sistem.',
+          statusCode: 404,
+          errors: {
+            'email': ['Email tidak terdaftar dalam sistem.']
+          },
+        );
+      }
+
+      return message;
     }
     return 'Kode OTP verifikasi telah dikirimkan ke email Anda.';
   }
