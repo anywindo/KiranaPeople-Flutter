@@ -800,31 +800,6 @@ class ProfileScreen extends ConsumerWidget {
     final userEmail = user?.email ?? '-';
     final employeeId = user?.employeeId ?? '-';
     final roleName = _getDisplayRole(user);
-    final departmentStr = (user?.department != null && user!.department!.trim().isNotEmpty)
-        ? user.department!.trim()
-        : '-';
-
-    final shiftObj = user?.shift ??
-        attendanceState.selectedShift ??
-        attendanceState.data.value?.shift;
-    final shiftStr = () {
-      if (shiftObj != null) {
-        final name = shiftObj.name.trim();
-        final start = shiftObj.startTime.trim();
-        final end = shiftObj.endTime.trim();
-        if (start.isNotEmpty && end.isNotEmpty) {
-          final s = start.length >= 5 ? start.substring(0, 5) : start;
-          final e = end.length >= 5 ? end.substring(0, 5) : end;
-          return '$name ($s - $e)';
-        }
-        return name;
-      }
-      return '-';
-    }();
-
-    final genderStr = user?.computedGender ?? '-';
-    final isUserActive = user?.isActive ?? true;
-
     final officeName = workLoc?.name ?? '-';
     final radiusStr = workLoc?.radius != null
         ? '${workLoc!.radius.round()} meter'
@@ -1010,71 +985,20 @@ class ProfileScreen extends ConsumerWidget {
               // Clearance for overlapping avatar
               const SizedBox(height: 12),
 
-              // User Name, Status Badge & Handle (Left aligned as per reference)
+              // User Name & Handle (Left aligned as per reference)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            userName,
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: context.textPrimaryColor,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isUserActive
-                                ? const Color(0xFF10B981).withValues(alpha: 0.12)
-                                : Colors.grey.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: isUserActive
-                                  ? const Color(0xFF10B981).withValues(alpha: 0.3)
-                                  : Colors.grey.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 7,
-                                height: 7,
-                                decoration: BoxDecoration(
-                                  color: isUserActive
-                                      ? const Color(0xFF10B981)
-                                      : Colors.grey,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                isUserActive ? 'Aktif' : 'Nonaktif',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: isUserActive
-                                      ? const Color(0xFF059669)
-                                      : Colors.grey.shade600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                    Text(
+                      userName,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: context.textPrimaryColor,
+                        letterSpacing: -0.3,
+                      ),
                     ),
                     if (userHandle.isNotEmpty) ...[
                       const SizedBox(height: 2),
@@ -1278,49 +1202,6 @@ class ProfileScreen extends ConsumerWidget {
                         iconBg: context.isDarkMode
                             ? const Color(0xFF3B1524)
                             : const Color(0xFFFFF1F5),
-                        icon: Icons.corporate_fare_rounded,
-                        iconColor: AppColors.primary,
-                        title: 'Departemen',
-                        trailing: Text(
-                          departmentStr,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: context.textSecondaryColor,
-                          ),
-                        ),
-                      ),
-                      Divider(
-                        height: 1,
-                        indent: 56,
-                        color: context.dividerColor,
-                      ),
-                      _buildRow(
-                        context,
-                        iconBg: context.isDarkMode
-                            ? const Color(0xFF3B1524)
-                            : const Color(0xFFFFF1F5),
-                        icon: Icons.schedule_rounded,
-                        iconColor: AppColors.primary,
-                        title: 'Shift Kerja',
-                        isTrailingExpanded: true,
-                        trailing: ContinuousMarqueeText(
-                          text: shiftStr,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: context.textSecondaryColor,
-                          ),
-                        ),
-                      ),
-                      Divider(
-                        height: 1,
-                        indent: 56,
-                        color: context.dividerColor,
-                      ),
-                      _buildRow(
-                        context,
-                        iconBg: context.isDarkMode
-                            ? const Color(0xFF3B1524)
-                            : const Color(0xFFFFF1F5),
                         icon: Icons.apartment_rounded,
                         iconColor: AppColors.primary,
                         title: 'Lokasi Kantor',
@@ -1410,27 +1291,6 @@ class ProfileScreen extends ConsumerWidget {
                               ),
                             ),
                           ],
-                        ),
-                      ),
-                      Divider(
-                        height: 1,
-                        indent: 56,
-                        color: context.dividerColor,
-                      ),
-                      _buildRow(
-                        context,
-                        iconBg: context.isDarkMode
-                            ? const Color(0xFF3B1524)
-                            : const Color(0xFFFFF1F5),
-                        icon: Icons.person_outline_rounded,
-                        iconColor: AppColors.primary,
-                        title: 'Jenis Kelamin',
-                        trailing: Text(
-                          genderStr,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: context.textSecondaryColor,
-                          ),
                         ),
                       ),
                       Divider(
