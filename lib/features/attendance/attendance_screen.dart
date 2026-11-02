@@ -121,20 +121,6 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     return timeStr;
   }
 
-  bool _isTimeLate(
-    String? actualTime,
-    String? scheduledTime, {
-    bool? ruleEnabled,
-    int? ruleMinutes,
-  }) {
-    return Shift.isShiftStartLate(
-      actualTime: actualTime,
-      scheduledTime: scheduledTime,
-      ruleEnabled: ruleEnabled ?? true,
-      ruleMinutes: ruleMinutes ?? 15,
-    );
-  }
-
   bool _isBreakTimeLate(
     String? actualTime,
     String? breakStartTime,
