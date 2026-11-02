@@ -11,6 +11,8 @@ class TodayAttendanceData {
   final List<Shift>? availableShifts;
   final WorkLocation? workLocation;
   final List<AttendanceEvent>? events;
+  final bool? attendanceRuleEnabled;
+  final int? attendanceRuleMinutes;
 
   TodayAttendanceData({
     this.date,
@@ -21,17 +23,42 @@ class TodayAttendanceData {
     this.availableShifts,
     this.workLocation,
     this.events,
+    this.attendanceRuleEnabled,
+    this.attendanceRuleMinutes,
   });
 
   factory TodayAttendanceData.fromJson(Map<String, dynamic> json) {
+    bool? ruleEnabled;
+    if (json.containsKey('attendance_rule_enabled')) {
+      final raw = json['attendance_rule_enabled'];
+      ruleEnabled = raw == true || raw?.toString() == '1' || raw?.toString().toLowerCase() == 'true';
+    }
+
+    int? ruleMinutes;
+    if (json.containsKey('attendance_rule_minutes')) {
+      final raw = json['attendance_rule_minutes'];
+      ruleMinutes = raw is int ? raw : int.tryParse(raw?.toString() ?? '');
+    }
+
+    var parsedShift = json['shift'] != null && json['shift'] is Map<String, dynamic>
+        ? Shift.fromJson(json['shift'] as Map<String, dynamic>)
+        : null;
+
+    if (parsedShift != null) {
+      if (parsedShift.attendanceRuleEnabled == null && ruleEnabled != null) {
+        parsedShift = parsedShift.copyWith(attendanceRuleEnabled: ruleEnabled);
+      }
+      if (parsedShift.attendanceRuleMinutes == null && ruleMinutes != null) {
+        parsedShift = parsedShift.copyWith(attendanceRuleMinutes: ruleMinutes);
+      }
+    }
+
     return TodayAttendanceData(
       date: json['date']?.toString(),
       status: json['status']?.toString(),
       nextAllowedAction: json['next_allowed_action']?.toString(),
       activeBreak: json['active_break'] == true,
-      shift: json['shift'] != null && json['shift'] is Map<String, dynamic>
-          ? Shift.fromJson(json['shift'] as Map<String, dynamic>)
-          : null,
+      shift: parsedShift,
       availableShifts: json['available_shifts'] is List
           ? (json['available_shifts'] as List)
               .map((e) => Shift.fromJson(e as Map<String, dynamic>))
@@ -45,6 +72,8 @@ class TodayAttendanceData {
               .map((e) => AttendanceEvent.fromJson(e as Map<String, dynamic>))
               .toList()
           : null,
+      attendanceRuleEnabled: ruleEnabled,
+      attendanceRuleMinutes: ruleMinutes,
     );
   }
 }

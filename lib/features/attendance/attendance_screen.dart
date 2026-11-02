@@ -121,17 +121,18 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     return timeStr;
   }
 
-  bool _isTimeLate(String? actualTime, String? scheduledTime) {
-    if (actualTime == null || scheduledTime == null) return false;
-    try {
-      final actualParts = actualTime.split(':');
-      final schedParts = scheduledTime.split(':');
-      final actualMin = int.parse(actualParts[0]) * 60 + int.parse(actualParts[1]);
-      final schedMin = int.parse(schedParts[0]) * 60 + int.parse(schedParts[1]);
-      return actualMin > schedMin;
-    } catch (_) {
-      return false;
-    }
+  bool _isTimeLate(
+    String? actualTime,
+    String? scheduledTime, {
+    bool? ruleEnabled,
+    int? ruleMinutes,
+  }) {
+    return Shift.isShiftStartLate(
+      actualTime: actualTime,
+      scheduledTime: scheduledTime,
+      ruleEnabled: ruleEnabled ?? true,
+      ruleMinutes: ruleMinutes ?? 15,
+    );
   }
 
   bool _isBreakTimeLate(
@@ -315,6 +316,16 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     }
 
     final hasStartedShift = startShiftEvent != null;
+    final isCheckInLate = Shift.isShiftStartLate(
+      actualTime: checkInTime,
+      scheduledTime: selectedShift?.startTime ?? '08:00',
+      ruleEnabled: selectedShift?.attendanceRuleEnabled ??
+          todayData?.attendanceRuleEnabled ??
+          true,
+      ruleMinutes: selectedShift?.attendanceRuleMinutes ??
+          todayData?.attendanceRuleMinutes ??
+          15,
+    );
     final hasEndedShift = endShiftEvent != null ||
         todayData?.status?.toUpperCase() == 'COMPLETED' ||
         todayData?.status?.toUpperCase() == 'SELESAI';
@@ -757,7 +768,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           color: (hasStartedShift
-                                                  ? AppColors.success
+                                                  ? (isCheckInLate
+                                                      ? AppColors.error
+                                                      : AppColors.success)
                                                   : AppColors.primary)
                                               .withValues(alpha: 0.12),
                                           shape: BoxShape.circle,
@@ -765,7 +778,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                         child: Icon(
                                           Icons.access_time_filled_rounded,
                                           color: hasStartedShift
-                                              ? AppColors.success
+                                              ? (isCheckInLate
+                                                  ? AppColors.error
+                                                  : AppColors.success)
                                               : AppColors.primary,
                                           size: 18,
                                         ),
@@ -934,10 +949,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                                       event: startShiftEvent,
                                       fallbackIcon: Icons.work_rounded,
                                       isCompleted: hasStartedShift,
-                                      isLate: _isTimeLate(
-                                          checkInTime,
-                                          selectedShift?.startTime ??
-                                              '08:00'),
+                                      isLate: isCheckInLate,
                                     ),
                                     const SizedBox(width: 12),
                                     _buildTimingColumn(

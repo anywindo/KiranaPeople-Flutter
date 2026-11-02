@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../data/models/attendance_event_model.dart';
+import '../../data/models/shift_model.dart';
 import '../../data/models/work_location_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/history_provider.dart';
@@ -2131,18 +2132,41 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         );
                       }
                       final item = filteredList[index];
-                      final rawStatus = item.status ?? 'Tepat Waktu';
-                      String displayStatus = rawStatus;
-                      if (rawStatus.toUpperCase() == 'LATE') {
-                        displayStatus = 'Terlambat';
-                      } else if (rawStatus.toUpperCase() == 'ON_TIME' ||
-                          rawStatus.toUpperCase() == 'ONTIME' ||
-                          rawStatus.toUpperCase() == 'HADIR') {
-                        displayStatus = 'Tepat Waktu';
+                      // Find start shift event if present to validate shift start timing
+                      AttendanceEvent? startShiftEvent;
+                      for (final e in item.events) {
+                        if (e.eventType == AttendanceEventType.startShift) {
+                          startShiftEvent = e;
+                          break;
+                        }
                       }
-                      final isLate =
-                          rawStatus.toUpperCase() == 'LATE' ||
-                          rawStatus.toLowerCase().contains('terlambat');
+                      String? checkInTime;
+                      if (startShiftEvent != null) {
+                        final dt = DateTime.tryParse(startShiftEvent.timestamp);
+                        final localDt = dt != null ? (dt.isUtc ? dt.toLocal() : dt) : null;
+                        checkInTime = localDt != null
+                            ? '${localDt.hour.toString().padLeft(2, '0')}:${localDt.minute.toString().padLeft(2, '0')}'
+                            : _formatShortTime(startShiftEvent.timestamp);
+                      }
+
+                      final isShiftStartLate = Shift.isShiftStartLate(
+                        actualTime: checkInTime,
+                        scheduledTime: item.shift?.startTime ?? '08:00',
+                        ruleEnabled: item.shift?.attendanceRuleEnabled ?? true,
+                        ruleMinutes: item.shift?.attendanceRuleMinutes ?? 15,
+                      );
+
+                      final rawStatus = item.status ?? (isShiftStartLate ? 'LATE' : 'Tepat Waktu');
+                      final isLate = rawStatus.toUpperCase() == 'LATE' ||
+                          rawStatus.toLowerCase().contains('terlambat') ||
+                          (startShiftEvent != null && isShiftStartLate);
+
+                      String displayStatus = isLate ? 'Terlambat' : 'Tepat Waktu';
+                      if (!isLate &&
+                          (rawStatus.toUpperCase() == 'EARLY' ||
+                              rawStatus.toLowerCase().contains('awal'))) {
+                        displayStatus = 'Lebih Awal';
+                      }
                       final shiftName = item.shift?.name ?? 'OFFICE';
                       final formattedDate = _formatIndoDateString(item.date);
 

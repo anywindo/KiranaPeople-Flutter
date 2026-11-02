@@ -154,6 +154,8 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
         availableShifts: originalData.availableShifts,
         workLocation: originalData.workLocation,
         events: updatedEvents,
+        attendanceRuleEnabled: originalData.attendanceRuleEnabled,
+        attendanceRuleMinutes: originalData.attendanceRuleMinutes,
       );
       state = state.copyWith(
         data: AsyncValue.data(updatedData),
