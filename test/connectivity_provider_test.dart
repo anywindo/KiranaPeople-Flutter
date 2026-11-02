@@ -77,7 +77,7 @@ void main() {
 
       expect(find.text('Mode Offline (Tidak Ada Internet)'), findsOneWidget);
       expect(find.text('Periksa Wi-Fi atau kuota data seluler Anda.'), findsOneWidget);
-      expect(find.text('Cek Lagi'), findsOneWidget);
+      expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
     });
   });
 }

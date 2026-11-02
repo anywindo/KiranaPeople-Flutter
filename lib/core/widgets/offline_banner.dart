@@ -102,9 +102,10 @@ class _OfflineBannerState extends ConsumerState<OfflineBanner> {
                   ],
                 ),
               ),
-              if (isOffline)
-                TextButton(
-                  onPressed: _isChecking
+              if (isOffline) ...[
+                const SizedBox(width: 8),
+                InkWell(
+                  onTap: _isChecking
                       ? null
                       : () async {
                           setState(() {
@@ -122,36 +123,30 @@ class _OfflineBannerState extends ConsumerState<OfflineBanner> {
                             });
                           }
                         },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.white.withValues(alpha: 0.2),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
                     ),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
-                  child: _isChecking
-                      ? const SizedBox(
-                          width: 12,
-                          height: 12,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
+                    child: _isChecking
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.refresh_rounded,
                             color: Colors.white,
+                            size: 18,
                           ),
-                        )
-                      : const Text(
-                          'Cek Lagi',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                  ),
                 ),
+              ],
             ],
           ),
           ),
