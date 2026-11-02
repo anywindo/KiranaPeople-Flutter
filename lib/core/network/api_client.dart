@@ -12,6 +12,11 @@ import 'api_exception.dart';
 class ApiClient {
   static VoidCallback? onUnauthorized;
 
+  /// Callback notified whenever an API request determines backend server reachability.
+  /// `isReachable = true` when server responds (2xx, 3xx, 4xx).
+  /// `isReachable = false` on network error, timeouts, or 5xx server errors.
+  static void Function(bool isReachable)? onServerReachabilityChanged;
+
   final Dio _dio;
   final SecureStorageService _storage;
 
@@ -65,6 +70,7 @@ class ApiClient {
             '[API Response] ${response.requestOptions.method} ${response.requestOptions.path} (${response.statusCode})',
             name: 'ApiClient',
           );
+          onServerReachabilityChanged?.call(true);
           return handler.next(response);
         },
         onError: (DioException e, handler) {
@@ -81,6 +87,27 @@ class ApiClient {
           }
 
           final response = e.response;
+          if (response != null &&
+              response.statusCode != null &&
+              response.statusCode! >= 500) {
+            // Server error (500, 502, 503, 504) -> server down/failing
+            onServerReachabilityChanged?.call(false);
+          } else if (response != null &&
+              response.statusCode != null &&
+              response.statusCode! < 500) {
+            // Client error (400, 401, 403, 404, 422) -> server responded and is reachable
+            onServerReachabilityChanged?.call(true);
+          } else if (e.type == DioExceptionType.connectionTimeout ||
+              e.type == DioExceptionType.receiveTimeout ||
+              e.type == DioExceptionType.sendTimeout ||
+              e.type == DioExceptionType.connectionError ||
+              e.error is SocketException ||
+              e.error is HandshakeException ||
+              e.error is TlsException ||
+              e.error is HttpException) {
+            // Network connection failure or timeout -> server unreachable
+            onServerReachabilityChanged?.call(false);
+          }
           String message =
               'Terjadi kesalahan koneksi. Periksa koneksi internet Anda.';
           dynamic errors;
@@ -288,6 +315,33 @@ class ApiClient {
       throw ApiException(
         message: e.message ?? 'Terjadi kesalahan tidak terduga.',
       );
+    }
+  }
+
+  /// Checks actual backend connectivity by querying the base health API endpoint with a short timeout.
+  /// Returns `true` if backend responds (HTTP status < 500); `false` on timeout, connection error, or 5xx.
+  Future<bool> checkServerHealth({
+    Duration timeout = const Duration(seconds: 4),
+  }) async {
+    try {
+      final baseUrl = await ApiConfig.getBaseUrl();
+      final healthDio = Dio(
+        BaseOptions(
+          connectTimeout: timeout,
+          receiveTimeout: timeout,
+          sendTimeout: timeout,
+          validateStatus: (status) => status != null,
+        ),
+      );
+      healthDio.httpClientAdapter = _dio.httpClientAdapter;
+
+      final response = await healthDio.get(baseUrl);
+      final isHealthy =
+          response.statusCode != null && response.statusCode! < 500;
+      return isHealthy;
+    } catch (e) {
+      developer.log('[ApiClient] Health check failed: $e', name: 'ApiClient');
+      return false;
     }
   }
 }

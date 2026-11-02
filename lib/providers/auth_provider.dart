@@ -66,9 +66,11 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   Future<void> checkSession() async {
+    if (!ref.mounted) return;
     state = state.copyWith(isCheckingSession: true, clearError: true);
     try {
       final hasToken = await _repository.hasValidToken();
+      if (!ref.mounted) return;
       if (!hasToken) {
         state = state.copyWith(
           isCheckingSession: false,
@@ -80,24 +82,28 @@ class AuthNotifier extends Notifier<AuthState> {
 
       // Check cached user first for instant display
       final cachedUser = await _repository.getCachedUser();
+      if (!ref.mounted) return;
       if (cachedUser != null) {
         state = state.copyWith(isAuthenticated: true, user: cachedUser);
       }
 
       // Refresh latest profile from backend
       final freshProfile = await _repository.getProfile();
+      if (!ref.mounted) return;
       state = state.copyWith(
         isCheckingSession: false,
         isAuthenticated: true,
         user: freshProfile,
       );
     } catch (e) {
+      if (!ref.mounted) return;
       final isUnauthorized = e is ApiException && e.statusCode == 401;
       if (isUnauthorized) {
         // Expired or revoked token: reset session cleanly to login screen
         await logout();
         return;
       }
+      if (!ref.mounted) return;
       state = state.copyWith(
         isCheckingSession: false,
         isAuthenticated: state.user != null,
