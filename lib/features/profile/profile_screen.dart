@@ -11,7 +11,9 @@ import '../../core/widgets/continuous_marquee_text.dart';
 import '../../data/models/user_model.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../core/notifications/notification_service.dart';
 import 'change_password_dialog.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -1317,8 +1319,54 @@ class ProfileScreen extends ConsumerWidget {
                     ]),
                     const SizedBox(height: 16),
 
-                    // 5. Section: Tampilan & Versi Aplikasi Card
+                    // 5. Section: Tampilan & Pengingat Card
                     _buildCardGroup(context, [
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final isNotifEnabled =
+                              ref.watch(notificationEnabledProvider);
+                          return _buildRow(
+                            context,
+                            iconBg: context.isDarkMode
+                                ? const Color(0xFF3B1524)
+                                : const Color(0xFFFFF1F5),
+                            icon: Icons.notifications_active_rounded,
+                            iconColor: AppColors.primary,
+                            title: 'Pengingat Presensi',
+                            trailing: Switch.adaptive(
+                              value: isNotifEnabled,
+                              activeTrackColor: AppColors.primary,
+                              onChanged: (val) {
+                                ref
+                                    .read(notificationEnabledProvider.notifier)
+                                    .toggle(val);
+                                _showCustomToast(
+                                  context,
+                                  val
+                                      ? 'Pengingat presensi otomatis diaktifkan'
+                                      : 'Pengingat presensi dinonaktifkan',
+                                );
+                              },
+                            ),
+                            onTap: () async {
+                              // Send a test notification on tap
+                              await NotificationService.instance
+                                  .showTestNotification();
+                              if (context.mounted) {
+                                _showCustomToast(
+                                  context,
+                                  'Notifikasi uji coba terkirim!',
+                                );
+                              }
+                            },
+                          );
+                        },
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: context.dividerColor,
+                      ),
                       _buildRow(
                         context,
                         iconBg: context.isDarkMode
