@@ -223,9 +223,6 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    try {
-      _controller?.setFlashMode(FlashMode.off);
-    } catch (_) {}
     _controller?.dispose();
     if (_capturedPhoto != null) {
       try {
@@ -302,10 +299,10 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
       // Configure hardware flash safely only if enabled and on rear camera
       if (_isFlashOn && description.lensDirection != CameraLensDirection.front) {
         try {
-          await _controller!.setFlashMode(FlashMode.torch);
+          await _controller!.setFlashMode(FlashMode.always);
         } catch (_) {
           try {
-            await _controller!.setFlashMode(FlashMode.always);
+            await _controller!.setFlashMode(FlashMode.torch);
           } catch (_) {}
         }
       } else {
@@ -333,10 +330,6 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
 
   Future<void> _toggleCamera() async {
     if (_cameras.length <= 1) return;
-    try {
-      await _controller?.setFlashMode(FlashMode.off);
-    } catch (_) {}
-
     final nextIndex = (_selectedCameraIndex + 1) % _cameras.length;
     setState(() {
       _isCameraReady = false;
@@ -350,19 +343,17 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
 
     final nextFlashState = !_isFlashOn;
 
-    // For rear camera, turn on physical hardware torch/flash
+    // For rear camera, attempt to configure physical hardware flash
     if (!_isCurrentCameraFront) {
-      if (nextFlashState) {
+      try {
+        await _controller!.setFlashMode(
+          nextFlashState ? FlashMode.always : FlashMode.off,
+        );
+      } catch (_) {
         try {
-          await _controller!.setFlashMode(FlashMode.torch);
-        } catch (_) {
-          try {
-            await _controller!.setFlashMode(FlashMode.always);
-          } catch (_) {}
-        }
-      } else {
-        try {
-          await _controller!.setFlashMode(FlashMode.off);
+          await _controller!.setFlashMode(
+            nextFlashState ? FlashMode.torch : FlashMode.off,
+          );
         } catch (_) {}
       }
     } else {
@@ -390,7 +381,6 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
 
       final bool isFront = _isCurrentCameraFront;
       final bool needsScreenFlash = _isFlashOn && isFront;
-      final bool needsRearFlash = _isFlashOn && !isFront;
 
       if (needsScreenFlash) {
         setState(() {
@@ -399,26 +389,10 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
         // 250ms delay gives the screen time to render 100% white light and illuminate the face,
         // allowing the camera sensor AE (Auto Exposure) to adjust properly.
         await Future.delayed(const Duration(milliseconds: 250));
-      } else if (needsRearFlash) {
-        // Ensure physical torch/flash is active on back camera
-        try {
-          await _controller!.setFlashMode(FlashMode.torch);
-        } catch (_) {
-          try {
-            await _controller!.setFlashMode(FlashMode.always);
-          } catch (_) {}
-        }
       }
 
       final image = await _controller!.takePicture();
       final file = File(image.path);
-
-      // Turn off hardware torch after capture so LED doesn't blast during confirmation
-      if (needsRearFlash) {
-        try {
-          await _controller?.setFlashMode(FlashMode.off);
-        } catch (_) {}
-      }
 
       try {
         final sensorOrientation = _cameras.isNotEmpty
@@ -508,9 +482,6 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
             }
             try {
               await _controller?.resumePreview();
-              if (_isFlashOn && !_isCurrentCameraFront) {
-                await _controller?.setFlashMode(FlashMode.torch);
-              }
             } catch (_) {}
             if (mounted) {
               setState(() {
