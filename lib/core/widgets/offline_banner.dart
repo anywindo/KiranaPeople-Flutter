@@ -51,7 +51,6 @@ class _OfflineBannerState extends ConsumerState<OfflineBanner> {
           isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
       firstChild: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isOffline ? const Color(0xFFDC2626) : const Color(0xFF059669),
           boxShadow: [
@@ -64,7 +63,9 @@ class _OfflineBannerState extends ConsumerState<OfflineBanner> {
         ),
         child: SafeArea(
           bottom: false,
-          child: Row(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            child: Row(
             children: [
               Icon(
                 isOffline ? Icons.wifi_off_rounded : Icons.wifi_rounded,
@@ -152,6 +153,7 @@ class _OfflineBannerState extends ConsumerState<OfflineBanner> {
                         ),
                 ),
             ],
+          ),
           ),
         ),
       ),
@@ -248,3 +250,4 @@ class OfflineCardWarning extends ConsumerWidget {
     );
   }
 }
+

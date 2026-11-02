@@ -70,3 +70,4 @@ class ConnectivityNotifier extends Notifier<bool> {
 final isOfflineProvider = NotifierProvider<ConnectivityNotifier, bool>(
   ConnectivityNotifier.new,
 );
+

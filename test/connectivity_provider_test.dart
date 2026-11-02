@@ -91,3 +91,4 @@ class _MockConnectivityNotifier extends ConnectivityNotifier {
     return initialOffline;
   }
 }
+

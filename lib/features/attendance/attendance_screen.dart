@@ -312,17 +312,19 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
         todayData?.status?.toUpperCase() == 'SELESAI';
     final hasStartedBreak = startBreakEvent != null;
     final hasEndedBreak = endBreakEvent != null;
+    final isOffline = ref.watch(isOfflineProvider);
     final isOnBreak = hasStartedBreak && !hasEndedBreak;
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       body: SafeArea(
+        top: !isOffline,
         child: RefreshIndicator(
           color: AppColors.primary,
           onRefresh: () => ref.read(todayAttendanceProvider.notifier).refresh(),
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            padding: EdgeInsets.fromLTRB(16, isOffline ? 4 : 12, 16, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

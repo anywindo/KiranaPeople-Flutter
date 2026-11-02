@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/offline_banner.dart';
 import '../../providers/attendance_provider.dart';
+import '../../providers/connectivity_provider.dart';
 import '../../providers/history_provider.dart';
 import '../attendance/attendance_screen.dart';
 import '../history/history_screen.dart';
@@ -47,15 +48,21 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isOffline = ref.watch(isOfflineProvider);
+
     return Scaffold(
       backgroundColor: context.scaffoldBg,
       body: Column(
         children: [
           const OfflineBanner(),
           Expanded(
-            child: IndexedStack(
-              index: _currentIndex,
-              children: _screens,
+            child: MediaQuery.removePadding(
+              context: context,
+              removeTop: isOffline,
+              child: IndexedStack(
+                index: _currentIndex,
+                children: _screens,
+              ),
             ),
           ),
         ],
