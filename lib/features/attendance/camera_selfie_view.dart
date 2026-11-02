@@ -223,6 +223,9 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    try {
+      _controller?.setFlashMode(FlashMode.off);
+    } catch (_) {}
     _controller?.dispose();
     if (_capturedPhoto != null) {
       try {
@@ -299,10 +302,10 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
       // Configure hardware flash safely only if enabled and on rear camera
       if (_isFlashOn && description.lensDirection != CameraLensDirection.front) {
         try {
-          await _controller!.setFlashMode(FlashMode.always);
+          await _controller!.setFlashMode(FlashMode.torch);
         } catch (_) {
           try {
-            await _controller!.setFlashMode(FlashMode.torch);
+            await _controller!.setFlashMode(FlashMode.always);
           } catch (_) {}
         }
       } else {
@@ -330,6 +333,10 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
 
   Future<void> _toggleCamera() async {
     if (_cameras.length <= 1) return;
+    try {
+      await _controller?.setFlashMode(FlashMode.off);
+    } catch (_) {}
+
     final nextIndex = (_selectedCameraIndex + 1) % _cameras.length;
     setState(() {
       _isCameraReady = false;
@@ -343,17 +350,19 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
 
     final nextFlashState = !_isFlashOn;
 
-    // For rear camera, attempt to configure physical hardware flash
+    // For rear camera, turn on physical hardware torch/flash
     if (!_isCurrentCameraFront) {
-      try {
-        await _controller!.setFlashMode(
-          nextFlashState ? FlashMode.always : FlashMode.off,
-        );
-      } catch (_) {
+      if (nextFlashState) {
         try {
-          await _controller!.setFlashMode(
-            nextFlashState ? FlashMode.torch : FlashMode.off,
-          );
+          await _controller!.setFlashMode(FlashMode.torch);
+        } catch (_) {
+          try {
+            await _controller!.setFlashMode(FlashMode.always);
+          } catch (_) {}
+        }
+      } else {
+        try {
+          await _controller!.setFlashMode(FlashMode.off);
         } catch (_) {}
       }
     } else {
@@ -381,6 +390,7 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
 
       final bool isFront = _isCurrentCameraFront;
       final bool needsScreenFlash = _isFlashOn && isFront;
+      final bool needsRearFlash = _isFlashOn && !isFront;
 
       if (needsScreenFlash) {
         setState(() {
@@ -389,10 +399,26 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
         // 250ms delay gives the screen time to render 100% white light and illuminate the face,
         // allowing the camera sensor AE (Auto Exposure) to adjust properly.
         await Future.delayed(const Duration(milliseconds: 250));
+      } else if (needsRearFlash) {
+        // Ensure physical torch/flash is active on back camera
+        try {
+          await _controller!.setFlashMode(FlashMode.torch);
+        } catch (_) {
+          try {
+            await _controller!.setFlashMode(FlashMode.always);
+          } catch (_) {}
+        }
       }
 
       final image = await _controller!.takePicture();
       final file = File(image.path);
+
+      // Turn off hardware torch after capture so LED doesn't blast during confirmation
+      if (needsRearFlash) {
+        try {
+          await _controller?.setFlashMode(FlashMode.off);
+        } catch (_) {}
+      }
 
       try {
         final sensorOrientation = _cameras.isNotEmpty
@@ -482,6 +508,9 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
             }
             try {
               await _controller?.resumePreview();
+              if (_isFlashOn && !_isCurrentCameraFront) {
+                await _controller?.setFlashMode(FlashMode.torch);
+              }
             } catch (_) {}
             if (mounted) {
               setState(() {
@@ -536,33 +565,33 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
                   ),
                 ),
 
-                if (isScreenFlashWarmup)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 6),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.shade100,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.amber.shade400),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.flash_on_rounded,
-                            size: 14, color: Color(0xFFB45309)),
-                        SizedBox(width: 4),
-                        Text(
-                          'Screen Flash Active',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFFB45309),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                // if (isScreenFlashWarmup)
+                //   Container(
+                //     margin: const EdgeInsets.only(bottom: 6),
+                //     padding: const EdgeInsets.symmetric(
+                //         horizontal: 12, vertical: 4),
+                //     decoration: BoxDecoration(
+                //       color: Colors.amber.shade100,
+                //       borderRadius: BorderRadius.circular(16),
+                //       border: Border.all(color: Colors.amber.shade400),
+                //     ),
+                //     // child: const Row(
+                //     //   mainAxisSize: MainAxisSize.min,
+                //     //   children: [
+                //     //     Icon(Icons.flash_on_rounded,
+                //     //         size: 14, color: Color(0xFFB45309)),
+                //     //     SizedBox(width: 4),
+                //     //     Text(
+                //     //       'Screen Flash Active',
+                //     //       style: TextStyle(
+                //     //         fontSize: 12,
+                //     //         color: Color(0xFFB45309),
+                //     //         fontWeight: FontWeight.w600,
+                //     //       ),
+                //     //     ),
+                //     //   ],
+                //     // ),
+                //   ),
 
                 // Camera Viewport + Headroom Overlay (Matches AttendanceConfirmationView frame)
                 Expanded(
