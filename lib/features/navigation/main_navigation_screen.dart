@@ -59,6 +59,7 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
             child: MediaQuery.removePadding(
               context: context,
               removeTop: isOffline,
+              removeBottom: true,
               child: IndexedStack(
                 index: _currentIndex,
                 children: _screens,
