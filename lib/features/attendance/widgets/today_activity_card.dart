@@ -299,3 +299,4 @@ class TodayActivityCard extends StatelessWidget {
     );
   }
 }
+

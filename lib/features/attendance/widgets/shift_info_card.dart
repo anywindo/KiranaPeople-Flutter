@@ -600,3 +600,4 @@ class ShiftInfoCard extends StatelessWidget {
     );
   }
 }
+
