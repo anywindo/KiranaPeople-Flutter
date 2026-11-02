@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/notifications/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/login_screen.dart';
 import 'features/navigation/main_navigation_screen.dart';
@@ -8,8 +9,9 @@ import 'features/onboarding/onboarding_password_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.instance.initialize();
   runApp(const ProviderScope(child: KiranaPeopleApp()));
 }
 

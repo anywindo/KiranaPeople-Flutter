@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/notifications/notification_service.dart';
 import '../../core/security/device_security_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/location_helper.dart';
@@ -39,10 +40,11 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    // Pre-warm device integrity report, GPS location, and auto-refresh when screen is mounted
+    // Pre-warm device integrity report, GPS location, request notification permissions, and auto-refresh when screen is mounted
     Future.microtask(() {
       DeviceSecurityService().getReport();
       LocationHelper.warmupPosition();
+      NotificationService.instance.requestPermissions();
       if (mounted && ref.read(authProvider).isAuthenticated) {
         ref.read(todayAttendanceProvider.notifier).refresh();
       }
@@ -226,6 +228,20 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
               ),
             ],
           ),
+        );
+      }
+
+      // Automatically sync scheduled attendance reminders when data loads or updates
+      final nextData = next.data.value;
+      if (nextData != null) {
+        final shift = next.selectedShift ??
+            nextData.shift ??
+            (nextData.availableShifts?.isNotEmpty == true
+                ? nextData.availableShifts!.first
+                : null);
+        NotificationService.instance.scheduleAttendanceReminders(
+          shift: shift,
+          events: nextData.events ?? [],
         );
       }
     });
