@@ -15,6 +15,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/notification_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../core/notifications/notification_service.dart';
+import '../attendance/widgets/photo_preview_dialog.dart';
 import 'change_password_dialog.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -106,97 +107,14 @@ class ProfileScreen extends ConsumerWidget {
     String userName,
   ) {
     final avatarUrl = user?.fullAvatarUrl;
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.85),
-      builder: (ctx) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 24,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        userName,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () => Navigator.of(ctx).pop(),
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.close_rounded,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.7,
-                    minHeight: 250,
-                    minWidth: double.infinity,
-                  ),
-                  color: Colors.black,
-                  child: InteractiveViewer(
-                    minScale: 0.8,
-                    maxScale: 4.0,
-                    child: (avatarUrl != null && avatarUrl.isNotEmpty)
-                        ? CachedNetworkImage(
-                            imageUrl: avatarUrl,
-                            fit: BoxFit.contain,
-                            placeholder: (context, url) => const SizedBox(
-                              height: 300,
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => SizedBox(
-                              height: 300,
-                              width: double.infinity,
-                              child: _buildInitialAvatar(userName),
-                            ),
-                          )
-                        : SizedBox(
-                            height: 300,
-                            width: double.infinity,
-                            child: _buildInitialAvatar(userName),
-                          ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+    if (avatarUrl == null || avatarUrl.trim().isEmpty) return;
+
+    PhotoPreviewDialog.show(
+      context,
+      imageUrl: avatarUrl,
+      title: userName,
+      subtitle: 'Foto Profil',
+      customFileName: 'profile_${user?.employeeId ?? "user"}.jpg',
     );
   }
 

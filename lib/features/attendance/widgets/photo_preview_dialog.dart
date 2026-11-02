@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/file_download_helper.dart';
 import '../../../core/widgets/auto_oriented_image.dart';
 
 class PhotoPreviewDialog extends StatefulWidget {
   final String imageUrl;
   final String title;
   final String? subtitle;
+  final String? customFileName;
 
   const PhotoPreviewDialog({
     super.key,
     required this.imageUrl,
     required this.title,
     this.subtitle,
+    this.customFileName,
   });
 
   static Future<void> show(
@@ -18,6 +21,7 @@ class PhotoPreviewDialog extends StatefulWidget {
     required String imageUrl,
     required String title,
     String? subtitle,
+    String? customFileName,
   }) {
     return showDialog(
       context: context,
@@ -25,6 +29,7 @@ class PhotoPreviewDialog extends StatefulWidget {
         imageUrl: imageUrl,
         title: title,
         subtitle: subtitle,
+        customFileName: customFileName,
       ),
     );
   }
@@ -35,6 +40,59 @@ class PhotoPreviewDialog extends StatefulWidget {
 
 class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
   int _rotationTurns = 0;
+  bool _isDownloading = false;
+
+  Future<void> _downloadMedia() async {
+    if (_isDownloading) return;
+    setState(() {
+      _isDownloading = true;
+    });
+
+    final result = await FileDownloadHelper.downloadFile(
+      urlOrPath: widget.imageUrl,
+      customFileName: widget.customFileName,
+    );
+
+    if (mounted) {
+      setState(() {
+        _isDownloading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: result.isSuccess
+              ? const Color(0xFF059669)
+              : const Color(0xFFDC2626),
+          content: Row(
+            children: [
+              Icon(
+                result.isSuccess
+                    ? Icons.check_circle_rounded
+                    : Icons.error_outline_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  result.isSuccess
+                      ? 'Berhasil mengunduh ${result.fileName}'
+                      : (result.errorMessage ?? 'Gagal mengunduh file.'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,41 +135,85 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
                     ],
                   ),
                 ),
+                // Download Media Button
+                _isDownloading
+                    ? Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        ),
+                      )
+                    : Tooltip(
+                        message: 'Unduh Media',
+                        child: InkWell(
+                          onTap: _downloadMedia,
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.download_rounded,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                const SizedBox(width: 8),
                 // Rotate Photo Button
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      _rotationTurns = (_rotationTurns + 1) % 4;
-                    });
-                  },
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.rotate_right_rounded,
-                      color: Colors.white,
-                      size: 18,
+                Tooltip(
+                  message: 'Putar Gambar',
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _rotationTurns = (_rotationTurns + 1) % 4;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.rotate_right_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                InkWell(
-                  onTap: () => Navigator.pop(context),
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.close_rounded,
-                      color: Colors.white,
-                      size: 18,
+                // Close Dialog Button
+                Tooltip(
+                  message: 'Tutup',
+                  child: InkWell(
+                    onTap: () => Navigator.pop(context),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                     ),
                   ),
                 ),
@@ -145,4 +247,3 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
     );
   }
 }
-
