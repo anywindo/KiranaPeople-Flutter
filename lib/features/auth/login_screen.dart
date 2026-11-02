@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/offline_banner.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/connectivity_provider.dart';
 import 'forgot_password_sheet.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -137,6 +139,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void _submit() async {
     if (!_isFormValid) return;
     FocusScope.of(context).unfocus();
+
+    final isOffline = ref.read(isOfflineProvider);
+    if (isOffline) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Tidak ada koneksi internet. Silakan periksa koneksi Anda untuk masuk.',
+          ),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     final identifier = _identifierController.text.trim();
     final success = await ref
         .read(authProvider.notifier)
@@ -189,17 +206,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         automaticallyImplyLeading: false,
       ),
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: IntrinsicHeight(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 12),
+        child: Column(
+          children: [
+            const OfflineBanner(),
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: ConstrainedBox(
+                      constraints:
+                          BoxConstraints(minHeight: constraints.maxHeight),
+                      child: IntrinsicHeight(
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 12),
 
                       // Kirana Logo Asset (logoKiranaSquare.jpeg)
                       Container(
@@ -594,8 +616,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           },
         ),
       ),
-    );
-  }
+    ],
+  ),
+),
+);
+}
 
   void _nextQuote() {
     setState(() {

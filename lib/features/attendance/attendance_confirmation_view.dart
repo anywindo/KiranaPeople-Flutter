@@ -7,10 +7,12 @@ import 'package:geolocator/geolocator.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/location_helper.dart';
+import '../../core/widgets/offline_banner.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../data/models/work_location_model.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/connectivity_provider.dart';
 import 'attendance_map_modal.dart';
 
 class AttendanceConfirmationView extends ConsumerStatefulWidget {
@@ -120,6 +122,38 @@ class _AttendanceConfirmationViewState
 
   Future<void> _submitAttendance() async {
     if (_isSubmitting) return;
+
+    final isOffline = ref.read(isOfflineProvider);
+    if (isOffline) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.wifi_off_rounded, color: Color(0xFFDC2626)),
+              SizedBox(width: 8),
+              Text(
+                'Perangkat Offline',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: const Text(
+            'Perangkat Anda saat ini tidak terhubung ke internet. Silakan aktifkan Wi-Fi atau data seluler Anda untuk mengirim presensi.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Mengerti'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
 
     setState(() {
       _isSubmitting = true;
@@ -539,6 +573,15 @@ class _AttendanceConfirmationViewState
             ),
 
             const SizedBox(height: 16),
+
+            // Offline alert warning if network disconnected
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: OfflineCardWarning(
+                message:
+                    'Koneksi internet terputus. Pastikan data seluler atau Wi-Fi aktif agar presensi dapat dikirim.',
+              ),
+            ),
 
             // Bottom Action Controls (Ambil Ulang & Simpan Presensi)
             Padding(

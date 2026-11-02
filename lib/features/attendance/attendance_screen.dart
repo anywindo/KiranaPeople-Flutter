@@ -6,11 +6,13 @@ import '../../core/notifications/notification_service.dart';
 import '../../core/security/device_security_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/location_helper.dart';
+import '../../core/widgets/offline_banner.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../data/models/attendance_model.dart';
 import '../../data/models/shift_model.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/connectivity_provider.dart';
 import '../navigation/main_navigation_screen.dart';
 import 'camera_selfie_view.dart';
 import 'shift_picker_sheet.dart';
@@ -333,7 +335,14 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                   },
                   onLogout: _showLogoutDialog,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
+
+                // Offline Status Indicator Card
+                OfflineCardWarning(
+                  onRetry: () =>
+                      ref.read(isOfflineProvider.notifier).checkConnection(),
+                ),
+                const SizedBox(height: 4),
 
                 // 2. Mode Switcher (Kerja / Istirahat)
                 AttendanceModeSwitcher(
