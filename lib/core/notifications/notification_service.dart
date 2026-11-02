@@ -29,6 +29,11 @@ class NotificationService {
   static const String channelDesc =
       'Notifikasi pengingat jadwal masuk kerja, istirahat, dan pulang.';
 
+  static const String submissionChannelId = 'attendance_submissions';
+  static const String submissionChannelName = 'Konfirmasi Presensi';
+  static const String submissionChannelDesc =
+      'Notifikasi konfirmasi saat presensi berhasil dicatat.';
+
   Future<void> initialize() async {
     if (_isInitialized) return;
 
@@ -106,16 +111,22 @@ class NotificationService {
   }
 
   Future<bool> isEnabled() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_prefKeyEnabled) ?? true;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool(_prefKeyEnabled) ?? true;
+    } catch (_) {
+      return true;
+    }
   }
 
   Future<void> setEnabled(bool enabled) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_prefKeyEnabled, enabled);
-    if (!enabled) {
-      await cancelAllReminders();
-    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_prefKeyEnabled, enabled);
+      if (!enabled) {
+        await cancelAllReminders();
+      }
+    } catch (_) {}
   }
 
   NotificationDetails _notificationDetails() {
@@ -293,6 +304,28 @@ class NotificationService {
     } catch (_) {}
   }
 
+  NotificationDetails _submissionNotificationDetails() {
+    const androidDetails = AndroidNotificationDetails(
+      submissionChannelId,
+      submissionChannelName,
+      channelDescription: submissionChannelDesc,
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+      color: Color(0xFF10B981), // Emerald green for success
+      enableVibration: true,
+      playSound: true,
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    return const NotificationDetails(android: androidDetails, iOS: iosDetails);
+  }
+
   /// Show instant test notification
   Future<void> showTestNotification({
     String title = '⏰ Tes Pengingat Presensi',
@@ -305,5 +338,42 @@ class NotificationService {
       body: body,
       notificationDetails: _notificationDetails(),
     );
+  }
+
+  /// Show instant notification confirming an attendance event was submitted successfully
+  Future<void> showAttendanceSubmittedNotification({
+    required AttendanceEventType eventType,
+    DateTime? timestamp,
+  }) async {
+    try {
+      if (!_isInitialized) await initialize();
+      if (!await isEnabled()) return;
+
+      final time = timestamp ?? DateTime.now();
+      final hourStr = time.hour.toString().padLeft(2, '0');
+      final minuteStr = time.minute.toString().padLeft(2, '0');
+      final timeStr = '$hourStr:$minuteStr';
+
+      final eventLabel = eventType.label;
+      final title = '✅ Presensi $eventLabel Berhasil';
+      final body =
+          'Presensi $eventLabel Anda telah berhasil dicatat pada pukul $timeStr WIB. Data telah tersinkronisasi.';
+
+      final notifId = DateTime.now().millisecondsSinceEpoch % 100000 + 200;
+
+      await _notificationsPlugin.show(
+        id: notifId,
+        title: title,
+        body: body,
+        notificationDetails: _submissionNotificationDetails(),
+      );
+      debugPrint(
+        '[NotificationService] Submitted attendance notification sent: $title',
+      );
+    } catch (e) {
+      debugPrint(
+        '[NotificationService] Error showing submitted notification: $e',
+      );
+    }
   }
 }

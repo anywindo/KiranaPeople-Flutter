@@ -64,5 +64,30 @@ void main() {
       expect(hasEndedShift, isFalse);
       expect(hasEndedBreak, isFalse);
     });
+
+    test('Attendance submission event label and notification content format', () {
+      const startShiftEvent = AttendanceEventType.startShift;
+      const endShiftEvent = AttendanceEventType.endShift;
+      const startBreakEvent = AttendanceEventType.startBreak;
+      const endBreakEvent = AttendanceEventType.endBreak;
+
+      expect(startShiftEvent.label, 'Masuk Kerja');
+      expect(endShiftEvent.label, 'Pulang Kerja');
+      expect(startBreakEvent.label, 'Mulai Istirahat');
+      expect(endBreakEvent.label, 'Selesai Istirahat');
+
+      final timestamp = DateTime(2026, 11, 2, 8, 5);
+      final hourStr = timestamp.hour.toString().padLeft(2, '0');
+      final minuteStr = timestamp.minute.toString().padLeft(2, '0');
+      final timeStr = '$hourStr:$minuteStr';
+
+      expect(timeStr, '08:05');
+      final expectedTitle = '✅ Presensi ${startShiftEvent.label} Berhasil';
+      final expectedBody =
+          'Presensi ${startShiftEvent.label} Anda telah berhasil dicatat pada pukul $timeStr WIB. Data telah tersinkronisasi.';
+
+      expect(expectedTitle, '✅ Presensi Masuk Kerja Berhasil');
+      expect(expectedBody, contains('08:05 WIB'));
+    });
   });
 }

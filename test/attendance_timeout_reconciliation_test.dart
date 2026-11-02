@@ -5,6 +5,7 @@ import 'package:kirana_people/data/models/attendance_model.dart';
 import 'package:kirana_people/data/repositories/attendance_repository.dart';
 import 'package:kirana_people/providers/attendance_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TimeoutMockRepository extends AttendanceRepository {
   bool submitCalled = false;
@@ -48,6 +49,12 @@ class TimeoutMockRepository extends AttendanceRepository {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   test('submitEvent auto-reconciles successfully when server timed out but recorded the event', () async {
     final mockRepo = TimeoutMockRepository();
     final container = ProviderContainer(

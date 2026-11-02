@@ -6,6 +6,7 @@ import '../data/models/attendance_model.dart';
 import '../data/models/attendance_event_model.dart';
 import '../data/repositories/attendance_repository.dart';
 import '../core/network/api_exception.dart';
+import '../core/notifications/notification_service.dart';
 import 'auth_provider.dart';
 import 'history_provider.dart';
 
@@ -179,6 +180,14 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
 
       state = state.copyWith(isSubmitting: false, clearError: true);
 
+      // Trigger notification confirming attendance was submitted
+      unawaited(
+        NotificationService.instance.showAttendanceSubmittedNotification(
+          eventType: eventType,
+          timestamp: deviceTimestamp,
+        ),
+      );
+
       // Purge local selfie cache file upon successful server reception (GDPR / Data Minimization)
       if (photoFile != null) {
         try {
@@ -237,6 +246,12 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
               clearError: true,
             );
             ref.read(historyProvider.notifier).refresh();
+            unawaited(
+              NotificationService.instance.showAttendanceSubmittedNotification(
+                eventType: eventType,
+                timestamp: deviceTimestamp,
+              ),
+            );
             return true;
           }
         } catch (_) {
