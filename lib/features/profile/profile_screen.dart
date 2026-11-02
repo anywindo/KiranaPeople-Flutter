@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/continuous_marquee_text.dart';
 import '../../data/models/user_model.dart';
+import '../../data/models/attendance_event_model.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/notification_provider.dart';
@@ -1349,13 +1350,15 @@ class ProfileScreen extends ConsumerWidget {
                               },
                             ),
                             onTap: () async {
-                              // Send a test notification on tap
+                              // Send a test submission notification with custom sound on tap
                               await NotificationService.instance
-                                  .showTestNotification();
+                                  .showAttendanceSubmittedNotification(
+                                    eventType: AttendanceEventType.startShift,
+                                  );
                               if (context.mounted) {
                                 _showCustomToast(
                                   context,
-                                  'Notifikasi uji coba terkirim!',
+                                  'Notifikasi uji coba presensi berhasil terkirim!',
                                 );
                               }
                             },

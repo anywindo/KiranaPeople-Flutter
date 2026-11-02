@@ -29,7 +29,7 @@ class NotificationService {
   static const String channelDesc =
       'Notifikasi pengingat jadwal masuk kerja, istirahat, dan pulang.';
 
-  static const String submissionChannelId = 'attendance_submissions';
+  static const String submissionChannelId = 'attendance_submissions_success_v1';
   static const String submissionChannelName = 'Konfirmasi Presensi';
   static const String submissionChannelDesc =
       'Notifikasi konfirmasi saat presensi berhasil dicatat.';
@@ -74,6 +74,31 @@ class NotificationService {
           debugPrint('Notification clicked: ${response.payload}');
         },
       );
+
+      // 3. Configure Android notification channels with custom sounds
+      final androidPlugin = _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+
+      if (androidPlugin != null) {
+        try {
+          await androidPlugin.deleteNotificationChannel(
+            channelId: 'attendance_submissions',
+          );
+        } catch (_) {}
+
+        const submissionChannel = AndroidNotificationChannel(
+          submissionChannelId,
+          submissionChannelName,
+          description: submissionChannelDesc,
+          importance: Importance.high,
+          playSound: true,
+          sound: RawResourceAndroidNotificationSound('successful'),
+          enableVibration: true,
+        );
+        await androidPlugin.createNotificationChannel(submissionChannel);
+      }
 
       _isInitialized = true;
       debugPrint('[NotificationService] Initialized successfully.');
@@ -315,12 +340,14 @@ class NotificationService {
       color: Color(0xFF10B981), // Emerald green for success
       enableVibration: true,
       playSound: true,
+      sound: RawResourceAndroidNotificationSound('successful'),
     );
 
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
+      sound: 'Successful.mp3',
     );
 
     return const NotificationDetails(android: androidDetails, iOS: iosDetails);
