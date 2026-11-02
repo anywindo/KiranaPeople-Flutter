@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../config/api_config.dart';
 import '../storage/secure_storage_service.dart';
@@ -193,6 +194,104 @@ class FileDownloadHelper {
       counter++;
     }
     return file;
+  }
+
+  /// Shares the previewed file or media directly via system share sheet.
+  static Future<FileDownloadResult> shareFile({
+    required String urlOrPath,
+    String? customFileName,
+    String? shareSubject,
+    Dio? dioClient,
+  }) async {
+    if (urlOrPath.trim().isEmpty) {
+      return const FileDownloadResult(
+        isSuccess: false,
+        fileName: '',
+        errorMessage: 'URL atau path file tidak valid.',
+      );
+    }
+
+    final fullUrl = resolveFullUrl(urlOrPath);
+    final fileName = customFileName ?? extractFileName(fullUrl);
+
+    try {
+      String localFilePath;
+
+      if (fullUrl.startsWith('http://') || fullUrl.startsWith('https://')) {
+        // 1. Check cached image first
+        File? cachedFile;
+        try {
+          final fileInfo = await DefaultCacheManager().getFileFromCache(fullUrl);
+          if (fileInfo != null && await fileInfo.file.exists()) {
+            cachedFile = fileInfo.file;
+          }
+        } catch (_) {}
+
+        if (cachedFile != null) {
+          // Copy to temp directory with proper extension/filename if needed
+          final tempDir = await getTemporaryDirectory();
+          final target = File('${tempDir.path}/$fileName');
+          await cachedFile.copy(target.path);
+          localFilePath = target.path;
+        } else {
+          // 2. Fetch directly from network and save to temp file
+          final dio = dioClient ?? Dio();
+          final token = await SecureStorageService().getToken();
+          final headers = <String, dynamic>{};
+          if (token != null && token.isNotEmpty) {
+            headers['Authorization'] = 'Bearer $token';
+          }
+
+          final tempDir = await getTemporaryDirectory();
+          final tempFile = File('${tempDir.path}/$fileName');
+
+          await dio.download(
+            fullUrl,
+            tempFile.path,
+            options: Options(headers: headers),
+          );
+
+          if (!await tempFile.exists()) {
+            return FileDownloadResult(
+              isSuccess: false,
+              fileName: fileName,
+              errorMessage: 'Gagal mengunduh file untuk dibagikan.',
+            );
+          }
+          localFilePath = tempFile.path;
+        }
+      } else {
+        // Local file
+        final localFile = File(fullUrl);
+        if (!await localFile.exists()) {
+          return FileDownloadResult(
+            isSuccess: false,
+            fileName: fileName,
+            errorMessage: 'File lokal tidak ditemukan.',
+          );
+        }
+        localFilePath = localFile.path;
+      }
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(localFilePath)],
+          subject: shareSubject ?? fileName,
+        ),
+      );
+
+      return FileDownloadResult(
+        isSuccess: true,
+        fileName: fileName,
+        savedPath: localFilePath,
+      );
+    } catch (e) {
+      return FileDownloadResult(
+        isSuccess: false,
+        fileName: fileName,
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+      );
+    }
   }
 }
 

@@ -41,6 +41,56 @@ class PhotoPreviewDialog extends StatefulWidget {
 class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
   int _rotationTurns = 0;
   bool _isDownloading = false;
+  bool _isSharing = false;
+
+  Future<void> _shareMedia() async {
+    if (_isSharing || _isDownloading) return;
+    setState(() {
+      _isSharing = true;
+    });
+
+    final result = await FileDownloadHelper.shareFile(
+      urlOrPath: widget.imageUrl,
+      customFileName: widget.customFileName,
+      shareSubject: widget.title,
+    );
+
+    if (mounted) {
+      setState(() {
+        _isSharing = false;
+      });
+
+      if (!result.isSuccess && result.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: const Color(0xFFDC2626),
+            content: Row(
+              children: [
+                const Icon(
+                  Icons.error_outline_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    result.errorMessage!,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
 
   Future<void> _downloadMedia() async {
     if (_isDownloading) return;
@@ -135,6 +185,43 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
                     ],
                   ),
                 ),
+                // Share Media Button
+                _isSharing
+                    ? Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        ),
+                      )
+                    : Tooltip(
+                        message: 'Bagikan',
+                        child: InkWell(
+                          onTap: _shareMedia,
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.share_rounded,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                const SizedBox(width: 8),
                 // Download Media Button
                 _isDownloading
                     ? Container(

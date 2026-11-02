@@ -54,7 +54,7 @@ void main() {
   });
 
   group('PhotoPreviewDialog Download Button Tests', () {
-    testWidgets('PhotoPreviewDialog renders download, rotate, and close buttons', (tester) async {
+    testWidgets('PhotoPreviewDialog renders share, download, rotate, and close buttons', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -72,6 +72,7 @@ void main() {
       expect(find.text('2 Nov 2026, 08:00'), findsOneWidget);
 
       // Verify buttons
+      expect(find.byIcon(Icons.share_rounded), findsOneWidget);
       expect(find.byIcon(Icons.download_rounded), findsOneWidget);
       expect(find.byIcon(Icons.rotate_right_rounded), findsOneWidget);
       expect(find.byIcon(Icons.close_rounded), findsOneWidget);
