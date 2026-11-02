@@ -186,3 +186,41 @@ class ConnectivityNotifier extends Notifier<bool> {
 final isOfflineProvider = NotifierProvider<ConnectivityNotifier, bool>(
   ConnectivityNotifier.new,
 );
+
+/// Notifier providing whether a banner (offline OR transient reconnected) is actively visible
+class BannerVisibilityNotifier extends Notifier<bool> {
+  Timer? _reconnectTimer;
+
+  @override
+  bool build() {
+    ref.listen<bool>(isOfflineProvider, (previous, next) {
+      if (next == true) {
+        _reconnectTimer?.cancel();
+        state = true;
+      } else if (previous == true && next == false) {
+        state = true; // Show "Terhubung Kembali"
+        _reconnectTimer?.cancel();
+        _reconnectTimer = Timer(const Duration(seconds: 3), () {
+          if (ref.mounted) {
+            state = false;
+          }
+        });
+      } else {
+        if (_reconnectTimer == null || !_reconnectTimer!.isActive) {
+          state = false;
+        }
+      }
+    });
+
+    ref.onDispose(() {
+      _reconnectTimer?.cancel();
+    });
+
+    return ref.watch(isOfflineProvider);
+  }
+}
+
+final isBannerVisibleProvider =
+    NotifierProvider<BannerVisibilityNotifier, bool>(
+  BannerVisibilityNotifier.new,
+);

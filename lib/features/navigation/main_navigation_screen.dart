@@ -48,7 +48,7 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isOffline = ref.watch(isOfflineProvider);
+    final isBannerVisible = ref.watch(isBannerVisibleProvider);
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
@@ -58,7 +58,7 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
           Expanded(
             child: MediaQuery.removePadding(
               context: context,
-              removeTop: isOffline,
+              removeTop: isBannerVisible,
               removeBottom: true,
               child: IndexedStack(
                 index: _currentIndex,

@@ -12,38 +12,12 @@ class OfflineBanner extends ConsumerStatefulWidget {
 }
 
 class _OfflineBannerState extends ConsumerState<OfflineBanner> {
-  bool _showReconnectedBanner = false;
-  Timer? _reconnectedTimer;
   bool _isChecking = false;
-
-  @override
-  void dispose() {
-    _reconnectedTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final isOffline = ref.watch(isOfflineProvider);
-
-    // Listen for reconnection to briefly show the green reconnected banner
-    ref.listen<bool>(isOfflineProvider, (previous, next) {
-      if (previous == true && next == false) {
-        setState(() {
-          _showReconnectedBanner = true;
-        });
-        _reconnectedTimer?.cancel();
-        _reconnectedTimer = Timer(const Duration(seconds: 3), () {
-          if (mounted) {
-            setState(() {
-              _showReconnectedBanner = false;
-            });
-          }
-        });
-      }
-    });
-
-    final isVisible = isOffline || _showReconnectedBanner;
+    final isVisible = ref.watch(isBannerVisibleProvider);
 
     return AnimatedCrossFade(
       duration: const Duration(milliseconds: 300),
