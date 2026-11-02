@@ -202,7 +202,7 @@ class OfflineCardWarning extends ConsumerWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
-              Icons.cloud_off_rounded,
+              Icons.wifi_off_rounded,
               color: Color(0xFFDC2626),
               size: 20,
             ),

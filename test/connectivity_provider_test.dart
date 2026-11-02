@@ -58,7 +58,7 @@ void main() {
 
       expect(find.text('Koneksi Internet Terputus'), findsOneWidget);
       expect(find.text('Perangkat Anda sedang offline.'), findsOneWidget);
-      expect(find.byIcon(Icons.cloud_off_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.wifi_off_rounded), findsOneWidget);
     });
 
     testWidgets('OfflineBanner renders when offline', (tester) async {
