@@ -376,7 +376,9 @@ class NotificationService {
       if (!_isInitialized) await initialize();
       if (!await isEnabled()) return;
 
-      final time = timestamp ?? DateTime.now();
+      final rawTime = timestamp ?? DateTime.now();
+      // Ensure time is formatted strictly in Western Indonesian Time (WIB / UTC+7)
+      final time = rawTime.toUtc().add(const Duration(hours: 7));
       final hourStr = time.hour.toString().padLeft(2, '0');
       final minuteStr = time.minute.toString().padLeft(2, '0');
       final timeStr = '$hourStr:$minuteStr';

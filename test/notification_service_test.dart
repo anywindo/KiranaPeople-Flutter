@@ -76,9 +76,11 @@ void main() {
       expect(startBreakEvent.label, 'Mulai Istirahat');
       expect(endBreakEvent.label, 'Selesai Istirahat');
 
-      final timestamp = DateTime(2026, 11, 2, 8, 5);
-      final hourStr = timestamp.hour.toString().padLeft(2, '0');
-      final minuteStr = timestamp.minute.toString().padLeft(2, '0');
+      // Geolocator returns UTC timestamps: e.g. 01:05 UTC should convert to 08:05 UTC+7 (WIB)
+      final utcTimestamp = DateTime.utc(2026, 11, 2, 1, 5);
+      final time = utcTimestamp.toUtc().add(const Duration(hours: 7));
+      final hourStr = time.hour.toString().padLeft(2, '0');
+      final minuteStr = time.minute.toString().padLeft(2, '0');
       final timeStr = '$hourStr:$minuteStr';
 
       expect(timeStr, '08:05');
