@@ -1349,18 +1349,83 @@ class ProfileScreen extends ConsumerWidget {
                                 );
                               },
                             ),
-                            onTap: () async {
-                              // Send a test submission notification with custom sound on tap
-                              await NotificationService.instance
-                                  .showAttendanceSubmittedNotification(
-                                    eventType: AttendanceEventType.startShift,
-                                  );
-                              if (context.mounted) {
-                                _showCustomToast(
-                                  context,
-                                  'Notifikasi uji coba presensi berhasil terkirim!',
-                                );
-                              }
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(20),
+                                  ),
+                                ),
+                                builder: (ctx) => SafeArea(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 16,
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'Uji Coba Suara & Notifikasi',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        ListTile(
+                                          leading: const CircleAvatar(
+                                            backgroundColor: Color(0xFFD1FAE5),
+                                            child: Icon(
+                                              Icons.check_circle_rounded,
+                                              color: Color(0xFF10B981),
+                                            ),
+                                          ),
+                                          title: const Text('Presensi Berhasil'),
+                                          subtitle: const Text(
+                                            'Notifikasi sukses + Suara Successful.mp3',
+                                          ),
+                                          onTap: () async {
+                                            Navigator.pop(ctx);
+                                            await NotificationService.instance
+                                                .showAttendanceSubmittedNotification(
+                                                  eventType: AttendanceEventType
+                                                      .startShift,
+                                                );
+                                          },
+                                        ),
+                                        ListTile(
+                                          leading: const CircleAvatar(
+                                            backgroundColor: Color(0xFFFEE2E2),
+                                            child: Icon(
+                                              Icons.cancel_rounded,
+                                              color: Color(0xFFEF4444),
+                                            ),
+                                          ),
+                                          title: const Text(
+                                              'Presensi Gagal (Fallback)'),
+                                          subtitle: const Text(
+                                            'Notifikasi gagal + Suara Unsuccessful.mp3',
+                                          ),
+                                          onTap: () async {
+                                            Navigator.pop(ctx);
+                                            await NotificationService.instance
+                                                .showAttendanceFailedNotification(
+                                                  eventType: AttendanceEventType
+                                                      .startShift,
+                                                  reason:
+                                                      'Koneksi internet terputus',
+                                                );
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
                             },
                           );
                         },

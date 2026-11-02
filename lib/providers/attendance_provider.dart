@@ -259,11 +259,22 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
         }
       }
 
+      final errorMsg = e.toString().replaceFirst('Exception: ', '');
       state = state.copyWith(
         data: originalData != null ? AsyncValue.data(originalData) : state.data,
         isSubmitting: false,
-        submitError: e.toString().replaceFirst('Exception: ', ''),
+        submitError: errorMsg,
       );
+
+      // Trigger fallback notification with Unsuccessful.mp3 audio
+      unawaited(
+        NotificationService.instance.showAttendanceFailedNotification(
+          eventType: eventType,
+          reason: errorMsg,
+          timestamp: deviceTimestamp,
+        ),
+      );
+
       return false;
     }
   }

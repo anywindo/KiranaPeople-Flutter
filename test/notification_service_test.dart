@@ -90,6 +90,14 @@ void main() {
 
       expect(expectedTitle, '✅ Presensi Masuk Kerja Berhasil');
       expect(expectedBody, contains('08:05 WIB'));
+
+      // Test failure notification formatting
+      final expectedFailTitle = '❌ Presensi ${startShiftEvent.label} Gagal';
+      final expectedFailBody =
+          'Presensi ${startShiftEvent.label} Anda pada pukul $timeStr WIB tidak berhasil tercatat: Koneksi terputus. Silakan buka aplikasi dan coba kembali.';
+      expect(expectedFailTitle, '❌ Presensi Masuk Kerja Gagal');
+      expect(expectedFailBody, contains('08:05 WIB'));
+      expect(expectedFailBody, contains('Koneksi terputus'));
     });
   });
 }

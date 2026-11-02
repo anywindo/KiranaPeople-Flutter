@@ -34,6 +34,11 @@ class NotificationService {
   static const String submissionChannelDesc =
       'Notifikasi konfirmasi saat presensi berhasil dicatat.';
 
+  static const String failureChannelId = 'attendance_submissions_failure_v1';
+  static const String failureChannelName = 'Presensi Belum Tercatat';
+  static const String failureChannelDesc =
+      'Notifikasi peringatan saat presensi gagal dikirim atau tidak tercatat.';
+
   Future<void> initialize() async {
     if (_isInitialized) return;
 
@@ -98,6 +103,17 @@ class NotificationService {
           enableVibration: true,
         );
         await androidPlugin.createNotificationChannel(submissionChannel);
+
+        const failureChannel = AndroidNotificationChannel(
+          failureChannelId,
+          failureChannelName,
+          description: failureChannelDesc,
+          importance: Importance.high,
+          playSound: true,
+          sound: RawResourceAndroidNotificationSound('unsuccessful'),
+          enableVibration: true,
+        );
+        await androidPlugin.createNotificationChannel(failureChannel);
       }
 
       _isInitialized = true;
@@ -353,6 +369,30 @@ class NotificationService {
     return const NotificationDetails(android: androidDetails, iOS: iosDetails);
   }
 
+  NotificationDetails _failureNotificationDetails() {
+    const androidDetails = AndroidNotificationDetails(
+      failureChannelId,
+      failureChannelName,
+      channelDescription: failureChannelDesc,
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+      color: Color(0xFFEF4444), // Crimson red for failure
+      enableVibration: true,
+      playSound: true,
+      sound: RawResourceAndroidNotificationSound('unsuccessful'),
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+      sound: 'Unsuccessful.mp3',
+    );
+
+    return const NotificationDetails(android: androidDetails, iOS: iosDetails);
+  }
+
   /// Show instant test notification
   Future<void> showTestNotification({
     String title = '⏰ Tes Pengingat Presensi',
@@ -402,6 +442,49 @@ class NotificationService {
     } catch (e) {
       debugPrint(
         '[NotificationService] Error showing submitted notification: $e',
+      );
+    }
+  }
+
+  /// Show instant notification when an attendance event submission failed or is unrecorded
+  Future<void> showAttendanceFailedNotification({
+    required AttendanceEventType eventType,
+    String? reason,
+    DateTime? timestamp,
+  }) async {
+    try {
+      if (!_isInitialized) await initialize();
+      if (!await isEnabled()) return;
+
+      final rawTime = timestamp ?? DateTime.now();
+      // Ensure time is formatted strictly in Western Indonesian Time (WIB / UTC+7)
+      final time = rawTime.toUtc().add(const Duration(hours: 7));
+      final hourStr = time.hour.toString().padLeft(2, '0');
+      final minuteStr = time.minute.toString().padLeft(2, '0');
+      final timeStr = '$hourStr:$minuteStr';
+
+      final eventLabel = eventType.label;
+      final title = '❌ Presensi $eventLabel Gagal';
+      final cleanReason = reason != null && reason.trim().isNotEmpty
+          ? ': ${reason.trim()}'
+          : '';
+      final body =
+          'Presensi $eventLabel Anda pada pukul $timeStr WIB tidak berhasil tercatat$cleanReason. Silakan buka aplikasi dan coba kembali.';
+
+      final notifId = DateTime.now().millisecondsSinceEpoch % 100000 + 400;
+
+      await _notificationsPlugin.show(
+        id: notifId,
+        title: title,
+        body: body,
+        notificationDetails: _failureNotificationDetails(),
+      );
+      debugPrint(
+        '[NotificationService] Failed attendance notification sent: $title',
+      );
+    } catch (e) {
+      debugPrint(
+        '[NotificationService] Error showing failed notification: $e',
       );
     }
   }
