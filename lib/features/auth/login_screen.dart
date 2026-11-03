@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/offline_banner.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/connectivity_provider.dart';
+import '../../providers/package_info_provider.dart';
 import 'forgot_password_sheet.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -195,6 +196,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final appVersion = ref.watch(appVersionDisplayProvider);
     final isDark = context.isDarkMode;
 
     return Scaffold(
@@ -600,7 +602,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                       // Version section
                       Text(
-                        'Versi 1.0.1 (Build 1)',
+                        'Versi $appVersion',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,

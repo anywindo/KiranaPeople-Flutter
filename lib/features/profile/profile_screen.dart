@@ -13,6 +13,7 @@ import '../../data/models/attendance_event_model.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/notification_provider.dart';
+import '../../providers/package_info_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../core/notifications/notification_service.dart';
 import '../attendance/widgets/photo_preview_dialog.dart';
@@ -711,6 +712,7 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
+    final appVersion = ref.watch(appVersionDisplayProvider);
     final user = authState.user;
     final attendanceState = ref.watch(todayAttendanceProvider);
     final workLoc = attendanceState.data.value?.workLocation ?? user?.location;
@@ -1406,7 +1408,7 @@ class ProfileScreen extends ConsumerWidget {
                         iconColor: context.textSecondaryColor,
                         title: 'Versi Aplikasi',
                         trailing: Text(
-                          '1.0.1 (Build 1)',
+                          appVersion,
                           style: TextStyle(
                             fontSize: 13,
                             color: context.textSecondaryColor,
