@@ -3,7 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/location_helper.dart';
 import '../../data/models/attendance_event_model.dart';
@@ -11,6 +11,10 @@ import '../../data/models/shift_model.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/history_provider.dart';
 import '../attendance/camera_selfie_view.dart';
+import 'widgets/map_attendance_action_card.dart';
+import 'widgets/map_controls_overlay.dart';
+import 'widgets/map_markers_layer.dart';
+import 'widgets/map_top_location_pill.dart';
 
 class MapViewScreen extends ConsumerStatefulWidget {
   const MapViewScreen({super.key});
@@ -24,6 +28,7 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
   Position? _currentPosition;
   String? _locationError;
   bool _isLoading = true;
+  bool _isRefreshing = false;
 
   @override
   void initState() {
@@ -37,9 +42,12 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
     super.dispose();
   }
 
-  Future<void> _fetchLocation() async {
+  Future<void> _fetchLocation({bool isManualRefresh = false}) async {
     setState(() {
       _locationError = null;
+      if (isManualRefresh) {
+        _isRefreshing = true;
+      }
     });
 
     try {
@@ -48,6 +56,7 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
       setState(() {
         _currentPosition = pos;
         _isLoading = false;
+        _isRefreshing = false;
         _locationError = null;
       });
     } catch (e) {
@@ -56,17 +65,10 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
       setState(() {
         _currentPosition = null;
         _isLoading = false;
+        _isRefreshing = false;
         _locationError = cleanErr;
       });
     }
-  }
-
-  String _formatShortTime(String? timeStr) {
-    if (timeStr == null || timeStr.isEmpty) return '--:--';
-    if (timeStr.length >= 5) {
-      return timeStr.substring(0, 5);
-    }
-    return timeStr;
   }
 
   AttendanceEventType _resolveTargetAction(List<AttendanceEvent> events) {
@@ -92,6 +94,54 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
       return AttendanceEventType.endShift;
     }
     return AttendanceEventType.startShift;
+  }
+
+  void _recenterOnUser(LatLng userLatLng) {
+    if (_currentPosition != null) {
+      _mapController.move(userLatLng, 17.5);
+    } else {
+      _fetchLocation(isManualRefresh: true);
+    }
+  }
+
+  void _fitAllBounds(LatLng userLatLng, LatLng officeLatLng) {
+    if (_currentPosition != null) {
+      final bounds = LatLngBounds.fromPoints([userLatLng, officeLatLng]);
+      _mapController.fitCamera(
+        CameraFit.bounds(
+          bounds: bounds,
+          padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 120),
+        ),
+      );
+    } else {
+      _mapController.move(officeLatLng, 16.5);
+    }
+  }
+
+  Future<void> _handleTakeAttendance({
+    required AttendanceEventType targetAction,
+    required Shift? selectedShift,
+    required dynamic workLocation,
+  }) async {
+    final res = await CameraSelfieView.push(
+      context,
+      action: targetAction,
+      shiftId: selectedShift?.id,
+      workLocation: workLocation,
+    );
+    if (res == true) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${targetAction.label} berhasil dicatat!'),
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+      ref.read(todayAttendanceProvider.notifier).refresh();
+      ref.read(historyProvider.notifier).refresh();
+    }
   }
 
   @override
@@ -163,16 +213,17 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
     }
 
     final topPadding = MediaQuery.of(context).padding.top;
+    final isDark = context.isDarkMode;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.scaffoldBg,
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             )
           : Stack(
               children: [
-                // Fullscreen OpenStreetMap
+                // 1. Fullscreen OpenStreetMap with Dark Mode CartoDB Tile support
                 Positioned.fill(
                   child: FlutterMap(
                     mapController: _mapController,
@@ -189,224 +240,45 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                             'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                         userAgentPackageName:
                             'com.kiranadesainindonesia.kiranapeople',
+                        tileBuilder: isDark
+                            ? (context, tileWidget, tile) {
+                                return ColorFiltered(
+                                  colorFilter: const ColorFilter.matrix(<double>[
+                                    -0.75, 0, 0, 0, 215,
+                                    0, -0.75, 0, 0, 215,
+                                    0, 0, -0.70, 0, 225,
+                                    0, 0, 0, 1, 0,
+                                  ]),
+                                  child: tileWidget,
+                                );
+                              }
+                            : null,
                       ),
 
-                      // Office Geofence Circle (Emerald border + translucent green fill)
-                      if (workLocation != null)
-                        CircleLayer(
-                          circles: [
-                            CircleMarker(
-                              point: officeLatLng,
-                              radius: radius,
-                              useRadiusInMeter: true,
-                              color: const Color(0xFF10B981)
-                                  .withValues(alpha: 0.18),
-                              borderColor: const Color(0xFF10B981),
-                              borderStrokeWidth: 2.0,
-                            ),
-                          ],
-                        ),
-
-                      // Marker Layer (Office Pin & User Pin)
-                      MarkerLayer(
-                        markers: [
-                          // 1. Office Pin (Matches Screenshot 1)
-                          if (workLocation != null)
-                            Marker(
-                              point: officeLatLng,
-                              width: 220,
-                              height: 80,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(7),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                          color: Colors.white, width: 2),
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          blurRadius: 6,
-                                          offset: Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Icon(
-                                      Icons.apartment_rounded,
-                                      color: Colors.white,
-                                      size: 18,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 3),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          color: Colors.black12,
-                                          blurRadius: 6,
-                                          offset: Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Text(
-                                      officeName,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFF1E293B),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                          // 2. User Pin (Matches Screenshot 1 with "Posisi Anda" badge)
-                          if (_currentPosition != null)
-                            Marker(
-                              point: userLatLng,
-                              width: 120,
-                              height: 76,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  // "Posisi Anda" pill
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 3),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF007AFF),
-                                      borderRadius: BorderRadius.circular(8),
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          color: Colors.black12,
-                                          blurRadius: 4,
-                                          offset: Offset(0, 1),
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Text(
-                                      'Posisi Anda',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  // Blue circular marker
-                                  Container(
-                                    padding: const EdgeInsets.all(7),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF007AFF),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                          color: Colors.white, width: 2),
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          blurRadius: 6,
-                                          offset: Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Icon(
-                                      Icons.directions_walk_rounded,
-                                      color: Colors.white,
-                                      size: 18,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
+                      // Geofence Circle & Pins Layer
+                      MapMarkersLayer(
+                        workLocation: workLocation,
+                        officeLatLng: officeLatLng,
+                        officeName: officeName,
+                        radius: radius,
+                        userLatLng: _currentPosition != null ? userLatLng : null,
                       ),
                     ],
                   ),
                 ),
 
-                // Top Floating Pill Bar (Matches Screenshot 1)
-                Positioned(
-                  top: topPadding + 10,
-                  left: 16,
-                  right: 16,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.apartment_rounded,
-                            color: AppColors.primary,
-                            size: 18,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            officeName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1F2937),
-                            ),
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            _fetchLocation();
-                            ref.read(todayAttendanceProvider.notifier).refresh();
-                          },
-                          borderRadius: BorderRadius.circular(20),
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFF1F5),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.refresh_rounded,
-                              color: AppColors.primary,
-                              size: 18,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                // 2. Top Floating Location Pill
+                MapTopLocationPill(
+                  officeName: officeName,
+                  topPadding: topPadding,
+                  isRefreshing: _isRefreshing,
+                  onRefresh: () {
+                    _fetchLocation(isManualRefresh: true);
+                    ref.read(todayAttendanceProvider.notifier).refresh();
+                  },
                 ),
 
-                // Bottom Floating Sheet Card + Right Map Controls
+                // 3. Bottom Floating Sheet Card + Right Map Controls
                 Positioned(
                   left: 16,
                   right: 16,
@@ -416,333 +288,29 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       // Right Floating Map Controls
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.10),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.near_me_rounded,
-                                color: AppColors.primary,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                if (_currentPosition != null) {
-                                  _mapController.move(userLatLng, 17.5);
-                                } else {
-                                  _fetchLocation();
-                                }
-                              },
-                            ),
-                            Container(
-                              width: 24,
-                              height: 1,
-                              color: const Color(0xFFF2F2F7),
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.zoom_out_map_rounded,
-                                color: Color(0xFF1F2937),
-                                size: 18,
-                              ),
-                              onPressed: () {
-                                if (_currentPosition != null &&
-                                    workLocation != null) {
-                                  final bounds = LatLngBounds.fromPoints(
-                                      [userLatLng, officeLatLng]);
-                                  _mapController.fitCamera(
-                                    CameraFit.bounds(
-                                      bounds: bounds,
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 60, vertical: 120),
-                                    ),
-                                  );
-                                } else {
-                                  _mapController.move(officeLatLng, 16.5);
-                                }
-                              },
-                            ),
-                          ],
-                        ),
+                      MapControlsOverlay(
+                        onRecenter: () => _recenterOnUser(userLatLng),
+                        onFitBounds: () => _fitAllBounds(userLatLng, officeLatLng),
                       ),
 
-                      // Bottom Floating Sheet Card (Matches Screenshot 1)
-                      Container(
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.12),
-                              blurRadius: 20,
-                              offset: const Offset(0, 6),
-                            ),
-                          ],
+                      // Bottom Floating Attendance Action Card
+                      MapAttendanceActionCard(
+                        hasLocation: _currentPosition != null,
+                        locationError: _locationError,
+                        isInsideRadius: isInside,
+                        distance: distance,
+                        officeLatLng: officeLatLng,
+                        officeName: officeName,
+                        selectedShift: selectedShift,
+                        isActionDisabled:
+                            hasEndedShift || isBreakActionDisabled,
+                        actionBtnLabel: actionBtnLabel,
+                        onAction: () => _handleTakeAttendance(
+                          targetAction: targetAction,
+                          selectedShift: selectedShift,
+                          workLocation: workLocation,
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Row 1: Radius Indicator + Rute Button
-                        Row(
-                          children: [
-                            // Pulsing dot
-                            Container(
-                              width: 10,
-                              height: 10,
-                              decoration: BoxDecoration(
-                                color: _currentPosition == null
-                                    ? const Color(0xFFF59E0B)
-                                    : (isInside
-                                        ? const Color(0xFF10B981)
-                                        : const Color(0xFFEF4444)),
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: (_currentPosition == null
-                                            ? const Color(0xFFF59E0B)
-                                            : (isInside
-                                                ? const Color(0xFF10B981)
-                                                : const Color(0xFFEF4444)))
-                                        .withValues(alpha: 0.35),
-                                    blurRadius: 6,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    _currentPosition == null
-                                        ? (_locationError ?? 'Mencari Lokasi GPS...')
-                                        : (isInside
-                                            ? 'Dalam Radius Presensi'
-                                            : 'Di Luar Radius Presensi'),
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: _currentPosition == null
-                                          ? const Color(0xFFD97706)
-                                          : (isInside
-                                              ? const Color(0xFF059669)
-                                              : const Color(0xFFEF4444)),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    _currentPosition == null
-                                        ? 'Ketuk tombol refresh untuk memuat koordinat'
-                                        : '${distance.round()} m dari titik kantor',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF6B7280),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () async {
-                                  final lat = officeLatLng.latitude;
-                                  final lng = officeLatLng.longitude;
-                                  final googleMapsAppUri = Uri.parse(
-                                      'google.navigation:q=$lat,$lng&mode=d');
-                                  final geoUri = Uri.parse('geo:$lat,$lng?q=$lat,$lng($officeName)');
-                                  final webMapsUri = Uri.parse(
-                                      'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
-
-                                  try {
-                                    // 1. Try native navigation intent if available
-                                    if (await canLaunchUrl(googleMapsAppUri)) {
-                                      await launchUrl(googleMapsAppUri);
-                                      return;
-                                    }
-                                    // 2. Try geo URI scheme
-                                    if (await canLaunchUrl(geoUri)) {
-                                      await launchUrl(geoUri);
-                                      return;
-                                    }
-                                    // 3. Fallback to Google Maps URL (External App first, then Browser)
-                                    final launched = await launchUrl(
-                                      webMapsUri,
-                                      mode: LaunchMode.externalApplication,
-                                    );
-                                    if (!launched) {
-                                      await launchUrl(
-                                        webMapsUri,
-                                        mode: LaunchMode.platformDefault,
-                                      );
-                                    }
-                                  } catch (_) {
-                                    try {
-                                      await launchUrl(
-                                        webMapsUri,
-                                        mode: LaunchMode.externalNonBrowserApplication,
-                                      );
-                                    } catch (_) {
-                                      await launchUrl(
-                                        webMapsUri,
-                                        mode: LaunchMode.platformDefault,
-                                      );
-                                    }
-                                  }
-                                },
-                                borderRadius: BorderRadius.circular(20),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 14, vertical: 7),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFFFF1F5),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.directions_rounded,
-                                        size: 16,
-                                        color: AppColors.primary,
-                                      ),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        'Rute',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.primary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-
-                        // Row 2: Shift Information Container
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 9),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF9FAFB),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFF2F2F7)),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.access_time_filled_rounded,
-                                size: 16,
-                                color: Color(0xFF6B7280),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  selectedShift != null
-                                      ? 'Shift: ${selectedShift.name} [${_formatShortTime(selectedShift.startTime)} - ${_formatShortTime(selectedShift.endTime)}]'
-                                      : 'Shift: OFFICE [08:00 - 16:00]',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1F2937),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-
-                        // Row 3: Big Hot Pink Action Button
-                        SizedBox(
-                          width: double.infinity,
-                          height: 52,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              disabledBackgroundColor: const Color(0xFFE5E7EB),
-                              disabledForegroundColor: const Color(0xFF9CA3AF),
-                              elevation: 4,
-                              shadowColor:
-                                  AppColors.primary.withValues(alpha: 0.35),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            onPressed: (hasEndedShift || isBreakActionDisabled)
-                                ? null
-                                : () async {
-                                    final res = await CameraSelfieView.push(
-                                      context,
-                                      action: targetAction,
-                                      shiftId: selectedShift?.id,
-                                      workLocation: workLocation,
-                                    );
-                                    if (res == true) {
-                                      if (!context.mounted) return;
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('${targetAction.label} berhasil dicatat!'),
-                                          backgroundColor: AppColors.success,
-                                          behavior: SnackBarBehavior.floating,
-                                          duration: const Duration(seconds: 4),
-                                        ),
-                                      );
-                                      ref
-                                          .read(
-                                              todayAttendanceProvider.notifier)
-                                          .refresh();
-                                      ref
-                                          .read(historyProvider.notifier)
-                                          .refresh();
-                                    }
-                                  },
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.camera_alt_rounded,
-                                  size: 19,
-                                  color: Colors.white,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  actionBtnLabel,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
                     ],
                   ),
                 ),
