@@ -125,7 +125,7 @@ void main() {
               officeName: 'Kantor Pusat',
               radiusStr: '100 meter',
               joinedStr: '1 Januari 2024',
-              onCopy: (_, __) {},
+              onCopy: (text, label) {},
             ),
           ),
         ),
@@ -151,7 +151,7 @@ void main() {
             body: ProfilePersonalInfoSection(
               nikStr: '33250123456789',
               dobStr: '15 Mei 1995',
-              onCopy: (_, __) {},
+              onCopy: (text, label) {},
             ),
           ),
         ),
