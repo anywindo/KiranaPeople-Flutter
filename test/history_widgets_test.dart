@@ -7,7 +7,6 @@ import 'package:kirana_people/data/models/shift_model.dart';
 import 'package:kirana_people/features/history/widgets/history_empty_state.dart';
 import 'package:kirana_people/features/history/widgets/history_filter_bar.dart';
 import 'package:kirana_people/features/history/widgets/history_item_card.dart';
-import 'package:kirana_people/providers/history_provider.dart';
 
 void main() {
   group('History Sub-Widgets Tests', () {
