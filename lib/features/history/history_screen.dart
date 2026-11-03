@@ -11,6 +11,7 @@ import '../../data/models/work_location_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/history_provider.dart';
 import '../../core/widgets/auto_oriented_image.dart';
+import '../../core/widgets/shimmer_loading.dart';
 import '../attendance/widgets/photo_preview_dialog.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
@@ -1921,9 +1922,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               color: AppColors.primary,
               onRefresh: () => ref.read(historyProvider.notifier).refresh(),
               child: historyState.records.when(
-                loading: () => const Center(
-                  child: CircularProgressIndicator(color: AppColors.primary),
-                ),
+                loading: () => const HistoryListSkeleton(),
                 error: (err, _) => Center(
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
@@ -2007,17 +2006,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     itemBuilder: (context, index) {
                       if (index == filteredList.length) {
                         return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 20),
-                          child: Center(
-                            child: SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: HistoryCardSkeleton(),
                         );
                       }
                       final item = filteredList[index];

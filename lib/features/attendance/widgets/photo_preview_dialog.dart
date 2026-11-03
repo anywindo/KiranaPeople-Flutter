@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/app_haptics.dart';
 import '../../../core/utils/file_download_helper.dart';
 import '../../../core/widgets/auto_oriented_image.dart';
 
@@ -205,7 +206,10 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
                     : Tooltip(
                         message: 'Bagikan',
                         child: InkWell(
-                          onTap: _shareMedia,
+                          onTap: () {
+                            AppHaptics.light();
+                            _shareMedia();
+                          },
                           borderRadius: BorderRadius.circular(20),
                           child: Container(
                             padding: const EdgeInsets.all(6),
@@ -242,7 +246,10 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
                     : Tooltip(
                         message: 'Unduh Media',
                         child: InkWell(
-                          onTap: _downloadMedia,
+                          onTap: () {
+                            AppHaptics.light();
+                            _downloadMedia();
+                          },
                           borderRadius: BorderRadius.circular(20),
                           child: Container(
                             padding: const EdgeInsets.all(6),
@@ -264,6 +271,7 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
                   message: 'Putar Gambar',
                   child: InkWell(
                     onTap: () {
+                      AppHaptics.selection();
                       setState(() {
                         _rotationTurns = (_rotationTurns + 1) % 4;
                       });
@@ -288,7 +296,10 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
                 Tooltip(
                   message: 'Tutup',
                   child: InkWell(
-                    onTap: () => Navigator.pop(context),
+                    onTap: () {
+                      AppHaptics.light();
+                      Navigator.pop(context);
+                    },
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
                       padding: const EdgeInsets.all(6),

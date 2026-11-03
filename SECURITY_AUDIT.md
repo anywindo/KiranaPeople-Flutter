@@ -36,7 +36,7 @@ All previous **High-severity** and **Medium-severity** vulnerabilities identifie
 | **SEC-03** | Attendance GPS Spoofing & Missing Telemetry Signals | MASVS-RESILIENCE | **Medium** | ✅ **RESOLVED** |
 | **SEC-04** | Biometric Attendance Selfie Images Persisting in Cache | MASVS-STORAGE | **Medium** | ✅ **RESOLVED** |
 | **SEC-05** | Absence of Root, Jailbreak & Hooking Telemetry | MASVS-RESILIENCE | **Medium** | ✅ **RESOLVED** |
-| **SEC-06** | Dart Code Obfuscation Flags Missing in CD Pipeline | MASVS-CODE | **Low** | ⚠️ **OPEN / RECOMMENDED** |
+| **SEC-06** | Dart Code Obfuscation Flags Missing in CD Pipeline | MASVS-CODE | **Low** | ✅ **RESOLVED** |
 | **SEC-07** | Permissive Location Cache Fallback Window (10 Minutes) | MASVS-RESILIENCE | **Low** | ⚠️ **OPEN / RECOMMENDED** |
 | **SEC-08** | Client-Side Pre-Drop of Blocked Attendance (Missing Server Audit) | MASVS-AUTH | **Low** | ⚠️ **OPEN / RECOMMENDED** |
 | **SEC-09** | Cleartext Dev Hosts Declared in Main Network Security Config | MASVS-NETWORK | **Low** | ⚠️ **OPEN / RECOMMENDED** |
@@ -108,20 +108,10 @@ All previous **High-severity** and **Medium-severity** vulnerabilities identifie
 ### [SEC-06] Dart Code Obfuscation Flags Missing in CD Pipeline
 * **Category:** OWASP MASVS-CODE
 * **Severity:** **Low**
-* **Status:** ⚠️ **OPEN / RECOMMENDED**
-* **Description:**
-  While Android native code is minified and obfuscated by R8 (`isMinifyEnabled = true`), Dart AOT binaries compiled in `.github/workflows/cd.yml` run:
-  ```bash
-  flutter build apk --release
-  flutter build appbundle --release
-  ```
-  Without `--obfuscate --split-debug-info=./symbols`, Dart class, field, and method identifiers remain readable via Flutter reverse engineering tools (e.g., `darter`, `blutter`).
-* **Remediation:**
-  Update `.github/workflows/cd.yml` to supply obfuscation flags and archive debug symbols:
-  ```yaml
-  - name: Build Universal APK
-    run: flutter build apk --release --obfuscate --split-debug-info=symbols/
-  ```
+* **Status:** ✅ **RESOLVED**
+* **Remediation & Verification:**
+  - In `.github/workflows/cd.yml`, all release build steps (`Universal APK`, `Split-per-ABI APKs`, and `Android App Bundle`) have been updated with `--obfuscate --split-debug-info=build/app/outputs/symbols`.
+  - Staging step automatically packages debug symbol mappings into `app-debug-symbols.zip` and attaches them to GitHub Release assets for crash de-obfuscation (`flutter symbolize`).
 
 ---
 

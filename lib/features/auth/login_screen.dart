@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/app_haptics.dart';
 import '../../core/widgets/offline_banner.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/connectivity_provider.dart';
@@ -139,10 +140,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   void _submit() async {
     if (!_isFormValid) return;
+    AppHaptics.medium();
     FocusScope.of(context).unfocus();
 
     final isOffline = ref.read(isOfflineProvider);
     if (isOffline) {
+      AppHaptics.error();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -160,6 +163,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         .read(authProvider.notifier)
         .login(identifier, _passwordController.text);
     if (success) {
+      AppHaptics.success();
       try {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('remember_login_credentials', _rememberMe);
@@ -169,6 +173,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           await prefs.remove('saved_login_identifier');
         }
       } catch (_) {}
+    } else {
+      AppHaptics.error();
     }
   }
 

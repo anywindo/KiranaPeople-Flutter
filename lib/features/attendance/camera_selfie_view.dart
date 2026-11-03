@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image/image.dart' as img;
 import '../../core/security/device_security_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/app_haptics.dart';
 import '../../core/utils/location_helper.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../data/models/work_location_model.dart';
@@ -330,6 +331,7 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
 
   Future<void> _toggleCamera() async {
     if (_cameras.length <= 1) return;
+    AppHaptics.selection();
     final nextIndex = (_selectedCameraIndex + 1) % _cameras.length;
     setState(() {
       _isCameraReady = false;
@@ -340,6 +342,7 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
 
   Future<void> _toggleFlash() async {
     if (_controller == null || !_isCameraReady) return;
+    AppHaptics.light();
 
     final nextFlashState = !_isFlashOn;
 
@@ -373,6 +376,7 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
 
   Future<void> _takePicture() async {
     if (_controller == null || !_isCameraReady || _isTakingPhoto) return;
+    AppHaptics.medium();
 
     try {
       setState(() {
@@ -427,6 +431,7 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
           _isTakingPhoto = false;
           _isScreenFlashing = false;
         });
+        AppHaptics.light();
       }
     } catch (_) {
       if (mounted) {

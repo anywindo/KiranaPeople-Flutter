@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/app_haptics.dart';
 import '../../core/utils/location_helper.dart';
 import '../../core/widgets/offline_banner.dart';
 import '../../data/models/attendance_event_model.dart';
@@ -125,6 +126,7 @@ class _AttendanceConfirmationViewState
 
     final isOffline = ref.read(isOfflineProvider);
     if (isOffline) {
+      AppHaptics.error();
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -155,6 +157,7 @@ class _AttendanceConfirmationViewState
       return;
     }
 
+    AppHaptics.medium();
     setState(() {
       _isSubmitting = true;
     });
@@ -228,6 +231,7 @@ class _AttendanceConfirmationViewState
       return;
     }
 
+    AppHaptics.medium();
     setState(() {
       _isSubmitting = true;
     });
@@ -602,7 +606,12 @@ class _AttendanceConfirmationViewState
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
-                        onPressed: _isSubmitting ? null : widget.onRetake,
+                        onPressed: _isSubmitting
+                            ? null
+                            : () {
+                                AppHaptics.selection();
+                                widget.onRetake();
+                              },
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

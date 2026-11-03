@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/app_haptics.dart';
 import '../../data/models/shift_model.dart';
 
 class ShiftPickerSheet extends StatefulWidget {
@@ -165,6 +166,7 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
 
                 return InkWell(
                   onTap: () {
+                    AppHaptics.selection();
                     setState(() {
                       _currentSelection = shift;
                     });
@@ -258,6 +260,7 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
               child: ElevatedButton(
                 onPressed: _currentSelection != null
                     ? () {
+                        AppHaptics.medium();
                         widget.onShiftSelected(_currentSelection!);
                         Navigator.pop(context);
                       }

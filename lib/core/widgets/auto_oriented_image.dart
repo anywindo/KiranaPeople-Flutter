@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import 'shimmer_loading.dart';
+
 /// A smart image viewer that automatically inspects image dimensions and orients
 /// sideways/landscape selfies to upright portrait, while supporting manual rotation.
 class AutoOrientedImage extends StatefulWidget {
@@ -110,11 +112,10 @@ class _AutoOrientedImageState extends State<AutoOrientedImage> {
       fit: widget.fit,
       placeholder: (context, url) =>
           widget.placeholder ??
-          const Center(
-            child: SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
+          ShimmerLoading(
+            child: SkeletonBox(
+              width: widget.width,
+              height: widget.height,
             ),
           ),
       errorWidget: (context, url, error) =>

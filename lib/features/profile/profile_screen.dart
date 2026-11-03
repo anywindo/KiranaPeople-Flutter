@@ -7,7 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/app_haptics.dart';
 import '../../core/widgets/continuous_marquee_text.dart';
+import '../../core/widgets/shimmer_loading.dart';
 import '../../data/models/user_model.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../providers/attendance_provider.dart';
@@ -98,6 +100,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   void _copyToClipboard(BuildContext context, String text, String label) {
+    AppHaptics.light();
     Clipboard.setData(ClipboardData(text: text));
     _showCustomToast(context, '$label berhasil disalin');
   }
@@ -837,19 +840,9 @@ class ProfileScreen extends ConsumerWidget {
                                             imageUrl: user.fullAvatarUrl!,
                                             fit: BoxFit.cover,
                                             placeholder: (context, url) =>
-                                                Container(
-                                              color:
-                                                  context.surfaceSecondaryColor,
-                                              child: const Center(
-                                                child: SizedBox(
-                                                  width: 16,
-                                                  height: 16,
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    strokeWidth: 2,
-                                                    color: AppColors.primary,
-                                                  ),
-                                                ),
+                                                const ShimmerLoading(
+                                              child: SkeletonBox.circle(
+                                                size: 88,
                                               ),
                                             ),
                                             errorWidget:

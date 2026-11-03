@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/app_haptics.dart';
 import '../../../core/widgets/bouncing_button.dart';
 import '../../../data/models/shift_model.dart';
 
@@ -149,6 +150,7 @@ class AttendanceActionButton extends StatelessWidget {
         if (Shift.isBeforeBreakTime(selectedShift)) {
           return InkWell(
             onTap: () {
+              AppHaptics.error();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -235,6 +237,7 @@ class AttendanceActionButton extends StatelessWidget {
 
     return BouncingButton(
       scaleDown: 0.96,
+      hapticType: BouncingHapticType.medium,
       onPressed: onAction,
       child: Container(
         width: double.infinity,

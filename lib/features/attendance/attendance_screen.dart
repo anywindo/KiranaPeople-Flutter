@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/notifications/notification_service.dart';
 import '../../core/security/device_security_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/app_haptics.dart';
 import '../../core/utils/location_helper.dart';
+import '../../core/widgets/shimmer_loading.dart';
 // import '../../core/widgets/offline_banner.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../data/models/attendance_model.dart';
@@ -189,6 +191,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
       workLocation: workLocation,
     );
     if (res == true && mounted) {
+      AppHaptics.success();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${targetAction.label} berhasil dicatat!'),
@@ -314,6 +317,15 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     final hasEndedBreak = endBreakEvent != null;
     final isOffline = ref.watch(isOfflineProvider);
     final isOnBreak = hasStartedBreak && !hasEndedBreak;
+
+    if (todayData == null && attendanceState.data.isLoading) {
+      return Scaffold(
+        backgroundColor: context.scaffoldBg,
+        body: const SafeArea(
+          child: AttendanceScreenSkeleton(),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
