@@ -558,41 +558,81 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                                 ],
                               ),
                             ),
-                            InkWell(
-                              onTap: () async {
-                                final uri = Uri.parse(
-                                    'https://www.google.com/maps/dir/?api=1&destination=${officeLatLng.latitude},${officeLatLng.longitude}');
-                                if (await canLaunchUrl(uri)) {
-                                  await launchUrl(uri,
-                                      mode: LaunchMode.externalApplication);
-                                }
-                              },
-                              borderRadius: BorderRadius.circular(20),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 7),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFF1F5),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.directions_rounded,
-                                      size: 16,
-                                      color: AppColors.primary,
-                                    ),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      'Rute',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () async {
+                                  final lat = officeLatLng.latitude;
+                                  final lng = officeLatLng.longitude;
+                                  final googleMapsAppUri = Uri.parse(
+                                      'google.navigation:q=$lat,$lng&mode=d');
+                                  final geoUri = Uri.parse('geo:$lat,$lng?q=$lat,$lng($officeName)');
+                                  final webMapsUri = Uri.parse(
+                                      'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+
+                                  try {
+                                    // 1. Try native navigation intent if available
+                                    if (await canLaunchUrl(googleMapsAppUri)) {
+                                      await launchUrl(googleMapsAppUri);
+                                      return;
+                                    }
+                                    // 2. Try geo URI scheme
+                                    if (await canLaunchUrl(geoUri)) {
+                                      await launchUrl(geoUri);
+                                      return;
+                                    }
+                                    // 3. Fallback to Google Maps URL (External App first, then Browser)
+                                    final launched = await launchUrl(
+                                      webMapsUri,
+                                      mode: LaunchMode.externalApplication,
+                                    );
+                                    if (!launched) {
+                                      await launchUrl(
+                                        webMapsUri,
+                                        mode: LaunchMode.platformDefault,
+                                      );
+                                    }
+                                  } catch (_) {
+                                    try {
+                                      await launchUrl(
+                                        webMapsUri,
+                                        mode: LaunchMode.externalNonBrowserApplication,
+                                      );
+                                    } catch (_) {
+                                      await launchUrl(
+                                        webMapsUri,
+                                        mode: LaunchMode.platformDefault,
+                                      );
+                                    }
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(20),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 7),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFF1F5),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.directions_rounded,
+                                        size: 16,
                                         color: AppColors.primary,
                                       ),
-                                    ),
-                                  ],
+                                      SizedBox(width: 4),
+                                      Text(
+                                        'Rute',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),

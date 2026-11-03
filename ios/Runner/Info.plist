@@ -72,5 +72,13 @@
 	<string>Kirana People membutuhkan lokasi Anda untuk memastikan presensi dilakukan di area kerja yang valid.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Kirana People membutuhkan akses galeri untuk mengunggah dokumen atau bukti presensi.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>googlechromes</string>
+		<string>comgooglemaps</string>
+		<string>maps</string>
+		<string>https</string>
+		<string>http</string>
+	</array>
 </dict>
 </plist>
