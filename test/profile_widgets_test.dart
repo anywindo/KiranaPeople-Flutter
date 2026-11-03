@@ -179,6 +179,7 @@ void main() {
 
       expect(find.text('Pengingat Presensi'), findsOneWidget);
       expect(find.text('Tema Tampilan'), findsOneWidget);
+      expect(find.text('Kebijakan Privasi'), findsOneWidget);
       expect(find.text('Versi Aplikasi'), findsOneWidget);
     });
   });

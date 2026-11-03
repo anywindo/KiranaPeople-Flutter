@@ -7,6 +7,7 @@ import '../../../data/models/attendance_event_model.dart';
 import '../../../providers/notification_provider.dart';
 import '../../../providers/package_info_provider.dart';
 import '../../../providers/theme_provider.dart';
+import '../../onboarding/privacy_policy_sheet.dart';
 import 'profile_card_group.dart';
 
 class ProfilePreferencesSection extends ConsumerWidget {
@@ -317,6 +318,25 @@ class ProfilePreferencesSection extends ConsumerWidget {
             ],
           ),
           onTap: () => _showThemeModeSheet(context, ref),
+        ),
+        Divider(
+          height: 1,
+          indent: 56,
+          color: context.dividerColor,
+        ),
+        ProfileRowItem(
+          iconBg: context.isDarkMode
+              ? const Color(0xFF3B1524)
+              : const Color(0xFFFFF1F5),
+          icon: Icons.policy_rounded,
+          iconColor: AppColors.primary,
+          title: 'Kebijakan Privasi',
+          trailing: Icon(
+            Icons.chevron_right_rounded,
+            size: 18,
+            color: context.textMutedColor,
+          ),
+          onTap: () => PrivacyPolicySheet.show(context),
         ),
         Divider(
           height: 1,
