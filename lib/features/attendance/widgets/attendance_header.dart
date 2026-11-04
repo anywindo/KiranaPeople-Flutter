@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../data/models/user_model.dart';
 import '../../navigation/main_navigation_screen.dart';
 import '../../profile/profile_screen.dart';
+import 'attendance_live_clock.dart';
 
 class AttendanceHeader extends StatelessWidget {
   final UserModel? user;
@@ -165,88 +166,103 @@ class AttendanceHeader extends StatelessWidget {
         ),
         const SizedBox(height: 16),
 
-        // 2. User Greeting Section (tap redirects to Profile)
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: () {
-              HapticFeedback.lightImpact();
-              final mainNav = MainNavigationScreen.of(context);
-              if (mainNav != null) {
-                mainNav.switchToTab(3);
-              } else {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                );
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Avatar photo or initials
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4338CA),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: context.isDarkMode
-                            ? context.surfaceColor
-                            : Colors.white,
-                        width: 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(
-                            alpha: context.isDarkMode ? 0.3 : 0.10,
+        // 2. User Greeting Section (tap redirects to Profile) & Small Live Clock
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    final mainNav = MainNavigationScreen.of(context);
+                    if (mainNav != null) {
+                      mainNav.switchToTab(3);
+                    } else {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                      );
+                    }
+                  },
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                    child: Row(
+                      children: [
+                        // Avatar photo or initials
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF4338CA),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: context.isDarkMode
+                                  ? context.surfaceColor
+                                  : Colors.white,
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(
+                                  alpha: context.isDarkMode ? 0.3 : 0.10,
+                                ),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
+                          child: ClipOval(
+                            child: user?.avatar != null &&
+                                    user!.avatar!.isNotEmpty
+                                ? CachedNetworkImage(
+                                    imageUrl: user!.avatar!,
+                                    fit: BoxFit.cover,
+                                    errorWidget: (_, _, _) =>
+                                        _buildUserInitial(user?.name ?? 'User'),
+                                  )
+                                : _buildUserInitial(user?.name ?? 'User'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+
+                        // Greeting + Name
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _getGreeting(),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: context.textMutedColor,
+                                ),
+                              ),
+                              Text(
+                                user?.name ?? 'User',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                  color: context.textPrimaryColor,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                    child: ClipOval(
-                      child: user?.avatar != null && user!.avatar!.isNotEmpty
-                          ? CachedNetworkImage(
-                              imageUrl: user!.avatar!,
-                              fit: BoxFit.cover,
-                              errorWidget: (_, _, _) =>
-                                  _buildUserInitial(user?.name ?? 'User'),
-                            )
-                          : _buildUserInitial(user?.name ?? 'User'),
-                    ),
                   ),
-                  const SizedBox(width: 12),
-
-                  // Greeting + Name
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _getGreeting(),
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: context.textMutedColor,
-                        ),
-                      ),
-                      Text(
-                        user?.name ?? 'User',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          color: context.textPrimaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+            const SizedBox(width: 8),
+            const AttendanceLiveClock(),
+          ],
         ),
       ],
     );
