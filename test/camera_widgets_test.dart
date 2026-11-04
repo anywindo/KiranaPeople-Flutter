@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kirana_people/data/models/attendance_event_model.dart';
 import 'package:kirana_people/features/attendance/widgets/camera_controls_bar.dart';
+import 'package:kirana_people/features/attendance/widgets/camera_device_integrity_dialog.dart';
 import 'package:kirana_people/features/attendance/widgets/camera_preview_surface.dart';
+import 'package:kirana_people/features/attendance/widgets/camera_top_bar.dart';
 
 void main() {
   group('Camera Sub-Widgets Tests', () {
@@ -82,6 +85,56 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.byType(Image), findsOneWidget); // Headroom.png overlay
     });
+
+    testWidgets('CameraTopBar renders action label and triggers onBack', (tester) async {
+      bool backTapped = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CameraTopBar(
+              action: AttendanceEventType.startShift,
+              textColor: Colors.white,
+              onBack: () => backTapped = true,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text(AttendanceEventType.startShift.label), findsOneWidget);
+      expect(find.byIcon(Icons.chevron_left_rounded), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.chevron_left_rounded));
+      await tester.pump();
+      expect(backTapped, isTrue);
+    });
+
+    testWidgets('CameraDeviceIntegrityDialog renders warning and dismisses on action', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () => CameraDeviceIntegrityDialog.show(context),
+                child: const Text('Show Warning'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Show Warning'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Perangkat Tidak Didukung'), findsOneWidget);
+      expect(find.textContaining('Aplikasi mendeteksi bahwa perangkat ini telah di-root'), findsOneWidget);
+      expect(find.text('Mengerti'), findsOneWidget);
+
+      await tester.tap(find.text('Mengerti'));
+      await tester.pumpAndSettle();
+      expect(find.text('Perangkat Tidak Didukung'), findsNothing);
+    });
   });
 }
+
 

@@ -11,8 +11,15 @@ import '../../data/models/attendance_event_model.dart';
 import '../../data/models/work_location_model.dart';
 import 'attendance_confirmation_view.dart';
 import 'widgets/camera_controls_bar.dart';
+import 'widgets/camera_device_integrity_dialog.dart';
 import 'widgets/camera_preview_surface.dart';
+import 'widgets/camera_top_bar.dart';
 import 'widgets/fast_image_processor.dart';
+
+export 'widgets/camera_controls_bar.dart';
+export 'widgets/camera_device_integrity_dialog.dart';
+export 'widgets/camera_preview_surface.dart';
+export 'widgets/camera_top_bar.dart';
 
 class CameraSelfieView extends StatefulWidget {
   final AttendanceEventType action;
@@ -35,23 +42,7 @@ class CameraSelfieView extends StatefulWidget {
     // Root / Jailbreak device integrity protection (MASVS-RESILIENCE)
     final isCompromised = await DeviceSecurityService().isDeviceCompromised();
     if (isCompromised && context.mounted) {
-      await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Perangkat Tidak Didukung', style: TextStyle(fontWeight: FontWeight.bold)),
-          content: const Text(
-            'Aplikasi mendeteksi bahwa perangkat ini telah di-root atau di-jailbreak. Demi keamanan data dan keaslian presensi, presensi tidak dapat dilakukan pada perangkat yang dimodifikasi.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Mengerti'),
-            ),
-          ],
-        ),
-      );
+      await CameraDeviceIntegrityDialog.show(context);
       return false;
     }
 
@@ -157,7 +148,6 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
       final frontIndex = _cameras.indexWhere(
           (c) => c.lensDirection == CameraLensDirection.front);
       _selectedCameraIndex = frontIndex != -1 ? frontIndex : 0;
-
       await _setupCameraController(_cameras[_selectedCameraIndex]);
     } catch (_) {
       if (mounted) {
@@ -397,30 +387,10 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
             child: Column(
               children: [
                 // Top Navigation Bar
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.chevron_left_rounded,
-                            color: textColor, size: 28),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      Expanded(
-                        child: Text(
-                          widget.action.label,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 48), // Spacer to balance back button
-                    ],
-                  ),
+                CameraTopBar(
+                  action: widget.action,
+                  textColor: textColor,
+                  onBack: () => Navigator.pop(context),
                 ),
 
                 // Camera Viewport + Headroom Overlay
