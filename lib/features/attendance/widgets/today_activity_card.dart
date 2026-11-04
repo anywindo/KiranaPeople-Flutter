@@ -100,7 +100,7 @@ class TodayActivityCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
           // Events or Empty placeholder
           if (events.isEmpty)
@@ -133,6 +133,7 @@ class TodayActivityCard extends StatelessWidget {
             )
           else
             ListView.separated(
+              padding: EdgeInsets.zero,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: events.length,

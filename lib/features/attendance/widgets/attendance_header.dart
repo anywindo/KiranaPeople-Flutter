@@ -31,7 +31,7 @@ class AttendanceStickyTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final blurHeight = topPadding + 62.0;
+    final blurHeight = topPadding + 84.0;
 
     Widget buildBar(double progress) {
       return SizedBox(
@@ -55,12 +55,12 @@ class AttendanceStickyTopBar extends StatelessWidget {
                               Colors.black,
                               Colors.transparent,
                             ],
-                            stops: [0.0, 0.65, 1.0],
+                            stops: [0.0, 0.60, 1.0],
                           ).createShader(bounds);
                         },
                         blendMode: BlendMode.dstIn,
                         child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                           child: Container(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
@@ -68,14 +68,17 @@ class AttendanceStickyTopBar extends StatelessWidget {
                                 end: Alignment.bottomCenter,
                                 colors: [
                                   context.scaffoldBg.withValues(
-                                    alpha: context.isDarkMode ? 0.85 : 0.80,
+                                    alpha: context.isDarkMode ? 0.98 : 0.96,
                                   ),
                                   context.scaffoldBg.withValues(
-                                    alpha: context.isDarkMode ? 0.45 : 0.35,
+                                    alpha: context.isDarkMode ? 0.96 : 0.94,
+                                  ),
+                                  context.scaffoldBg.withValues(
+                                    alpha: context.isDarkMode ? 0.60 : 0.50,
                                   ),
                                   context.scaffoldBg.withValues(alpha: 0.0),
                                 ],
-                                stops: const [0.0, 0.70, 1.0],
+                                stops: const [0.0, 0.55, 0.78, 1.0],
                               ),
                             ),
                           ),
