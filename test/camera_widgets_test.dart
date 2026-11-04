@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kirana_people/data/models/attendance_event_model.dart';
+import 'package:kirana_people/features/attendance/widgets/camera_confirmation_bridge.dart';
 import 'package:kirana_people/features/attendance/widgets/camera_controls_bar.dart';
 import 'package:kirana_people/features/attendance/widgets/camera_device_integrity_dialog.dart';
 import 'package:kirana_people/features/attendance/widgets/camera_preview_surface.dart';
+import 'package:kirana_people/features/attendance/widgets/camera_session_controller.dart';
 import 'package:kirana_people/features/attendance/widgets/camera_top_bar.dart';
 
 void main() {
@@ -133,6 +135,19 @@ void main() {
       await tester.tap(find.text('Mengerti'));
       await tester.pumpAndSettle();
       expect(find.text('Perangkat Tidak Didukung'), findsNothing);
+    });
+
+    test('CameraSessionController initializes with safe default state', () {
+      final controller = CameraSessionController();
+      expect(controller.controller, isNull);
+      expect(controller.cameras, isEmpty);
+      expect(controller.selectedCameraIndex, equals(0));
+      expect(controller.isCameraReady, isFalse);
+      expect(controller.isTakingPhoto, isFalse);
+      expect(controller.isFlashOn, isFalse);
+      expect(controller.isScreenFlashing, isFalse);
+      expect(controller.isCurrentCameraFront, isTrue);
+      controller.dispose();
     });
   });
 }
