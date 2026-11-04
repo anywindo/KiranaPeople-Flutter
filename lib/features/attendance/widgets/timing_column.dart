@@ -48,7 +48,9 @@ class TimingColumn extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: const Color(0xFFE5E7EB),
+                        color: context.isDarkMode
+                            ? const Color(0xFF334155)
+                            : const Color(0xFFE2E8F0),
                         width: 1.5,
                       ),
                     ),
@@ -93,9 +95,12 @@ class TimingColumn extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: const Color(0xFFFFF1F2),
+                color: AppColors.primary.withValues(alpha: 0.10),
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFFFE4E6), width: 1.5),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.22),
+                  width: 1.5,
+                ),
               ),
               child: Icon(fallbackIcon, color: AppColors.primary, size: 20),
             ),

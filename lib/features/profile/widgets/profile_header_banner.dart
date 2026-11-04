@@ -131,17 +131,10 @@ class ProfileHeaderBanner extends StatelessWidget {
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: context.isDarkMode
-                                ? context.scaffoldBg
+                                ? const Color(0xFF334155)
                                 : Colors.white,
                             width: 3.5,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.18),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
                         ),
                         child: ClipOval(
                           child:
@@ -175,7 +168,14 @@ class ProfileHeaderBanner extends StatelessWidget {
                           width: 34,
                           height: 34,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFF2D75),
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Color(0xFFFF2A88),
+                                Color(0xFFE6007A),
+                              ],
+                            ),
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: context.isDarkMode
@@ -183,13 +183,6 @@ class ProfileHeaderBanner extends StatelessWidget {
                                   : Colors.white,
                               width: 2.5,
                             ),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
                           ),
                           child: const Icon(
                             Icons.camera_alt_rounded,

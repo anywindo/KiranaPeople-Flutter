@@ -53,13 +53,6 @@ class _OfflineBannerState extends ConsumerState<OfflineBanner> {
         width: double.infinity,
         decoration: BoxDecoration(
           color: isOffline ? const Color(0xFFDC2626) : const Color(0xFF059669),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.12),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         child: SafeArea(
           bottom: false,

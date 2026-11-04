@@ -43,18 +43,20 @@ class _AttendanceLiveClockState extends State<AttendanceLiveClock> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: context.isDarkMode
+              ? [const Color(0xFF1E293B), const Color(0xFF172033)]
+              : [Colors.white, const Color(0xFFF8FAFC)],
+        ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: context.isDarkMode ? 0.2 : 0.04,
-            ),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
+        border: Border.all(
+          color: context.isDarkMode
+              ? const Color(0xFF334155)
+              : const Color(0xFFE2E8F0),
+          width: 1.2,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -64,7 +66,7 @@ class _AttendanceLiveClockState extends State<AttendanceLiveClock> {
             size: 13,
             color: AppColors.primary,
           ),
-          const SizedBox(width: 5),
+          const SizedBox(width: 6),
           Text(
             '$hourStr:$minStr:$secStr',
             style: TextStyle(
@@ -80,4 +82,3 @@ class _AttendanceLiveClockState extends State<AttendanceLiveClock> {
     );
   }
 }
-

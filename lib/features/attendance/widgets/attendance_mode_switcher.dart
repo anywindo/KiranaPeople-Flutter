@@ -23,8 +23,16 @@ class AttendanceModeSwitcher extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: context.surfaceSecondaryColor,
+        color: context.isDarkMode
+            ? const Color(0xFF1E293B)
+            : const Color(0xFFEEF2F6),
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: context.isDarkMode
+              ? const Color(0xFF334155).withValues(alpha: 0.6)
+              : const Color(0xFFE2E8F0),
+          width: 1.2,
+        ),
       ),
       child: Stack(
         clipBehavior: Clip.antiAlias,
@@ -41,15 +49,19 @@ class AttendanceModeSwitcher extends StatelessWidget {
               heightFactor: 1.0,
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFFFF2A88),
+                      Color(0xFFE6007A),
+                    ],
+                  ),
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.35),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.25),
+                    width: 1,
+                  ),
                 ),
               ),
             ),

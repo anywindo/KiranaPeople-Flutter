@@ -114,16 +114,9 @@ class MapAttendanceActionCard extends StatelessWidget {
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isDark ? context.borderColor : Colors.transparent,
-          width: 1,
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          width: 1.2,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.12),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-          ),
-        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -248,19 +241,26 @@ class MapAttendanceActionCard extends StatelessWidget {
               hapticType: BouncingHapticType.none,
               child: Container(
                 decoration: BoxDecoration(
+                  gradient: isActionDisabled
+                      ? null
+                      : const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0xFFFF2A88),
+                            Color(0xFFE6007A),
+                          ],
+                        ),
                   color: isActionDisabled
                       ? (isDark ? const Color(0xFF334155) : const Color(0xFFE5E7EB))
-                      : AppColors.primary,
+                      : null,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: isActionDisabled
+                  border: isActionDisabled
                       ? null
-                      : [
-                          BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.35),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                      : Border.all(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          width: 1,
+                        ),
                 ),
                 alignment: Alignment.center,
                 child: Row(

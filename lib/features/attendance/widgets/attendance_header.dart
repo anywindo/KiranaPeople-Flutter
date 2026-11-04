@@ -144,16 +144,12 @@ class AttendanceStickyTopBar extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: context.surfaceColor,
                                 shape: BoxShape.circle,
-                                border: Border.all(color: context.borderColor),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(
-                                      alpha: context.isDarkMode ? 0.2 : 0.04,
-                                    ),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
+                                border: Border.all(
+                                  color: context.isDarkMode
+                                      ? const Color(0xFF334155)
+                                      : const Color(0xFFE2E8F0),
+                                  width: 1.2,
+                                ),
                               ),
                               child: isBackgroundSyncing
                                   ? const Padding(
@@ -180,16 +176,12 @@ class AttendanceStickyTopBar extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: context.surfaceColor,
                                 shape: BoxShape.circle,
-                                border: Border.all(color: context.borderColor),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(
-                                      alpha: context.isDarkMode ? 0.2 : 0.04,
-                                    ),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
+                                border: Border.all(
+                                  color: context.isDarkMode
+                                      ? const Color(0xFF334155)
+                                      : const Color(0xFFE2E8F0),
+                                  width: 1.2,
+                                ),
                               ),
                               child: Icon(
                                 Icons.logout_rounded,
@@ -308,19 +300,10 @@ class AttendanceGreetingSection extends StatelessWidget {
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: context.isDarkMode
-                              ? context.surfaceColor
-                              : Colors.white,
-                          width: 2,
+                              ? const Color(0xFF334155)
+                              : const Color(0xFFE2E8F0),
+                          width: 1.5,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(
-                              alpha: context.isDarkMode ? 0.3 : 0.10,
-                            ),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
                       child: ClipOval(
                         child: user?.avatar != null &&

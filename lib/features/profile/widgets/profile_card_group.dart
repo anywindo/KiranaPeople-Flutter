@@ -18,33 +18,9 @@ class ProfileCardGroup extends StatelessWidget {
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isDark
-              ? context.borderColor.withValues(alpha: 0.5)
-              : const Color(0xFFE2E8F0).withValues(alpha: 0.75),
-          width: 1,
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          width: 1.2,
         ),
-        boxShadow: isDark
-            ? [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.35),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : [
-                BoxShadow(
-                  color: const Color(0xFF0F172A).withValues(alpha: 0.05),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                  spreadRadius: -1,
-                ),
-                BoxShadow(
-                  color: const Color(0xFF0F172A).withValues(alpha: 0.025),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                  spreadRadius: 0,
-                ),
-              ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(children: children),

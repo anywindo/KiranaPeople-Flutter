@@ -54,14 +54,12 @@ class TodayActivityCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: context.borderColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(
+          color: context.isDarkMode
+              ? const Color(0xFF334155)
+              : const Color(0xFFE2E8F0),
+          width: 1.2,
+        ),
       ),
       child: Column(
         children: [
@@ -249,20 +247,21 @@ class TodayActivityCard extends StatelessWidget {
                                         ),
                                       ),
                                       const SizedBox(width: 6),
-                                      const Icon(
-                                        Icons.location_on_rounded,
-                                        size: 11,
-                                        color: Color(0xFF94A3B8),
-                                      ),
-                                      const SizedBox(width: 2),
-                                      Text(
-                                        'Lokasi GPS',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: context.textMutedColor,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
+                                      // Jelek
+                                      // const Icon(
+                                      //   Icons.location_on_rounded,
+                                      //   size: 11,
+                                      //   color: Color(0xFF94A3B8),
+                                      // ),
+                                      // const SizedBox(width: 2),
+                                      // Text(
+                                      //   'Lokasi GPS',
+                                      //   style: TextStyle(
+                                      //     fontSize: 11,
+                                      //     color: context.textMutedColor,
+                                      //     fontWeight: FontWeight.w500,
+                                      //   ),
+                                      // ),
                                     ],
                                   ],
                                 ),

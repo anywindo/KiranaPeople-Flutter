@@ -50,9 +50,20 @@ class ShiftWorkPanel extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: context.surfaceSecondaryColor,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: context.borderColor),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: context.isDarkMode
+                  ? [const Color(0xFF1E293B), const Color(0xFF182234)]
+                  : [const Color(0xFFF8FAFC), const Color(0xFFF1F5F9)],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: context.isDarkMode
+                  ? const Color(0xFF334155)
+                  : const Color(0xFFE2E8F0),
+              width: 1.2,
+            ),
           ),
           child: Row(
             children: [
@@ -65,6 +76,13 @@ class ShiftWorkPanel extends StatelessWidget {
                           : AppColors.primary)
                       .withValues(alpha: 0.12),
                   shape: BoxShape.circle,
+                  border: Border.all(
+                    color: (hasStartedShift
+                            ? (isCheckInLate ? AppColors.error : AppColors.success)
+                            : AppColors.primary)
+                        .withValues(alpha: 0.20),
+                    width: 1,
+                  ),
                 ),
                 child: Icon(
                   Icons.access_time_filled_rounded,

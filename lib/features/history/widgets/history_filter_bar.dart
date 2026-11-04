@@ -186,15 +186,7 @@ class HistoryFilterBar extends ConsumerWidget {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: borderColor, width: 1),
-          boxShadow: [
-            if (!isSelected)
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
-              ),
-          ],
+          border: Border.all(color: borderColor, width: 1.2),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
