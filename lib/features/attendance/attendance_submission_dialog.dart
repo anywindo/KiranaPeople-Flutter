@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
 
 import '../../core/security/device_security_service.dart';
+import '../../core/services/face_detector_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/location_helper.dart';
 import '../../data/models/attendance_event_model.dart';
@@ -91,8 +92,25 @@ class _AttendanceSubmissionDialogState
             await file.writeAsBytes(img.encodeJpg(oriented, quality: 75));
           }
         } catch (_) {}
+        // Face detection verification
+        final faceResult =
+            await FaceDetectorService.instance.detectFaces(file);
+        if (!faceResult.hasFace && mounted) {
+          try {
+            if (file.existsSync()) {
+              file.deleteSync();
+            }
+          } catch (_) {}
+          setState(() {
+            _dialogError = faceResult.errorMessage ?? 'Wajah tidak terdeteksi.';
+            _selfieImage = null;
+          });
+          return;
+        }
+
         setState(() {
           _selfieImage = file;
+          _dialogError = null;
         });
       }
     } catch (e) {

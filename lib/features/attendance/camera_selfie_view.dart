@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../core/security/device_security_service.dart';
+import '../../core/services/face_detector_service.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/utils/app_haptics.dart';
 import '../../core/utils/location_helper.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../data/models/work_location_model.dart';
@@ -124,6 +127,42 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
     );
 
     if (photo != null && mounted) {
+      // Validasi Deteksi Wajah (Face Detection)
+      final faceResult = await FaceDetectorService.instance.detectFaces(photo);
+      if (!faceResult.hasFace && mounted) {
+        try {
+          if (photo.existsSync()) {
+            photo.deleteSync();
+          }
+        } catch (_) {}
+        await _cameraSession.resumePreview();
+        AppHaptics.error();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(
+                  Icons.face_retouching_off_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    faceResult.errorMessage ?? 'Wajah tidak terdeteksi!',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        return;
+      }
+
       // Clean up previous photo file if different
       if (_capturedPhoto != null && _capturedPhoto!.path != photo.path) {
         _cleanupCapturedPhoto();

@@ -48,6 +48,11 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
+        <!-- Google ML Kit Face Detection automatic model downloader -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="face" />
+
         <!-- Receivers for flutter_local_notifications scheduled alarms & device reboot recovery -->
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
