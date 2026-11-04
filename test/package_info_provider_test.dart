@@ -27,7 +27,7 @@ void main() {
 
       await container.read(packageInfoProvider.future);
       final displayVersion = container.read(appVersionDisplayProvider);
-      expect(displayVersion, equals('1.0.2 '));
+      expect(displayVersion, equals('1.0.2 (Build 1)'));
     });
 
     test('appVersionDisplayProvider formats without build number if buildNumber is empty', () async {
