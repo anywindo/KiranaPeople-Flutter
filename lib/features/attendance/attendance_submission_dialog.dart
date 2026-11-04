@@ -10,32 +10,23 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/location_helper.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../providers/attendance_provider.dart';
+import 'widgets/camera_device_integrity_dialog.dart';
+import 'widgets/submission/submission_error_banner.dart';
+import 'widgets/submission/submission_notes_field.dart';
+import 'widgets/submission/submission_selfie_preview.dart';
 
 class AttendanceSubmissionDialog extends ConsumerStatefulWidget {
   final AttendanceEventType eventType;
 
   const AttendanceSubmissionDialog({super.key, required this.eventType});
 
-  static Future<bool?> show(BuildContext context, AttendanceEventType type) async {
+  static Future<bool?> show(
+    BuildContext context,
+    AttendanceEventType type,
+  ) async {
     final isCompromised = await DeviceSecurityService().isDeviceCompromised();
     if (isCompromised && context.mounted) {
-      await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Perangkat Tidak Didukung', style: TextStyle(fontWeight: FontWeight.bold)),
-          content: const Text(
-            'Aplikasi mendeteksi bahwa perangkat ini telah di-root atau di-jailbreak. Demi keamanan data dan keaslian presensi, presensi tidak dapat dilakukan pada perangkat yang dimodifikasi.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Mengerti'),
-            ),
-          ],
-        ),
-      );
+      await CameraDeviceIntegrityDialog.show(context);
       return false;
     }
 
@@ -57,6 +48,7 @@ class _AttendanceSubmissionDialogState
   File? _selfieImage;
   final _picker = ImagePicker();
   final _notesController = TextEditingController();
+  String? _dialogError;
 
   @override
   void dispose() {
@@ -111,8 +103,6 @@ class _AttendanceSubmissionDialogState
       }
     }
   }
-
-  String? _dialogError;
 
   void _submit() async {
     setState(() {
@@ -219,155 +209,22 @@ class _AttendanceSubmissionDialogState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_dialogError != null) ...[
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEF4444).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: const Color(0xFFEF4444).withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.error_outline_rounded,
-                      color: Color(0xFFEF4444),
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _dialogError!,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFFEF4444),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            if (_dialogError != null)
+              SubmissionErrorBanner(errorMessage: _dialogError!),
             const Text(
               'Silakan ambil foto selfie untuk verifikasi presensi Anda. GPS lokasi akan dicatat secara otomatis.',
               style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 16),
-
-            // Selfie preview or camera trigger
-            GestureDetector(
-              onTap: state.isSubmitting ? null : _takePhoto,
-              child: Container(
-                height: 180,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceSecondary,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: _selfieImage != null
-                        ? AppColors.primary
-                        : AppColors.border,
-                    width: 1.5,
-                  ),
-                ),
-                child: _selfieImage != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            Image.file(_selfieImage!, fit: BoxFit.cover),
-                            Positioned(
-                              bottom: 8,
-                              right: 8,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.6),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.camera_alt,
-                                      size: 14,
-                                      color: Colors.white,
-                                    ),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      'Ubah Foto',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.camera_alt_outlined,
-                              size: 32,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          const Text(
-                            'Ketuk untuk Ambil Foto Selfie',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primaryDark,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Wajib verifikasi wajah',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: AppColors.textMuted,
-                            ),
-                          ),
-                        ],
-                      ),
-              ),
+            SubmissionSelfiePreview(
+              selfieImage: _selfieImage,
+              onTap: _takePhoto,
+              isSubmitting: state.isSubmitting,
             ),
             const SizedBox(height: 16),
-
-            // Optional note input
-            TextField(
+            SubmissionNotesField(
               controller: _notesController,
-              decoration: const InputDecoration(
-                labelText: 'Catatan (Opsional)',
-                hintText: 'Misal: Bekerja dari kantor...',
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
-                ),
-              ),
-              maxLines: 2,
+              enabled: !state.isSubmitting,
             ),
           ],
         ),
