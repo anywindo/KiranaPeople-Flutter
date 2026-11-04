@@ -20,14 +20,7 @@ class HistoryCardSkeleton extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cardBorder, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        border: Border.all(color: cardBorder, width: 1.2),
       ),
       child: ShimmerLoading(
         child: Column(
@@ -119,14 +112,20 @@ class HistoryCardSkeleton extends StatelessWidget {
 /// Shimmer list showing multiple HistoryCardSkeletons
 class HistoryListSkeleton extends StatelessWidget {
   final int itemCount;
+  final EdgeInsetsGeometry? padding;
 
-  const HistoryListSkeleton({super.key, this.itemCount = 4});
+  const HistoryListSkeleton({
+    super.key,
+    this.itemCount = 4,
+    this.padding,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: itemCount,
       itemBuilder: (context, index) => const HistoryCardSkeleton(),
     );

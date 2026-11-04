@@ -14,20 +14,10 @@ class HistoryFilterBar extends ConsumerWidget {
     final filter = historyState.filter;
     final notifier = ref.read(historyProvider.notifier);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: context.scaffoldBg,
-        border: Border(
-          bottom: BorderSide(
-            color: context.borderColor.withValues(alpha: 0.6),
-            width: 1,
-          ),
-        ),
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Row(
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
           children: [
             // Status: Semua
             _buildQuickFilterPill(
@@ -153,8 +143,7 @@ class HistoryFilterBar extends ConsumerWidget {
             ],
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildQuickFilterPill(
