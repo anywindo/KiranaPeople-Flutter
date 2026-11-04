@@ -87,6 +87,17 @@ class NotificationService {
           >();
 
       if (androidPlugin != null) {
+        // Attendance reminders channel (high importance, sound, vibration)
+        const reminderChannel = AndroidNotificationChannel(
+          channelId,
+          channelName,
+          description: channelDesc,
+          importance: Importance.high,
+          playSound: true,
+          enableVibration: true,
+        );
+        await androidPlugin.createNotificationChannel(reminderChannel);
+
         try {
           await androidPlugin.deleteNotificationChannel(
             channelId: 'attendance_submissions',
@@ -213,75 +224,76 @@ class NotificationService {
 
     final now = tz.TZDateTime.now(tz.local);
 
-    // 1. Schedule Shift Start Reminders (15 & 30 min before shift start)
-    if (!hasStartedShift) {
-      final shiftStartTime = _parseTimeToToday(shift.startTime, now);
-      if (shiftStartTime != null) {
-        // 30 min before
-        final time30Min = shiftStartTime.subtract(const Duration(minutes: 30));
-        if (time30Min.isAfter(now)) {
-          await _scheduleZonedNotification(
-            id: idShiftStart30Min,
-            title: '⏰ Pengingat Presensi Masuk (30 Menit)',
-            body:
-                '30 menit lagi shift ${shift.name} dimulai pukul ${shift.startTime}. Siapkan diri untuk presensi!',
-            scheduledDate: time30Min,
-          );
-        }
+    // 1. Schedule Shift Start Reminders (30 min & 15 min before shift start)
+    final startReminders = calculateNextShiftStartReminders(
+      timeStr: shift.startTime,
+      now: now,
+      alreadyCheckedIn: hasStartedShift,
+    );
 
-        // 15 min before (acceptance criteria: "15 menit lagi shift Anda dimulai, jangan lupa lakukan presensi tepat waktu!")
-        final time15Min = shiftStartTime.subtract(const Duration(minutes: 15));
-        if (time15Min.isAfter(now)) {
-          await _scheduleZonedNotification(
-            id: idShiftStart15Min,
-            title: '⏰ Pengingat Presensi Masuk (15 Menit)',
-            body:
-                '15 menit lagi shift Anda dimulai, jangan lupa lakukan presensi tepat waktu!',
-            scheduledDate: time15Min,
-          );
-        }
-      }
-    } else {
-      // User has checked in, cancel start reminders
-      await cancelReminder(idShiftStart30Min);
-      await cancelReminder(idShiftStart15Min);
+    if (startReminders != null) {
+      final (time30Min, time15Min) = startReminders;
+
+      await _scheduleZonedNotification(
+        id: idShiftStart30Min,
+        title: '⏰ Pengingat Presensi Masuk (30 Menit)',
+        body:
+            '30 menit lagi shift ${shift.name} dimulai pukul ${shift.startTime}. Siapkan diri untuk presensi!',
+        scheduledDate: time30Min,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+
+      await _scheduleZonedNotification(
+        id: idShiftStart15Min,
+        title: '⏰ Pengingat Presensi Masuk (15 Menit)',
+        body:
+            '15 menit lagi shift Anda dimulai, jangan lupa lakukan presensi tepat waktu!',
+        scheduledDate: time15Min,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
     }
 
-    // 2. Schedule Break End Reminder
+    // 2. Schedule Break End Reminder (5 minutes before break ends)
     final breakEndTimeStr = shift.effectiveBreakEnd;
-    if (!hasEndedBreak && breakEndTimeStr.isNotEmpty) {
-      final breakEndTime = _parseTimeToToday(breakEndTimeStr, now);
-      if (breakEndTime != null) {
-        // 5 minutes before break ends or exactly when break ends
-        final reminderTime = breakEndTime.subtract(const Duration(minutes: 5));
-        final targetTime = reminderTime.isAfter(now)
-            ? reminderTime
-            : (breakEndTime.isAfter(now) ? breakEndTime : null);
+    if (breakEndTimeStr.isNotEmpty) {
+      final targetBreakEnd = calculateNextTime(
+        timeStr: breakEndTimeStr,
+        now: now,
+        subtractMinutes: 5,
+        alreadyDoneToday: hasEndedBreak,
+      );
 
-        if (targetTime != null) {
-          await _scheduleZonedNotification(
-            id: idBreakEnd,
-            title: '☕ Waktu Istirahat Akan Berakhir',
-            body:
-                'Jam istirahat akan segera berakhir pukul $breakEndTimeStr. Silakan kembali bekerja!',
-            scheduledDate: targetTime,
-          );
-        }
+      if (targetBreakEnd != null) {
+        await _scheduleZonedNotification(
+          id: idBreakEnd,
+          title: '☕ Waktu Istirahat Akan Berakhir',
+          body:
+              'Jam istirahat akan segera berakhir pukul $breakEndTimeStr. Silakan kembali bekerja!',
+          scheduledDate: targetBreakEnd,
+          matchDateTimeComponents: DateTimeComponents.time,
+        );
       }
     } else {
       await cancelReminder(idBreakEnd);
     }
 
     // 3. Schedule Shift End (Jam Pulang) Reminder
-    if (!hasEndedShift && shift.endTime.isNotEmpty) {
-      final shiftEndTime = _parseTimeToToday(shift.endTime, now);
-      if (shiftEndTime != null && shiftEndTime.isAfter(now)) {
+    if (shift.endTime.isNotEmpty) {
+      final targetShiftEnd = calculateNextTime(
+        timeStr: shift.endTime,
+        now: now,
+        subtractMinutes: 0,
+        alreadyDoneToday: hasEndedShift,
+      );
+
+      if (targetShiftEnd != null) {
         await _scheduleZonedNotification(
           id: idShiftEnd,
           title: '🏠 Waktu Pulang Kerja',
           body:
               'Shift Anda telah berakhir pukul ${shift.endTime}. Jangan lupa lakukan presensi pulang!',
-          scheduledDate: shiftEndTime,
+          scheduledDate: targetShiftEnd,
+          matchDateTimeComponents: DateTimeComponents.time,
         );
       }
     } else {
@@ -289,13 +301,21 @@ class NotificationService {
     }
   }
 
-  tz.TZDateTime? _parseTimeToToday(String timeStr, tz.TZDateTime now) {
+  /// Calculates next occurrence of 30-min and 15-min shift start reminders.
+  /// If today's reminder time has already elapsed or user already checked in,
+  /// returns the reminder time for tomorrow morning.
+  (tz.TZDateTime, tz.TZDateTime)? calculateNextShiftStartReminders({
+    required String timeStr,
+    required tz.TZDateTime now,
+    bool alreadyCheckedIn = false,
+  }) {
     try {
       final parts = timeStr.trim().split(':');
       if (parts.length < 2) return null;
       final hour = int.parse(parts[0]);
       final minute = int.parse(parts[1]);
-      return tz.TZDateTime(
+
+      final shiftStartToday = tz.TZDateTime(
         tz.local,
         now.year,
         now.month,
@@ -303,6 +323,68 @@ class NotificationService {
         hour,
         minute,
       );
+
+      var time30Min = shiftStartToday.subtract(const Duration(minutes: 30));
+      var time15Min = shiftStartToday.subtract(const Duration(minutes: 15));
+
+      if (alreadyCheckedIn) {
+        if (time30Min.isBefore(now) || time30Min.day == now.day) {
+          time30Min = time30Min.add(const Duration(days: 1));
+        }
+        if (time15Min.isBefore(now) || time15Min.day == now.day) {
+          time15Min = time15Min.add(const Duration(days: 1));
+        }
+      } else {
+        if (time30Min.isBefore(now)) {
+          time30Min = time30Min.add(const Duration(days: 1));
+        }
+        if (time15Min.isBefore(now)) {
+          time15Min = time15Min.add(const Duration(days: 1));
+        }
+      }
+
+      return (time30Min, time15Min);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Calculates the next scheduled occurrence of a specific time of day.
+  /// If today's time has elapsed or already completed, shifts by 1 day to tomorrow.
+  tz.TZDateTime? calculateNextTime({
+    required String timeStr,
+    required tz.TZDateTime now,
+    int subtractMinutes = 0,
+    bool alreadyDoneToday = false,
+  }) {
+    try {
+      final parts = timeStr.trim().split(':');
+      if (parts.length < 2) return null;
+      final hour = int.parse(parts[0]);
+      final minute = int.parse(parts[1]);
+
+      final baseTimeToday = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        hour,
+        minute,
+      );
+
+      var target = baseTimeToday.subtract(Duration(minutes: subtractMinutes));
+
+      if (alreadyDoneToday) {
+        if (target.isBefore(now) || target.day == now.day) {
+          target = target.add(const Duration(days: 1));
+        }
+      } else {
+        if (target.isBefore(now)) {
+          target = target.add(const Duration(days: 1));
+        }
+      }
+
+      return target;
     } catch (_) {
       return null;
     }
@@ -313,6 +395,7 @@ class NotificationService {
     required String title,
     required String body,
     required tz.TZDateTime scheduledDate,
+    DateTimeComponents? matchDateTimeComponents,
   }) async {
     try {
       await _notificationsPlugin.zonedSchedule(
@@ -322,14 +405,33 @@ class NotificationService {
         scheduledDate: scheduledDate,
         notificationDetails: _notificationDetails(),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: matchDateTimeComponents,
       );
       debugPrint(
-        '[NotificationService] Scheduled notification #$id at $scheduledDate',
+        '[NotificationService] Scheduled notification #$id at $scheduledDate (exact)',
       );
     } catch (e) {
       debugPrint(
-        '[NotificationService] Error scheduling notification #$id: $e',
+        '[NotificationService] Exact alarm failed for #$id ($e), retrying with inexact mode...',
       );
+      try {
+        await _notificationsPlugin.zonedSchedule(
+          id: id,
+          title: title,
+          body: body,
+          scheduledDate: scheduledDate,
+          notificationDetails: _notificationDetails(),
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          matchDateTimeComponents: matchDateTimeComponents,
+        );
+        debugPrint(
+          '[NotificationService] Scheduled notification #$id at $scheduledDate (inexact)',
+        );
+      } catch (innerError) {
+        debugPrint(
+          '[NotificationService] Failed to schedule notification #$id: $innerError',
+        );
+      }
     }
   }
 
@@ -405,6 +507,29 @@ class NotificationService {
       body: body,
       notificationDetails: _notificationDetails(),
     );
+  }
+
+  /// Schedule a test reminder to fire in [seconds] seconds (default 5s)
+  Future<void> scheduleTestReminder({int seconds = 5}) async {
+    if (!_isInitialized) await initialize();
+    final now = tz.TZDateTime.now(tz.local);
+    final scheduledDate = now.add(Duration(seconds: seconds));
+
+    await _scheduleZonedNotification(
+      id: 998,
+      title: '⏰ Uji Jadwal Pengingat Presensi',
+      body: 'Pengingat berhasil berjalan sesuai jadwal ($seconds detik)!',
+      scheduledDate: scheduledDate,
+    );
+  }
+
+  /// Get list of all pending/scheduled notifications
+  Future<List<PendingNotificationRequest>> getPendingNotifications() async {
+    try {
+      return await _notificationsPlugin.pendingNotificationRequests();
+    } catch (_) {
+      return [];
+    }
   }
 
   /// Show instant notification confirming an attendance event was submitted successfully

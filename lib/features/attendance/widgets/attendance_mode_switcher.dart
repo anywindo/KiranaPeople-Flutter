@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/app_haptics.dart';
 
 class AttendanceModeSwitcher extends StatelessWidget {
   final int activeSegment; // 0 = Kerja, 1 = Istirahat
@@ -15,6 +15,9 @@ class AttendanceModeSwitcher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const animationDuration = Duration(milliseconds: 250);
+    const animationCurve = Curves.easeOutCubic;
+
     return Container(
       height: 48,
       clipBehavior: Clip.antiAlias,
@@ -28,8 +31,8 @@ class AttendanceModeSwitcher extends StatelessWidget {
         children: [
           // Smooth Spring Capsule Pill
           AnimatedAlign(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeOutCubic,
+            duration: animationDuration,
+            curve: animationCurve,
             alignment: activeSegment == 0
                 ? Alignment.centerLeft
                 : Alignment.centerRight,
@@ -61,7 +64,7 @@ class AttendanceModeSwitcher extends StatelessWidget {
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
                     if (activeSegment != 0) {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selection();
                       onSegmentChanged(0);
                     }
                   },
@@ -69,16 +72,26 @@ class AttendanceModeSwitcher extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.work_rounded,
-                          size: 16,
-                          color: activeSegment == 0
-                              ? Colors.white
-                              : context.textSecondaryColor,
+                        TweenAnimationBuilder<Color?>(
+                          duration: animationDuration,
+                          curve: animationCurve,
+                          tween: ColorTween(
+                            end: activeSegment == 0
+                                ? Colors.white
+                                : context.textSecondaryColor,
+                          ),
+                          builder: (context, color, _) {
+                            return Icon(
+                              Icons.work_rounded,
+                              size: 16,
+                              color: color,
+                            );
+                          },
                         ),
                         const SizedBox(width: 6),
                         AnimatedDefaultTextStyle(
-                          duration: const Duration(milliseconds: 200),
+                          duration: animationDuration,
+                          curve: animationCurve,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -100,7 +113,7 @@ class AttendanceModeSwitcher extends StatelessWidget {
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
                     if (activeSegment != 1) {
-                      HapticFeedback.selectionClick();
+                      AppHaptics.selection();
                       onSegmentChanged(1);
                     }
                   },
@@ -108,16 +121,26 @@ class AttendanceModeSwitcher extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.coffee_rounded,
-                          size: 16,
-                          color: activeSegment == 1
-                              ? Colors.white
-                              : context.textSecondaryColor,
+                        TweenAnimationBuilder<Color?>(
+                          duration: animationDuration,
+                          curve: animationCurve,
+                          tween: ColorTween(
+                            end: activeSegment == 1
+                                ? Colors.white
+                                : context.textSecondaryColor,
+                          ),
+                          builder: (context, color, _) {
+                            return Icon(
+                              Icons.coffee_rounded,
+                              size: 16,
+                              color: color,
+                            );
+                          },
                         ),
                         const SizedBox(width: 6),
                         AnimatedDefaultTextStyle(
-                          duration: const Duration(milliseconds: 200),
+                          duration: animationDuration,
+                          curve: animationCurve,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -139,4 +162,3 @@ class AttendanceModeSwitcher extends StatelessWidget {
     );
   }
 }
-

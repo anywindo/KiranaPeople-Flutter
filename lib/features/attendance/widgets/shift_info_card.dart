@@ -169,27 +169,50 @@ class ShiftInfoCard extends StatelessWidget {
           const SizedBox(height: 12),
 
           // Shift Row Box or Break Schedule Row with Smooth Crossfade/Slide Animation
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 260),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0.0, 0.03),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: child,
-                ),
-              );
-            },
-            child: KeyedSubtree(
-              key: ValueKey<int>(activeSegment),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+          AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutCubic,
+            alignment: Alignment.topCenter,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 280),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              layoutBuilder: (currentChild, previousChildren) {
+                return Stack(
+                  alignment: Alignment.topCenter,
+                  children: <Widget>[
+                    ...previousChildren,
+                    if (currentChild != null) currentChild,
+                  ],
+                );
+              },
+              transitionBuilder: (child, animation) {
+                final isKerja = (child.key as ValueKey<int>?)?.value == 0;
+                final beginOffset = isKerja
+                    ? const Offset(-0.06, 0.0)
+                    : const Offset(0.06, 0.0);
+                return FadeTransition(
+                  opacity: CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeInOut,
+                  ),
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: beginOffset,
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                    )),
+                    child: child,
+                  ),
+                );
+              },
+              child: KeyedSubtree(
+                key: ValueKey<int>(activeSegment),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   if (activeSegment == 0) ...[
                     // Kerja: Shift Row Box
                     Container(
@@ -435,7 +458,9 @@ class ShiftInfoCard extends StatelessWidget {
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFF1F2),
+                        color: context.isDarkMode
+                            ? const Color(0xFF4C0519).withValues(alpha: 0.5)
+                            : const Color(0xFFFFF1F2),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
@@ -489,9 +514,15 @@ class ShiftInfoCard extends StatelessWidget {
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFFBEB),
+                        color: context.isDarkMode
+                            ? const Color(0xFF451A03).withValues(alpha: 0.5)
+                            : const Color(0xFFFFFBEB),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFFFDE68A)),
+                        border: Border.all(
+                          color: context.isDarkMode
+                              ? const Color(0xFF78350F)
+                              : const Color(0xFFFDE68A),
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -543,7 +574,9 @@ class ShiftInfoCard extends StatelessWidget {
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFDCFCE7),
+                        color: context.isDarkMode
+                            ? const Color(0xFF064E3B).withValues(alpha: 0.5)
+                            : const Color(0xFFDCFCE7),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
@@ -588,6 +621,7 @@ class ShiftInfoCard extends StatelessWidget {
                     ),
                   ],
                 ],
+              ),
               ),
             ),
           ),

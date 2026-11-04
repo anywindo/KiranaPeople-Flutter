@@ -202,6 +202,51 @@ class ProfilePreferencesSection extends ConsumerWidget {
               const SizedBox(height: 12),
               ListTile(
                 leading: const CircleAvatar(
+                  backgroundColor: Color(0xFFEFF6FF),
+                  child: Icon(
+                    Icons.alarm_on_rounded,
+                    color: Color(0xFF3B82F6),
+                  ),
+                ),
+                title: const Text('Uji Pengingat Jadwal (5 Detik)'),
+                subtitle: const Text(
+                  'Menguji sistem AlarmManager & layar kunci',
+                ),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await NotificationService.instance.scheduleTestReminder(seconds: 5);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          '⏰ Pengingat dijadwalkan dalam 5 detik! Kunci layar atau minimalkan aplikasi untuk menguji.',
+                        ),
+                        backgroundColor: Color(0xFF1E293B),
+                        duration: Duration(seconds: 4),
+                      ),
+                    );
+                  }
+                },
+              ),
+              ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0xFFFFF1F2),
+                  child: Icon(
+                    Icons.notifications_active_rounded,
+                    color: Color(0xFFE11D48),
+                  ),
+                ),
+                title: const Text('Uji Pengingat Presensi (Langsung)'),
+                subtitle: const Text(
+                  'Kanal: attendance_reminders',
+                ),
+                onTap: () async {
+                  Navigator.pop(ctx);
+                  await NotificationService.instance.showTestNotification();
+                },
+              ),
+              ListTile(
+                leading: const CircleAvatar(
                   backgroundColor: Color(0xFFD1FAE5),
                   child: Icon(
                     Icons.check_circle_rounded,

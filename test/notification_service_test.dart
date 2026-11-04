@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 import 'package:kirana_people/data/models/shift_model.dart';
 import 'package:kirana_people/data/models/attendance_event_model.dart';
 import 'package:kirana_people/core/notifications/notification_service.dart';
@@ -9,6 +11,7 @@ void main() {
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    tz.initializeTimeZones();
   });
 
   group('NotificationService Tests', () {
@@ -98,6 +101,108 @@ void main() {
       expect(expectedFailTitle, '❌ Presensi Masuk Kerja Gagal');
       expect(expectedFailBody, contains('08:05 WIB'));
       expect(expectedFailBody, contains('Koneksi terputus'));
+    });
+
+    test('calculateNextShiftStartReminders schedules today when before start time', () {
+      final service = NotificationService.instance;
+      final now = tz.TZDateTime(tz.local, 2026, 11, 4, 6, 30); // 06:30 AM
+
+      final reminders = service.calculateNextShiftStartReminders(
+        timeStr: '08:00',
+        now: now,
+        alreadyCheckedIn: false,
+      );
+
+      expect(reminders, isNotNull);
+      final (time30, time15) = reminders!;
+      // 30 min before 08:00 -> 07:30 today
+      expect(time30.day, 4);
+      expect(time30.hour, 7);
+      expect(time30.minute, 30);
+
+      // 15 min before 08:00 -> 07:45 today
+      expect(time15.day, 4);
+      expect(time15.hour, 7);
+      expect(time15.minute, 45);
+    });
+
+    test('calculateNextShiftStartReminders advances to tomorrow when time has passed', () {
+      final service = NotificationService.instance;
+      final now = tz.TZDateTime(tz.local, 2026, 11, 4, 8, 30); // 08:30 AM (after 07:30 and 07:45)
+
+      final reminders = service.calculateNextShiftStartReminders(
+        timeStr: '08:00',
+        now: now,
+        alreadyCheckedIn: false,
+      );
+
+      expect(reminders, isNotNull);
+      final (time30, time15) = reminders!;
+      // Both should advance to tomorrow (day 5)
+      expect(time30.day, 5);
+      expect(time30.hour, 7);
+      expect(time30.minute, 30);
+
+      expect(time15.day, 5);
+      expect(time15.hour, 7);
+      expect(time15.minute, 45);
+    });
+
+    test('calculateNextShiftStartReminders advances to tomorrow if already checked in', () {
+      final service = NotificationService.instance;
+      // Even if it is 07:00 AM, if user has already checked in today, reminders are for tomorrow
+      final now = tz.TZDateTime(tz.local, 2026, 11, 4, 7, 0);
+
+      final reminders = service.calculateNextShiftStartReminders(
+        timeStr: '08:00',
+        now: now,
+        alreadyCheckedIn: true,
+      );
+
+      expect(reminders, isNotNull);
+      final (time30, time15) = reminders!;
+      expect(time30.day, 5);
+      expect(time15.day, 5);
+    });
+
+    test('calculateNextTime handles same day vs next day correctly', () {
+      final service = NotificationService.instance;
+      final now = tz.TZDateTime(tz.local, 2026, 11, 4, 10, 0); // 10:00 AM
+
+      // Break ends at 13:00, subtract 5 min -> 12:55 PM
+      final breakRemind = service.calculateNextTime(
+        timeStr: '13:00',
+        now: now,
+        subtractMinutes: 5,
+        alreadyDoneToday: false,
+      );
+      expect(breakRemind, isNotNull);
+      expect(breakRemind!.day, 4);
+      expect(breakRemind.hour, 12);
+      expect(breakRemind.minute, 55);
+
+      // Shift ends at 16:00
+      final shiftEndRemind = service.calculateNextTime(
+        timeStr: '16:00',
+        now: now,
+        subtractMinutes: 0,
+        alreadyDoneToday: false,
+      );
+      expect(shiftEndRemind, isNotNull);
+      expect(shiftEndRemind!.day, 4);
+      expect(shiftEndRemind.hour, 16);
+      expect(shiftEndRemind.minute, 0);
+
+      // If already done today, should advance to tomorrow (day 5)
+      final shiftEndDone = service.calculateNextTime(
+        timeStr: '16:00',
+        now: now,
+        subtractMinutes: 0,
+        alreadyDoneToday: true,
+      );
+      expect(shiftEndDone, isNotNull);
+      expect(shiftEndDone!.day, 5);
+      expect(shiftEndDone.hour, 16);
     });
   });
 }
