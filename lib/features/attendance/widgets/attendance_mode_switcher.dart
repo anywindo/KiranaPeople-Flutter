@@ -49,19 +49,8 @@ class AttendanceModeSwitcher extends StatelessWidget {
               heightFactor: 1.0,
               child: Container(
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFFFF2A88),
-                      Color(0xFFE6007A),
-                    ],
-                  ),
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.25),
-                    width: 1,
-                  ),
                 ),
               ),
             ),
