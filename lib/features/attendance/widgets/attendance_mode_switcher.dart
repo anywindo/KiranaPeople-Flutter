@@ -23,8 +23,45 @@ class AttendanceModeSwitcher extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: context.surfaceSecondaryColor,
-        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: context.isDarkMode
+              ? [
+                  const Color(0xFF13151C),
+                  const Color(0xFF1B1D26),
+                ]
+              : [
+                  const Color(0xFFE2E7ED),
+                  const Color(0xFFEDF1F6),
+                ],
+        ),
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(
+          color: context.isDarkMode
+              ? Colors.white.withValues(alpha: 0.08)
+              : const Color(0xFFD6DCE5),
+          width: 1.0,
+        ),
+        boxShadow: [
+          // Sunken channel shadow
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: context.isDarkMode ? 0.35 : 0.06,
+            ),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+          // Bottom groove reflection
+          BoxShadow(
+            color: Colors.white.withValues(
+              alpha: context.isDarkMode ? 0.05 : 0.85,
+            ),
+            blurRadius: 0,
+            spreadRadius: 0.5,
+            offset: const Offset(0, 1),
+          ),
+        ],
       ),
       child: Stack(
         clipBehavior: Clip.antiAlias,
@@ -41,13 +78,39 @@ class AttendanceModeSwitcher extends StatelessWidget {
               heightFactor: 1.0,
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(20),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFFFF337E), // top highlight
+                      AppColors.primary,
+                      Color(0xFFD80052), // bottom bevel
+                    ],
+                    stops: [0.0, 0.5, 1.0],
+                  ),
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.32),
+                    width: 1.0,
+                  ),
                   boxShadow: [
+                    // Specular rim
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.35),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
+                      color: Colors.white.withValues(alpha: 0.35),
+                      blurRadius: 1,
+                      offset: const Offset(0, -1),
+                    ),
+                    // Contact shadow
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.20),
+                      blurRadius: 3,
+                      offset: const Offset(0, 1),
+                    ),
+                    // Ambient colorful glow
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.45),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),

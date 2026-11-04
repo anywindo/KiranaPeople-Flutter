@@ -48,9 +48,28 @@ class TimingColumn extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: const Color(0xFFE5E7EB),
+                        color: context.isDarkMode
+                            ? Colors.white.withValues(alpha: 0.20)
+                            : const Color(0xFFE2E8F0),
                         width: 1.5,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                            alpha: context.isDarkMode ? 0.30 : 0.08,
+                          ),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                        BoxShadow(
+                          color: Colors.white.withValues(
+                            alpha: context.isDarkMode ? 0.05 : 0.9,
+                          ),
+                          blurRadius: 0,
+                          spreadRadius: 0.5,
+                          offset: const Offset(0, -0.8),
+                        ),
+                      ],
                     ),
                     child: ClipOval(
                       child: AutoOrientedImage(

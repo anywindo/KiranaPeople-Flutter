@@ -50,9 +50,46 @@ class ShiftWorkPanel extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: context.surfaceSecondaryColor,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: context.borderColor),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: context.isDarkMode
+                  ? [
+                      const Color(0xFF14161C),
+                      const Color(0xFF1A1C24),
+                    ]
+                  : [
+                      const Color(0xFFEFF2F6),
+                      const Color(0xFFF8FAFC),
+                    ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: context.isDarkMode
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : const Color(0xFFDDE3EA),
+              width: 1.0,
+            ),
+            boxShadow: [
+              // Inset feel with slight dark top/contact shadow
+              BoxShadow(
+                color: Colors.black.withValues(
+                  alpha: context.isDarkMode ? 0.25 : 0.035,
+                ),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
+              ),
+              // Bottom specular bounce line
+              BoxShadow(
+                color: (context.isDarkMode
+                        ? Colors.white.withValues(alpha: 0.04)
+                        : Colors.white)
+                    .withValues(alpha: context.isDarkMode ? 0.05 : 0.8),
+                blurRadius: 0,
+                spreadRadius: 0.6,
+                offset: const Offset(0, 1),
+              ),
+            ],
           ),
           child: Row(
             children: [
@@ -60,11 +97,36 @@ class ShiftWorkPanel extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: (hasStartedShift
-                          ? (isCheckInLate ? AppColors.error : AppColors.success)
-                          : AppColors.primary)
-                      .withValues(alpha: 0.12),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      (hasStartedShift
+                              ? (isCheckInLate ? AppColors.error : AppColors.success)
+                              : AppColors.primary)
+                          .withValues(alpha: 0.20),
+                      (hasStartedShift
+                              ? (isCheckInLate ? AppColors.error : AppColors.success)
+                              : AppColors.primary)
+                          .withValues(alpha: 0.08),
+                    ],
+                  ),
                   shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withValues(
+                      alpha: context.isDarkMode ? 0.15 : 0.70,
+                    ),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(
+                        alpha: context.isDarkMode ? 0.2 : 0.05,
+                      ),
+                      blurRadius: 3,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
                 ),
                 child: Icon(
                   Icons.access_time_filled_rounded,
