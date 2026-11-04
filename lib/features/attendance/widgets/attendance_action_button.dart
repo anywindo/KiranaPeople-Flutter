@@ -273,19 +273,8 @@ class AttendanceActionButton extends StatelessWidget {
           width: double.infinity,
           height: 50,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFFF2A88),
-                Color(0xFFE6007A),
-              ],
-            ),
+            color: AppColors.primary,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.25),
-              width: 1,
-            ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

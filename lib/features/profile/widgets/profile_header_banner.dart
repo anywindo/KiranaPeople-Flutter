@@ -168,14 +168,7 @@ class ProfileHeaderBanner extends StatelessWidget {
                           width: 34,
                           height: 34,
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Color(0xFFFF2A88),
-                                Color(0xFFE6007A),
-                              ],
-                            ),
+                            color: AppColors.primary,
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: context.isDarkMode

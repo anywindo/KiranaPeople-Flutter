@@ -241,26 +241,10 @@ class MapAttendanceActionCard extends StatelessWidget {
               hapticType: BouncingHapticType.none,
               child: Container(
                 decoration: BoxDecoration(
-                  gradient: isActionDisabled
-                      ? null
-                      : const LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Color(0xFFFF2A88),
-                            Color(0xFFE6007A),
-                          ],
-                        ),
                   color: isActionDisabled
                       ? (isDark ? const Color(0xFF334155) : const Color(0xFFE5E7EB))
-                      : null,
+                      : AppColors.primary,
                   borderRadius: BorderRadius.circular(16),
-                  border: isActionDisabled
-                      ? null
-                      : Border.all(
-                          color: Colors.white.withValues(alpha: 0.25),
-                          width: 1,
-                        ),
                 ),
                 alignment: Alignment.center,
                 child: Row(
