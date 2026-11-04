@@ -3,6 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../providers/history_provider.dart';
+import 'filter/history_date_filter_sheet.dart';
+import 'filter/history_filter_chip.dart';
+import 'filter/history_shift_filter_sheet.dart';
+
+export 'filter/history_date_filter_sheet.dart';
+export 'filter/history_filter_chip.dart';
+export 'filter/history_filter_option_tile.dart';
+export 'filter/history_shift_filter_sheet.dart';
 
 class HistoryFilterSheet extends ConsumerStatefulWidget {
   const HistoryFilterSheet({super.key});
@@ -17,135 +25,7 @@ class HistoryFilterSheet extends ConsumerStatefulWidget {
   }
 
   static void showDateFilter(BuildContext context, WidgetRef ref) {
-    final historyState = ref.read(historyProvider);
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-        decoration: BoxDecoration(
-          color: context.surfaceColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: context.borderColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Filter Periode Tanggal',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: context.textPrimaryColor,
-                  ),
-                ),
-                if (historyState.filter.dateRange != null)
-                  TextButton(
-                    onPressed: () {
-                      ref
-                          .read(historyProvider.notifier)
-                          .setDateRangeFilter(null);
-                      Navigator.pop(ctx);
-                    },
-                    child: const Text(
-                      'Hapus Filter',
-                      style: TextStyle(color: AppColors.primary),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _buildSheetOptionTile(
-              context,
-              title: 'Semua Waktu',
-              subtitle: 'Tampilkan seluruh riwayat presensi',
-              isSelected: historyState.filter.dateRange == null,
-              onTap: () {
-                ref.read(historyProvider.notifier).setDateRangeFilter(null);
-                Navigator.pop(ctx);
-              },
-            ),
-            _buildSheetOptionTile(
-              context,
-              title: 'Hari Ini',
-              subtitle:
-                  '${today.day} ${_formatIndoDateString(today.toIso8601String()).split(', ').last}',
-              isSelected: historyState.filter.dateRangeLabel == 'Hari Ini',
-              onTap: () {
-                final range = DateTimeRange(start: today, end: today);
-                ref
-                    .read(historyProvider.notifier)
-                    .setDateRangeFilter(range, 'Hari Ini');
-                Navigator.pop(ctx);
-              },
-            ),
-            _buildSheetOptionTile(
-              context,
-              title: '7 Hari Terakhir',
-              subtitle: 'Presensi satu minggu ke belakang',
-              isSelected:
-                  historyState.filter.dateRangeLabel == '7 Hari Terakhir',
-              onTap: () {
-                final range = DateTimeRange(
-                  start: today.subtract(const Duration(days: 6)),
-                  end: today,
-                );
-                ref
-                    .read(historyProvider.notifier)
-                    .setDateRangeFilter(range, '7 Hari Terakhir');
-                Navigator.pop(ctx);
-              },
-            ),
-            _buildSheetOptionTile(
-              context,
-              title: 'Bulan Ini',
-              subtitle:
-                  '1 - ${today.day} ${_formatIndoDateString(today.toIso8601String()).split(', ').last}',
-              isSelected: historyState.filter.dateRangeLabel == 'Bulan Ini',
-              onTap: () {
-                final startOfMonth = DateTime(today.year, today.month, 1);
-                final range = DateTimeRange(start: startOfMonth, end: today);
-                ref
-                    .read(historyProvider.notifier)
-                    .setDateRangeFilter(range, 'Bulan Ini');
-                Navigator.pop(ctx);
-              },
-            ),
-            _buildSheetOptionTile(
-              context,
-              title: 'Pilih Rentang Tanggal Manual...',
-              subtitle: 'Tentukan tanggal mulai dan selesai sendiri',
-              isSelected: historyState.filter.dateRange != null &&
-                  historyState.filter.dateRangeLabel != 'Hari Ini' &&
-                  historyState.filter.dateRangeLabel != '7 Hari Terakhir' &&
-                  historyState.filter.dateRangeLabel != 'Bulan Ini',
-              icon: Icons.date_range_rounded,
-              onTap: () {
-                Navigator.pop(ctx);
-                pickCustomDateRange(context, ref);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+    HistoryDateFilterSheet.show(context, ref);
   }
 
   static void showShiftFilter(
@@ -153,227 +33,18 @@ class HistoryFilterSheet extends ConsumerStatefulWidget {
     WidgetRef ref,
     List<String> shifts,
   ) {
-    final historyState = ref.read(historyProvider);
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
-        decoration: BoxDecoration(
-          color: context.surfaceColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: context.borderColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Filter Shift Kerja',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: context.textPrimaryColor,
-              ),
-            ),
-            const SizedBox(height: 12),
-            ...shifts.map((s) {
-              final isSelected =
-                  (historyState.filter.shift ?? 'Semua Shift') == s;
-              return _buildSheetOptionTile(
-                context,
-                title: s,
-                isSelected: isSelected,
-                onTap: () {
-                  ref
-                      .read(historyProvider.notifier)
-                      .setShiftFilter(s == 'Semua Shift' ? null : s);
-                  Navigator.pop(ctx);
-                },
-              );
-            }),
-          ],
-        ),
-      ),
-    );
+    HistoryShiftFilterSheet.show(context, ref, shifts);
   }
 
   static Future<void> pickCustomDateRange(
     BuildContext context,
     WidgetRef ref,
-  ) async {
-    final historyState = ref.read(historyProvider);
-    final now = DateTime.now();
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(now.year - 3),
-      lastDate: DateTime(now.year + 1),
-      initialDateRange: historyState.filter.dateRange ??
-          DateTimeRange(
-            start: now.subtract(const Duration(days: 30)),
-            end: now,
-          ),
-      cancelText: 'Batal',
-      confirmText: 'Pilih',
-      saveText: 'Simpan',
-      helpText: 'Pilih Rentang Tanggal',
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
-              onPrimary: Colors.white,
-              surface: context.surfaceColor,
-              onSurface: context.textPrimaryColor,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null) {
-      final label = formatDateRangeLabel(picked);
-      ref.read(historyProvider.notifier).setDateRangeFilter(picked, label);
-    }
+  ) {
+    return HistoryDateFilterSheet.pickCustomDateRange(context, ref);
   }
 
   static String formatDateRangeLabel(DateTimeRange range) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'Mei',
-      'Jun',
-      'Jul',
-      'Agt',
-      'Sep',
-      'Okt',
-      'Nov',
-      'Des',
-    ];
-    final startDay = range.start.day;
-    final startMonth = months[range.start.month - 1];
-    final endDay = range.end.day;
-    final endMonth = months[range.end.month - 1];
-
-    if (range.start.year == range.end.year &&
-        range.start.month == range.end.month &&
-        range.start.day == range.end.day) {
-      return '$startDay $startMonth ${range.start.year}';
-    }
-    if (range.start.year == range.end.year) {
-      return '$startDay $startMonth - $endDay $endMonth';
-    }
-    return '$startDay $startMonth ${range.start.year} - $endDay $endMonth ${range.end.year}';
-  }
-
-  static String _formatIndoDateString(String dateStr) {
-    final dt = DateTime.tryParse(dateStr);
-    if (dt != null) {
-      const months = [
-        'Januari',
-        'Februari',
-        'Maret',
-        'April',
-        'Mei',
-        'Juni',
-        'Juli',
-        'Agustus',
-        'September',
-        'Oktober',
-        'November',
-        'Desember',
-      ];
-      return '${dt.day} ${months[dt.month - 1]}, ${dt.year}';
-    }
-    return dateStr;
-  }
-
-  static Widget _buildSheetOptionTile(
-    BuildContext context, {
-    required String title,
-    String? subtitle,
-    required bool isSelected,
-    IconData? icon,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        margin: const EdgeInsets.only(bottom: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.08)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.transparent,
-            width: 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            if (icon != null) ...[
-              Icon(
-                icon,
-                size: 20,
-                color:
-                    isSelected ? AppColors.primary : context.textSecondaryColor,
-              ),
-              const SizedBox(width: 12),
-            ],
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.w500,
-                      color: isSelected
-                          ? AppColors.primary
-                          : context.textPrimaryColor,
-                    ),
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: context.textMutedColor,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle_rounded,
-                color: AppColors.primary,
-                size: 20,
-              ),
-          ],
-        ),
-      ),
-    );
+    return HistoryDateFilterSheet.formatDateRangeLabel(range);
   }
 
   @override
@@ -446,7 +117,7 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
             const Divider(height: 1),
             const SizedBox(height: 16),
 
-            // 1. Status Filter
+            // 1. Status Kehadiran
             Text(
               'Status Kehadiran',
               style: TextStyle(
@@ -460,16 +131,14 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _buildChip(
-                  context,
+                HistoryFilterChip(
                   label: 'Semua Status',
                   isSelected: _tempStatus == AttendanceHistoryStatusFilter.all,
                   onTap: () => setState(
                     () => _tempStatus = AttendanceHistoryStatusFilter.all,
                   ),
                 ),
-                _buildChip(
-                  context,
+                HistoryFilterChip(
                   label: 'Tepat Waktu',
                   isSelected:
                       _tempStatus == AttendanceHistoryStatusFilter.onTime,
@@ -479,8 +148,7 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
                     () => _tempStatus = AttendanceHistoryStatusFilter.onTime,
                   ),
                 ),
-                _buildChip(
-                  context,
+                HistoryFilterChip(
                   label: 'Terlambat',
                   isSelected: _tempStatus == AttendanceHistoryStatusFilter.late,
                   selectedColor: const Color(0xFFE11D48),
@@ -507,8 +175,7 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _buildChip(
-                  context,
+                HistoryFilterChip(
                   label: 'Semua',
                   isSelected: _tempRange == null,
                   onTap: () => setState(() {
@@ -516,8 +183,7 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
                     _tempRangeLabel = null;
                   }),
                 ),
-                _buildChip(
-                  context,
+                HistoryFilterChip(
                   label: 'Hari Ini',
                   isSelected: _tempRangeLabel == 'Hari Ini',
                   onTap: () {
@@ -529,8 +195,7 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
                     });
                   },
                 ),
-                _buildChip(
-                  context,
+                HistoryFilterChip(
                   label: '7 Hari Terakhir',
                   isSelected: _tempRangeLabel == '7 Hari Terakhir',
                   onTap: () {
@@ -545,8 +210,7 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
                     });
                   },
                 ),
-                _buildChip(
-                  context,
+                HistoryFilterChip(
                   label: 'Bulan Ini',
                   isSelected: _tempRangeLabel == 'Bulan Ini',
                   onTap: () {
@@ -636,7 +300,7 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
             ),
             const SizedBox(height: 20),
 
-            // 3. Shift Filter
+            // 3. Shift Kerja
             if (historyState.availableShifts.length > 1) ...[
               Text(
                 'Shift Kerja',
@@ -652,8 +316,7 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
                 runSpacing: 8,
                 children: historyState.availableShifts.map((s) {
                   final isSelected = _tempShift == s;
-                  return _buildChip(
-                    context,
+                  return HistoryFilterChip(
                     label: s,
                     isSelected: isSelected,
                     onTap: () => setState(() => _tempShift = s),
@@ -720,41 +383,4 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
       ),
     );
   }
-
-  Widget _buildChip(
-    BuildContext context, {
-    required String label,
-    required bool isSelected,
-    Color? selectedColor,
-    Color? selectedBg,
-    required VoidCallback onTap,
-  }) {
-    final activeBg = selectedBg ?? AppColors.primary.withValues(alpha: 0.12);
-    final activeText = selectedColor ?? AppColors.primary;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? activeBg : context.surfaceSecondaryColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? activeText : context.borderColor,
-            width: isSelected ? 1.5 : 1,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            color: isSelected ? activeText : context.textSecondaryColor,
-          ),
-        ),
-      ),
-    );
-  }
 }
-
