@@ -79,43 +79,8 @@ class AttendanceActionButton extends StatelessWidget {
           width: double.infinity,
           height: 50,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: context.isDarkMode
-                  ? [
-                      const Color(0xFF1B231F),
-                      const Color(0xFF141A17),
-                    ]
-                  : [
-                      const Color(0xFFF0FDF4),
-                      const Color(0xFFDCFCE7),
-                    ],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: AppColors.success.withValues(
-                alpha: context.isDarkMode ? 0.35 : 0.45,
-              ),
-              width: 1.2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.success.withValues(
-                  alpha: context.isDarkMode ? 0.15 : 0.08,
-                ),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-              BoxShadow(
-                color: Colors.white.withValues(
-                  alpha: context.isDarkMode ? 0.05 : 0.8,
-                ),
-                blurRadius: 0,
-                spreadRadius: 0.5,
-                offset: const Offset(0, 1),
-              ),
-            ],
+            color: completedBg,
+            borderRadius: BorderRadius.circular(14),
           ),
           child: const Center(
             child: Row(
@@ -304,37 +269,13 @@ class AttendanceActionButton extends StatelessWidget {
           width: double.infinity,
           height: 50,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFFF337E),
-                AppColors.primary,
-                Color(0xFFCD004D),
-              ],
-              stops: [0.0, 0.48, 1.0],
-            ),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.30),
-              width: 1.0,
-            ),
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(
-                color: Colors.white.withValues(alpha: 0.30),
-                blurRadius: 1,
-                offset: const Offset(0, -1),
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.16),
-                blurRadius: 3,
-                offset: const Offset(0, 1),
-              ),
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.48),
-                blurRadius: 14,
-                spreadRadius: -1,
-                offset: const Offset(0, 6),
+                color: AppColors.primary.withValues(alpha: 0.40),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),

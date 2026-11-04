@@ -63,65 +63,16 @@ class ShiftInfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: context.isDarkMode
-              ? [
-                  const Color(0xFF282C37),
-                  const Color(0xFF20232D),
-                  const Color(0xFF191B22),
-                ]
-              : [
-                  const Color(0xFFFFFFFF),
-                  const Color(0xFFFAFBFC),
-                  const Color(0xFFF3F5F9),
-                ],
-          stops: const [0.0, 0.45, 1.0],
-        ),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: context.isDarkMode
-              ? Colors.white.withValues(alpha: 0.12)
-              : const Color(0xFFE2E8F0),
-          width: 1.2,
-        ),
+        color: context.surfaceColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: context.borderColor),
         boxShadow: [
-          // 1. Top specular rim (overhead ambient bounce highlight)
-          BoxShadow(
-            color: Colors.white.withValues(
-              alpha: context.isDarkMode ? 0.08 : 0.95,
-            ),
-            blurRadius: 0,
-            spreadRadius: 1,
-            offset: const Offset(0, -1),
-          ),
-          // 2. Direct crisp drop shadow
           BoxShadow(
             color: Colors.black.withValues(
-              alpha: context.isDarkMode ? 0.35 : 0.04,
+              alpha: context.isDarkMode ? 0.25 : 0.03,
             ),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-          // 3. Ambient deep shadow for physical elevation
-          BoxShadow(
-            color: (context.isDarkMode ? Colors.black : const Color(0xFF0F172A))
-                .withValues(
-              alpha: context.isDarkMode ? 0.50 : 0.07,
-            ),
-            blurRadius: 18,
-            spreadRadius: -2,
-            offset: const Offset(0, 9),
-          ),
-          // 4. Subtle chromatic glow underneath
-          BoxShadow(
-            color: AppColors.primary.withValues(
-              alpha: context.isDarkMode ? 0.04 : 0.015,
-            ),
-            blurRadius: 24,
-            spreadRadius: -4,
-            offset: const Offset(0, 14),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
