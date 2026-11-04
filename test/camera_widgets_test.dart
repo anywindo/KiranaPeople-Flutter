@@ -6,6 +6,7 @@ import 'package:kirana_people/features/attendance/widgets/camera_controls_bar.da
 import 'package:kirana_people/features/attendance/widgets/camera_device_integrity_dialog.dart';
 import 'package:kirana_people/features/attendance/widgets/camera_preview_surface.dart';
 import 'package:kirana_people/features/attendance/widgets/camera_session_controller.dart';
+import 'package:kirana_people/features/attendance/widgets/camera_top_alert.dart';
 import 'package:kirana_people/features/attendance/widgets/camera_top_bar.dart';
 
 void main() {
@@ -135,6 +136,29 @@ void main() {
       await tester.tap(find.text('Mengerti'));
       await tester.pumpAndSettle();
       expect(find.text('Perangkat Tidak Didukung'), findsNothing);
+    });
+
+    testWidgets('CameraTopAlert renders warning message and handles dismiss', (tester) async {
+      bool dismissed = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CameraTopAlert(
+              message: 'Wajah tidak terdeteksi. Pastikan wajah terlihat jelas.',
+              onDismiss: () => dismissed = true,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Wajah tidak terdeteksi. Pastikan wajah terlihat jelas.'), findsOneWidget);
+      expect(find.byIcon(Icons.face_retouching_off_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.close_rounded));
+      await tester.pump();
+      expect(dismissed, isTrue);
     });
 
     test('CameraSessionController initializes with safe default state', () {

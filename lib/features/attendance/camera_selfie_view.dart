@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -14,6 +15,7 @@ import 'widgets/camera_controls_bar.dart';
 import 'widgets/camera_device_integrity_dialog.dart';
 import 'widgets/camera_preview_surface.dart';
 import 'widgets/camera_session_controller.dart';
+import 'widgets/camera_top_alert.dart';
 import 'widgets/camera_top_bar.dart';
 
 export 'widgets/camera_confirmation_bridge.dart';
@@ -21,6 +23,7 @@ export 'widgets/camera_controls_bar.dart';
 export 'widgets/camera_device_integrity_dialog.dart';
 export 'widgets/camera_preview_surface.dart';
 export 'widgets/camera_session_controller.dart';
+export 'widgets/camera_top_alert.dart';
 export 'widgets/camera_top_bar.dart';
 
 class CameraSelfieView extends StatefulWidget {
@@ -71,6 +74,8 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
   File? _capturedPhoto;
   Position? _warmedPosition;
   Future<void>? _imageProcessFuture;
+  String? _topAlertMessage;
+  Timer? _topAlertTimer;
 
   @override
   void initState() {
@@ -105,9 +110,24 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
     }
   }
 
+  void _showTopAlert(String message) {
+    _topAlertTimer?.cancel();
+    setState(() {
+      _topAlertMessage = message;
+    });
+    _topAlertTimer = Timer(const Duration(seconds: 4), () {
+      if (mounted) {
+        setState(() {
+          _topAlertMessage = null;
+        });
+      }
+    });
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _topAlertTimer?.cancel();
     _cameraSession.removeListener(_onSessionUpdated);
     _cameraSession.dispose();
     _cleanupCapturedPhoto();
@@ -137,28 +157,8 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
         } catch (_) {}
         await _cameraSession.resumePreview();
         AppHaptics.error();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(
-                  Icons.face_retouching_off_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    faceResult.errorMessage ?? 'Wajah tidak terdeteksi!',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: AppColors.error,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 4),
-          ),
+        _showTopAlert(
+          faceResult.errorMessage ?? 'Wajah tidak terdeteksi!',
         );
         return;
       }
@@ -253,6 +253,23 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
             Positioned.fill(
               child: Container(
                 color: Colors.white,
+              ),
+            ),
+
+          // Top Floating Alert Notification (Wajah Tidak Terdeteksi)
+          if (_topAlertMessage != null)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 60,
+              left: 0,
+              right: 0,
+              child: CameraTopAlert(
+                message: _topAlertMessage!,
+                onDismiss: () {
+                  _topAlertTimer?.cancel();
+                  setState(() {
+                    _topAlertMessage = null;
+                  });
+                },
               ),
             ),
         ],
