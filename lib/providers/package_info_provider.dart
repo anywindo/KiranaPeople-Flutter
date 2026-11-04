@@ -15,14 +15,14 @@ final packageInfoProvider = FutureProvider<PackageInfo>((ref) async {
   }
 });
 
-/// Returns formatted string, e.g. "1.0.2 (Build 1)" or "1.0.2"
+/// Returns formatted string, e.g. "1.0.2 " or "1.0.2"
 final appVersionDisplayProvider = Provider<String>((ref) {
   final infoAsync = ref.watch(packageInfoProvider);
   return infoAsync.maybeWhen(
     data: (info) => info.buildNumber.isNotEmpty
         ? '${info.version} (Build ${info.buildNumber})'
         : info.version,
-    orElse: () => '1.0.2 (Build 1)',
+    orElse: () => '1.0.2 ',
   );
 });
 
