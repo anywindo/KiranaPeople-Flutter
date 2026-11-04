@@ -8,9 +8,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/app_haptics.dart';
 import '../../core/utils/location_helper.dart';
 import '../../core/widgets/shimmer_loading.dart';
-// import '../../core/widgets/offline_banner.dart';
 import '../../data/models/attendance_event_model.dart';
-import '../../data/models/attendance_model.dart';
 import '../../data/models/shift_model.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -18,9 +16,12 @@ import '../../providers/connectivity_provider.dart';
 import '../navigation/main_navigation_screen.dart';
 import 'camera_selfie_view.dart';
 import 'shift_picker_sheet.dart';
+import 'utils/attendance_event_resolver.dart';
 import 'widgets/attendance_action_button.dart';
+import 'widgets/attendance_error_dialog.dart';
 import 'widgets/attendance_event_detail_modal.dart';
 import 'widgets/attendance_header.dart';
+import 'widgets/attendance_logout_dialog.dart';
 import 'widgets/attendance_mode_switcher.dart';
 import 'widgets/shift_info_card.dart';
 import 'widgets/today_activity_card.dart';
@@ -85,82 +86,10 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
   }
 
   void _showLogoutDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Text(
-          'Keluar Akun',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        content: const Text('Apakah Anda yakin ingin keluar dari akun ini?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text(
-              'Batal',
-              style: TextStyle(color: Color(0xFF8E8E93)),
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            onPressed: () {
-              Navigator.of(
-                context,
-                rootNavigator: true,
-              ).popUntil((route) => route.isFirst);
-              ref.read(authProvider.notifier).logout();
-            },
-            child: const Text('Keluar'),
-          ),
-        ],
-      ),
+    AttendanceLogoutDialog.show(
+      context,
+      onConfirmLogout: () => ref.read(authProvider.notifier).logout(),
     );
-  }
-
-  AttendanceEventType _resolveTargetAction(TodayAttendanceData? data) {
-    final nextAllowed = data?.nextAllowedAction;
-    if (nextAllowed != null && nextAllowed.isNotEmpty) {
-      return AttendanceEventType.fromString(nextAllowed);
-    }
-
-    final events = data?.events ?? [];
-    if (events.isEmpty) return AttendanceEventType.startShift;
-
-    final hasStartShift = events.any(
-      (e) => e.eventType == AttendanceEventType.startShift,
-    );
-    final hasStartBreak = events.any(
-      (e) => e.eventType == AttendanceEventType.startBreak,
-    );
-    final hasEndBreak = events.any(
-      (e) => e.eventType == AttendanceEventType.endBreak,
-    );
-    final hasEndShift = events.any(
-      (e) => e.eventType == AttendanceEventType.endShift,
-    );
-
-    if (hasEndShift) return AttendanceEventType.startShift;
-
-    if (_activeSegment == 1) {
-      // Istirahat Mode
-      if (hasStartBreak && !hasEndBreak) {
-        return AttendanceEventType.endBreak;
-      }
-      return AttendanceEventType.startBreak;
-    } else {
-      // Kerja Mode
-      if (!hasStartShift) {
-        return AttendanceEventType.startShift;
-      }
-      return AttendanceEventType.endShift;
-    }
   }
 
   Future<void> _handleActionPress({
@@ -211,28 +140,11 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     ref.listen<TodayAttendanceState>(todayAttendanceProvider, (previous, next) {
       if (next.submitError != null &&
           previous?.submitError != next.submitError) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (ctx) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: const Text(
-              'Presensi Belum Tersimpan',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            content: Text(next.submitError!),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  ref.read(todayAttendanceProvider.notifier).clearError();
-                  Navigator.pop(ctx);
-                },
-                child: const Text('Tutup'),
-              ),
-            ],
-          ),
+        AttendanceErrorDialog.show(
+          context,
+          errorMessage: next.submitError!,
+          onDismiss: () =>
+              ref.read(todayAttendanceProvider.notifier).clearError(),
         );
       }
 
@@ -260,63 +172,16 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
             ? todayData!.availableShifts!.first
             : null);
 
-    final targetAction = _resolveTargetAction(todayData);
-    final events = todayData?.events ?? [];
-
-    // Find actual event times
-    String? checkInTime;
-    String? checkOutTime;
-    String? startBreakTime;
-    String? endBreakTime;
-
-    AttendanceEvent? startShiftEvent;
-    AttendanceEvent? endShiftEvent;
-    AttendanceEvent? startBreakEvent;
-    AttendanceEvent? endBreakEvent;
-
-    for (final e in events) {
-      final dt = DateTime.tryParse(e.timestamp);
-      final localDt = dt != null ? (dt.isUtc ? dt.toLocal() : dt) : null;
-      final formattedTime = localDt != null
-          ? '${localDt.hour.toString().padLeft(2, '0')}:${localDt.minute.toString().padLeft(2, '0')}'
-          : e.timestamp;
-
-      if (e.eventType == AttendanceEventType.startShift) {
-        startShiftEvent = e;
-        checkInTime = formattedTime;
-      } else if (e.eventType == AttendanceEventType.endShift) {
-        endShiftEvent = e;
-        checkOutTime = formattedTime;
-      } else if (e.eventType == AttendanceEventType.startBreak) {
-        startBreakEvent = e;
-        startBreakTime = formattedTime;
-      } else if (e.eventType == AttendanceEventType.endBreak) {
-        endBreakEvent = e;
-        endBreakTime = formattedTime;
-      }
-    }
-
-    final hasStartedShift = startShiftEvent != null;
-    final isCheckInLate = Shift.isShiftStartLate(
-      actualTime: checkInTime,
-      scheduledTime: selectedShift?.startTime ?? '08:00',
-      ruleEnabled:
-          selectedShift?.attendanceRuleEnabled ??
-          todayData?.attendanceRuleEnabled ??
-          true,
-      ruleMinutes:
-          selectedShift?.attendanceRuleMinutes ??
-          todayData?.attendanceRuleMinutes ??
-          15,
+    final targetAction = AttendanceEventTimeline.resolveTargetAction(
+      data: todayData,
+      activeSegment: _activeSegment,
     );
-    final hasEndedShift =
-        endShiftEvent != null ||
-        todayData?.status?.toUpperCase() == 'COMPLETED' ||
-        todayData?.status?.toUpperCase() == 'SELESAI';
-    final hasStartedBreak = startBreakEvent != null;
-    final hasEndedBreak = endBreakEvent != null;
+    final timeline = AttendanceEventTimeline.fromData(
+      data: todayData,
+      selectedShift: selectedShift,
+    );
+    final events = todayData?.events ?? [];
     final isOffline = ref.watch(isOfflineProvider);
-    final isOnBreak = hasStartedBreak && !hasEndedBreak;
 
     if (todayData == null && attendanceState.data.isLoading) {
       return Scaffold(
@@ -352,13 +217,6 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                 ),
                 const SizedBox(height: 12),
 
-                // Offline Status Indicator Card (commented out in favor of top OfflineBanner)
-                // OfflineCardWarning(
-                //   onRetry: () =>
-                //       ref.read(isOfflineProvider.notifier).checkConnection(),
-                // ),
-                // const SizedBox(height: 4),
-
                 // 2. Mode Switcher (Kerja / Istirahat)
                 AttendanceModeSwitcher(
                   activeSegment: _activeSegment,
@@ -376,19 +234,19 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                   selectedShift: selectedShift,
                   todayData: todayData,
                   isSubmitting: attendanceState.isSubmitting,
-                  hasStartedShift: hasStartedShift,
-                  isCheckInLate: isCheckInLate,
-                  hasEndedShift: hasEndedShift,
-                  hasStartedBreak: hasStartedBreak,
-                  hasEndedBreak: hasEndedBreak,
-                  checkInTime: checkInTime,
-                  checkOutTime: checkOutTime,
-                  startBreakTime: startBreakTime,
-                  endBreakTime: endBreakTime,
-                  startShiftEvent: startShiftEvent,
-                  endShiftEvent: endShiftEvent,
-                  startBreakEvent: startBreakEvent,
-                  endBreakEvent: endBreakEvent,
+                  hasStartedShift: timeline.hasStartedShift,
+                  isCheckInLate: timeline.isCheckInLate,
+                  hasEndedShift: timeline.hasEndedShift,
+                  hasStartedBreak: timeline.hasStartedBreak,
+                  hasEndedBreak: timeline.hasEndedBreak,
+                  checkInTime: timeline.checkInTime,
+                  checkOutTime: timeline.checkOutTime,
+                  startBreakTime: timeline.startBreakTime,
+                  endBreakTime: timeline.endBreakTime,
+                  startShiftEvent: timeline.startShiftEvent,
+                  endShiftEvent: timeline.endShiftEvent,
+                  startBreakEvent: timeline.startBreakEvent,
+                  endBreakEvent: timeline.endBreakEvent,
                   onPickShift: () {
                     if (todayData?.availableShifts?.isNotEmpty == true) {
                       ShiftPickerSheet.show(
@@ -410,11 +268,11 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                   },
                   actionButton: AttendanceActionButton(
                     isLoading: attendanceState.data.isLoading,
-                    hasEndedShift: hasEndedShift,
-                    hasStartedShift: hasStartedShift,
-                    hasStartedBreak: hasStartedBreak,
-                    hasEndedBreak: hasEndedBreak,
-                    isOnBreak: isOnBreak,
+                    hasEndedShift: timeline.hasEndedShift,
+                    hasStartedShift: timeline.hasStartedShift,
+                    hasStartedBreak: timeline.hasStartedBreak,
+                    hasEndedBreak: timeline.hasEndedBreak,
+                    isOnBreak: timeline.isOnBreak,
                     activeSegment: _activeSegment,
                     selectedShift: selectedShift,
                     onAction: () => _handleActionPress(
