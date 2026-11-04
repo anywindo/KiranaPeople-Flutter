@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/continuous_marquee_text.dart';
 import '../../../data/models/user_model.dart';
 import '../../navigation/main_navigation_screen.dart';
 import '../../profile/profile_screen.dart';
@@ -241,15 +242,15 @@ class AttendanceHeader extends StatelessWidget {
                                   color: context.textMutedColor,
                                 ),
                               ),
-                              Text(
-                                user?.name ?? 'User',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                              ContinuousMarqueeText(
+                                text: user?.name ?? 'User',
                                 style: TextStyle(
                                   fontSize: 17,
                                   fontWeight: FontWeight.bold,
                                   color: context.textPrimaryColor,
                                 ),
+                                blankSpace: 28.0,
+                                velocity: 28.0,
                               ),
                             ],
                           ),

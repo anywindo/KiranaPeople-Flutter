@@ -56,6 +56,38 @@ void main() {
       expect(find.byType(AttendanceLiveClock), findsOneWidget);
       expect(find.byIcon(Icons.access_time_filled_rounded), findsOneWidget);
     });
+
+    testWidgets('AttendanceHeader renders long user name gracefully with ContinuousMarqueeText',
+        (tester) async {
+      final longNameUser = UserModel(
+        id: 2,
+        name: 'Alexander Balmacéda José Miller Wilson',
+        email: 'alex@kirana.com',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 360, // Lebar layar ponsel standar
+              child: AttendanceHeader(
+                user: longNameUser,
+                isBackgroundSyncing: false,
+                onRefresh: () {},
+                onLogout: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('Alexander Balmacéda José Miller Wilson'), findsWidgets);
+      expect(find.byType(AttendanceLiveClock), findsOneWidget);
+      expect(tester.takeException(), isNull); // zero layout overflow
+    });
   });
 }
 
