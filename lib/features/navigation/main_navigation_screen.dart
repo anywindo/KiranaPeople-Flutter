@@ -197,7 +197,7 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                   },
                   blendMode: BlendMode.dstIn,
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
                     child: Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -205,17 +205,17 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                           end: Alignment.topCenter,
                           colors: [
                             context.scaffoldBg.withValues(
-                              alpha: context.isDarkMode ? 0.98 : 0.96,
+                              alpha: context.isDarkMode ? 0.85 : 0.80,
                             ),
                             context.scaffoldBg.withValues(
-                              alpha: context.isDarkMode ? 0.96 : 0.94,
+                              alpha: context.isDarkMode ? 0.55 : 0.50,
                             ),
                             context.scaffoldBg.withValues(
-                              alpha: context.isDarkMode ? 0.60 : 0.50,
+                              alpha: context.isDarkMode ? 0.20 : 0.16,
                             ),
                             context.scaffoldBg.withValues(alpha: 0.0),
                           ],
-                          stops: const [0.0, 0.55, 0.78, 1.0],
+                          stops: const [0.0, 0.45, 0.72, 1.0],
                         ),
                       ),
                     ),
@@ -225,7 +225,7 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
             ),
           ),
 
-          // 2. Floating Island Navigation Bar
+          // 2. Floating Island Navigation Bar with enhanced Glassmorphism
           SafeArea(
             top: false,
             left: false,
@@ -237,23 +237,32 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(32),
                   border: Border.all(
-                    color: context.borderColor.withValues(
-                      alpha: context.isDarkMode ? 0.35 : 0.65,
-                    ),
-                    width: 1.0,
+                    color: context.isDarkMode
+                        ? Colors.white.withValues(alpha: 0.18)
+                        : Colors.white.withValues(alpha: 0.85),
+                    width: 1.2,
                   ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(
-                        alpha: context.isDarkMode ? 0.40 : 0.08,
+                        alpha: context.isDarkMode ? 0.45 : 0.08,
                       ),
-                      blurRadius: 24,
+                      blurRadius: 28,
                       spreadRadius: -2,
-                      offset: const Offset(0, 8),
+                      offset: const Offset(0, 10),
+                    ),
+                    BoxShadow(
+                      color: (context.isDarkMode ? Colors.white : Colors.white)
+                          .withValues(
+                        alpha: context.isDarkMode ? 0.06 : 0.60,
+                      ),
+                      blurRadius: 1,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 1),
                     ),
                     BoxShadow(
                       color: AppColors.primary.withValues(
-                        alpha: context.isDarkMode ? 0.06 : 0.03,
+                        alpha: context.isDarkMode ? 0.08 : 0.03,
                       ),
                       blurRadius: 16,
                       spreadRadius: 0,
@@ -264,10 +273,27 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(32),
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                    filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
                     child: Container(
-                      color: context.surfaceColor.withValues(
-                        alpha: context.isDarkMode ? 0.82 : 0.88,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            (context.isDarkMode
+                                    ? const Color(0xFF1E293B)
+                                    : Colors.white)
+                                .withValues(
+                              alpha: context.isDarkMode ? 0.65 : 0.62,
+                            ),
+                            (context.isDarkMode
+                                    ? const Color(0xFF0F172A)
+                                    : const Color(0xFFF1F5F9))
+                                .withValues(
+                              alpha: context.isDarkMode ? 0.42 : 0.38,
+                            ),
+                          ],
+                        ),
                       ),
                       child: NavigationBarTheme(
                         data: NavigationBarThemeData(
@@ -275,7 +301,7 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                           backgroundColor: Colors.transparent,
                           surfaceTintColor: Colors.transparent,
                           indicatorColor: AppColors.primary.withValues(
-                            alpha: context.isDarkMode ? 0.22 : 0.14,
+                            alpha: context.isDarkMode ? 0.24 : 0.16,
                           ),
                           indicatorShape: const StadiumBorder(),
                           labelTextStyle: WidgetStateProperty.resolveWith((states) {
