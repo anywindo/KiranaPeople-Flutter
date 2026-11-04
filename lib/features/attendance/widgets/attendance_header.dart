@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -9,18 +10,227 @@ import '../../navigation/main_navigation_screen.dart';
 import '../../profile/profile_screen.dart';
 import 'attendance_live_clock.dart';
 
-class AttendanceHeader extends StatelessWidget {
-  final UserModel? user;
+/// Sticky Top Bar with "KIRANA GROUP", Sync Indicator, Refresh, and Logout buttons.
+/// Has no background when at rest at the top, and uses a feather blur gradient when
+/// items scroll behind it.
+class AttendanceStickyTopBar extends StatelessWidget {
   final bool isBackgroundSyncing;
   final VoidCallback onRefresh;
   final VoidCallback onLogout;
+  final ScrollController? scrollController;
+  final double topPadding;
 
-  const AttendanceHeader({
+  const AttendanceStickyTopBar({
     super.key,
-    required this.user,
     required this.isBackgroundSyncing,
     required this.onRefresh,
     required this.onLogout,
+    this.scrollController,
+    this.topPadding = 0.0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final blurHeight = topPadding + 62.0;
+
+    Widget buildBar(double progress) {
+      return SizedBox(
+        height: blurHeight,
+        child: Stack(
+          children: [
+            // 1. Lightweight Feathered Blur Gradient Background
+            if (progress > 0.0)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Opacity(
+                    opacity: progress,
+                    child: ClipRect(
+                      child: ShaderMask(
+                        shaderCallback: (Rect bounds) {
+                          return const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black,
+                              Colors.black,
+                              Colors.transparent,
+                            ],
+                            stops: [0.0, 0.65, 1.0],
+                          ).createShader(bounds);
+                        },
+                        blendMode: BlendMode.dstIn,
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  context.scaffoldBg.withValues(
+                                    alpha: context.isDarkMode ? 0.85 : 0.80,
+                                  ),
+                                  context.scaffoldBg.withValues(
+                                    alpha: context.isDarkMode ? 0.45 : 0.35,
+                                  ),
+                                  context.scaffoldBg.withValues(alpha: 0.0),
+                                ],
+                                stops: const [0.0, 0.70, 1.0],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+            // 2. Sticky Header Items (Sync progress, Title, Refresh & Logout buttons)
+            Positioned(
+              top: topPadding,
+              left: 16,
+              right: 16,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Subtle background sync indicator
+                  AnimatedOpacity(
+                    opacity: isBackgroundSyncing ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(1),
+                      child: LinearProgressIndicator(
+                        minHeight: 2,
+                        backgroundColor: Colors.transparent,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primary.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Header Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'KIRANA GROUP',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                            color: context.textPrimaryColor,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          InkWell(
+                            onTap: onRefresh,
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: context.surfaceColor,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: context.borderColor),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(
+                                      alpha: context.isDarkMode ? 0.2 : 0.04,
+                                    ),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: isBackgroundSyncing
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(10),
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColors.primary,
+                                      ),
+                                    )
+                                  : Icon(
+                                      Icons.refresh_rounded,
+                                      size: 18,
+                                      color: context.textSecondaryColor,
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          InkWell(
+                            onTap: onLogout,
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: context.surfaceColor,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: context.borderColor),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(
+                                      alpha: context.isDarkMode ? 0.2 : 0.04,
+                                    ),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.logout_rounded,
+                                size: 18,
+                                color: context.textSecondaryColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (scrollController != null) {
+      return AnimatedBuilder(
+        animation: scrollController!,
+        builder: (context, _) {
+          final offset =
+              scrollController!.hasClients ? scrollController!.offset : 0.0;
+          final progress = (offset / 36.0).clamp(0.0, 1.0);
+          return buildBar(progress);
+        },
+      );
+    }
+
+    return buildBar(0.0);
+  }
+}
+
+/// User Greeting Section (Avatar with Profile Redirect, Greeting Text,
+/// User Name with ContinuousMarqueeText, and AttendanceLiveClock).
+class AttendanceGreetingSection extends StatelessWidget {
+  final UserModel? user;
+
+  const AttendanceGreetingSection({
+    super.key,
+    required this.user,
   });
 
   String _getGreeting() {
@@ -62,209 +272,144 @@ class AttendanceHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Subtle background sync indicator (2px, zero layout shift)
-        AnimatedOpacity(
-          opacity: isBackgroundSyncing ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 200),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(1),
-            child: LinearProgressIndicator(
-              minHeight: 2,
-              backgroundColor: Colors.transparent,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                AppColors.primary.withValues(alpha: 0.6),
+        Expanded(
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                final mainNav = MainNavigationScreen.of(context);
+                if (mainNav != null) {
+                  mainNav.switchToTab(3);
+                } else {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                  );
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                child: Row(
+                  children: [
+                    // Avatar photo or initials
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4338CA),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: context.isDarkMode
+                              ? context.surfaceColor
+                              : Colors.white,
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(
+                              alpha: context.isDarkMode ? 0.3 : 0.10,
+                            ),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: user?.avatar != null &&
+                                user!.avatar!.isNotEmpty
+                            ? CachedNetworkImage(
+                                imageUrl: user!.avatar!,
+                                fit: BoxFit.cover,
+                                errorWidget: (_, _, _) =>
+                                    _buildUserInitial(user?.name ?? 'User'),
+                              )
+                            : _buildUserInitial(user?.name ?? 'User'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+
+                    // Greeting + Name
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _getGreeting(),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: context.textMutedColor,
+                            ),
+                          ),
+                          ContinuousMarqueeText(
+                            text: user?.name ?? 'User',
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: context.textPrimaryColor,
+                            ),
+                            blankSpace: 28.0,
+                            velocity: 28.0,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(width: 8),
+        const AttendanceLiveClock(),
+      ],
+    );
+  }
+}
 
-        // 1. Top Header Bar (KIRANA GROUP + Refresh + Logout)
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'KIRANA GROUP',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.5,
-                color: context.textPrimaryColor,
-              ),
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                InkWell(
-                  onTap: onRefresh,
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: context.surfaceColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: context.borderColor),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(
-                            alpha: context.isDarkMode ? 0.2 : 0.04,
-                          ),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: isBackgroundSyncing
-                        ? const Padding(
-                            padding: EdgeInsets.all(10),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.primary,
-                            ),
-                          )
-                        : Icon(
-                            Icons.refresh_rounded,
-                            size: 18,
-                            color: context.textSecondaryColor,
-                          ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                InkWell(
-                  onTap: onLogout,
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: context.surfaceColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: context.borderColor),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(
-                            alpha: context.isDarkMode ? 0.2 : 0.04,
-                          ),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.logout_rounded,
-                      size: 18,
-                      color: context.textSecondaryColor,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+/// Composite Attendance Header for backward compatibility and test stability.
+class AttendanceHeader extends StatelessWidget {
+  final UserModel? user;
+  final bool isBackgroundSyncing;
+  final VoidCallback onRefresh;
+  final VoidCallback onLogout;
+  final bool includeTopBar;
+  final ScrollController? scrollController;
+  final double topPadding;
+
+  const AttendanceHeader({
+    super.key,
+    required this.user,
+    required this.isBackgroundSyncing,
+    required this.onRefresh,
+    required this.onLogout,
+    this.includeTopBar = true,
+    this.scrollController,
+    this.topPadding = 0.0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!includeTopBar) {
+      return AttendanceGreetingSection(user: user);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AttendanceStickyTopBar(
+          isBackgroundSyncing: isBackgroundSyncing,
+          onRefresh: onRefresh,
+          onLogout: onLogout,
+          scrollController: scrollController,
+          topPadding: topPadding,
         ),
-        const SizedBox(height: 16),
-
-        // 2. User Greeting Section (tap redirects to Profile) & Small Live Clock
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    final mainNav = MainNavigationScreen.of(context);
-                    if (mainNav != null) {
-                      mainNav.switchToTab(3);
-                    } else {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                      );
-                    }
-                  },
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                    child: Row(
-                      children: [
-                        // Avatar photo or initials
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF4338CA),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: context.isDarkMode
-                                  ? context.surfaceColor
-                                  : Colors.white,
-                              width: 2,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(
-                                  alpha: context.isDarkMode ? 0.3 : 0.10,
-                                ),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: ClipOval(
-                            child: user?.avatar != null &&
-                                    user!.avatar!.isNotEmpty
-                                ? CachedNetworkImage(
-                                    imageUrl: user!.avatar!,
-                                    fit: BoxFit.cover,
-                                    errorWidget: (_, _, _) =>
-                                        _buildUserInitial(user?.name ?? 'User'),
-                                  )
-                                : _buildUserInitial(user?.name ?? 'User'),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-
-                        // Greeting + Name
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _getGreeting(),
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: context.textMutedColor,
-                                ),
-                              ),
-                              ContinuousMarqueeText(
-                                text: user?.name ?? 'User',
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.textPrimaryColor,
-                                ),
-                                blankSpace: 28.0,
-                                velocity: 28.0,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            const AttendanceLiveClock(),
-          ],
-        ),
+        const SizedBox(height: 12),
+        AttendanceGreetingSection(user: user),
       ],
     );
   }

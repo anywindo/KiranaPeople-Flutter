@@ -37,6 +37,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     with WidgetsBindingObserver {
   // Mode: 0 = Kerja, 1 = Istirahat
   int _activeSegment = 0;
+  final ScrollController _scrollController = ScrollController();
   Timer? _autoRefreshTimer;
   Timer? _minuteTicker;
 
@@ -71,6 +72,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _scrollController.dispose();
     _autoRefreshTimer?.cancel();
     _minuteTicker?.cancel();
     super.dispose();
@@ -192,30 +194,27 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
       );
     }
 
+    final topPadding = isOffline ? 4.0 : MediaQuery.of(context).padding.top;
+
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      body: SafeArea(
-        top: !isOffline,
-        bottom: false,
-        child: RefreshIndicator(
-          color: AppColors.primary,
-          onRefresh: () => ref.read(todayAttendanceProvider.notifier).refresh(),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(16, isOffline ? 4 : 12, 16, 128),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // 1. Header (Kirana Group, Sync indicator, Refresh, Logout, User Greeting)
-                AttendanceHeader(
-                  user: user,
-                  isBackgroundSyncing: attendanceState.isBackgroundSyncing,
-                  onRefresh: () {
-                    ref.read(todayAttendanceProvider.notifier).refresh();
-                  },
-                  onLogout: _showLogoutDialog,
-                ),
-                const SizedBox(height: 12),
+      body: Stack(
+        children: [
+          // 1. Scrollable Page Body (flows behind sticky top bar with blur gradient)
+          RefreshIndicator(
+            color: AppColors.primary,
+            edgeOffset: topPadding + 48,
+            onRefresh: () => ref.read(todayAttendanceProvider.notifier).refresh(),
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(16, topPadding + 54, 16, 128),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // User Greeting Section (tap redirects to Profile) & Small Live Clock
+                  AttendanceGreetingSection(user: user),
+                  const SizedBox(height: 12),
 
                 // 2. Mode Switcher (Kerja / Istirahat)
                 AttendanceModeSwitcher(
@@ -302,7 +301,25 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
             ),
           ),
         ),
-      ),
-    );
+
+        // 2. Sticky Top Bar (KIRANA GROUP, Sync Indicator, Refresh & Logout buttons)
+        // Pinned on top, zero background when resting, feathered blur gradient when scrolled
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: AttendanceStickyTopBar(
+            isBackgroundSyncing: attendanceState.isBackgroundSyncing,
+            onRefresh: () {
+              ref.read(todayAttendanceProvider.notifier).refresh();
+            },
+            onLogout: _showLogoutDialog,
+            scrollController: _scrollController,
+            topPadding: topPadding,
+          ),
+        ),
+      ],
+    ),
+  );
   }
 }
