@@ -23,11 +23,35 @@ class MainNavigationScreen extends ConsumerStatefulWidget {
 
 class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   int _currentIndex = 0;
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   void switchToTab(int index) {
+    if (index < 0 || index >= _screens.length) return;
+    if (_currentIndex == index) return;
+
     setState(() {
       _currentIndex = index;
     });
+
+    if (_pageController.hasClients) {
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+    }
     _triggerSubtleTabSync(index);
   }
 
@@ -60,8 +84,9 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
               context: context,
               removeTop: isOffline,
               removeBottom: true,
-              child: IndexedStack(
-                index: _currentIndex,
+              child: PageView(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
                 children: _screens,
               ),
             ),
@@ -97,10 +122,7 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
           onDestinationSelected: (index) {
             if (_currentIndex == index) return;
             HapticFeedback.selectionClick();
-            setState(() {
-              _currentIndex = index;
-            });
-            _triggerSubtleTabSync(index);
+            switchToTab(index);
           },
           destinations: const [
             NavigationDestination(
