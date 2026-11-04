@@ -2,11 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_theme.dart';
 import '../../data/repositories/auth_repository.dart';
 import 'widgets/forgot_password_email_step.dart';
 import 'widgets/forgot_password_otp_step.dart';
 import 'widgets/forgot_password_reset_step.dart';
+import 'widgets/forgot_password_stepper_header.dart';
+import 'widgets/forgot_password_success_dialog.dart';
+
+export 'widgets/forgot_password_banners.dart';
+export 'widgets/forgot_password_email_step.dart';
+export 'widgets/forgot_password_otp_step.dart';
+export 'widgets/forgot_password_reset_step.dart';
+export 'widgets/forgot_password_stepper_header.dart';
+export 'widgets/forgot_password_success_dialog.dart';
 
 enum ForgotPasswordStep { inputEmail, inputOtp, resetPassword }
 
@@ -325,7 +333,15 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
         _isLoading = false;
       });
 
-      _showSuccessDialog(email, msg);
+      ForgotPasswordSuccessDialog.show(
+        context,
+        email: email,
+        message: msg,
+        onLoginNow: () {
+          Navigator.pop(context); // Close bottom sheet
+          widget.onResetSuccess?.call(email);
+        },
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -333,67 +349,6 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
         _errorMessage = e.toString().replaceFirst('Exception: ', '');
       });
     }
-  }
-
-  void _showSuccessDialog(String email, String message) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.success.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check_circle_rounded,
-                color: AppColors.success,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              'Berhasil',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        content: Text(
-          message.isNotEmpty
-              ? message
-              : 'Kata sandi Anda berhasil diperbarui. Silakan masuk menggunakan kata sandi baru.',
-          style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
-        ),
-        actions: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(ctx); // Close dialog
-                Navigator.pop(context); // Close bottom sheet
-                widget.onResetSuccess?.call(email);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-              child: const Text(
-                'Masuk Sekarang',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   void _goBack() {
@@ -432,104 +387,13 @@ class _ForgotPasswordSheetState extends State<ForgotPasswordSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Top grabber bar
-          const SizedBox(height: 12),
-          Container(
-            width: 36,
-            height: 4,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE5E5EA),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 8),
-
           // Header Bar
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                // Back button or empty spacer
-                if (_step != ForgotPasswordStep.inputEmail)
-                  InkWell(
-                    onTap: _goBack,
-                    borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFFE5E5EA)),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.chevron_left_rounded,
-                            size: 18,
-                            color: AppColors.primary,
-                          ),
-                          SizedBox(width: 2),
-                          Text(
-                            'Kembali',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                else
-                  const SizedBox(width: 40),
-
-                // Center Title
-                Expanded(
-                  child: Text(
-                    _headerTitle,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1C1C1E),
-                    ),
-                  ),
-                ),
-
-                // Close Button
-                InkWell(
-                  onTap: () => Navigator.pop(context),
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFE5E5EA)),
-                    ),
-                    child: const Text(
-                      'Tutup',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF8E8E93),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          ForgotPasswordStepperHeader(
+            title: _headerTitle,
+            showBackButton: _step != ForgotPasswordStep.inputEmail,
+            onBack: _goBack,
+            onClose: () => Navigator.pop(context),
           ),
-
-          const Divider(height: 1, color: Color(0xFFF2F2F7)),
 
           // Scrollable Body
           Flexible(

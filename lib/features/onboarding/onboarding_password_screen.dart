@@ -3,7 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
-import 'privacy_policy_sheet.dart';
+import 'widgets/onboarding_logout_dialog.dart';
+import 'widgets/onboarding_password_header.dart';
+import 'widgets/onboarding_password_requirements.dart';
+import 'widgets/onboarding_policy_agreement.dart';
+
+export 'widgets/onboarding_logout_dialog.dart';
+export 'widgets/onboarding_password_header.dart';
+export 'widgets/onboarding_password_requirements.dart';
+export 'widgets/onboarding_policy_agreement.dart';
 
 class OnboardingPasswordScreen extends ConsumerStatefulWidget {
   const OnboardingPasswordScreen({super.key});
@@ -106,43 +114,15 @@ class _OnboardingPasswordScreenState
   }
 
   void _showLogoutConfirmDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Batalkan Aktivasi?',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
-        ),
-        content: const Text(
-          'Sesi login Anda akan diakhiri dan Anda akan diarahkan kembali ke layar masuk.',
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              elevation: 0,
-            ),
-            onPressed: () {
-              Navigator.of(
-                context,
-                rootNavigator: true,
-              ).popUntil((route) => route.isFirst);
-              ref.read(authProvider.notifier).logout();
-            },
-            child: const Text('Keluar'),
-          ),
-        ],
-      ),
+    OnboardingLogoutDialog.show(
+      context,
+      onConfirmLogout: () {
+        Navigator.of(
+          context,
+          rootNavigator: true,
+        ).popUntil((route) => route.isFirst);
+        ref.read(authProvider.notifier).logout();
+      },
     );
   }
 
@@ -150,7 +130,6 @@ class _OnboardingPasswordScreenState
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
-
     final errorMessage = _localError;
 
     return PopScope(
@@ -198,46 +177,8 @@ class _OnboardingPasswordScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Header Icon
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.key_rounded,
-                    color: AppColors.primary,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Title
-                const Text(
-                  'Aktivasi Kata Sandi',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                    letterSpacing: -0.3,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Subtitle
-                Text(
-                  user != null
-                      ? 'Halo ${user.name}, demi keamanan silakan buat kata sandi baru untuk akun Anda.'
-                      : 'Demi keamanan, silakan ganti kata sandi bawaan akun Anda.',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.textSecondary,
-                    height: 1.4,
-                  ),
-                ),
+                // Header (Icon, Title, Subtitle)
+                OnboardingPasswordHeader(user: user),
                 const SizedBox(height: 24),
 
                 // Error Banner
@@ -430,93 +371,22 @@ class _OnboardingPasswordScreenState
                 const SizedBox(height: 18),
 
                 // Requirements Checklist
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF9FAFB),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFF3F4F6)),
-                  ),
-                  child: Column(
-                    children: [
-                      _buildRequirementRow('Minimal 8 karakter', _hasMinLength),
-                      const SizedBox(height: 8),
-                      _buildRequirementRow(
-                        'Kombinasi huruf besar & huruf kecil',
-                        _hasMixedCase,
-                      ),
-                      const SizedBox(height: 8),
-                      _buildRequirementRow(
-                        'Mengandung minimal 1 angka',
-                        _hasNumber,
-                      ),
-                      const SizedBox(height: 8),
-                      _buildRequirementRow(
-                        'Konfirmasi kata sandi cocok',
-                        _isMatching,
-                      ),
-                    ],
-                  ),
+                OnboardingPasswordRequirements(
+                  hasMinLength: _hasMinLength,
+                  hasMixedCase: _hasMixedCase,
+                  hasNumber: _hasNumber,
+                  isMatching: _isMatching,
                 ),
                 const SizedBox(height: 18),
 
                 // Privacy Policy Checkbox
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: Checkbox(
-                        value: _hasAcceptedPolicies,
-                        activeColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        onChanged: (val) {
-                          setState(() {
-                            _hasAcceptedPolicies = val ?? false;
-                          });
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          PrivacyPolicySheet.show(
-                            context,
-                            onAccept: () {
-                              setState(() {
-                                _hasAcceptedPolicies = true;
-                              });
-                            },
-                          );
-                        },
-                        child: RichText(
-                          text: const TextSpan(
-                            text: 'Saya telah membaca dan menyetujui ',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF4B5563),
-                              height: 1.4,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: 'Kebijakan Privasi & Ketentuan Layanan',
-                                style: TextStyle(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                OnboardingPolicyAgreement(
+                  hasAcceptedPolicies: _hasAcceptedPolicies,
+                  onChanged: (val) {
+                    setState(() {
+                      _hasAcceptedPolicies = val;
+                    });
+                  },
                 ),
                 const SizedBox(height: 24),
 
@@ -564,31 +434,6 @@ class _OnboardingPasswordScreenState
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildRequirementRow(String label, bool isSatisfied) {
-    return Row(
-      children: [
-        Icon(
-          isSatisfied ? Icons.check_circle_rounded : Icons.circle_outlined,
-          size: 15,
-          color: isSatisfied ? AppColors.success : const Color(0xFFD1D5DB),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: isSatisfied ? FontWeight.w600 : FontWeight.normal,
-              color: isSatisfied
-                  ? const Color(0xFF1F2937)
-                  : const Color(0xFF6B7280),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
