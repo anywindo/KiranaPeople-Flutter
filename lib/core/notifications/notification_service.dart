@@ -6,6 +6,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/models/shift_model.dart';
 import '../../data/models/attendance_event_model.dart';
+import 'notification_channels.dart';
+import 'notification_payload_builder.dart';
+
+export 'notification_channels.dart';
+export 'notification_payload_builder.dart';
 
 class NotificationService {
   NotificationService._();
@@ -17,27 +22,29 @@ class NotificationService {
   bool _isInitialized = false;
   static const String _prefKeyEnabled = 'attendance_notifications_enabled';
 
-  // Notification IDs
-  static const int idShiftStart30Min = 101;
-  static const int idShiftStart15Min = 102;
-  static const int idBreakEnd = 103;
-  static const int idShiftEnd = 104;
+  // Backward-compatible Notification IDs
+  static const int idShiftStart30Min = NotificationChannels.idShiftStart30Min;
+  static const int idShiftStart15Min = NotificationChannels.idShiftStart15Min;
+  static const int idBreakEnd = NotificationChannels.idBreakEnd;
+  static const int idShiftEnd = NotificationChannels.idShiftEnd;
 
-  // Channel details
-  static const String channelId = 'attendance_reminders';
-  static const String channelName = 'Pengingat Presensi';
-  static const String channelDesc =
-      'Notifikasi pengingat jadwal masuk kerja, istirahat, dan pulang.';
+  // Backward-compatible Channel details
+  static const String channelId = NotificationChannels.reminderChannelId;
+  static const String channelName = NotificationChannels.reminderChannelName;
+  static const String channelDesc = NotificationChannels.reminderChannelDesc;
 
-  static const String submissionChannelId = 'attendance_submissions_success_v1';
-  static const String submissionChannelName = 'Konfirmasi Presensi';
+  static const String submissionChannelId =
+      NotificationChannels.submissionChannelId;
+  static const String submissionChannelName =
+      NotificationChannels.submissionChannelName;
   static const String submissionChannelDesc =
-      'Notifikasi konfirmasi saat presensi berhasil dicatat.';
+      NotificationChannels.submissionChannelDesc;
 
-  static const String failureChannelId = 'attendance_submissions_failure_v1';
-  static const String failureChannelName = 'Presensi Belum Tercatat';
+  static const String failureChannelId = NotificationChannels.failureChannelId;
+  static const String failureChannelName =
+      NotificationChannels.failureChannelName;
   static const String failureChannelDesc =
-      'Notifikasi peringatan saat presensi gagal dikirim atau tidak tercatat.';
+      NotificationChannels.failureChannelDesc;
 
   Future<void> initialize() async {
     if (_isInitialized) return;
@@ -63,10 +70,10 @@ class NotificationService {
 
       const DarwinInitializationSettings darwinSettings =
           DarwinInitializationSettings(
-            requestAlertPermission: false,
-            requestBadgePermission: false,
-            requestSoundPermission: false,
-          );
+        requestAlertPermission: false,
+        requestBadgePermission: false,
+        requestSoundPermission: false,
+      );
 
       const InitializationSettings initSettings = InitializationSettings(
         android: androidSettings,
@@ -87,16 +94,9 @@ class NotificationService {
           >();
 
       if (androidPlugin != null) {
-        // Attendance reminders channel (high importance, sound, vibration)
-        const reminderChannel = AndroidNotificationChannel(
-          channelId,
-          channelName,
-          description: channelDesc,
-          importance: Importance.high,
-          playSound: true,
-          enableVibration: true,
+        await androidPlugin.createNotificationChannel(
+          NotificationChannels.reminderChannel,
         );
-        await androidPlugin.createNotificationChannel(reminderChannel);
 
         try {
           await androidPlugin.deleteNotificationChannel(
@@ -104,27 +104,13 @@ class NotificationService {
           );
         } catch (_) {}
 
-        const submissionChannel = AndroidNotificationChannel(
-          submissionChannelId,
-          submissionChannelName,
-          description: submissionChannelDesc,
-          importance: Importance.high,
-          playSound: true,
-          sound: RawResourceAndroidNotificationSound('successful'),
-          enableVibration: true,
+        await androidPlugin.createNotificationChannel(
+          NotificationChannels.submissionChannel,
         );
-        await androidPlugin.createNotificationChannel(submissionChannel);
 
-        const failureChannel = AndroidNotificationChannel(
-          failureChannelId,
-          failureChannelName,
-          description: failureChannelDesc,
-          importance: Importance.high,
-          playSound: true,
-          sound: RawResourceAndroidNotificationSound('unsuccessful'),
-          enableVibration: true,
+        await androidPlugin.createNotificationChannel(
+          NotificationChannels.failureChannel,
         );
-        await androidPlugin.createNotificationChannel(failureChannel);
       }
 
       _isInitialized = true;
@@ -179,28 +165,6 @@ class NotificationService {
         await cancelAllReminders();
       }
     } catch (_) {}
-  }
-
-  NotificationDetails _notificationDetails() {
-    const androidDetails = AndroidNotificationDetails(
-      channelId,
-      channelName,
-      channelDescription: channelDesc,
-      importance: Importance.high,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-      color: Color(0xFFE11D48),
-      enableVibration: true,
-      playSound: true,
-    );
-
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    return const NotificationDetails(android: androidDetails, iOS: iosDetails);
   }
 
   /// Schedule reminders based on shift schedules and existing events
@@ -301,9 +265,6 @@ class NotificationService {
     }
   }
 
-  /// Calculates next occurrence of 30-min and 15-min shift start reminders.
-  /// If today's reminder time has already elapsed or user already checked in,
-  /// returns the reminder time for tomorrow morning.
   (tz.TZDateTime, tz.TZDateTime)? calculateNextShiftStartReminders({
     required String timeStr,
     required tz.TZDateTime now,
@@ -349,8 +310,6 @@ class NotificationService {
     }
   }
 
-  /// Calculates the next scheduled occurrence of a specific time of day.
-  /// If today's time has elapsed or already completed, shifts by 1 day to tomorrow.
   tz.TZDateTime? calculateNextTime({
     required String timeStr,
     required tz.TZDateTime now,
@@ -403,7 +362,7 @@ class NotificationService {
         title: title,
         body: body,
         scheduledDate: scheduledDate,
-        notificationDetails: _notificationDetails(),
+        notificationDetails: NotificationPayloadBuilder.reminderDetails(),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: matchDateTimeComponents,
       );
@@ -420,7 +379,7 @@ class NotificationService {
           title: title,
           body: body,
           scheduledDate: scheduledDate,
-          notificationDetails: _notificationDetails(),
+          notificationDetails: NotificationPayloadBuilder.reminderDetails(),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           matchDateTimeComponents: matchDateTimeComponents,
         );
@@ -447,54 +406,6 @@ class NotificationService {
     } catch (_) {}
   }
 
-  NotificationDetails _submissionNotificationDetails() {
-    const androidDetails = AndroidNotificationDetails(
-      submissionChannelId,
-      submissionChannelName,
-      channelDescription: submissionChannelDesc,
-      importance: Importance.high,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-      color: Color(0xFF10B981), // Emerald green for success
-      enableVibration: true,
-      playSound: true,
-      sound: RawResourceAndroidNotificationSound('successful'),
-    );
-
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-      sound: 'Successful.mp3',
-    );
-
-    return const NotificationDetails(android: androidDetails, iOS: iosDetails);
-  }
-
-  NotificationDetails _failureNotificationDetails() {
-    const androidDetails = AndroidNotificationDetails(
-      failureChannelId,
-      failureChannelName,
-      channelDescription: failureChannelDesc,
-      importance: Importance.high,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-      color: Color(0xFFEF4444), // Crimson red for failure
-      enableVibration: true,
-      playSound: true,
-      sound: RawResourceAndroidNotificationSound('unsuccessful'),
-    );
-
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-      sound: 'Unsuccessful.mp3',
-    );
-
-    return const NotificationDetails(android: androidDetails, iOS: iosDetails);
-  }
-
   /// Show instant test notification
   Future<void> showTestNotification({
     String title = '⏰ Tes Pengingat Presensi',
@@ -505,7 +416,7 @@ class NotificationService {
       id: 999,
       title: title,
       body: body,
-      notificationDetails: _notificationDetails(),
+      notificationDetails: NotificationPayloadBuilder.reminderDetails(),
     );
   }
 
@@ -541,28 +452,21 @@ class NotificationService {
       if (!_isInitialized) await initialize();
       if (!await isEnabled()) return;
 
-      final rawTime = timestamp ?? DateTime.now();
-      // Ensure time is formatted strictly in Western Indonesian Time (WIB / UTC+7)
-      final time = rawTime.toUtc().add(const Duration(hours: 7));
-      final hourStr = time.hour.toString().padLeft(2, '0');
-      final minuteStr = time.minute.toString().padLeft(2, '0');
-      final timeStr = '$hourStr:$minuteStr';
-
-      final eventLabel = eventType.label;
-      final title = '✅ Presensi $eventLabel Berhasil';
-      final body =
-          'Presensi $eventLabel Anda telah berhasil dicatat pada pukul $timeStr WIB. Data telah tersinkronisasi.';
+      final payload = NotificationPayloadBuilder.buildSubmittedPayload(
+        eventType: eventType,
+        timestamp: timestamp,
+      );
 
       final notifId = DateTime.now().millisecondsSinceEpoch % 100000 + 200;
 
       await _notificationsPlugin.show(
         id: notifId,
-        title: title,
-        body: body,
-        notificationDetails: _submissionNotificationDetails(),
+        title: payload.title,
+        body: payload.body,
+        notificationDetails: NotificationPayloadBuilder.submissionDetails(),
       );
       debugPrint(
-        '[NotificationService] Submitted attendance notification sent: $title',
+        '[NotificationService] Submitted attendance notification sent: ${payload.title}',
       );
     } catch (e) {
       debugPrint(
@@ -581,31 +485,22 @@ class NotificationService {
       if (!_isInitialized) await initialize();
       if (!await isEnabled()) return;
 
-      final rawTime = timestamp ?? DateTime.now();
-      // Ensure time is formatted strictly in Western Indonesian Time (WIB / UTC+7)
-      final time = rawTime.toUtc().add(const Duration(hours: 7));
-      final hourStr = time.hour.toString().padLeft(2, '0');
-      final minuteStr = time.minute.toString().padLeft(2, '0');
-      final timeStr = '$hourStr:$minuteStr';
-
-      final eventLabel = eventType.label;
-      final title = '❌ Presensi $eventLabel Gagal';
-      final cleanReason = reason != null && reason.trim().isNotEmpty
-          ? ': ${reason.trim()}'
-          : '';
-      final body =
-          'Presensi $eventLabel Anda pada pukul $timeStr WIB tidak berhasil tercatat$cleanReason. Silakan buka aplikasi dan coba kembali.';
+      final payload = NotificationPayloadBuilder.buildFailedPayload(
+        eventType: eventType,
+        reason: reason,
+        timestamp: timestamp,
+      );
 
       final notifId = DateTime.now().millisecondsSinceEpoch % 100000 + 400;
 
       await _notificationsPlugin.show(
         id: notifId,
-        title: title,
-        body: body,
-        notificationDetails: _failureNotificationDetails(),
+        title: payload.title,
+        body: payload.body,
+        notificationDetails: NotificationPayloadBuilder.failureDetails(),
       );
       debugPrint(
-        '[NotificationService] Failed attendance notification sent: $title',
+        '[NotificationService] Failed attendance notification sent: ${payload.title}',
       );
     } catch (e) {
       debugPrint(

@@ -7,7 +7,13 @@ import 'package:dio/io.dart';
 
 import '../config/api_config.dart';
 import '../storage/secure_storage_service.dart';
+import 'api_error_localizer.dart';
 import 'api_exception.dart';
+import 'api_interceptor.dart';
+
+export 'api_error_localizer.dart';
+export 'api_exception.dart';
+export 'api_interceptor.dart';
 
 class ApiClient {
   static VoidCallback? onUnauthorized;
@@ -44,173 +50,11 @@ class ApiClient {
     };
 
     _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          // Construct explicit full URL so Dio doesn't strip baseUrl subpath (e.g. /api/v1)
-          if (!options.path.startsWith('http://') &&
-              !options.path.startsWith('https://')) {
-            final currentBaseUrl = await ApiConfig.getBaseUrl();
-            options.path = _resolveFullPath(currentBaseUrl, options.path);
-          }
-
-          // Add Bearer Token if present
-          final token = await _storage.getToken();
-          if (token != null && token.isNotEmpty) {
-            options.headers['Authorization'] = 'Bearer $token';
-          }
-
-          developer.log(
-            '[API Request] ${options.method} ${options.path}',
-            name: 'ApiClient',
-          );
-          return handler.next(options);
-        },
-        onResponse: (response, handler) {
-          developer.log(
-            '[API Response] ${response.requestOptions.method} ${response.requestOptions.path} (${response.statusCode})',
-            name: 'ApiClient',
-          );
-          onServerReachabilityChanged?.call(true);
-          return handler.next(response);
-        },
-        onError: (DioException e, handler) {
-          final uri = e.requestOptions.uri;
-          if (kDebugMode) {
-            developer.log(
-              '[API Error] ${e.requestOptions.method} $uri -> ${e.type}: ${e.message} (status: ${e.response?.statusCode})',
-              name: 'ApiClient',
-              error: e,
-            );
-            debugPrint(
-              '[ApiClient Error] ${e.requestOptions.method} $uri -> ${e.type}: ${e.message} (status: ${e.response?.statusCode}) error: ${e.error}',
-            );
-          }
-
-          final response = e.response;
-          if (response != null &&
-              response.statusCode != null &&
-              response.statusCode! >= 500) {
-            // Server error (500, 502, 503, 504) -> server down/failing
-            onServerReachabilityChanged?.call(false);
-          } else if (response != null &&
-              response.statusCode != null &&
-              response.statusCode! < 500) {
-            // Client error (400, 401, 403, 404, 422) -> server responded and is reachable
-            onServerReachabilityChanged?.call(true);
-          } else if (e.type == DioExceptionType.connectionTimeout ||
-              e.type == DioExceptionType.receiveTimeout ||
-              e.type == DioExceptionType.sendTimeout ||
-              e.type == DioExceptionType.connectionError ||
-              e.error is SocketException ||
-              e.error is HandshakeException ||
-              e.error is TlsException ||
-              e.error is HttpException) {
-            // Network connection failure or timeout -> server unreachable
-            onServerReachabilityChanged?.call(false);
-          }
-          String message =
-              'Terjadi kesalahan koneksi. Periksa koneksi internet Anda.';
-          dynamic errors;
-
-          if (response != null) {
-            final data = response.data;
-            bool hasCustomMessage = false;
-
-            // Extract message and validation errors from JSON response if available
-            if (data is Map) {
-              errors = data['errors'];
-              if (errors is Map && errors.isNotEmpty) {
-                final firstVal = errors.values.first;
-                if (firstVal is List && firstVal.isNotEmpty) {
-                  message = firstVal.first.toString();
-                  hasCustomMessage = true;
-                } else if (firstVal is String && firstVal.isNotEmpty) {
-                  message = firstVal;
-                  hasCustomMessage = true;
-                } else {
-                  final m = data['meta']?['message'] ?? data['message'];
-                  if (m != null && m.toString().isNotEmpty) {
-                    message = m.toString();
-                    hasCustomMessage = true;
-                  }
-                }
-              } else {
-                final m =
-                    data['message'] ??
-                    data['meta']?['message'] ??
-                    data['error'];
-                if (m != null && m.toString().isNotEmpty) {
-                  message = m.toString();
-                  hasCustomMessage = true;
-                } else {
-                  message =
-                      'Gagal memproses permintaan (${response.statusCode})';
-                }
-              }
-            } else if (data is String && data.isNotEmpty) {
-              message = data;
-              hasCustomMessage = true;
-            }
-
-            // Fallback status messages if no specific custom message was provided
-            if (response.statusCode == 401) {
-              if (!hasCustomMessage) {
-                message = 'Sesi Anda telah berakhir atau identitas login salah.';
-              }
-              if (!e.requestOptions.path.contains('/login')) {
-                onUnauthorized?.call();
-              }
-            } else if (response.statusCode == 429) {
-              if (!hasCustomMessage) {
-                message =
-                    'Terlalu banyak permintaan. Silakan tunggu beberapa saat.';
-              }
-            } else if (response.statusCode == 403) {
-              if (!hasCustomMessage) {
-                message = 'Anda tidak memiliki izin untuk mengakses fitur ini.';
-              }
-            } else if (response.statusCode == 404) {
-              if (!hasCustomMessage) {
-                message = 'Data yang diminta tidak ditemukan.';
-              }
-            } else if (response.statusCode == 422) {
-              if (!hasCustomMessage) {
-                message = 'Data yang dimasukkan tidak valid.';
-              }
-            } else if (response.statusCode != null &&
-                response.statusCode! >= 500) {
-              if (!hasCustomMessage) {
-                message = 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
-              }
-            }
-          } else if (e.type == DioExceptionType.connectionTimeout ||
-              e.type == DioExceptionType.receiveTimeout ||
-              e.type == DioExceptionType.sendTimeout) {
-            message = 'Koneksi ke server terputus (waktu habis). Silakan coba lagi.';
-          } else if (e.type == DioExceptionType.connectionError ||
-              e.error is SocketException ||
-              e.error is HandshakeException ||
-              e.error is TlsException) {
-            message = 'Gagal terhubung ke server. Periksa koneksi internet Anda.';
-          } else {
-            message = 'Terjadi gangguan saat berkomunikasi dengan server. Silakan coba lagi.';
-          }
-
-          final customException = ApiException(
-            message: _localizeBackendMessage(message),
-            statusCode: response?.statusCode,
-            errors: errors,
-          );
-
-          return handler.reject(
-            DioException(
-              requestOptions: e.requestOptions,
-              response: e.response,
-              type: e.type,
-              error: customException,
-            ),
-          );
-        },
+      ApiInterceptor(
+        storage: _storage,
+        onUnauthorized: () => onUnauthorized?.call(),
+        onServerReachabilityChanged: (reachable) =>
+            onServerReachabilityChanged?.call(reachable),
       ),
     );
   }
@@ -232,18 +76,6 @@ class ApiClient {
         host.startsWith('192.168.') ||
         host.startsWith('10.');
     return isLocalDev;
-  }
-
-  static String _resolveFullPath(String baseUrl, String path) {
-    var b = baseUrl.trim();
-    while (b.endsWith('/')) {
-      b = b.substring(0, b.length - 1);
-    }
-    var p = path.trim();
-    if (!p.startsWith('/')) {
-      p = '/$p';
-    }
-    return '$b$p';
   }
 
   Future<Response> get(
@@ -344,69 +176,4 @@ class ApiClient {
       return false;
     }
   }
-}
-
-String _localizeBackendMessage(String raw) {
-  final trimmed = raw.trim();
-  final lower = trimmed.toLowerCase();
-
-  if (lower.contains('provided credentials are incorrect') ||
-      lower.contains('credentials do not match') ||
-      lower.contains('invalid credentials') ||
-      lower.contains('these credentials')) {
-    return 'Identitas login atau kata sandi yang Anda masukkan salah.';
-  }
-  if (lower.contains('unauthenticated') ||
-      lower.contains('session has expired')) {
-    return 'Sesi Anda telah berakhir. Silakan masuk kembali.';
-  }
-  if (lower.contains('too many attempts') ||
-      lower.contains('too many requests')) {
-    return 'Terlalu banyak percobaan. Silakan coba lagi dalam beberapa saat.';
-  }
-  if (lower.contains('given data was invalid') ||
-      lower.contains('invalid input')) {
-    return 'Data yang dimasukkan tidak valid.';
-  }
-  if (lower.contains('server error') ||
-      lower.contains('internal server error')) {
-    return 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
-  }
-  if (lower.contains('email has already been taken') ||
-      lower.contains('email already exists')) {
-    return 'Alamat email sudah terdaftar.';
-  }
-  if (lower.contains('password must be at least') ||
-      lower.contains('password must contain')) {
-    return 'Kata sandi minimal 8 karakter.';
-  }
-  if (lower.contains('password confirmation does not match') ||
-      lower.contains('passwords do not match')) {
-    return 'Konfirmasi kata sandi tidak cocok.';
-  }
-  if (lower.contains('field is required')) {
-    return 'Kolom ini wajib diisi.';
-  }
-  if (lower.contains('user not found') || lower.contains('account not found')) {
-    return 'Pengguna tidak ditemukan.';
-  }
-  if (lower.contains('token has expired') || lower.contains('expired token')) {
-    return 'Token kedaluwarsa. Silakan ajukan permintaan ulang.';
-  }
-  if (lower.contains('token is invalid') || lower.contains('invalid token')) {
-    return 'Token tidak valid.';
-  }
-  if (lower.contains('outside the office radius') ||
-      lower.contains('outside radius')) {
-    return 'Anda berada di luar radius kantor.';
-  }
-  if (lower.contains('mock location') || lower.contains('fake gps')) {
-    return 'Terdeteksi lokasi palsu (Fake GPS). Harap nonaktifkan Fake GPS.';
-  }
-  if (lower.contains('permission was denied') ||
-      lower.contains('location permission')) {
-    return 'Izin lokasi ditolak.';
-  }
-
-  return trimmed;
 }
