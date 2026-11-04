@@ -93,5 +93,69 @@ void main() {
       expect(find.text('Kebijakan Privasi'), findsOneWidget);
       expect(find.text('Saya Mengerti & Tutup'), findsOneWidget);
     });
+
+    testWidgets('PrivacyPolicyHighlightsBanner renders custom items properly', (tester) async {
+      const customItems = [
+        PrivacyHighlight(
+          icon: Icons.shield,
+          title: 'Custom Title',
+          desc: 'Custom Description',
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const Scaffold(
+            body: PrivacyPolicyHighlightsBanner(items: customItems),
+          ),
+        ),
+      );
+
+      expect(find.text('Ikhtisar Komitmen Privasi Kami'), findsOneWidget);
+      expect(find.text('Custom Title'), findsOneWidget);
+      expect(find.text('Custom Description'), findsOneWidget);
+      expect(find.byIcon(Icons.shield), findsOneWidget);
+    });
+
+    testWidgets('PrivacyPolicySectionCard renders section number, badge, and bullets', (tester) async {
+      const testSection = PrivacyPolicySection(
+        icon: Icons.verified_user,
+        sectionNumber: '99',
+        title: 'Ketentuan Khusus',
+        badge: 'Penting',
+        badgeColor: Colors.deepOrange,
+        content: 'Isi ringkas ketentuan.',
+        bulletPoints: ['Poin A', 'Poin B'],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const Scaffold(
+            body: PrivacyPolicySectionCard(section: testSection),
+          ),
+        ),
+      );
+
+      expect(find.text('99. Ketentuan Khusus'), findsOneWidget);
+      expect(find.text('Penting'), findsOneWidget);
+      expect(find.text('Isi ringkas ketentuan.'), findsOneWidget);
+      expect(find.text('Poin A'), findsOneWidget);
+      expect(find.text('Poin B'), findsOneWidget);
+      expect(find.byIcon(Icons.verified_user), findsOneWidget);
+    });
+
+    test('privacySections and privacyHighlights static data integrity', () {
+      expect(privacySections.length, equals(12));
+      expect(privacyHighlights.length, equals(4));
+
+      for (final s in privacySections) {
+        expect(s.sectionNumber.isNotEmpty, isTrue);
+        expect(s.title.isNotEmpty, isTrue);
+        expect(s.content.isNotEmpty, isTrue);
+      }
+    });
   });
 }
+
