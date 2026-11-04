@@ -213,7 +213,6 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
     }
 
     final topPadding = MediaQuery.of(context).padding.top;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
     final isDark = context.isDarkMode;
 
     return Scaffold(
@@ -283,7 +282,7 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                 Positioned(
                   left: 16,
                   right: 16,
-                  bottom: bottomPadding + 88,
+                  bottom: 16,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,

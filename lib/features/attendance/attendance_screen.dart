@@ -202,7 +202,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
           onRefresh: () => ref.read(todayAttendanceProvider.notifier).refresh(),
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(16, isOffline ? 4 : 12, 16, 96),
+            padding: EdgeInsets.fromLTRB(16, isOffline ? 4 : 12, 16, 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

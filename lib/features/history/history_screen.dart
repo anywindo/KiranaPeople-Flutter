@@ -255,7 +255,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   if (filteredList.isEmpty) {
                     return ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.only(bottom: 96),
                       children: [
                         const SizedBox(height: 40),
                         HistoryEmptyState(
@@ -270,7 +269,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       historyState.hasMore && !historyState.filter.isActive;
                   return ListView.separated(
                     controller: _scrollController,
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     itemCount: filteredList.length + (showLoadingMore ? 1 : 0),
                     separatorBuilder: (context, index) =>
                         const SizedBox(height: 18),

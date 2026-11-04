@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,7 +75,6 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     final isOffline = ref.watch(isOfflineProvider);
 
     return Scaffold(
-      extendBody: true,
       backgroundColor: context.scaffoldBg,
       body: Column(
         children: [
@@ -95,133 +93,62 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(
-                    alpha: context.isDarkMode ? 0.40 : 0.08,
-                  ),
-                  blurRadius: 24,
-                  spreadRadius: 0,
-                  offset: const Offset(0, 8),
-                ),
-                BoxShadow(
-                  color: AppColors.primary.withValues(
-                    alpha: context.isDarkMode ? 0.08 : 0.04,
-                  ),
-                  blurRadius: 16,
-                  spreadRadius: -2,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(32),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                child: Container(
-                  height: 66,
-                  decoration: BoxDecoration(
-                    color: context.surfaceColor.withValues(
-                      alpha: context.isDarkMode ? 0.88 : 0.92,
-                    ),
-                    borderRadius: BorderRadius.circular(32),
-                    border: Border.all(
-                      color: context.isDarkMode
-                          ? Colors.white.withValues(alpha: 0.12)
-                          : context.borderColor.withValues(alpha: 0.7),
-                      width: 1.2,
-                    ),
-                  ),
-                  child: NavigationBarTheme(
-                    data: NavigationBarThemeData(
-                      height: 66,
-                      backgroundColor: Colors.transparent,
-                      surfaceTintColor: Colors.transparent,
-                      indicatorColor: AppColors.primary.withValues(
-                        alpha: context.isDarkMode ? 0.22 : 0.14,
-                      ),
-                      indicatorShape: const StadiumBorder(),
-                      labelTextStyle: WidgetStateProperty.resolveWith((states) {
-                        final isSelected = states.contains(WidgetState.selected);
-                        return TextStyle(
-                          fontSize: 11,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected
-                              ? AppColors.primary
-                              : (context.isDarkMode
-                                  ? AppColors.darkTextSecondary
-                                  : AppColors.textSecondary),
-                        );
-                      }),
-                      iconTheme: WidgetStateProperty.resolveWith((states) {
-                        final isSelected = states.contains(WidgetState.selected);
-                        return IconThemeData(
-                          size: 22,
-                          color: isSelected
-                              ? AppColors.primary
-                              : (context.isDarkMode
-                                  ? AppColors.darkTextSecondary
-                                  : AppColors.textSecondary),
-                        );
-                      }),
-                    ),
-                    child: NavigationBar(
-                      selectedIndex: _currentIndex,
-                      backgroundColor: Colors.transparent,
-                      surfaceTintColor: Colors.transparent,
-                      elevation: 0,
-                      animationDuration: const Duration(milliseconds: 350),
-                      onDestinationSelected: (index) {
-                        if (_currentIndex == index) return;
-                        HapticFeedback.selectionClick();
-                        switchToTab(index);
-                      },
-                      destinations: const [
-                        NavigationDestination(
-                          icon: Icon(Icons.home_outlined),
-                          selectedIcon:
-                              Icon(Icons.home_rounded, color: AppColors.primary),
-                          label: 'Beranda',
-                          tooltip: '',
-                        ),
-                        NavigationDestination(
-                          icon: Icon(Icons.map_outlined),
-                          selectedIcon:
-                              Icon(Icons.map_rounded, color: AppColors.primary),
-                          label: 'Peta',
-                          tooltip: '',
-                        ),
-                        NavigationDestination(
-                          icon: Icon(Icons.history_rounded),
-                          selectedIcon: Icon(
-                            Icons.history_toggle_off_rounded,
-                            color: AppColors.primary,
-                          ),
-                          label: 'Riwayat',
-                          tooltip: '',
-                        ),
-                        NavigationDestination(
-                          icon: Icon(Icons.person_outline_rounded),
-                          selectedIcon:
-                              Icon(Icons.person_rounded, color: AppColors.primary),
-                          label: 'Profil',
-                          tooltip: '',
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          color: context.surfaceColor,
+          border: Border(
+            top: BorderSide(color: context.borderColor, width: 1),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(
+                alpha: context.isDarkMode ? 0.25 : 0.04,
+              ),
+              blurRadius: 12,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: NavigationBar(
+          selectedIndex: _currentIndex,
+          backgroundColor: context.surfaceColor,
+          surfaceTintColor: Colors.transparent,
+          indicatorColor: AppColors.primary.withValues(
+            alpha: context.isDarkMode ? 0.22 : 0.14,
+          ),
+          indicatorShape: const StadiumBorder(),
+          animationDuration: const Duration(milliseconds: 350),
+          elevation: 0,
+          onDestinationSelected: (index) {
+            if (_currentIndex == index) return;
+            HapticFeedback.selectionClick();
+            switchToTab(index);
+          },
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home_rounded, color: AppColors.primary),
+              label: 'Beranda',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.map_outlined),
+              selectedIcon: Icon(Icons.map_rounded, color: AppColors.primary),
+              label: 'Peta',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.history_rounded),
+              selectedIcon: Icon(
+                Icons.history_toggle_off_rounded,
+                color: AppColors.primary,
+              ),
+              label: 'Riwayat',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.person_outline_rounded),
+              selectedIcon: Icon(Icons.person_rounded, color: AppColors.primary),
+              label: 'Profil',
+            ),
+          ],
         ),
       ),
     );
