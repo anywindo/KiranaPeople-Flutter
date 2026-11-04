@@ -1,10 +1,13 @@
 import 'dart:ui';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/offline_banner.dart';
+import '../../data/models/user_model.dart';
 import '../../providers/attendance_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/connectivity_provider.dart';
 import '../../providers/history_provider.dart';
 import '../attendance/attendance_screen.dart';
@@ -71,9 +74,86 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     ProfileScreen(),
   ];
 
+  Widget _buildNavAvatar({
+    required BuildContext context,
+    required UserModel? user,
+    required bool isSelected,
+  }) {
+    final avatarUrl = user?.fullAvatarUrl ?? user?.avatar;
+    final hasAvatar = avatarUrl != null && avatarUrl.trim().isNotEmpty;
+
+    return Container(
+      width: 26,
+      height: 26,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: isSelected
+              ? AppColors.primary
+              : (context.isDarkMode
+                  ? AppColors.darkTextSecondary.withValues(alpha: 0.45)
+                  : AppColors.textSecondary.withValues(alpha: 0.35)),
+          width: isSelected ? 2.0 : 1.2,
+        ),
+      ),
+      child: ClipOval(
+        child: hasAvatar
+            ? CachedNetworkImage(
+                imageUrl: avatarUrl,
+                fit: BoxFit.cover,
+                errorWidget: (_, _, _) =>
+                    _buildNavFallback(context, user, isSelected),
+                placeholder: (_, _) => Container(
+                  color: context.surfaceSecondaryColor,
+                ),
+              )
+            : _buildNavFallback(context, user, isSelected),
+      ),
+    );
+  }
+
+  Widget _buildNavFallback(
+    BuildContext context,
+    UserModel? user,
+    bool isSelected,
+  ) {
+    final name = user?.name.trim() ?? '';
+    if (name.isNotEmpty) {
+      final initial = name.substring(0, 1).toUpperCase();
+      return Container(
+        color: isSelected
+            ? AppColors.primary.withValues(alpha: 0.15)
+            : context.surfaceSecondaryColor,
+        child: Center(
+          child: Text(
+            initial,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color:
+                  isSelected ? AppColors.primary : context.textSecondaryColor,
+            ),
+          ),
+        ),
+      );
+    }
+    return Container(
+      color: context.surfaceSecondaryColor,
+      child: Center(
+        child: Icon(
+          isSelected ? Icons.person_rounded : Icons.person_outline_rounded,
+          size: 16,
+          color: isSelected ? AppColors.primary : context.textSecondaryColor,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isOffline = ref.watch(isOfflineProvider);
+    final authState = ref.watch(authProvider);
+    final user = authState.user;
 
     return Scaffold(
       extendBody: true,
@@ -234,22 +314,22 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                             HapticFeedback.selectionClick();
                             switchToTab(index);
                           },
-                          destinations: const [
-                            NavigationDestination(
+                          destinations: [
+                            const NavigationDestination(
                               icon: Icon(Icons.home_outlined),
                               selectedIcon:
                                   Icon(Icons.home_rounded, color: AppColors.primary),
                               label: 'Beranda',
                               tooltip: '',
                             ),
-                            NavigationDestination(
+                            const NavigationDestination(
                               icon: Icon(Icons.map_outlined),
                               selectedIcon:
                                   Icon(Icons.map_rounded, color: AppColors.primary),
                               label: 'Peta',
                               tooltip: '',
                             ),
-                            NavigationDestination(
+                            const NavigationDestination(
                               icon: Icon(Icons.history_rounded),
                               selectedIcon: Icon(
                                 Icons.history_toggle_off_rounded,
@@ -259,9 +339,16 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                               tooltip: '',
                             ),
                             NavigationDestination(
-                              icon: Icon(Icons.person_outline_rounded),
-                              selectedIcon:
-                                  Icon(Icons.person_rounded, color: AppColors.primary),
+                              icon: _buildNavAvatar(
+                                context: context,
+                                user: user,
+                                isSelected: false,
+                              ),
+                              selectedIcon: _buildNavAvatar(
+                                context: context,
+                                user: user,
+                                isSelected: true,
+                              ),
                               label: 'Profil',
                               tooltip: '',
                             ),
