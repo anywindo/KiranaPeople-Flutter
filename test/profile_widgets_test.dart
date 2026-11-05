@@ -229,6 +229,19 @@ void main() {
       // Smaller profile section sticks on top:
       expect(find.text('Alexander Balmaceda José Miller'), findsOneWidget);
       expect(find.text('user'), findsOneWidget);
+
+      // Verify pill-shaped container decoration (matching navbar style)
+      final pillContainers = tester
+          .widgetList<Container>(find.byType(Container))
+          .where((c) {
+        final dec = c.decoration;
+        if (dec is BoxDecoration &&
+            dec.borderRadius == BorderRadius.circular(32)) {
+          return true;
+        }
+        return false;
+      });
+      expect(pillContainers, isNotEmpty);
     });
 
     testWidgets('ProfileScreen contains RefreshIndicator for pull-to-refresh', (tester) async {

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -237,7 +239,7 @@ class ProfileStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   });
 
   @override
-  double get minExtent => topPadding + 60.0;
+  double get minExtent => topPadding + 72.0;
 
   @override
   double get maxExtent {
@@ -294,7 +296,7 @@ class ProfileStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
       ),
       child: ClipRect(
         child: Container(
-          color: context.scaffoldBg,
+          color: Colors.transparent,
           child: Stack(
             fit: StackFit.expand,
             clipBehavior: Clip.hardEdge,
@@ -437,7 +439,7 @@ class ProfileStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
                 ),
               ],
 
-              // 2. STICKY TOP BAR SURFACE (Solid Surface with Dual Shadow & Contour Border)
+              // 2. Feathered Blur Gradient behind the top floating pill
               if (stickyBarOpacity > 0.0)
                 Positioned(
                   top: 0,
@@ -446,126 +448,184 @@ class ProfileStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
                   height: minExtent,
                   child: Opacity(
                     opacity: stickyBarOpacity,
+                    child: IgnorePointer(
+                      child: ClipRect(
+                        child: ShaderMask(
+                          shaderCallback: (Rect bounds) {
+                            return const LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Colors.black, Colors.black, Colors.transparent],
+                              stops: [0.0, 0.65, 1.0],
+                            ).createShader(bounds);
+                          },
+                          blendMode: BlendMode.dstIn,
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    context.scaffoldBg.withValues(
+                                      alpha: isDark ? 0.98 : 0.96,
+                                    ),
+                                    context.scaffoldBg.withValues(
+                                      alpha: isDark ? 0.96 : 0.94,
+                                    ),
+                                    context.scaffoldBg.withValues(
+                                      alpha: isDark ? 0.60 : 0.50,
+                                    ),
+                                    context.scaffoldBg.withValues(alpha: 0.0),
+                                  ],
+                                  stops: const [0.0, 0.55, 0.78, 1.0],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+              // 3. FLOATING PILL-SHAPED PROFILE SECTION (Mirrors the bottom floating navbar)
+              if (compactOpacity > 0.0)
+                Positioned(
+                  top: topPadding + 8.0,
+                  left: 20,
+                  right: 20,
+                  height: 56.0,
+                  child: Opacity(
+                    opacity: compactOpacity,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: context.surfaceColor,
-                        border: Border(
-                          bottom: BorderSide(
-                            color: isDark
-                                ? const Color(0xFF334155)
-                                : const Color(0xFFCBD5E1),
-                            width: 1.2,
-                          ),
+                        borderRadius: BorderRadius.circular(32),
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF334155).withValues(alpha: 0.8)
+                              : const Color(0xFFCBD5E1).withValues(alpha: 0.8),
+                          width: 1.2,
                         ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(
                               alpha: isDark ? 0.35 : 0.08,
                             ),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 6),
                           ),
                           BoxShadow(
                             color: Colors.black.withValues(
-                              alpha: isDark ? 0.20 : 0.04,
+                              alpha: isDark ? 0.18 : 0.04,
                             ),
-                            blurRadius: 3,
-                            offset: const Offset(0, 1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
-                    ),
-                  ),
-                ),
-
-              // 3. COMPACT SMALLER PROFILE SECTION (Small Avatar + Name + Handle)
-              if (compactOpacity > 0.0)
-                Positioned(
-                  top: topPadding,
-                  left: 16,
-                  right: 16,
-                  height: 60.0,
-                  child: Opacity(
-                    opacity: compactOpacity,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Small circular avatar (38px)
-                        GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () =>
-                              _showEnlargedPhotoDialog(context, user, userName),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(32),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                           child: Container(
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isDark
-                                    ? const Color(0xFF334155)
-                                    : const Color(0xFFCBD5E1),
-                                width: 1.5,
-                              ),
+                            color: context.surfaceColor.withValues(
+                              alpha: isDark ? 0.82 : 0.88,
                             ),
-                            child: ClipOval(
-                              child:
-                                  (user?.fullAvatarUrl != null &&
-                                      user!.fullAvatarUrl!.isNotEmpty)
-                                  ? CachedNetworkImage(
-                                      imageUrl: user!.fullAvatarUrl!,
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) =>
-                                          const ShimmerLoading(
-                                            child: SkeletonBox.circle(size: 38),
-                                          ),
-                                      errorWidget: (context, url, error) =>
-                                          _buildInitialAvatar(
-                                            userName,
-                                            fontSize: 14,
-                                          ),
-                                    )
-                                  : _buildInitialAvatar(
-                                      userName,
-                                      fontSize: 14,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 7,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Small circular avatar (38px)
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () => _showEnlargedPhotoDialog(
+                                    context,
+                                    user,
+                                    userName,
+                                  ),
+                                  child: Container(
+                                    width: 38,
+                                    height: 38,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: isDark
+                                            ? const Color(0xFF334155)
+                                            : const Color(0xFFCBD5E1),
+                                        width: 1.5,
+                                      ),
                                     ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-
-                        // Name & Handle in compact row
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                userName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.textPrimaryColor,
+                                    child: ClipOval(
+                                      child: (user?.fullAvatarUrl != null &&
+                                              user!.fullAvatarUrl!.isNotEmpty)
+                                          ? CachedNetworkImage(
+                                              imageUrl: user!.fullAvatarUrl!,
+                                              fit: BoxFit.cover,
+                                              placeholder: (context, url) =>
+                                                  const ShimmerLoading(
+                                                child: SkeletonBox.circle(
+                                                  size: 38,
+                                                ),
+                                              ),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      _buildInitialAvatar(
+                                                userName,
+                                                fontSize: 14,
+                                              ),
+                                            )
+                                          : _buildInitialAvatar(
+                                              userName,
+                                              fontSize: 14,
+                                            ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              if (userHandle.isNotEmpty) ...[
-                                const SizedBox(height: 1),
-                                Text(
-                                  userHandle,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: context.textSecondaryColor,
+                                const SizedBox(width: 12),
+
+                                // Name & Handle in compact row
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        userName,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 14.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: context.textPrimaryColor,
+                                        ),
+                                      ),
+                                      if (userHandle.isNotEmpty) ...[
+                                        const SizedBox(height: 1),
+                                        Text(
+                                          userHandle,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 11.5,
+                                            fontWeight: FontWeight.w500,
+                                            color: context.textSecondaryColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ),
                               ],
-                            ],
+                            ),
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),

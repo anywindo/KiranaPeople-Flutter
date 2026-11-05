@@ -6,7 +6,6 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../providers/auth_provider.dart';
-import '../dialogs/photo_confirm_dialog.dart';
 import '../profile_actions.dart';
 
 class PhotoSourceSheet extends StatelessWidget {
