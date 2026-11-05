@@ -11,6 +11,8 @@ import '../../data/models/shift_model.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/history_provider.dart';
 import '../attendance/camera_selfie_view.dart';
+import '../attendance/shift_picker_sheet.dart';
+import '../attendance/widgets/shift_confirmation_dialog.dart';
 import 'widgets/map_attendance_action_card.dart';
 import 'widgets/map_controls_overlay.dart';
 import 'widgets/map_markers_layer.dart';
@@ -123,10 +125,42 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
     required Shift? selectedShift,
     required dynamic workLocation,
   }) async {
+    final availableShifts =
+        ref.read(todayAttendanceProvider).data.value?.availableShifts ?? [];
+
+    Shift? effectiveShift = selectedShift ??
+        (availableShifts.isNotEmpty ? availableShifts.first : null);
+
+    if (targetAction == AttendanceEventType.startShift) {
+      if (effectiveShift != null) {
+        final confirmed = await ShiftConfirmationDialog.show(
+          context,
+          shift: effectiveShift,
+          availableShifts:
+              availableShifts.isNotEmpty ? availableShifts : [effectiveShift],
+          onShiftChanged: (newShift) {
+            effectiveShift = newShift;
+            ref.read(todayAttendanceProvider.notifier).selectShift(newShift);
+          },
+        );
+        if (confirmed != true) return;
+      } else if (availableShifts.isNotEmpty) {
+        ShiftPickerSheet.show(
+          context,
+          shifts: availableShifts,
+          selectedShift: selectedShift,
+          onShiftSelected: (s) {
+            ref.read(todayAttendanceProvider.notifier).selectShift(s);
+          },
+        );
+        return;
+      }
+    }
+
     final res = await CameraSelfieView.push(
       context,
       action: targetAction,
-      shiftId: selectedShift?.id,
+      shiftId: effectiveShift?.id ?? selectedShift?.id,
       workLocation: workLocation,
     );
     if (res == true) {

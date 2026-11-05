@@ -350,8 +350,9 @@ class AttendanceGreetingSection extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 8),
-        const AttendanceLiveClock(),
+        // jelek
+        // const SizedBox(width: 8),
+        // const AttendanceLiveClock(),
       ],
     );
   }

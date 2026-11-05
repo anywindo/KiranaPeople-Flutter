@@ -23,6 +23,7 @@ import 'widgets/attendance_event_detail_modal.dart';
 import 'widgets/attendance_header.dart';
 import 'widgets/attendance_logout_dialog.dart';
 import 'widgets/attendance_mode_switcher.dart';
+import 'widgets/shift_confirmation_dialog.dart';
 import 'widgets/shift_info_card.dart';
 import 'widgets/today_activity_card.dart';
 
@@ -100,25 +101,41 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     required dynamic workLocation,
   }) async {
     final availableShifts =
-        ref.read(todayAttendanceProvider).data.value?.availableShifts;
-    if (targetAction == AttendanceEventType.startShift &&
-        selectedShift == null &&
-        availableShifts?.isNotEmpty == true) {
-      ShiftPickerSheet.show(
-        context,
-        shifts: availableShifts!,
-        selectedShift: selectedShift,
-        onShiftSelected: (s) {
-          ref.read(todayAttendanceProvider.notifier).selectShift(s);
-        },
-      );
-      return;
+        ref.read(todayAttendanceProvider).data.value?.availableShifts ?? [];
+
+    Shift? effectiveShift = selectedShift ??
+        (availableShifts.isNotEmpty ? availableShifts.first : null);
+
+    if (targetAction == AttendanceEventType.startShift) {
+      if (effectiveShift != null) {
+        final confirmed = await ShiftConfirmationDialog.show(
+          context,
+          shift: effectiveShift,
+          availableShifts:
+              availableShifts.isNotEmpty ? availableShifts : [effectiveShift],
+          onShiftChanged: (newShift) {
+            effectiveShift = newShift;
+            ref.read(todayAttendanceProvider.notifier).selectShift(newShift);
+          },
+        );
+        if (confirmed != true) return;
+      } else if (availableShifts.isNotEmpty) {
+        ShiftPickerSheet.show(
+          context,
+          shifts: availableShifts,
+          selectedShift: selectedShift,
+          onShiftSelected: (s) {
+            ref.read(todayAttendanceProvider.notifier).selectShift(s);
+          },
+        );
+        return;
+      }
     }
 
     final res = await CameraSelfieView.push(
       context,
       action: targetAction,
-      shiftId: selectedShift?.id,
+      shiftId: effectiveShift?.id ?? selectedShift?.id,
       workLocation: workLocation,
     );
     if (res == true && mounted) {

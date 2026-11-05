@@ -53,8 +53,6 @@ void main() {
       );
 
       expect(find.text('Budi Santoso'), findsOneWidget);
-      expect(find.byType(AttendanceLiveClock), findsOneWidget);
-      expect(find.byIcon(Icons.access_time_filled_rounded), findsOneWidget);
     });
 
     testWidgets('AttendanceHeader renders long user name gracefully with ContinuousMarqueeText',
@@ -85,7 +83,6 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(find.text('Alexander Balmacéda José Miller Wilson'), findsWidgets);
-      expect(find.byType(AttendanceLiveClock), findsOneWidget);
       expect(tester.takeException(), isNull); // zero layout overflow
     });
   });
