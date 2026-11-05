@@ -7,6 +7,7 @@ import 'package:kirana_people/data/models/shift_model.dart';
 import 'package:kirana_people/features/history/widgets/history_empty_state.dart';
 import 'package:kirana_people/features/history/widgets/history_filter_bar.dart';
 import 'package:kirana_people/features/history/widgets/history_item_card.dart';
+import 'package:kirana_people/features/history/widgets/history_summary_card.dart';
 import 'package:kirana_people/features/history/widgets/history_filter_sheet.dart';
 import 'package:kirana_people/features/history/widgets/history_location_modal.dart';
 
@@ -180,6 +181,45 @@ void main() {
 
       expect(find.text('Dalam radius presensi (25 m dari kantor)'), findsOneWidget);
       expect(find.text('Jarak 1.25 km dari titik kantor (Radius: 50m)'), findsOneWidget);
+    });
+
+    testWidgets('HistorySummaryCard calculates metrics and renders summary counts', (tester) async {
+      final records = [
+        AttendanceRecord(
+          id: 1,
+          date: '2026-11-01',
+          status: 'ON_TIME',
+          events: [],
+        ),
+        AttendanceRecord(
+          id: 2,
+          date: '2026-11-02',
+          status: 'LATE',
+          events: [],
+        ),
+        AttendanceRecord(
+          id: 3,
+          date: '2026-11-03',
+          status: 'ON_TIME',
+          events: [],
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: HistorySummaryCard(records: records),
+          ),
+        ),
+      );
+
+      expect(find.text('Ringkasan Kehadiran'), findsOneWidget);
+      expect(find.text('Total Hadir'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('Tepat Waktu'), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('Terlambat'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
     });
   });
 }

@@ -116,4 +116,34 @@ class AttendanceRecord {
           : [],
     );
   }
+
+  bool get isLate {
+    AttendanceEvent? startShiftEvent;
+    for (final e in events) {
+      if (e.eventType == AttendanceEventType.startShift) {
+        startShiftEvent = e;
+        break;
+      }
+    }
+    String? checkInTime;
+    if (startShiftEvent != null) {
+      final dt = DateTime.tryParse(startShiftEvent.timestamp);
+      final localDt = dt != null ? (dt.isUtc ? dt.toLocal() : dt) : null;
+      checkInTime = localDt != null
+          ? '${localDt.hour.toString().padLeft(2, '0')}:${localDt.minute.toString().padLeft(2, '0')}'
+          : null;
+    }
+
+    final isShiftStartLate = Shift.isShiftStartLate(
+      actualTime: checkInTime,
+      scheduledTime: shift?.startTime ?? '08:00',
+      ruleEnabled: shift?.attendanceRuleEnabled ?? true,
+      ruleMinutes: shift?.attendanceRuleMinutes ?? 15,
+    );
+
+    final rawStatus = status ?? (isShiftStartLate ? 'LATE' : 'Tepat Waktu');
+    return rawStatus.toUpperCase() == 'LATE' ||
+        rawStatus.toLowerCase().contains('terlambat') ||
+        (startShiftEvent != null && isShiftStartLate);
+  }
 }

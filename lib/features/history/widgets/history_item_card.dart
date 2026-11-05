@@ -5,7 +5,6 @@ import '../../../core/widgets/auto_oriented_image.dart';
 import '../../../core/widgets/bouncing_button.dart';
 import '../../../data/models/attendance_event_model.dart';
 import '../../../data/models/attendance_model.dart';
-import '../../../data/models/shift_model.dart';
 
 class HistoryItemCard extends StatelessWidget {
   final AttendanceRecord item;
@@ -72,36 +71,8 @@ class HistoryItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Find start shift event if present to validate shift start timing
-    AttendanceEvent? startShiftEvent;
-    for (final e in item.events) {
-      if (e.eventType == AttendanceEventType.startShift) {
-        startShiftEvent = e;
-        break;
-      }
-    }
-    String? checkInTime;
-    if (startShiftEvent != null) {
-      final dt = DateTime.tryParse(startShiftEvent.timestamp);
-      final localDt = dt != null ? (dt.isUtc ? dt.toLocal() : dt) : null;
-      checkInTime = localDt != null
-          ? '${localDt.hour.toString().padLeft(2, '0')}:${localDt.minute.toString().padLeft(2, '0')}'
-          : formatShortTime(startShiftEvent.timestamp);
-    }
-
-    final isShiftStartLate = Shift.isShiftStartLate(
-      actualTime: checkInTime,
-      scheduledTime: item.shift?.startTime ?? '08:00',
-      ruleEnabled: item.shift?.attendanceRuleEnabled ?? true,
-      ruleMinutes: item.shift?.attendanceRuleMinutes ?? 15,
-    );
-
-    final rawStatus =
-        item.status ?? (isShiftStartLate ? 'LATE' : 'Tepat Waktu');
-    final isLate =
-        rawStatus.toUpperCase() == 'LATE' ||
-        rawStatus.toLowerCase().contains('terlambat') ||
-        (startShiftEvent != null && isShiftStartLate);
+    final isLate = item.isLate;
+    final rawStatus = item.status ?? (isLate ? 'LATE' : 'Tepat Waktu');
 
     String displayStatus = isLate ? 'Terlambat' : 'Tepat Waktu';
     if (!isLate &&
@@ -137,9 +108,23 @@ class HistoryItemCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: isLate
-                        ? const Color(0xFFFFF1F2)
-                        : const Color(0xFFDCFCE7),
+                        ? (context.isDarkMode
+                            ? const Color(0xFF3B151E)
+                            : const Color(0xFFFFF1F2))
+                        : (context.isDarkMode
+                            ? const Color(0xFF064E3B).withValues(alpha: 0.5)
+                            : const Color(0xFFDCFCE7)),
                     borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: isLate
+                          ? (context.isDarkMode
+                              ? const Color(0xFF4C1D24)
+                              : const Color(0xFFFFE4E6))
+                          : (context.isDarkMode
+                              ? const Color(0xFF047857).withValues(alpha: 0.4)
+                              : const Color(0xFFBBF7D0)),
+                      width: 1.0,
+                    ),
                   ),
                   child: Text(
                     displayStatus,
@@ -147,8 +132,10 @@ class HistoryItemCard extends StatelessWidget {
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                       color: isLate
-                          ? const Color(0xFFE11D48)
-                          : const Color(0xFF15803D),
+                          ? const Color(0xFFEF4444)
+                          : (context.isDarkMode
+                              ? const Color(0xFF34D399)
+                              : const Color(0xFF15803D)),
                     ),
                   ),
                 ),
@@ -162,6 +149,12 @@ class HistoryItemCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: context.surfaceSecondaryColor,
                     borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: context.isDarkMode
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFCBD5E1),
+                      width: 1.0,
+                    ),
                   ),
                   child: Text(
                     shiftName,
@@ -195,19 +188,19 @@ class HistoryItemCard extends StatelessWidget {
                   color: context.isDarkMode
                       ? const Color(0xFF334155)
                       : const Color(0xFFCBD5E1),
-                  width: 1.2,
+                  width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(
-                      alpha: context.isDarkMode ? 0.30 : 0.06,
+                      alpha: context.isDarkMode ? 0.35 : 0.08,
                     ),
-                    blurRadius: 10,
+                    blurRadius: 14,
                     offset: const Offset(0, 4),
                   ),
                   BoxShadow(
                     color: Colors.black.withValues(
-                      alpha: context.isDarkMode ? 0.20 : 0.03,
+                      alpha: context.isDarkMode ? 0.18 : 0.03,
                     ),
                     blurRadius: 3,
                     offset: const Offset(0, 1),
@@ -312,7 +305,12 @@ class HistoryItemCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: context.surfaceSecondaryColor,
                         shape: BoxShape.circle,
-                        border: Border.all(color: context.borderColor),
+                        border: Border.all(
+                          color: context.isDarkMode
+                              ? const Color(0xFF334155)
+                              : const Color(0xFFCBD5E1),
+                          width: 1.2,
+                        ),
                       ),
                       child: Icon(
                         Icons.chevron_right_rounded,

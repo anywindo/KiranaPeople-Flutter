@@ -114,9 +114,25 @@ class MapAttendanceActionCard extends StatelessWidget {
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-          width: 1.2,
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+          width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: isDark ? 0.35 : 0.08,
+            ),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: isDark ? 0.20 : 0.04,
+            ),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -164,8 +180,10 @@ class MapAttendanceActionCard extends StatelessWidget {
                           : const Color(0xFFFFF1F5),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                        width: 1,
+                        color: AppColors.primary.withValues(
+                          alpha: isDark ? 0.50 : 0.35,
+                        ),
+                        width: 1.2,
                       ),
                     ),
                     child: const Row(
@@ -196,13 +214,18 @@ class MapAttendanceActionCard extends StatelessWidget {
 
           // Row 2: Shift Information Container
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               color: isDark
-                  ? AppColors.darkSurfaceSecondary.withValues(alpha: 0.6)
-                  : const Color(0xFFF9FAFB),
+                  ? const Color(0xFF0F172A)
+                  : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: context.borderColor),
+              border: Border.all(
+                color: isDark
+                    ? const Color(0xFF334155)
+                    : const Color(0xFFCBD5E1),
+                width: 1.2,
+              ),
             ),
             child: Row(
               children: [

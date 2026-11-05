@@ -12,6 +12,7 @@ import 'widgets/history_filter_bar.dart';
 import 'widgets/history_filter_sheet.dart';
 import 'widgets/history_item_card.dart';
 import 'widgets/history_location_modal.dart';
+import 'widgets/history_summary_card.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -125,31 +126,34 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 ),
                 data: (records) {
                   if (records.isEmpty) {
-                    return Center(
+                    return SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(
                           24.0,
-                          listTopPadding,
+                          listTopPadding + 60,
                           24.0,
                           128.0,
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.calendar_today_outlined,
-                              size: 48,
-                              color: AppColors.textMuted,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Belum ada riwayat presensi tercatat.',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: context.textSecondaryColor,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.calendar_today_outlined,
+                                size: 48,
+                                color: AppColors.textMuted,
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 12),
+                              Text(
+                                'Belum ada riwayat presensi tercatat.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: context.textSecondaryColor,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -179,17 +183,28 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   return ListView.separated(
                     controller: _scrollController,
                     padding: EdgeInsets.fromLTRB(16, listTopPadding, 16, 128),
-                    itemCount: filteredList.length + (showLoadingMore ? 1 : 0),
+                    itemCount: filteredList.length + 1 + (showLoadingMore ? 1 : 0),
                     separatorBuilder: (context, index) =>
                         const SizedBox(height: 18),
                     itemBuilder: (context, index) {
-                      if (index == filteredList.length) {
+                      // Index 0: Monthly / Filtered Attendance Summary Card
+                      if (index == 0) {
+                        return HistorySummaryCard(
+                          records: historyState.filter.isActive
+                              ? filteredList
+                              : records,
+                        );
+                      }
+
+                      // Trailing Loading Indicator for pagination
+                      if (showLoadingMore && index == filteredList.length + 1) {
                         return const Padding(
                           padding: EdgeInsets.symmetric(vertical: 8),
                           child: HistoryCardSkeleton(),
                         );
                       }
-                      final item = filteredList[index];
+
+                      final item = filteredList[index - 1];
 
                       return HistoryItemCard(
                         item: item,
@@ -301,8 +316,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                       ? AppColors.primary
                                       : (context.isDarkMode
                                             ? const Color(0xFF334155)
-                                            : const Color(0xFFE2E8F0)),
-                                  width: 1.2,
+                                            : const Color(0xFFCBD5E1)),
+                                  width: 1.5,
                                 ),
                               ),
                               child: Icon(
@@ -329,8 +344,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                 border: Border.all(
                                   color: context.isDarkMode
                                       ? const Color(0xFF334155)
-                                      : const Color(0xFFE2E8F0),
-                                  width: 1.2,
+                                      : const Color(0xFFCBD5E1),
+                                  width: 1.5,
                                 ),
                               ),
                               child: const Icon(

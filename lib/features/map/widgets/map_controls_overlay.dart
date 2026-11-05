@@ -21,16 +21,25 @@ class MapControlsOverlay extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: context.surfaceColor,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? context.borderColor : Colors.transparent,
-          width: 1,
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+          width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.10),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(
+              alpha: isDark ? 0.35 : 0.08,
+            ),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: isDark ? 0.18 : 0.04,
+            ),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -49,7 +58,11 @@ class MapControlsOverlay extends StatelessWidget {
               onRecenter();
             },
           ),
-          Container(width: 24, height: 1, color: context.borderColor),
+          Container(
+            width: 24,
+            height: 1.5,
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+          ),
           IconButton(
             tooltip: 'Tampilkan Semua Titik',
             icon: Icon(

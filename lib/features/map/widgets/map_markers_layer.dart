@@ -36,9 +36,9 @@ class MapMarkersLayer extends StatelessWidget {
                 radius: radius,
                 useRadiusInMeter: true,
                 color: const Color(0xFF10B981)
-                    .withValues(alpha: isDark ? 0.22 : 0.18),
+                    .withValues(alpha: isDark ? 0.20 : 0.15),
                 borderColor: const Color(0xFF10B981),
-                borderStrokeWidth: 2.0,
+                borderStrokeWidth: 2.2,
               ),
             ],
           ),
@@ -60,12 +60,12 @@ class MapMarkersLayer extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: AppColors.primary,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                        boxShadow: const [
+                        border: Border.all(color: Colors.white, width: 2.5),
+                        boxShadow: [
                           BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
+                            color: Colors.black.withValues(alpha: 0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
                           ),
                         ],
                       ),
@@ -79,24 +79,24 @@ class MapMarkersLayer extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
-                        vertical: 4,
+                        vertical: 5,
                       ),
                       decoration: BoxDecoration(
                         color: context.surfaceColor,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isDark
-                              ? context.borderColor
-                              : Colors.transparent,
-                          width: 1,
+                              ? const Color(0xFF334155)
+                              : const Color(0xFFCBD5E1),
+                          width: 1.5,
                         ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(
-                              alpha: isDark ? 0.35 : 0.12,
+                              alpha: isDark ? 0.35 : 0.10,
                             ),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
                           ),
                         ],
                       ),
@@ -130,11 +130,15 @@ class MapMarkersLayer extends StatelessWidget {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF007AFF),
+                        color: const Color(0xFF0284C7),
                         borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 1.2,
+                        ),
                         boxShadow: const [
                           BoxShadow(
-                            color: Colors.black12,
+                            color: Colors.black26,
                             blurRadius: 4,
                             offset: Offset(0, 1),
                           ),
@@ -153,14 +157,14 @@ class MapMarkersLayer extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(7),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF007AFF),
+                        color: const Color(0xFF0284C7),
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                        boxShadow: const [
+                        border: Border.all(color: Colors.white, width: 2.5),
+                        boxShadow: [
                           BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 6,
-                            offset: Offset(0, 2),
+                            color: Colors.black.withValues(alpha: 0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
                           ),
                         ],
                       ),

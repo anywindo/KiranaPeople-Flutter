@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -33,17 +34,44 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
   String? _locationError;
   bool _isLoading = true;
   bool _isRefreshing = false;
+  StreamSubscription<Position>? _positionStreamSubscription;
 
   @override
   void initState() {
     super.initState();
     _fetchLocation();
+    _startLocationStream();
   }
 
   @override
   void dispose() {
+    _positionStreamSubscription?.cancel();
     _mapController.dispose();
     super.dispose();
+  }
+
+  void _startLocationStream() {
+    try {
+      const locationSettings = LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 3,
+      );
+      _positionStreamSubscription = Geolocator.getPositionStream(
+        locationSettings: locationSettings,
+      ).listen(
+        (pos) {
+          if (!mounted) return;
+          setState(() {
+            _currentPosition = pos;
+            _isLoading = false;
+            _locationError = null;
+          });
+        },
+        onError: (_) {
+          // Gracefully continue with static fetch on stream error
+        },
+      );
+    } catch (_) {}
   }
 
   Future<void> _fetchLocation({bool isManualRefresh = false}) async {
@@ -118,7 +146,7 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
       _mapController.fitCamera(
         CameraFit.bounds(
           bounds: bounds,
-          padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 120),
+          padding: const EdgeInsets.fromLTRB(48, 100, 48, 280),
         ),
       );
     } else {

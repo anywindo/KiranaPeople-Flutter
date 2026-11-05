@@ -13,6 +13,7 @@ class HistoryFilterBar extends ConsumerWidget {
     final historyState = ref.watch(historyProvider);
     final filter = historyState.filter;
     final notifier = ref.read(historyProvider.notifier);
+    final isDark = context.isDarkMode;
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -35,8 +36,12 @@ class HistoryFilterBar extends ConsumerWidget {
             label: 'Tepat Waktu',
             icon: Icons.check_circle_rounded,
             isSelected: filter.status == AttendanceHistoryStatusFilter.onTime,
-            activeColor: const Color(0xFF15803D),
-            activeBg: const Color(0xFFDCFCE7),
+            activeColor: isDark
+                ? const Color(0xFF34D399)
+                : const Color(0xFF15803D),
+            activeBg: isDark
+                ? const Color(0xFF064E3B).withValues(alpha: 0.5)
+                : const Color(0xFFDCFCE7),
             onTap: () => notifier.setStatusFilter(
               filter.status == AttendanceHistoryStatusFilter.onTime
                   ? AttendanceHistoryStatusFilter.all
@@ -51,8 +56,12 @@ class HistoryFilterBar extends ConsumerWidget {
             label: 'Terlambat',
             icon: Icons.alarm_rounded,
             isSelected: filter.status == AttendanceHistoryStatusFilter.late,
-            activeColor: const Color(0xFFE11D48),
-            activeBg: const Color(0xFFFFF1F2),
+            activeColor: isDark
+                ? const Color(0xFFF87171)
+                : const Color(0xFFE11D48),
+            activeBg: isDark
+                ? const Color(0xFF4C1D24).withValues(alpha: 0.5)
+                : const Color(0xFFFFF1F2),
             onTap: () => notifier.setStatusFilter(
               filter.status == AttendanceHistoryStatusFilter.late
                   ? AttendanceHistoryStatusFilter.all
@@ -118,7 +127,12 @@ class HistoryFilterBar extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: context.surfaceSecondaryColor,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: context.borderColor),
+                  border: Border.all(
+                    color: context.isDarkMode
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFCBD5E1),
+                    width: 1.2,
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -166,7 +180,9 @@ class HistoryFilterBar extends ConsumerWidget {
         : context.surfaceColor;
     final borderColor = isSelected
         ? (activeColor ?? AppColors.primary)
-        : context.borderColor;
+        : (context.isDarkMode
+              ? const Color(0xFF334155)
+              : const Color(0xFFCBD5E1));
 
     return InkWell(
       onTap: onTap,

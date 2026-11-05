@@ -31,26 +31,41 @@ class MapTopLocationPill extends StatelessWidget {
           color: context.surfaceColor,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: isDark ? context.borderColor : Colors.transparent,
-            width: 1,
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+            width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+              color: Colors.black.withValues(
+                alpha: isDark ? 0.35 : 0.08,
+              ),
               blurRadius: 16,
-              offset: const Offset(0, 4),
+              offset: const Offset(0, 6),
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(
+                alpha: isDark ? 0.18 : 0.04,
+              ),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(7),
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(
                   alpha: isDark ? 0.20 : 0.12,
                 ),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: AppColors.primary.withValues(
+                    alpha: isDark ? 0.40 : 0.25,
+                  ),
+                  width: 1.0,
+                ),
               ),
               child: const Icon(
                 Icons.apartment_rounded,
@@ -87,6 +102,12 @@ class MapTopLocationPill extends StatelessWidget {
                         ? AppColors.primary.withValues(alpha: 0.18)
                         : const Color(0xFFFFF1F5),
                     shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.primary.withValues(
+                        alpha: isDark ? 0.40 : 0.25,
+                      ),
+                      width: 1.0,
+                    ),
                   ),
                   child: isRefreshing
                       ? const Center(
