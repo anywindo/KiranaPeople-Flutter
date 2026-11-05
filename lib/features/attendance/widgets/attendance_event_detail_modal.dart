@@ -100,23 +100,8 @@ class AttendanceEventDetailModal extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 1. Peta Lokasi (2 Pin + Radius)
-                    HistoryLocationMapView(
-                      userLatLng: userLatLng,
-                      officeLatLng: officeLatLng,
-                      officeName: officeName,
-                      radius: radius,
-                    ),
-                    const SizedBox(height: 10),
-                    HistoryLocationRadiusBadge(
-                      isInside: isInside,
-                      distance: distance,
-                      radius: radius,
-                    ),
-
-                    // 2. Foto Selfie Presensi (Disatukan dalam satu panel)
+                    // 1. Foto Selfie Presensi (Di atas)
                     if (hasPhoto) ...[
-                      const SizedBox(height: 18),
                       Row(
                         children: [
                           const Icon(
@@ -141,7 +126,41 @@ class AttendanceEventDetailModal extends StatelessWidget {
                         lat: lat,
                         lng: lng,
                       ),
+                      const SizedBox(height: 18),
                     ],
+
+                    // 2. Peta Lokasi Presensi (2 Pin + Radius)
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.map_rounded,
+                          size: 16,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Peta Lokasi Presensi',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: context.textPrimaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    HistoryLocationMapView(
+                      userLatLng: userLatLng,
+                      officeLatLng: officeLatLng,
+                      officeName: officeName,
+                      radius: radius,
+                    ),
+                    const SizedBox(height: 10),
+                    HistoryLocationRadiusBadge(
+                      isInside: isInside,
+                      distance: distance,
+                      radius: radius,
+                    ),
                     const SizedBox(height: 8),
                   ],
                 ),
