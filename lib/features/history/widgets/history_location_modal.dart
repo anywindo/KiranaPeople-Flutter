@@ -65,10 +65,7 @@ class HistoryLocationModal extends StatelessWidget {
     final isInside = distance <= radius;
     final hasPhoto =
         event.fullSelfieUrl != null && event.fullSelfieUrl!.isNotEmpty;
-    int selectedTab = 0; // 0 = Map, 1 = Foto
-
-    return StatefulBuilder(
-      builder: (ctx, setModalState) => Container(
+    return Container(
         height: MediaQuery.of(context).size.height * 0.85,
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
         decoration: BoxDecoration(
@@ -96,36 +93,58 @@ class HistoryLocationModal extends StatelessWidget {
                 lat: lat,
                 lng: lng,
                 hasPhoto: hasPhoto,
-                selectedTab: selectedTab,
-                onTabChanged: (newTab) =>
-                    setModalState(() => selectedTab = newTab),
+                showTabs: false,
               ),
               const SizedBox(height: 14),
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (selectedTab == 1 && hasPhoto)
+                      // 1. Peta Lokasi (2 Pin + Radius)
+                      HistoryLocationMapView(
+                        userLatLng: userLatLng,
+                        officeLatLng: officeLatLng,
+                        officeName: officeName,
+                        radius: radius,
+                      ),
+                      const SizedBox(height: 10),
+                      HistoryLocationRadiusBadge(
+                        isInside: isInside,
+                        distance: distance,
+                        radius: radius,
+                      ),
+
+                      // 2. Foto Selfie Presensi (Disatukan dalam satu panel)
+                      if (hasPhoto) ...[
+                        const SizedBox(height: 18),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.camera_alt_rounded,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Foto Selfie Presensi',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                color: context.textPrimaryColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
                         HistoryLocationPhotoView(
                           event: event,
                           lat: lat,
                           lng: lng,
-                        )
-                      else ...[
-                        HistoryLocationMapView(
-                          userLatLng: userLatLng,
-                          officeLatLng: officeLatLng,
-                          officeName: officeName,
-                          radius: radius,
-                        ),
-                        const SizedBox(height: 10),
-                        HistoryLocationRadiusBadge(
-                          isInside: isInside,
-                          distance: distance,
-                          radius: radius,
                         ),
                       ],
+                      const SizedBox(height: 8),
                     ],
                   ),
                 ),
@@ -143,7 +162,7 @@ class HistoryLocationModal extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  onPressed: () => Navigator.pop(ctx),
+                  onPressed: () => Navigator.pop(context),
                   child: const Text(
                     'Tutup',
                     style: TextStyle(
@@ -156,7 +175,6 @@ class HistoryLocationModal extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }

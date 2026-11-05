@@ -26,7 +26,7 @@ class HistoryLocationMapView extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: SizedBox(
-            height: 360,
+            height: 280,
             child: FlutterMap(
               options: MapOptions(
                 initialCameraFit: CameraFit.coordinates(

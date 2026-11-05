@@ -10,7 +10,7 @@ import '../../history/widgets/location/history_location_map_view.dart';
 import '../../history/widgets/location/history_location_photo_view.dart';
 import '../../history/widgets/location/history_location_radius_badge.dart';
 
-class AttendanceEventDetailModal extends StatefulWidget {
+class AttendanceEventDetailModal extends StatelessWidget {
   final AttendanceEvent event;
   final WorkLocation? workLocation;
 
@@ -35,22 +35,12 @@ class AttendanceEventDetailModal extends StatefulWidget {
   }
 
   @override
-  State<AttendanceEventDetailModal> createState() =>
-      _AttendanceEventDetailModalState();
-}
-
-class _AttendanceEventDetailModalState
-    extends State<AttendanceEventDetailModal> {
-  int _selectedTab = 0; // 0 = Map, 1 = Foto
-
-  @override
   Widget build(BuildContext context) {
-    final event = widget.event;
     final lat = event.latitude ?? -7.025648;
     final lng = event.longitude ?? 109.957296;
     final userLatLng = LatLng(lat, lng);
 
-    final resolvedWorkLocation = widget.workLocation;
+    final resolvedWorkLocation = workLocation;
     final officeLatLng = resolvedWorkLocation != null
         ? LatLng(resolvedWorkLocation.latitude, resolvedWorkLocation.longitude)
         : const LatLng(-7.025801, 109.956894);
@@ -101,35 +91,58 @@ class _AttendanceEventDetailModalState
               lat: lat,
               lng: lng,
               hasPhoto: hasPhoto,
-              selectedTab: _selectedTab,
-              onTabChanged: (newTab) => setState(() => _selectedTab = newTab),
+              showTabs: false,
             ),
             const SizedBox(height: 14),
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_selectedTab == 1 && hasPhoto)
+                    // 1. Peta Lokasi (2 Pin + Radius)
+                    HistoryLocationMapView(
+                      userLatLng: userLatLng,
+                      officeLatLng: officeLatLng,
+                      officeName: officeName,
+                      radius: radius,
+                    ),
+                    const SizedBox(height: 10),
+                    HistoryLocationRadiusBadge(
+                      isInside: isInside,
+                      distance: distance,
+                      radius: radius,
+                    ),
+
+                    // 2. Foto Selfie Presensi (Disatukan dalam satu panel)
+                    if (hasPhoto) ...[
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.camera_alt_rounded,
+                            size: 16,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Foto Selfie Presensi',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: context.textPrimaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
                       HistoryLocationPhotoView(
                         event: event,
                         lat: lat,
                         lng: lng,
-                      )
-                    else ...[
-                      HistoryLocationMapView(
-                        userLatLng: userLatLng,
-                        officeLatLng: officeLatLng,
-                        officeName: officeName,
-                        radius: radius,
-                      ),
-                      const SizedBox(height: 10),
-                      HistoryLocationRadiusBadge(
-                        isInside: isInside,
-                        distance: distance,
-                        radius: radius,
                       ),
                     ],
+                    const SizedBox(height: 8),
                   ],
                 ),
               ),

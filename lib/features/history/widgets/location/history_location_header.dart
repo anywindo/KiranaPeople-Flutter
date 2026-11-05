@@ -11,7 +11,8 @@ class HistoryLocationHeader extends StatelessWidget {
   final double lng;
   final bool hasPhoto;
   final int selectedTab;
-  final ValueChanged<int> onTabChanged;
+  final ValueChanged<int>? onTabChanged;
+  final bool showTabs;
 
   const HistoryLocationHeader({
     super.key,
@@ -19,8 +20,9 @@ class HistoryLocationHeader extends StatelessWidget {
     required this.lat,
     required this.lng,
     required this.hasPhoto,
-    required this.selectedTab,
-    required this.onTabChanged,
+    this.selectedTab = 0,
+    this.onTabChanged,
+    this.showTabs = false,
   });
 
   @override
@@ -121,7 +123,7 @@ class HistoryLocationHeader extends StatelessWidget {
             ),
           ],
         ),
-        if (hasPhoto) ...[
+        if (showTabs && hasPhoto && onTabChanged != null) ...[
           const SizedBox(height: 14),
           Container(
             height: 38,
@@ -134,7 +136,7 @@ class HistoryLocationHeader extends StatelessWidget {
               children: [
                 Expanded(
                   child: InkWell(
-                    onTap: () => onTabChanged(0),
+                    onTap: () => onTabChanged!(0),
                     borderRadius: BorderRadius.circular(9),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
@@ -182,7 +184,7 @@ class HistoryLocationHeader extends StatelessWidget {
                 ),
                 Expanded(
                   child: InkWell(
-                    onTap: () => onTabChanged(1),
+                    onTap: () => onTabChanged!(1),
                     borderRadius: BorderRadius.circular(9),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
