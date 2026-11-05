@@ -17,10 +17,7 @@ class HistoryLocationRadiusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 7,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
         color: context.surfaceSecondaryColor,
         borderRadius: BorderRadius.circular(8),
@@ -29,13 +26,9 @@ class HistoryLocationRadiusBadge extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            isInside
-                ? Icons.check_circle_rounded
-                : Icons.info_outline_rounded,
+            isInside ? Icons.check_circle_rounded : Icons.info_outline_rounded,
             size: 15,
-            color: isInside
-                ? const Color(0xFF059669)
-                : const Color(0xFFD97706),
+            color: isInside ? const Color(0xFF059669) : const Color(0xFFD97706),
           ),
           const SizedBox(width: 6),
           Expanded(
@@ -57,4 +50,3 @@ class HistoryLocationRadiusBadge extends StatelessWidget {
     );
   }
 }
-

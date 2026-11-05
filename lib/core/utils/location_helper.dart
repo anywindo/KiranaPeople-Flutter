@@ -151,7 +151,9 @@ class LocationHelper {
         );
       }
 
-      position = await Geolocator.getCurrentPosition(locationSettings: settings);
+      position = await Geolocator.getCurrentPosition(
+        locationSettings: settings,
+      );
     } catch (_) {
       // Fallback 1: If live high-accuracy GPS times out indoors (e.g. basement, thick concrete),
       // quickly try medium-accuracy (Wi-Fi / Cell tower assisted) within 3s
@@ -170,7 +172,9 @@ class LocationHelper {
             timeLimit: Duration(seconds: 3),
           );
         }
-        position = await Geolocator.getCurrentPosition(locationSettings: fallbackSettings);
+        position = await Geolocator.getCurrentPosition(
+          locationSettings: fallbackSettings,
+        );
       } catch (_) {}
 
       // Fallback 2: Accept recent cached position (max 10 minutes old)

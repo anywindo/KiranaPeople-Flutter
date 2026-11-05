@@ -202,4 +202,3 @@ class PhotoSourceSheet extends StatelessWidget {
     return const SizedBox.shrink();
   }
 }
-

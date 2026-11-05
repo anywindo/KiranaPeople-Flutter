@@ -57,4 +57,3 @@ class OnboardingPasswordHeader extends StatelessWidget {
     );
   }
 }
-

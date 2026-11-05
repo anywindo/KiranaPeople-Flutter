@@ -34,10 +34,8 @@ class HistoryLocationModal extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => HistoryLocationModal(
-        event: event,
-        workLocation: workLocation,
-      ),
+      builder: (ctx) =>
+          HistoryLocationModal(event: event, workLocation: workLocation),
     );
   }
 
@@ -53,8 +51,8 @@ class HistoryLocationModal extends StatelessWidget {
 
     final officeName =
         (workLocation?.name != null && workLocation!.name.isNotEmpty)
-            ? workLocation!.name
-            : 'Kantor Utama (Tersono, Batang)';
+        ? workLocation!.name
+        : 'Kantor Utama (Tersono, Batang)';
 
     final radius = workLocation?.radius ?? 50.0;
 
@@ -97,15 +95,12 @@ class HistoryLocationModal extends StatelessWidget {
               lng: lng,
               hasPhoto: hasPhoto,
               selectedTab: selectedTab,
-              onTabChanged: (newTab) => setModalState(() => selectedTab = newTab),
+              onTabChanged: (newTab) =>
+                  setModalState(() => selectedTab = newTab),
             ),
             const SizedBox(height: 14),
             if (selectedTab == 1 && hasPhoto)
-              HistoryLocationPhotoView(
-                event: event,
-                lat: lat,
-                lng: lng,
-              )
+              HistoryLocationPhotoView(event: event, lat: lat, lng: lng)
             else ...[
               HistoryLocationMapView(
                 userLatLng: userLatLng,

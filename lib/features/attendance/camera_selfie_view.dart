@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -157,9 +158,7 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
         } catch (_) {}
         await _cameraSession.resumePreview();
         AppHaptics.error();
-        _showTopAlert(
-          faceResult.errorMessage ?? 'Wajah tidak terdeteksi!',
-        );
+        _showTopAlert(faceResult.errorMessage ?? 'Wajah tidak terdeteksi!');
         return;
       }
 
@@ -209,8 +208,9 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
     final Color textColor = isScreenFlashWarmup ? Colors.black87 : Colors.white;
 
     return Scaffold(
-      backgroundColor:
-          isScreenFlashWarmup ? const Color(0xFFFBFBFB) : Colors.black,
+      backgroundColor: isScreenFlashWarmup
+          ? const Color(0xFFFBFBFB)
+          : Colors.black,
       body: Stack(
         children: [
           SafeArea(
@@ -250,11 +250,7 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
 
           // Full-screen blinding white burst during screen flash capture
           if (_cameraSession.isScreenFlashing)
-            Positioned.fill(
-              child: Container(
-                color: Colors.white,
-              ),
-            ),
+            Positioned.fill(child: Container(color: Colors.white)),
 
           // Top Floating Alert Notification (Wajah Tidak Terdeteksi)
           if (_topAlertMessage != null)

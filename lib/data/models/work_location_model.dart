@@ -15,7 +15,9 @@ class WorkLocation {
 
   factory WorkLocation.fromJson(Map<String, dynamic> json) {
     return WorkLocation(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
       name: json['name']?.toString() ?? '',
       latitude: json['latitude'] is num
           ? (json['latitude'] as num).toDouble()

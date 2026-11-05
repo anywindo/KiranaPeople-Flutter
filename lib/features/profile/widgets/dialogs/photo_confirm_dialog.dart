@@ -11,9 +11,7 @@ class PhotoConfirmDialog {
     return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
           'Konfirmasi Foto',
           style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
@@ -67,4 +65,3 @@ class PhotoConfirmDialog {
     );
   }
 }
-

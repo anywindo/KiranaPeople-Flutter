@@ -40,7 +40,9 @@ class PrivacyPolicyHighlightsBanner extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? AppColors.primaryLight : AppColors.primaryDark,
+                  color: isDark
+                      ? AppColors.primaryLight
+                      : AppColors.primaryDark,
                 ),
               ),
             ],
@@ -110,4 +112,3 @@ class PrivacyPolicyHighlightsBanner extends StatelessWidget {
     );
   }
 }
-

@@ -18,13 +18,9 @@ class SubmissionNotesField extends StatelessWidget {
       decoration: const InputDecoration(
         labelText: 'Catatan (Opsional)',
         hintText: 'Misal: Bekerja dari kantor...',
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 12,
-        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       ),
       maxLines: 2,
     );
   }
 }
-

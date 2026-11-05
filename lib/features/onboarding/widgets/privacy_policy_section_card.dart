@@ -6,10 +6,7 @@ import '../models/privacy_policy_data.dart';
 class PrivacyPolicySectionCard extends StatelessWidget {
   final PrivacyPolicySection section;
 
-  const PrivacyPolicySectionCard({
-    super.key,
-    required this.section,
-  });
+  const PrivacyPolicySectionCard({super.key, required this.section});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +32,9 @@ class PrivacyPolicySectionCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: isDark ? 0.20 : 0.12),
+                  color: AppColors.primary.withValues(
+                    alpha: isDark ? 0.20 : 0.12,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(section.icon, size: 16, color: AppColors.primary),
@@ -91,7 +90,8 @@ class PrivacyPolicySectionCard extends StatelessWidget {
               color: context.textSecondaryColor,
             ),
           ),
-          if (section.bulletPoints != null && section.bulletPoints!.isNotEmpty) ...[
+          if (section.bulletPoints != null &&
+              section.bulletPoints!.isNotEmpty) ...[
             const SizedBox(height: 8),
             ...section.bulletPoints!.map((point) {
               return Padding(
@@ -130,4 +130,3 @@ class PrivacyPolicySectionCard extends StatelessWidget {
     );
   }
 }
-

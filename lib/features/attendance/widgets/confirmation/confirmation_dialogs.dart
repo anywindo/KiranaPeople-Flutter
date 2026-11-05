@@ -7,9 +7,7 @@ class ConfirmationDialogs {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Row(
           children: [
             Icon(Icons.wifi_off_rounded, color: Color(0xFFDC2626)),
@@ -33,21 +31,21 @@ class ConfirmationDialogs {
     );
   }
 
-  static void showGpsNotFoundDialog(BuildContext context, String? locationError) {
+  static void showGpsNotFoundDialog(
+    BuildContext context,
+    String? locationError,
+  ) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
           'Lokasi GPS Tidak Ditemukan',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         content: Text(
-          locationError ??
-              'Gagal mendapatkan lokasi GPS. Pastikan GPS dan izin lokasi telah diaktifkan.',
+          locationError ?? 'Gagal mendapatkan lokasi GPS. Pastikan GPS dan izin lokasi telah diaktifkan.',
         ),
         actions: [
           TextButton(
@@ -68,9 +66,7 @@ class ConfirmationDialogs {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
           'Di Luar Radius Kantor',
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -88,4 +84,3 @@ class ConfirmationDialogs {
     );
   }
 }
-

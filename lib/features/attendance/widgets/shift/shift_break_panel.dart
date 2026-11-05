@@ -66,18 +66,14 @@ class ShiftBreakPanel extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: context.isDarkMode
-                  ? [const Color(0xFF1E293B), const Color(0xFF182234)]
-                  : [const Color(0xFFF8FAFC), const Color(0xFFF1F5F9)],
-            ),
+            color: context.isDarkMode
+                ? const Color(0xFF0F172A)
+                : const Color(0xFFF1F5F9),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: context.isDarkMode
                   ? const Color(0xFF334155)
-                  : const Color(0xFFE2E8F0),
+                  : const Color(0xFFCBD5E1),
               width: 1.2,
             ),
           ),
@@ -113,36 +109,33 @@ class ShiftBreakPanel extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: !hasStartedBreak
                       ? (Shift.isBeforeBreakTime(selectedShift)
-                          ? const Color(0xFFF3F4F6)
-                          : AppColors.primary.withValues(alpha: 0.10))
+                            ? const Color(0xFFF3F4F6)
+                            : AppColors.primary.withValues(alpha: 0.10))
                       : (!hasEndedBreak
-                          ? AppColors.success.withValues(alpha: 0.12)
-                          : context.surfaceColor),
+                            ? AppColors.success.withValues(alpha: 0.12)
+                            : context.surfaceColor),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   !hasStartedBreak
                       ? (Shift.isBeforeBreakTime(selectedShift)
-                          ? 'Belum Waktunya'
-                          : 'Belum Mulai')
+                            ? 'Belum Waktunya'
+                            : 'Belum Mulai')
                       : (!hasEndedBreak ? 'Sedang Istirahat' : 'Selesai'),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: !hasStartedBreak
                         ? (Shift.isBeforeBreakTime(selectedShift)
-                            ? const Color(0xFF6B7280)
-                            : AppColors.primary)
+                              ? const Color(0xFF6B7280)
+                              : AppColors.primary)
                         : (!hasEndedBreak
-                            ? AppColors.success
-                            : context.textSecondaryColor),
+                              ? AppColors.success
+                              : context.textSecondaryColor),
                   ),
                 ),
               ),
@@ -188,10 +181,7 @@ class ShiftBreakPanel extends StatelessWidget {
         if (!hasStartedShift) ...[
           const SizedBox(height: 14),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 10,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               color: context.isDarkMode
                   ? const Color(0xFF4C0519).withValues(alpha: 0.5)
@@ -221,10 +211,7 @@ class ShiftBreakPanel extends StatelessWidget {
                 InkWell(
                   onTap: onSwitchToWork,
                   child: const Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 2,
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                     child: Text(
                       'Masuk',
                       style: TextStyle(
@@ -243,10 +230,7 @@ class ShiftBreakPanel extends StatelessWidget {
             Shift.isBeforeBreakTime(selectedShift)) ...[
           const SizedBox(height: 14),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 10,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               color: context.isDarkMode
                   ? const Color(0xFF451A03).withValues(alpha: 0.5)
@@ -281,10 +265,7 @@ class ShiftBreakPanel extends StatelessWidget {
                 InkWell(
                   onTap: onSwitchToWork,
                   child: const Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 2,
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                     child: Text(
                       'Ke Kerja',
                       style: TextStyle(
@@ -301,10 +282,7 @@ class ShiftBreakPanel extends StatelessWidget {
         ] else if (hasEndedBreak && !hasEndedShift) ...[
           const SizedBox(height: 14),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 10,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
               color: context.isDarkMode
                   ? const Color(0xFF064E3B).withValues(alpha: 0.5)
@@ -334,10 +312,7 @@ class ShiftBreakPanel extends StatelessWidget {
                 InkWell(
                   onTap: onSwitchToWork,
                   child: const Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 2,
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                     child: Text(
                       'Ke Kerja',
                       style: TextStyle(
@@ -356,4 +331,3 @@ class ShiftBreakPanel extends StatelessWidget {
     );
   }
 }
-

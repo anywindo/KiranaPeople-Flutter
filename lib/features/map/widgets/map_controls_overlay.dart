@@ -49,11 +49,7 @@ class MapControlsOverlay extends StatelessWidget {
               onRecenter();
             },
           ),
-          Container(
-            width: 24,
-            height: 1,
-            color: context.borderColor,
-          ),
+          Container(width: 24, height: 1, color: context.borderColor),
           IconButton(
             tooltip: 'Tampilkan Semua Titik',
             icon: Icon(
@@ -71,4 +67,3 @@ class MapControlsOverlay extends StatelessWidget {
     );
   }
 }
-

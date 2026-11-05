@@ -60,18 +60,11 @@ class OnboardingPasswordRequirements extends StatelessWidget {
             hasMixedCase,
           ),
           const SizedBox(height: 8),
-          _buildRequirementRow(
-            'Mengandung minimal 1 angka',
-            hasNumber,
-          ),
+          _buildRequirementRow('Mengandung minimal 1 angka', hasNumber),
           const SizedBox(height: 8),
-          _buildRequirementRow(
-            'Konfirmasi kata sandi cocok',
-            isMatching,
-          ),
+          _buildRequirementRow('Konfirmasi kata sandi cocok', isMatching),
         ],
       ),
     );
   }
 }
-

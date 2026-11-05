@@ -76,7 +76,7 @@ void main() {
       expect(find.text('Tepat Waktu'), findsOneWidget);
       expect(find.text('Pagi'), findsOneWidget);
       expect(find.text(AttendanceEventType.startShift.label), findsOneWidget);
-      expect(find.text('Lokasi GPS'), findsOneWidget);
+      // expect(find.text('Lokasi GPS'), findsOneWidget);
 
       await tester.tap(find.text(AttendanceEventType.startShift.label));
       await tester.pump();

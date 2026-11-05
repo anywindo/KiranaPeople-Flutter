@@ -189,17 +189,19 @@ class _AttendanceConfirmationViewState
 
     // Submit attendance event
     unawaited(
-      ref.read(todayAttendanceProvider.notifier).submitEvent(
-        eventType: widget.action,
-        latitude: _currentPosition!.latitude,
-        longitude: _currentPosition!.longitude,
-        accuracy: _currentPosition!.accuracy,
-        altitude: _currentPosition!.altitude,
-        deviceTimestamp: _currentPosition!.timestamp,
-        isMocked: _currentPosition!.isMocked,
-        photoFile: widget.photoFile,
-        shiftId: widget.shiftId,
-      ),
+      ref
+          .read(todayAttendanceProvider.notifier)
+          .submitEvent(
+            eventType: widget.action,
+            latitude: _currentPosition!.latitude,
+            longitude: _currentPosition!.longitude,
+            accuracy: _currentPosition!.accuracy,
+            altitude: _currentPosition!.altitude,
+            deviceTimestamp: _currentPosition!.timestamp,
+            isMocked: _currentPosition!.isMocked,
+            photoFile: widget.photoFile,
+            shiftId: widget.shiftId,
+          ),
     );
 
     widget.onSubmittedSuccess();
@@ -261,8 +263,7 @@ class _AttendanceConfirmationViewState
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: OfflineCardWarning(
-                message:
-                    'Koneksi internet terputus. Pastikan data seluler atau Wi-Fi aktif agar presensi dapat dikirim.',
+                message: 'Koneksi internet terputus. Pastikan data seluler atau Wi-Fi aktif agar presensi dapat dikirim.',
               ),
             ),
             ConfirmationActionButtons(

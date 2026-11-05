@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/bouncing_button.dart';
 
 class ProfileCardGroup extends StatelessWidget {
   final List<Widget> children;
 
-  const ProfileCardGroup({
-    super.key,
-    required this.children,
-  });
+  const ProfileCardGroup({super.key, required this.children});
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +16,21 @@ class ProfileCardGroup extends StatelessWidget {
         color: context.surfaceColor,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-          width: 1.2,
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+          width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.07),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.03),
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(children: children),
@@ -75,10 +85,7 @@ class ProfileRowItem extends StatelessWidget {
           const SizedBox(width: 12),
           if (isTrailingExpanded)
             Expanded(
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: trailing,
-              ),
+              child: Align(alignment: Alignment.centerRight, child: trailing),
             )
           else ...[
             const Spacer(),
@@ -89,9 +96,10 @@ class ProfileRowItem extends StatelessWidget {
     );
 
     if (onTap != null) {
-      return InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+      return BouncingButton(
+        scaleDown: 0.98,
+        hapticType: BouncingHapticType.light,
+        onPressed: onTap,
         child: content,
       );
     }
@@ -102,10 +110,7 @@ class ProfileRowItem extends StatelessWidget {
 class ProfileSectionHeader extends StatelessWidget {
   final String title;
 
-  const ProfileSectionHeader({
-    super.key,
-    required this.title,
-  });
+  const ProfileSectionHeader({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -126,4 +131,3 @@ class ProfileSectionHeader extends StatelessWidget {
     );
   }
 }
-

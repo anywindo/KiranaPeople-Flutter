@@ -52,11 +52,7 @@ class ProfilePersonalInfoSection extends StatelessWidget {
                 ],
               ),
             ),
-            Divider(
-              height: 1,
-              indent: 56,
-              color: context.dividerColor,
-            ),
+            Divider(height: 1, indent: 56, color: context.dividerColor),
             ProfileRowItem(
               iconBg: context.isDarkMode
                   ? const Color(0xFF3B1524)
@@ -78,4 +74,3 @@ class ProfilePersonalInfoSection extends StatelessWidget {
     );
   }
 }
-

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/app_haptics.dart';
 import '../../data/models/shift_model.dart';
@@ -43,7 +44,9 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
   @override
   void initState() {
     super.initState();
-    _currentSelection = widget.selectedShift ?? (widget.shifts.isNotEmpty ? widget.shifts.first : null);
+    _currentSelection =
+        widget.selectedShift ??
+        (widget.shifts.isNotEmpty ? widget.shifts.first : null);
   }
 
   String _formatTime(String raw) {
@@ -56,7 +59,8 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
   List<Shift> get _uniqueShifts {
     final seen = <String>{};
     return widget.shifts.where((s) {
-      final key = '${s.id}_${s.name.trim().toLowerCase()}_${s.startTime}_${s.endTime}';
+      final key =
+          '${s.id}_${s.name.trim().toLowerCase()}_${s.startTime}_${s.endTime}';
       return seen.add(key);
     }).toList();
   }
@@ -225,10 +229,13 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
                             ],
                           ),
                         ),
-                        if (shift.breakStartTime != null && shift.breakEndTime != null) ...[
+                        if (shift.breakStartTime != null &&
+                            shift.breakEndTime != null) ...[
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: context.surfaceColor,
                               borderRadius: BorderRadius.circular(8),
@@ -274,10 +281,7 @@ class _ShiftPickerSheetState extends State<ShiftPickerSheet> {
                 ),
                 child: const Text(
                   'Pilih Shift Ini',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

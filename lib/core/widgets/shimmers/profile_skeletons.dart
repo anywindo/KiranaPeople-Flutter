@@ -27,4 +27,3 @@ class ProfileHeaderSkeleton extends StatelessWidget {
     );
   }
 }
-

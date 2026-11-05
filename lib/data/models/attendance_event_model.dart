@@ -41,8 +41,12 @@ class AttendanceEvent {
 
   factory AttendanceEvent.fromJson(Map<String, dynamic> json) {
     return AttendanceEvent(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? ''),
-      eventType: AttendanceEventType.fromString(json['event_type']?.toString() ?? ''),
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? ''),
+      eventType: AttendanceEventType.fromString(
+        json['event_type']?.toString() ?? '',
+      ),
       timestamp: json['timestamp']?.toString() ?? '',
       latitude: json['latitude'] is num
           ? (json['latitude'] as num).toDouble()
@@ -50,7 +54,8 @@ class AttendanceEvent {
       longitude: json['longitude'] is num
           ? (json['longitude'] as num).toDouble()
           : double.tryParse(json['longitude']?.toString() ?? ''),
-      selfieUrl: json['selfie_url']?.toString() ??
+      selfieUrl:
+          json['selfie_url']?.toString() ??
           json['selfie_path']?.toString() ??
           json['photo_url']?.toString() ??
           json['photo']?.toString(),

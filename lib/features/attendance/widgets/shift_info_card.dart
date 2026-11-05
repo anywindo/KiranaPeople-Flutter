@@ -68,9 +68,25 @@ class ShiftInfoCard extends StatelessWidget {
         border: Border.all(
           color: context.isDarkMode
               ? const Color(0xFF334155)
-              : const Color(0xFFE2E8F0),
-          width: 1.2,
+              : const Color(0xFFCBD5E1),
+          width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: context.isDarkMode ? 0.40 : 0.08,
+            ),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: context.isDarkMode ? 0.25 : 0.04,
+            ),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,7 +109,7 @@ class ShiftInfoCard extends StatelessWidget {
                   alignment: Alignment.topCenter,
                   children: <Widget>[
                     ...previousChildren,
-                    if (currentChild != null) currentChild,
+                    ?currentChild,
                   ],
                 );
               },
@@ -108,13 +124,16 @@ class ShiftInfoCard extends StatelessWidget {
                     curve: Curves.easeInOut,
                   ),
                   child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: beginOffset,
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeOutCubic,
-                    )),
+                    position:
+                        Tween<Offset>(
+                          begin: beginOffset,
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
+                          ),
+                        ),
                     child: child,
                   ),
                 );

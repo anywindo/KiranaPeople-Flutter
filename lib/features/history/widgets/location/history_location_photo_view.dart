@@ -39,20 +39,14 @@ class HistoryLocationPhotoView extends StatelessWidget {
               height: 220,
               width: double.infinity,
               color: const Color(0xFF0F172A),
-              child: AutoOrientedImage(
-                imageUrl: photoUrl,
-                fit: BoxFit.contain,
-              ),
+              child: AutoOrientedImage(imageUrl: photoUrl, fit: BoxFit.contain),
             ),
           ),
           Positioned(
             bottom: 10,
             right: 10,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 5,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.65),
                 borderRadius: BorderRadius.circular(20),
@@ -60,11 +54,7 @@ class HistoryLocationPhotoView extends StatelessWidget {
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.fullscreen_rounded,
-                    color: Colors.white,
-                    size: 16,
-                  ),
+                  Icon(Icons.fullscreen_rounded, color: Colors.white, size: 16),
                   SizedBox(width: 4),
                   Text(
                     'Perbesar Foto',
@@ -83,4 +73,3 @@ class HistoryLocationPhotoView extends StatelessWidget {
     );
   }
 }
-

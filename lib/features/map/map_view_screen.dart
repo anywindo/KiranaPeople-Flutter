@@ -74,14 +74,18 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
   }
 
   AttendanceEventType _resolveTargetAction(List<AttendanceEvent> events) {
-    final hasStartShift =
-        events.any((e) => e.eventType == AttendanceEventType.startShift);
-    final hasStartBreak =
-        events.any((e) => e.eventType == AttendanceEventType.startBreak);
-    final hasEndBreak =
-        events.any((e) => e.eventType == AttendanceEventType.endBreak);
-    final hasEndShift =
-        events.any((e) => e.eventType == AttendanceEventType.endShift);
+    final hasStartShift = events.any(
+      (e) => e.eventType == AttendanceEventType.startShift,
+    );
+    final hasStartBreak = events.any(
+      (e) => e.eventType == AttendanceEventType.startBreak,
+    );
+    final hasEndBreak = events.any(
+      (e) => e.eventType == AttendanceEventType.endBreak,
+    );
+    final hasEndShift = events.any(
+      (e) => e.eventType == AttendanceEventType.endShift,
+    );
 
     if (!hasStartShift) {
       return AttendanceEventType.startShift;
@@ -128,7 +132,8 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
     final availableShifts =
         ref.read(todayAttendanceProvider).data.value?.availableShifts ?? [];
 
-    Shift? effectiveShift = selectedShift ??
+    Shift? effectiveShift =
+        selectedShift ??
         (availableShifts.isNotEmpty ? availableShifts.first : null);
 
     if (targetAction == AttendanceEventType.startShift) {
@@ -136,8 +141,9 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
         final confirmed = await ShiftConfirmationDialog.show(
           context,
           shift: effectiveShift,
-          availableShifts:
-              availableShifts.isNotEmpty ? availableShifts : [effectiveShift],
+          availableShifts: availableShifts.isNotEmpty
+              ? availableShifts
+              : [effectiveShift],
           onShiftChanged: (newShift) {
             effectiveShift = newShift;
             ref.read(todayAttendanceProvider.notifier).selectShift(newShift);
@@ -185,7 +191,8 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
     final workLocation = todayData?.workLocation;
     final events = todayData?.events ?? [];
 
-    final selectedShift = attendanceState.selectedShift ??
+    final selectedShift =
+        attendanceState.selectedShift ??
         todayData?.shift ??
         (todayData?.availableShifts?.isNotEmpty == true
             ? todayData!.availableShifts!.first
@@ -213,16 +220,19 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
 
     final bool isInside = _currentPosition != null && distance <= radius;
 
-    final hasStartedShift =
-        events.any((e) => e.eventType == AttendanceEventType.startShift);
+    final hasStartedShift = events.any(
+      (e) => e.eventType == AttendanceEventType.startShift,
+    );
     final hasEndedShift =
         events.any((e) => e.eventType == AttendanceEventType.endShift) ||
-            todayData?.status?.toUpperCase() == 'COMPLETED' ||
-            todayData?.status?.toUpperCase() == 'SELESAI';
-    final hasStartedBreak =
-        events.any((e) => e.eventType == AttendanceEventType.startBreak);
-    final hasEndedBreak =
-        events.any((e) => e.eventType == AttendanceEventType.endBreak);
+        todayData?.status?.toUpperCase() == 'COMPLETED' ||
+        todayData?.status?.toUpperCase() == 'SELESAI';
+    final hasStartedBreak = events.any(
+      (e) => e.eventType == AttendanceEventType.startBreak,
+    );
+    final hasEndedBreak = events.any(
+      (e) => e.eventType == AttendanceEventType.endBreak,
+    );
     final isOnBreak = hasStartedBreak && !hasEndedBreak;
 
     final isBeforeBreak = Shift.isBeforeBreakTime(selectedShift);
@@ -263,8 +273,9 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                   child: FlutterMap(
                     mapController: _mapController,
                     options: MapOptions(
-                      initialCenter:
-                          workLocation != null ? officeLatLng : userLatLng,
+                      initialCenter: workLocation != null
+                          ? officeLatLng
+                          : userLatLng,
                       initialZoom: 16.5,
                       maxZoom: 19.0,
                       minZoom: 10.0,
@@ -278,12 +289,30 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                         tileBuilder: isDark
                             ? (context, tileWidget, tile) {
                                 return ColorFiltered(
-                                  colorFilter: const ColorFilter.matrix(<double>[
-                                    -0.75, 0, 0, 0, 215,
-                                    0, -0.75, 0, 0, 215,
-                                    0, 0, -0.70, 0, 225,
-                                    0, 0, 0, 1, 0,
-                                  ]),
+                                  colorFilter: const ColorFilter.matrix(
+                                    <double>[
+                                      -0.75,
+                                      0,
+                                      0,
+                                      0,
+                                      215,
+                                      0,
+                                      -0.75,
+                                      0,
+                                      0,
+                                      215,
+                                      0,
+                                      0,
+                                      -0.70,
+                                      0,
+                                      225,
+                                      0,
+                                      0,
+                                      0,
+                                      1,
+                                      0,
+                                    ],
+                                  ),
                                   child: tileWidget,
                                 );
                               }
@@ -296,7 +325,9 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                         officeLatLng: officeLatLng,
                         officeName: officeName,
                         radius: radius,
-                        userLatLng: _currentPosition != null ? userLatLng : null,
+                        userLatLng: _currentPosition != null
+                            ? userLatLng
+                            : null,
                       ),
                     ],
                   ),
@@ -325,7 +356,8 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                       // Right Floating Map Controls
                       MapControlsOverlay(
                         onRecenter: () => _recenterOnUser(userLatLng),
-                        onFitBounds: () => _fitAllBounds(userLatLng, officeLatLng),
+                        onFitBounds: () =>
+                            _fitAllBounds(userLatLng, officeLatLng),
                       ),
 
                       // Bottom Floating Attendance Action Card

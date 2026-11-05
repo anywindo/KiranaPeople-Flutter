@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -103,7 +104,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     final availableShifts =
         ref.read(todayAttendanceProvider).data.value?.availableShifts ?? [];
 
-    Shift? effectiveShift = selectedShift ??
+    Shift? effectiveShift =
+        selectedShift ??
         (availableShifts.isNotEmpty ? availableShifts.first : null);
 
     if (targetAction == AttendanceEventType.startShift) {
@@ -111,8 +113,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
         final confirmed = await ShiftConfirmationDialog.show(
           context,
           shift: effectiveShift,
-          availableShifts:
-              availableShifts.isNotEmpty ? availableShifts : [effectiveShift],
+          availableShifts: availableShifts.isNotEmpty
+              ? availableShifts
+              : [effectiveShift],
           onShiftChanged: (newShift) {
             effectiveShift = newShift;
             ref.read(todayAttendanceProvider.notifier).selectShift(newShift);
@@ -170,7 +173,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
       // Automatically sync scheduled attendance reminders when data loads or updates
       final nextData = next.data.value;
       if (nextData != null) {
-        final shift = next.selectedShift ??
+        final shift =
+            next.selectedShift ??
             nextData.shift ??
             (nextData.availableShifts?.isNotEmpty == true
                 ? nextData.availableShifts!.first
@@ -205,9 +209,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     if (todayData == null && attendanceState.data.isLoading) {
       return Scaffold(
         backgroundColor: context.scaffoldBg,
-        body: const SafeArea(
-          child: AttendanceScreenSkeleton(),
-        ),
+        body: const SafeArea(child: AttendanceScreenSkeleton()),
       );
     }
 
@@ -221,7 +223,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
           RefreshIndicator(
             color: AppColors.primary,
             edgeOffset: topPadding + 48,
-            onRefresh: () => ref.read(todayAttendanceProvider.notifier).refresh(),
+            onRefresh: () =>
+                ref.read(todayAttendanceProvider.notifier).refresh(),
             child: SingleChildScrollView(
               controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
@@ -233,110 +236,110 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                   AttendanceGreetingSection(user: user),
                   const SizedBox(height: 12),
 
-                // 2. Mode Switcher (Kerja / Istirahat)
-                AttendanceModeSwitcher(
-                  activeSegment: _activeSegment,
-                  onSegmentChanged: (newSegment) {
-                    setState(() {
-                      _activeSegment = newSegment;
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
+                  // 2. Mode Switcher (Kerja / Istirahat)
+                  AttendanceModeSwitcher(
+                    activeSegment: _activeSegment,
+                    onSegmentChanged: (newSegment) {
+                      setState(() {
+                        _activeSegment = newSegment;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
 
-                // 3. Shift Info & Action Card
-                ShiftInfoCard(
-                  activeSegment: _activeSegment,
-                  selectedShift: selectedShift,
-                  todayData: todayData,
-                  isSubmitting: attendanceState.isSubmitting,
-                  hasStartedShift: timeline.hasStartedShift,
-                  isCheckInLate: timeline.isCheckInLate,
-                  hasEndedShift: timeline.hasEndedShift,
-                  hasStartedBreak: timeline.hasStartedBreak,
-                  hasEndedBreak: timeline.hasEndedBreak,
-                  checkInTime: timeline.checkInTime,
-                  checkOutTime: timeline.checkOutTime,
-                  startBreakTime: timeline.startBreakTime,
-                  endBreakTime: timeline.endBreakTime,
-                  startShiftEvent: timeline.startShiftEvent,
-                  endShiftEvent: timeline.endShiftEvent,
-                  startBreakEvent: timeline.startBreakEvent,
-                  endBreakEvent: timeline.endBreakEvent,
-                  onPickShift: () {
-                    if (todayData?.availableShifts?.isNotEmpty == true) {
-                      ShiftPickerSheet.show(
-                        context,
-                        shifts: todayData!.availableShifts!,
-                        selectedShift: selectedShift,
-                        onShiftSelected: (s) {
-                          ref
-                              .read(todayAttendanceProvider.notifier)
-                              .selectShift(s);
-                        },
-                      );
-                    }
-                  },
-                  onSwitchToWork: () {
-                    setState(() {
-                      _activeSegment = 0;
-                    });
-                  },
-                  actionButton: AttendanceActionButton(
-                    isLoading: attendanceState.data.isLoading,
-                    hasEndedShift: timeline.hasEndedShift,
-                    hasStartedShift: timeline.hasStartedShift,
-                    hasStartedBreak: timeline.hasStartedBreak,
-                    hasEndedBreak: timeline.hasEndedBreak,
-                    isOnBreak: timeline.isOnBreak,
+                  // 3. Shift Info & Action Card
+                  ShiftInfoCard(
                     activeSegment: _activeSegment,
                     selectedShift: selectedShift,
-                    onAction: () => _handleActionPress(
-                      targetAction: targetAction,
+                    todayData: todayData,
+                    isSubmitting: attendanceState.isSubmitting,
+                    hasStartedShift: timeline.hasStartedShift,
+                    isCheckInLate: timeline.isCheckInLate,
+                    hasEndedShift: timeline.hasEndedShift,
+                    hasStartedBreak: timeline.hasStartedBreak,
+                    hasEndedBreak: timeline.hasEndedBreak,
+                    checkInTime: timeline.checkInTime,
+                    checkOutTime: timeline.checkOutTime,
+                    startBreakTime: timeline.startBreakTime,
+                    endBreakTime: timeline.endBreakTime,
+                    startShiftEvent: timeline.startShiftEvent,
+                    endShiftEvent: timeline.endShiftEvent,
+                    startBreakEvent: timeline.startBreakEvent,
+                    endBreakEvent: timeline.endBreakEvent,
+                    onPickShift: () {
+                      if (todayData?.availableShifts?.isNotEmpty == true) {
+                        ShiftPickerSheet.show(
+                          context,
+                          shifts: todayData!.availableShifts!,
+                          selectedShift: selectedShift,
+                          onShiftSelected: (s) {
+                            ref
+                                .read(todayAttendanceProvider.notifier)
+                                .selectShift(s);
+                          },
+                        );
+                      }
+                    },
+                    onSwitchToWork: () {
+                      setState(() {
+                        _activeSegment = 0;
+                      });
+                    },
+                    actionButton: AttendanceActionButton(
+                      isLoading: attendanceState.data.isLoading,
+                      hasEndedShift: timeline.hasEndedShift,
+                      hasStartedShift: timeline.hasStartedShift,
+                      hasStartedBreak: timeline.hasStartedBreak,
+                      hasEndedBreak: timeline.hasEndedBreak,
+                      isOnBreak: timeline.isOnBreak,
+                      activeSegment: _activeSegment,
                       selectedShift: selectedShift,
-                      workLocation: todayData?.workLocation,
+                      onAction: () => _handleActionPress(
+                        targetAction: targetAction,
+                        selectedShift: selectedShift,
+                        workLocation: todayData?.workLocation,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // 4. Aktivitas Hari Ini Card
-                TodayActivityCard(
-                  events: events,
-                  onViewFullHistory: () {
-                    MainNavigationScreen.of(context)?.switchToTab(2);
-                  },
-                  onEventTap: (event) {
-                    AttendanceEventDetailModal.show(
-                      context,
-                      event: event,
-                      workLocation: todayData?.workLocation ?? user?.location,
-                    );
-                  },
-                ),
-              ],
+                  // 4. Aktivitas Hari Ini Card
+                  TodayActivityCard(
+                    events: events,
+                    onViewFullHistory: () {
+                      MainNavigationScreen.of(context)?.switchToTab(2);
+                    },
+                    onEventTap: (event) {
+                      AttendanceEventDetailModal.show(
+                        context,
+                        event: event,
+                        workLocation: todayData?.workLocation ?? user?.location,
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
 
-        // 2. Sticky Top Bar (KIRANA GROUP, Sync Indicator, Refresh & Logout buttons)
-        // Pinned on top, zero background when resting, feathered blur gradient when scrolled
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: AttendanceStickyTopBar(
-            isBackgroundSyncing: attendanceState.isBackgroundSyncing,
-            onRefresh: () {
-              ref.read(todayAttendanceProvider.notifier).refresh();
-            },
-            onLogout: _showLogoutDialog,
-            scrollController: _scrollController,
-            topPadding: topPadding,
+          // 2. Sticky Top Bar (KIRANA GROUP, Sync Indicator, Refresh & Logout buttons)
+          // Pinned on top, zero background when resting, feathered blur gradient when scrolled
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: AttendanceStickyTopBar(
+              isBackgroundSyncing: attendanceState.isBackgroundSyncing,
+              onRefresh: () {
+                ref.read(todayAttendanceProvider.notifier).refresh();
+              },
+              onLogout: _showLogoutDialog,
+              scrollController: _scrollController,
+              topPadding: topPadding,
+            ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
   }
 }

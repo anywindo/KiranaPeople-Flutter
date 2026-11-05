@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -47,8 +48,9 @@ class _OfflineBannerState extends ConsumerState<OfflineBanner> {
 
     return AnimatedCrossFade(
       duration: const Duration(milliseconds: 300),
-      crossFadeState:
-          isVisible ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+      crossFadeState: isVisible
+          ? CrossFadeState.showFirst
+          : CrossFadeState.showSecond,
       firstChild: Container(
         width: double.infinity,
         decoration: BoxDecoration(
@@ -59,89 +61,89 @@ class _OfflineBannerState extends ConsumerState<OfflineBanner> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             child: Row(
-            children: [
-              Icon(
-                isOffline ? Icons.wifi_off_rounded : Icons.wifi_rounded,
-                color: Colors.white,
-                size: 18,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      isOffline
-                          ? 'Mode Offline (Tidak Ada Internet)'
-                          : 'Terhubung Kembali',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                    Text(
-                      isOffline
-                          ? 'Periksa Wi-Fi atau kuota data seluler Anda.'
-                          : 'Data presensi sedang disinkronisasi.',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 11,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+              children: [
+                Icon(
+                  isOffline ? Icons.wifi_off_rounded : Icons.wifi_rounded,
+                  color: Colors.white,
+                  size: 18,
                 ),
-              ),
-              if (isOffline) ...[
-                const SizedBox(width: 8),
-                InkWell(
-                  onTap: _isChecking
-                      ? null
-                      : () async {
-                          setState(() {
-                            _isChecking = true;
-                          });
-                          await ref
-                              .read(isOfflineProvider.notifier)
-                              .checkConnection();
-                          await Future.delayed(
-                            const Duration(milliseconds: 500),
-                          );
-                          if (mounted) {
-                            setState(() {
-                              _isChecking = false;
-                            });
-                          }
-                        },
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: _isChecking
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(
-                            Icons.refresh_rounded,
-                            color: Colors.white,
-                            size: 18,
-                          ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        isOffline
+                            ? 'Mode Offline (Tidak Ada Internet)'
+                            : 'Terhubung Kembali',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        isOffline
+                            ? 'Periksa Wi-Fi atau kuota data seluler Anda.'
+                            : 'Data presensi sedang disinkronisasi.',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontSize: 11,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 ),
+                if (isOffline) ...[
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: _isChecking
+                        ? null
+                        : () async {
+                            setState(() {
+                              _isChecking = true;
+                            });
+                            await ref
+                                .read(isOfflineProvider.notifier)
+                                .checkConnection();
+                            await Future.delayed(
+                              const Duration(milliseconds: 500),
+                            );
+                            if (mounted) {
+                              setState(() {
+                                _isChecking = false;
+                              });
+                            }
+                          },
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: _isChecking
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.refresh_rounded,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                    ),
+                  ),
+                ],
               ],
-            ],
-          ),
+            ),
           ),
         ),
       ),
@@ -155,11 +157,7 @@ class OfflineCardWarning extends ConsumerWidget {
   final String? message;
   final VoidCallback? onRetry;
 
-  const OfflineCardWarning({
-    super.key,
-    this.message,
-    this.onRetry,
-  });
+  const OfflineCardWarning({super.key, this.message, this.onRetry});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -173,10 +171,7 @@ class OfflineCardWarning extends ConsumerWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFFEF2F2),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFFFCA5A5),
-          width: 1,
-        ),
+        border: Border.all(color: const Color(0xFFFCA5A5), width: 1),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFFEF4444).withValues(alpha: 0.08),
@@ -215,8 +210,7 @@ class OfflineCardWarning extends ConsumerWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  message ??
-                      'Perangkat Anda sedang offline. Presensi & sinkronisasi data memerlukan koneksi internet aktif.',
+                  message ?? 'Perangkat Anda sedang offline. Presensi & sinkronisasi data memerlukan koneksi internet aktif.',
                   style: const TextStyle(
                     fontSize: 11.5,
                     color: Color(0xFF7F1D1D),
@@ -238,4 +232,3 @@ class OfflineCardWarning extends ConsumerWidget {
     );
   }
 }
-

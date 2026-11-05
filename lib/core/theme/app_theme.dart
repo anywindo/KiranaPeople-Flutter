@@ -6,23 +6,23 @@ class AppColors {
   static const Color primary = Color(0xFFFF21A4); // tnAccent
   static const Color primaryDark = Color(0xFFDB2777); // tnPinkDark
   static const Color primaryLight = Color(0xFFFCE7F3); // tnPinkLight
-  
+
   // Light Backgrounds & Surfaces
-  static const Color background = Color(0xFFF6F7FA); // tnBackground
+  static const Color background = Color(0xFFE2E7EE); // tnBackground
   static const Color surface = Colors.white; // tnCard
-  static const Color surfaceSecondary = Color(0xFFEEF0F5); // tnCardSecondary
-  
+  static const Color surfaceSecondary = Color(0xFFECEFF4); // tnCardSecondary
+
   // Dark Backgrounds & Surfaces (Sleek Slate Dark Identity)
-  static const Color darkBackground = Color(0xFF0F172A); // Slate 900
+  static const Color darkBackground = Color(0xFF0B1120); // Slate 900
   static const Color darkSurface = Color(0xFF1E293B); // Slate 800
-  static const Color darkSurfaceSecondary = Color(0xFF334155); // Slate 700
-  
+  static const Color darkSurfaceSecondary = Color(0xFF0F172A); // Slate 700
+
   // Status Colors
   static const Color success = Color(0xFF10B981); // tnGreen
   static const Color error = Color(0xFFEF4444); // tnRed
   static const Color warning = Color(0xFFF59E0B); // tnYellow
   static const Color info = Color(0xFF3B82F6);
-  
+
   // Light Text Colors
   static const Color textPrimary = Color(0xFF111827);
   static const Color textSecondary = Color(0xFF6B7280);
@@ -32,24 +32,31 @@ class AppColors {
   static const Color darkTextPrimary = Color(0xFFF8FAFC);
   static const Color darkTextSecondary = Color(0xFF94A3B8);
   static const Color darkTextMuted = Color(0xFF64748B);
-  
+
   // Borders & Dividers
-  static const Color divider = Color(0xFFE5E7EB);
-  static const Color border = Color(0xFFE5E7EB);
+  static const Color divider = Color(0xFFCBD5E1);
+  static const Color border = Color(0xFFCBD5E1);
   static const Color darkDivider = Color(0xFF334155);
   static const Color darkBorder = Color(0xFF334155);
 }
 
 extension ThemeContextExtension on BuildContext {
   bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
-  Color get scaffoldBg => isDarkMode ? AppColors.darkBackground : AppColors.background;
-  Color get surfaceColor => isDarkMode ? AppColors.darkSurface : AppColors.surface;
-  Color get surfaceSecondaryColor => isDarkMode ? AppColors.darkSurfaceSecondary : AppColors.surfaceSecondary;
-  Color get textPrimaryColor => isDarkMode ? AppColors.darkTextPrimary : AppColors.textPrimary;
-  Color get textSecondaryColor => isDarkMode ? AppColors.darkTextSecondary : AppColors.textSecondary;
-  Color get textMutedColor => isDarkMode ? AppColors.darkTextMuted : AppColors.textMuted;
+  Color get scaffoldBg =>
+      isDarkMode ? AppColors.darkBackground : AppColors.background;
+  Color get surfaceColor =>
+      isDarkMode ? AppColors.darkSurface : AppColors.surface;
+  Color get surfaceSecondaryColor =>
+      isDarkMode ? AppColors.darkSurfaceSecondary : AppColors.surfaceSecondary;
+  Color get textPrimaryColor =>
+      isDarkMode ? AppColors.darkTextPrimary : AppColors.textPrimary;
+  Color get textSecondaryColor =>
+      isDarkMode ? AppColors.darkTextSecondary : AppColors.textSecondary;
+  Color get textMutedColor =>
+      isDarkMode ? AppColors.darkTextMuted : AppColors.textMuted;
   Color get borderColor => isDarkMode ? AppColors.darkBorder : AppColors.border;
-  Color get dividerColor => isDarkMode ? AppColors.darkDivider : AppColors.divider;
+  Color get dividerColor =>
+      isDarkMode ? AppColors.darkDivider : AppColors.divider;
 }
 
 class AppTheme {
@@ -87,9 +94,7 @@ class AppTheme {
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w600,
         ),
-        bodyLarge: textTheme.bodyLarge?.copyWith(
-          color: AppColors.textPrimary,
-        ),
+        bodyLarge: textTheme.bodyLarge?.copyWith(color: AppColors.textPrimary),
         bodyMedium: textTheme.bodyMedium?.copyWith(
           color: AppColors.textSecondary,
         ),
@@ -112,38 +117,40 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: AppColors.surface,
-        elevation: 0,
+        elevation: 2,
+        shadowColor: Colors.black.withValues(alpha: 0.08),
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.border, width: 1),
+          side: const BorderSide(color: Color(0xFFCBD5E1), width: 1.2),
         ),
       ),
-      bottomSheetTheme: const BottomSheetThemeData(
+      bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: Colors.white,
         modalBackgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
+        elevation: 8,
+        shadowColor: Colors.black.withValues(alpha: 0.15),
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        elevation: 6,
+        shadowColor: Colors.black.withValues(alpha: 0.15),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
-          elevation: 0,
+          elevation: 1.5,
+          shadowColor: Colors.black.withValues(alpha: 0.15),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -154,16 +161,16 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.border),
@@ -180,10 +187,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.error),
         ),
-        hintStyle: const TextStyle(
-          color: AppColors.textMuted,
-          fontSize: 14,
-        ),
+        hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 14),
       ),
       navigationBarTheme: NavigationBarThemeData(
         height: 70,
@@ -218,7 +222,9 @@ class AppTheme {
   }
 
   static ThemeData get darkTheme {
-    final textTheme = GoogleFonts.plusJakartaSansTextTheme(ThemeData.dark().textTheme);
+    final textTheme = GoogleFonts.plusJakartaSansTextTheme(
+      ThemeData.dark().textTheme,
+    );
 
     return ThemeData(
       useMaterial3: true,
@@ -276,38 +282,43 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: AppColors.darkSurface,
-        elevation: 0,
+        elevation: 2.5,
+        shadowColor: Colors.black.withValues(alpha: 0.35),
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.darkBorder, width: 1),
+          side: const BorderSide(
+            color: Color(0xFF334155),
+            width: 1.2,
+          ),
         ),
       ),
-      bottomSheetTheme: const BottomSheetThemeData(
+      bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: AppColors.darkSurface,
         modalBackgroundColor: AppColors.darkSurface,
-        shape: RoundedRectangleBorder(
+        elevation: 8,
+        shadowColor: Colors.black.withValues(alpha: 0.35),
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.darkSurface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        elevation: 6,
+        shadowColor: Colors.black.withValues(alpha: 0.35),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
-          elevation: 0,
+          elevation: 1.5,
+          shadowColor: Colors.black.withValues(alpha: 0.35),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -318,16 +329,16 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.darkSurface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.darkBorder),
@@ -375,7 +386,10 @@ class AppTheme {
           if (states.contains(WidgetState.selected)) {
             return const IconThemeData(color: AppColors.primary, size: 24);
           }
-          return const IconThemeData(color: AppColors.darkTextSecondary, size: 24);
+          return const IconThemeData(
+            color: AppColors.darkTextSecondary,
+            size: 24,
+          );
         }),
       ),
     );

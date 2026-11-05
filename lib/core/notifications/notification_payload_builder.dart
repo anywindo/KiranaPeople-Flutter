@@ -106,11 +106,11 @@ class NotificationPayloadBuilder {
     final timeStr = formatWibTime(timestamp);
     final eventLabel = eventType.label;
     final title = '❌ Presensi $eventLabel Gagal';
-    final cleanReason =
-        reason != null && reason.trim().isNotEmpty ? ': ${reason.trim()}' : '';
+    final cleanReason = reason != null && reason.trim().isNotEmpty
+        ? ': ${reason.trim()}'
+        : '';
     final body =
         'Presensi $eventLabel Anda pada pukul $timeStr WIB tidak berhasil tercatat$cleanReason. Silakan buka aplikasi dan coba kembali.';
     return (title: title, body: body);
   }
 }
-

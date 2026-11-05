@@ -35,7 +35,9 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
       name: json['name']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
       employeeId: json['employee_id']?.toString(),
@@ -43,7 +45,8 @@ class UserModel {
       dob: json['dob']?.toString(),
       phone: json['phone']?.toString(),
       mustChangePassword: json['must_change_password'] == true,
-      location: json['location'] != null && json['location'] is Map<String, dynamic>
+      location:
+          json['location'] != null && json['location'] is Map<String, dynamic>
           ? WorkLocation.fromJson(json['location'] as Map<String, dynamic>)
           : null,
       avatarUrl: json['avatar_url']?.toString() ?? json['avatar']?.toString(),

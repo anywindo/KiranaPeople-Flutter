@@ -73,4 +73,3 @@ class ShiftCardHeader extends StatelessWidget {
     );
   }
 }
-

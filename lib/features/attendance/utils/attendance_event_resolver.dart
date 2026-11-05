@@ -79,14 +79,17 @@ class AttendanceEventTimeline {
     final isCheckInLate = Shift.isShiftStartLate(
       actualTime: checkInTime,
       scheduledTime: selectedShift?.startTime ?? '08:00',
-      ruleEnabled: selectedShift?.attendanceRuleEnabled ??
+      ruleEnabled:
+          selectedShift?.attendanceRuleEnabled ??
           data?.attendanceRuleEnabled ??
           true,
-      ruleMinutes: selectedShift?.attendanceRuleMinutes ??
+      ruleMinutes:
+          selectedShift?.attendanceRuleMinutes ??
           data?.attendanceRuleMinutes ??
           15,
     );
-    final hasEndedShift = endShiftEvent != null ||
+    final hasEndedShift =
+        endShiftEvent != null ||
         data?.status?.toUpperCase() == 'COMPLETED' ||
         data?.status?.toUpperCase() == 'SELESAI';
     final hasStartedBreak = startBreakEvent != null;
@@ -153,4 +156,3 @@ class AttendanceEventTimeline {
     }
   }
 }
-

@@ -18,132 +18,133 @@ class HistoryFilterBar extends ConsumerWidget {
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
-          children: [
-            // Status: Semua
-            _buildQuickFilterPill(
-              context,
-              label: 'Semua',
-              isSelected: filter.status == AttendanceHistoryStatusFilter.all,
-              onTap: () =>
-                  notifier.setStatusFilter(AttendanceHistoryStatusFilter.all),
-            ),
-            const SizedBox(width: 8),
+        children: [
+          // Status: Semua
+          _buildQuickFilterPill(
+            context,
+            label: 'Semua',
+            isSelected: filter.status == AttendanceHistoryStatusFilter.all,
+            onTap: () =>
+                notifier.setStatusFilter(AttendanceHistoryStatusFilter.all),
+          ),
+          const SizedBox(width: 8),
 
-            // Status: Tepat Waktu
-            _buildQuickFilterPill(
-              context,
-              label: 'Tepat Waktu',
-              icon: Icons.check_circle_rounded,
-              isSelected: filter.status == AttendanceHistoryStatusFilter.onTime,
-              activeColor: const Color(0xFF15803D),
-              activeBg: const Color(0xFFDCFCE7),
-              onTap: () => notifier.setStatusFilter(
-                filter.status == AttendanceHistoryStatusFilter.onTime
-                    ? AttendanceHistoryStatusFilter.all
-                    : AttendanceHistoryStatusFilter.onTime,
-              ),
+          // Status: Tepat Waktu
+          _buildQuickFilterPill(
+            context,
+            label: 'Tepat Waktu',
+            icon: Icons.check_circle_rounded,
+            isSelected: filter.status == AttendanceHistoryStatusFilter.onTime,
+            activeColor: const Color(0xFF15803D),
+            activeBg: const Color(0xFFDCFCE7),
+            onTap: () => notifier.setStatusFilter(
+              filter.status == AttendanceHistoryStatusFilter.onTime
+                  ? AttendanceHistoryStatusFilter.all
+                  : AttendanceHistoryStatusFilter.onTime,
             ),
-            const SizedBox(width: 8),
+          ),
+          const SizedBox(width: 8),
 
-            // Status: Terlambat
-            _buildQuickFilterPill(
-              context,
-              label: 'Terlambat',
-              icon: Icons.alarm_rounded,
-              isSelected: filter.status == AttendanceHistoryStatusFilter.late,
-              activeColor: const Color(0xFFE11D48),
-              activeBg: const Color(0xFFFFF1F2),
-              onTap: () => notifier.setStatusFilter(
-                filter.status == AttendanceHistoryStatusFilter.late
-                    ? AttendanceHistoryStatusFilter.all
-                    : AttendanceHistoryStatusFilter.late,
-              ),
+          // Status: Terlambat
+          _buildQuickFilterPill(
+            context,
+            label: 'Terlambat',
+            icon: Icons.alarm_rounded,
+            isSelected: filter.status == AttendanceHistoryStatusFilter.late,
+            activeColor: const Color(0xFFE11D48),
+            activeBg: const Color(0xFFFFF1F2),
+            onTap: () => notifier.setStatusFilter(
+              filter.status == AttendanceHistoryStatusFilter.late
+                  ? AttendanceHistoryStatusFilter.all
+                  : AttendanceHistoryStatusFilter.late,
             ),
-            const SizedBox(width: 8),
+          ),
+          const SizedBox(width: 8),
 
-            // Date Range Chip
+          // Date Range Chip
+          _buildQuickFilterPill(
+            context,
+            label: filter.dateRange != null
+                ? (filter.dateRangeLabel ?? 'Rentang Tanggal')
+                : 'Tanggal',
+            icon: Icons.calendar_month_rounded,
+            trailingIcon: filter.dateRange != null
+                ? Icons.close_rounded
+                : Icons.keyboard_arrow_down_rounded,
+            isSelected: filter.dateRange != null,
+            onTap: () => HistoryFilterSheet.showDateFilter(context, ref),
+            onTrailingTap: filter.dateRange != null
+                ? () => notifier.setDateRangeFilter(null)
+                : null,
+          ),
+
+          // Shift Chip (if shifts available)
+          if (historyState.availableShifts.length > 2) ...[
+            const SizedBox(width: 8),
             _buildQuickFilterPill(
               context,
-              label: filter.dateRange != null
-                  ? (filter.dateRangeLabel ?? 'Rentang Tanggal')
-                  : 'Tanggal',
-              icon: Icons.calendar_month_rounded,
-              trailingIcon: filter.dateRange != null
+              label: filter.shift != null && filter.shift != 'Semua Shift'
+                  ? filter.shift!
+                  : 'Shift',
+              icon: Icons.access_time_rounded,
+              trailingIcon:
+                  filter.shift != null && filter.shift != 'Semua Shift'
                   ? Icons.close_rounded
                   : Icons.keyboard_arrow_down_rounded,
-              isSelected: filter.dateRange != null,
-              onTap: () => HistoryFilterSheet.showDateFilter(context, ref),
-              onTrailingTap: filter.dateRange != null
-                  ? () => notifier.setDateRangeFilter(null)
+              isSelected: filter.shift != null && filter.shift != 'Semua Shift',
+              onTap: () => HistoryFilterSheet.showShiftFilter(
+                context,
+                ref,
+                historyState.availableShifts,
+              ),
+              onTrailingTap:
+                  filter.shift != null && filter.shift != 'Semua Shift'
+                  ? () => notifier.setShiftFilter(null)
                   : null,
             ),
+          ],
 
-            // Shift Chip (if shifts available)
-            if (historyState.availableShifts.length > 2) ...[
-              const SizedBox(width: 8),
-              _buildQuickFilterPill(
-                context,
-                label: filter.shift != null && filter.shift != 'Semua Shift'
-                    ? filter.shift!
-                    : 'Shift',
-                icon: Icons.access_time_rounded,
-                trailingIcon:
-                    filter.shift != null && filter.shift != 'Semua Shift'
-                        ? Icons.close_rounded
-                        : Icons.keyboard_arrow_down_rounded,
-                isSelected:
-                    filter.shift != null && filter.shift != 'Semua Shift',
-                onTap: () => HistoryFilterSheet.showShiftFilter(
-                  context,
-                  ref,
-                  historyState.availableShifts,
+          // Reset chip (when filter active)
+          if (filter.isActive) ...[
+            const SizedBox(width: 8),
+            InkWell(
+              onTap: () => notifier.resetFilter(),
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 7,
                 ),
-                onTrailingTap:
-                    filter.shift != null && filter.shift != 'Semua Shift'
-                        ? () => notifier.setShiftFilter(null)
-                        : null,
-              ),
-            ],
-
-            // Reset chip (when filter active)
-            if (filter.isActive) ...[
-              const SizedBox(width: 8),
-              InkWell(
-                onTap: () => notifier.resetFilter(),
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: context.surfaceSecondaryColor,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: context.borderColor),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.refresh_rounded,
-                        size: 14,
+                decoration: BoxDecoration(
+                  color: context.surfaceSecondaryColor,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: context.borderColor),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.refresh_rounded,
+                      size: 14,
+                      color: context.textSecondaryColor,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Reset',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
                         color: context.textSecondaryColor,
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Reset',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: context.textSecondaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ],
-        ),
-      );
+        ],
+      ),
+    );
   }
 
   Widget _buildQuickFilterPill(
@@ -205,4 +206,3 @@ class HistoryFilterBar extends ConsumerWidget {
     );
   }
 }
-

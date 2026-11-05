@@ -24,7 +24,9 @@ class CameraPreviewSurface extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           // Camera Preview or Fallback
-          if (isCameraReady && controller != null && controller!.value.isInitialized)
+          if (isCameraReady &&
+              controller != null &&
+              controller!.value.isInitialized)
             LayoutBuilder(
               builder: (context, constraints) {
                 final double containerWidth = constraints.maxWidth;
@@ -105,9 +107,7 @@ class CameraPreviewSurface extends StatelessWidget {
 class SilhouettePainter extends CustomPainter {
   final Color strokeColor;
 
-  const SilhouettePainter({
-    this.strokeColor = const Color(0xB3FFFFFF),
-  });
+  const SilhouettePainter({this.strokeColor = const Color(0xB3FFFFFF)});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -145,4 +145,3 @@ class SilhouettePainter extends CustomPainter {
   bool shouldRepaint(covariant SilhouettePainter oldDelegate) =>
       oldDelegate.strokeColor != strokeColor;
 }
-

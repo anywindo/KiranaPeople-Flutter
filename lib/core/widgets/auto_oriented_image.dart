@@ -68,23 +68,23 @@ class _AutoOrientedImageState extends State<AutoOrientedImage> {
       final provider = CachedNetworkImageProvider(widget.imageUrl);
       final stream = provider.resolve(ImageConfiguration.empty);
       _imageStream = stream;
-      _streamListener = ImageStreamListener(
-        (ImageInfo info, bool synchronousCall) {
-          final w = info.image.width;
-          final h = info.image.height;
-          // If image width > height, it was captured sideways on an Android landscape sensor.
-          // Rotating 270° clockwise (3 quarter turns) brings it upright portrait.
-          final detectedTurns = (w > h) ? 3 : 0;
-          AutoOrientedImage._detectedTurnsCache[widget.imageUrl] = detectedTurns;
-          if (_autoTurns != detectedTurns && mounted) {
-            setState(() {
-              _autoTurns = detectedTurns;
-            });
-            widget.onOrientationDetected?.call(detectedTurns);
-          }
-        },
-        onError: (e, stack) {},
-      );
+      _streamListener = ImageStreamListener((
+        ImageInfo info,
+        bool synchronousCall,
+      ) {
+        final w = info.image.width;
+        final h = info.image.height;
+        // If image width > height, it was captured sideways on an Android landscape sensor.
+        // Rotating 270° clockwise (3 quarter turns) brings it upright portrait.
+        final detectedTurns = (w > h) ? 3 : 0;
+        AutoOrientedImage._detectedTurnsCache[widget.imageUrl] = detectedTurns;
+        if (_autoTurns != detectedTurns && mounted) {
+          setState(() {
+            _autoTurns = detectedTurns;
+          });
+          widget.onOrientationDetected?.call(detectedTurns);
+        }
+      }, onError: (e, stack) {});
       stream.addListener(_streamListener!);
     } catch (_) {}
   }
@@ -113,10 +113,7 @@ class _AutoOrientedImageState extends State<AutoOrientedImage> {
       placeholder: (context, url) =>
           widget.placeholder ??
           ShimmerLoading(
-            child: SkeletonBox(
-              width: widget.width,
-              height: widget.height,
-            ),
+            child: SkeletonBox(width: widget.width, height: widget.height),
           ),
       errorWidget: (context, url, error) =>
           widget.errorWidget ??
@@ -126,10 +123,7 @@ class _AutoOrientedImageState extends State<AutoOrientedImage> {
     );
 
     if (totalTurns != 0) {
-      content = RotatedBox(
-        quarterTurns: totalTurns,
-        child: content,
-      );
+      content = RotatedBox(quarterTurns: totalTurns, child: content);
     }
 
     if (widget.width != null || widget.height != null) {

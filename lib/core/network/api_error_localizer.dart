@@ -42,10 +42,12 @@ class ApiErrorLocalizer {
     if (lower.contains('field is required')) {
       return 'Kolom ini wajib diisi.';
     }
-    if (lower.contains('user not found') || lower.contains('account not found')) {
+    if (lower.contains('user not found') ||
+        lower.contains('account not found')) {
       return 'Pengguna tidak ditemukan.';
     }
-    if (lower.contains('token has expired') || lower.contains('expired token')) {
+    if (lower.contains('token has expired') ||
+        lower.contains('expired token')) {
       return 'Token kedaluwarsa. Silakan ajukan permintaan ulang.';
     }
     if (lower.contains('token is invalid') || lower.contains('invalid token')) {
@@ -66,4 +68,3 @@ class ApiErrorLocalizer {
     return trimmed;
   }
 }
-

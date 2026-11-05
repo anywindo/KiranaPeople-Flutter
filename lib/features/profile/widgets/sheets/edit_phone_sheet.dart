@@ -9,11 +9,7 @@ class EditPhoneSheet extends StatefulWidget {
   final String? initialPhone;
   final WidgetRef ref;
 
-  const EditPhoneSheet({
-    super.key,
-    this.initialPhone,
-    required this.ref,
-  });
+  const EditPhoneSheet({super.key, this.initialPhone, required this.ref});
 
   static Future<void> show(
     BuildContext context,
@@ -27,10 +23,7 @@ class EditPhoneSheet extends StatefulWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (ctx) => EditPhoneSheet(
-        initialPhone: currentPhone,
-        ref: ref,
-      ),
+      builder: (ctx) => EditPhoneSheet(initialPhone: currentPhone, ref: ref),
     );
   }
 
@@ -114,10 +107,7 @@ class _EditPhoneSheetState extends State<EditPhoneSheet> {
             const SizedBox(height: 4),
             Text(
               'Masukkan nomor telepon aktif untuk verifikasi dan kontak.',
-              style: TextStyle(
-                fontSize: 13,
-                color: context.textSecondaryColor,
-              ),
+              style: TextStyle(fontSize: 13, color: context.textSecondaryColor),
             ),
             const SizedBox(height: 20),
             TextFormField(
@@ -185,4 +175,3 @@ class _EditPhoneSheetState extends State<EditPhoneSheet> {
     );
   }
 }
-

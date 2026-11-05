@@ -31,7 +31,10 @@ class TodayAttendanceData {
     bool? ruleEnabled;
     if (json.containsKey('attendance_rule_enabled')) {
       final raw = json['attendance_rule_enabled'];
-      ruleEnabled = raw == true || raw?.toString() == '1' || raw?.toString().toLowerCase() == 'true';
+      ruleEnabled =
+          raw == true ||
+          raw?.toString() == '1' ||
+          raw?.toString().toLowerCase() == 'true';
     }
 
     int? ruleMinutes;
@@ -40,7 +43,8 @@ class TodayAttendanceData {
       ruleMinutes = raw is int ? raw : int.tryParse(raw?.toString() ?? '');
     }
 
-    var parsedShift = json['shift'] != null && json['shift'] is Map<String, dynamic>
+    var parsedShift =
+        json['shift'] != null && json['shift'] is Map<String, dynamic>
         ? Shift.fromJson(json['shift'] as Map<String, dynamic>)
         : null;
 
@@ -61,16 +65,18 @@ class TodayAttendanceData {
       shift: parsedShift,
       availableShifts: json['available_shifts'] is List
           ? (json['available_shifts'] as List)
-              .map((e) => Shift.fromJson(e as Map<String, dynamic>))
-              .toList()
+                .map((e) => Shift.fromJson(e as Map<String, dynamic>))
+                .toList()
           : null,
-      workLocation: json['work_location'] != null && json['work_location'] is Map<String, dynamic>
+      workLocation:
+          json['work_location'] != null &&
+              json['work_location'] is Map<String, dynamic>
           ? WorkLocation.fromJson(json['work_location'] as Map<String, dynamic>)
           : null,
       events: json['events'] is List
           ? (json['events'] as List)
-              .map((e) => AttendanceEvent.fromJson(e as Map<String, dynamic>))
-              .toList()
+                .map((e) => AttendanceEvent.fromJson(e as Map<String, dynamic>))
+                .toList()
           : null,
       attendanceRuleEnabled: ruleEnabled,
       attendanceRuleMinutes: ruleMinutes,
@@ -95,7 +101,9 @@ class AttendanceRecord {
 
   factory AttendanceRecord.fromJson(Map<String, dynamic> json) {
     return AttendanceRecord(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
       date: json['date']?.toString() ?? '',
       status: json['status']?.toString(),
       shift: json['shift'] != null && json['shift'] is Map<String, dynamic>
@@ -103,8 +111,8 @@ class AttendanceRecord {
           : null,
       events: json['events'] is List
           ? (json['events'] as List)
-              .map((e) => AttendanceEvent.fromJson(e as Map<String, dynamic>))
-              .toList()
+                .map((e) => AttendanceEvent.fromJson(e as Map<String, dynamic>))
+                .toList()
           : [],
     );
   }

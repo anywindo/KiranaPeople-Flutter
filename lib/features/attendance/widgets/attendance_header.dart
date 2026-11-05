@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -8,7 +9,6 @@ import '../../../core/widgets/continuous_marquee_text.dart';
 import '../../../data/models/user_model.dart';
 import '../../navigation/main_navigation_screen.dart';
 import '../../profile/profile_screen.dart';
-import 'attendance_live_clock.dart';
 
 /// Sticky Top Bar with "KIRANA GROUP", Sync Indicator, Refresh, and Logout buttons.
 /// Has no background when at rest at the top, and uses a feather blur gradient when
@@ -206,8 +206,9 @@ class AttendanceStickyTopBar extends StatelessWidget {
       return AnimatedBuilder(
         animation: scrollController!,
         builder: (context, _) {
-          final offset =
-              scrollController!.hasClients ? scrollController!.offset : 0.0;
+          final offset = scrollController!.hasClients
+              ? scrollController!.offset
+              : 0.0;
           final progress = (offset / 36.0).clamp(0.0, 1.0);
           return buildBar(progress);
         },
@@ -223,10 +224,7 @@ class AttendanceStickyTopBar extends StatelessWidget {
 class AttendanceGreetingSection extends StatelessWidget {
   final UserModel? user;
 
-  const AttendanceGreetingSection({
-    super.key,
-    required this.user,
-  });
+  const AttendanceGreetingSection({super.key, required this.user});
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
@@ -249,8 +247,9 @@ class AttendanceGreetingSection extends StatelessWidget {
       if (parts.length >= 2) {
         initial = '${parts[0][0]}${parts[1][0]}'.toUpperCase();
       } else {
-        initial =
-            parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
+        initial = parts[0]
+            .substring(0, parts[0].length >= 2 ? 2 : 1)
+            .toUpperCase();
       }
     }
     return Center(
@@ -306,8 +305,7 @@ class AttendanceGreetingSection extends StatelessWidget {
                         ),
                       ),
                       child: ClipOval(
-                        child: user?.avatar != null &&
-                                user!.avatar!.isNotEmpty
+                        child: user?.avatar != null && user!.avatar!.isNotEmpty
                             ? CachedNetworkImage(
                                 imageUrl: user!.avatar!,
                                 fit: BoxFit.cover,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/bouncing_button.dart';
 
 class LoginFormCard extends StatelessWidget {
   final TextEditingController identifierController;
@@ -38,16 +39,29 @@ class LoginFormCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = context.isDarkMode;
 
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: context.surfaceColor,
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
+        color: context.surfaceColor,
         borderRadius: BorderRadius.circular(24),
-        side: BorderSide(color: context.borderColor),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(22),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -113,6 +127,9 @@ class LoginFormCard extends StatelessWidget {
                       ? AppColors.primary
                       : context.textSecondaryColor,
                   fontSize: 14,
+                  fontWeight: identifierFocus.hasFocus
+                      ? FontWeight.w600
+                      : FontWeight.w400,
                 ),
                 prefixIcon: Icon(
                   Icons.badge_outlined,
@@ -134,27 +151,36 @@ class LoginFormCard extends StatelessWidget {
                       )
                     : null,
                 filled: true,
-                fillColor: isDark
-                    ? AppColors.darkBackground.withValues(alpha: 0.5)
-                    : AppColors.background,
+                fillColor: identifierFocus.hasFocus
+                    ? (isDark ? const Color(0xFF0F172A) : Colors.white)
+                    : (isDark
+                          ? const Color(0xFF0F172A)
+                          : const Color(0xFFF1F5F9)),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 16,
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: context.borderColor),
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFCBD5E1),
+                    width: 1.5,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: context.borderColor),
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFCBD5E1),
+                    width: 1.5,
+                  ),
                 ),
                 focusedBorder: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(14)),
-                  borderSide: BorderSide(
-                    color: AppColors.primary,
-                    width: 2,
-                  ),
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                  borderSide: BorderSide(color: AppColors.primary, width: 2.2),
                 ),
               ),
             ),
@@ -181,6 +207,9 @@ class LoginFormCard extends StatelessWidget {
                       ? AppColors.primary
                       : context.textSecondaryColor,
                   fontSize: 14,
+                  fontWeight: passwordFocus.hasFocus
+                      ? FontWeight.w600
+                      : FontWeight.w400,
                 ),
                 prefixIcon: Icon(
                   Icons.lock_outline_rounded,
@@ -199,31 +228,42 @@ class LoginFormCard extends StatelessWidget {
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
                     size: 20,
-                    color: context.textMutedColor,
+                    color: passwordFocus.hasFocus
+                        ? AppColors.primary
+                        : context.textMutedColor,
                   ),
                 ),
                 filled: true,
-                fillColor: isDark
-                    ? AppColors.darkBackground.withValues(alpha: 0.5)
-                    : AppColors.background,
+                fillColor: passwordFocus.hasFocus
+                    ? (isDark ? const Color(0xFF0F172A) : Colors.white)
+                    : (isDark
+                          ? const Color(0xFF0F172A)
+                          : const Color(0xFFF1F5F9)),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 16,
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: context.borderColor),
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFCBD5E1),
+                    width: 1.5,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: context.borderColor),
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFCBD5E1),
+                    width: 1.5,
+                  ),
                 ),
                 focusedBorder: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(14)),
-                  borderSide: BorderSide(
-                    color: AppColors.primary,
-                    width: 2,
-                  ),
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                  borderSide: BorderSide(color: AppColors.primary, width: 2.2),
                 ),
               ),
             ),
@@ -294,39 +334,74 @@ class LoginFormCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // FilledButton (Masuk)
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: FilledButton(
-                onPressed: isFormValid && !isLoading ? onSubmit : null,
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: isDark
-                      ? AppColors.darkSurfaceSecondary
-                      : const Color(0xFFE5E7EB),
-                  disabledForegroundColor: isDark
-                      ? AppColors.darkTextMuted
-                      : const Color(0xFF9CA3AF),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                child: isLoading
-                    ? const SizedBox(
-                        height: 22,
-                        width: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
+            // Button (Masuk)
+            BouncingButton(
+              scaleDown: 0.97,
+              hapticType: BouncingHapticType.medium,
+              onPressed: isFormValid && !isLoading ? onSubmit : null,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                width: double.infinity,
+                height: 54,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  color: isFormValid && !isLoading
+                      ? AppColors.primary
+                      : (isDark
+                            ? const Color(0xFF334155)
+                            : const Color(0xFFE2E8F0)),
+                  border: isFormValid && !isLoading
+                      ? Border.all(color: const Color(0xFFDB2777), width: 1.2)
+                      : Border.all(
+                          color: isDark
+                              ? const Color(0xFF475569)
+                              : const Color(0xFFCBD5E1),
+                          width: 1.0,
                         ),
-                      )
-                    : const Text('Masuk'),
+                  boxShadow: isFormValid && !isLoading
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withValues(
+                              alpha: isDark ? 0.45 : 0.16,
+                            ),
+                            blurRadius: 14,
+                            offset: const Offset(0, 6),
+                          ),
+                          BoxShadow(
+                            color: Colors.black.withValues(
+                              alpha: isDark ? 0.25 : 0.08,
+                            ),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Center(
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          'Masuk',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.3,
+                            color: isFormValid && !isLoading
+                                ? Colors.white
+                                : (isDark
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF9CA3AF)),
+                          ),
+                        ),
+                ),
               ),
             ),
           ],
@@ -335,4 +410,3 @@ class LoginFormCard extends StatelessWidget {
     );
   }
 }
-

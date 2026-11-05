@@ -5,10 +5,7 @@ import '../../../core/theme/app_theme.dart';
 class AttendanceLogoutDialog extends StatelessWidget {
   final VoidCallback onConfirmLogout;
 
-  const AttendanceLogoutDialog({
-    super.key,
-    required this.onConfirmLogout,
-  });
+  const AttendanceLogoutDialog({super.key, required this.onConfirmLogout});
 
   static Future<void> show(
     BuildContext context, {
@@ -16,9 +13,8 @@ class AttendanceLogoutDialog extends StatelessWidget {
   }) {
     return showDialog(
       context: context,
-      builder: (ctx) => AttendanceLogoutDialog(
-        onConfirmLogout: onConfirmLogout,
-      ),
+      builder: (ctx) =>
+          AttendanceLogoutDialog(onConfirmLogout: onConfirmLogout),
     );
   }
 
@@ -60,4 +56,3 @@ class AttendanceLogoutDialog extends StatelessWidget {
     );
   }
 }
-

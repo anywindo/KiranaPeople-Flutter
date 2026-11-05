@@ -11,8 +11,9 @@ class HistoryCardSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = context.isDarkMode;
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final cardBorder =
-        isDark ? const Color(0xFF334155) : const Color(0xFFE5E7EB);
+    final cardBorder = isDark
+        ? const Color(0xFF334155)
+        : const Color(0xFFE5E7EB);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -53,8 +54,9 @@ class HistoryCardSkeleton extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color:
-                    isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                color: isDark
+                    ? const Color(0xFF0F172A)
+                    : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -114,11 +116,7 @@ class HistoryListSkeleton extends StatelessWidget {
   final int itemCount;
   final EdgeInsetsGeometry? padding;
 
-  const HistoryListSkeleton({
-    super.key,
-    this.itemCount = 4,
-    this.padding,
-  });
+  const HistoryListSkeleton({super.key, this.itemCount = 4, this.padding});
 
   @override
   Widget build(BuildContext context) {
@@ -131,4 +129,3 @@ class HistoryListSkeleton extends StatelessWidget {
     );
   }
 }
-

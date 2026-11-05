@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+
 import '../theme/app_theme.dart';
 
 import 'shimmers/attendance_skeletons.dart';
@@ -64,13 +65,11 @@ class SkeletonBox extends StatelessWidget {
     this.shape = BoxShape.rectangle,
   });
 
-  const SkeletonBox.circle({
-    super.key,
-    required double size,
-  })  : width = size,
-        height = size,
-        borderRadius = null,
-        shape = BoxShape.circle;
+  const SkeletonBox.circle({super.key, required double size})
+    : width = size,
+      height = size,
+      borderRadius = null,
+      shape = BoxShape.circle;
 
   @override
   Widget build(BuildContext context) {

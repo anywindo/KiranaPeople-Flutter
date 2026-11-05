@@ -119,7 +119,8 @@ class HistoryDateFilterSheet extends StatelessWidget {
             HistoryFilterOptionTile(
               title: 'Pilih Rentang Tanggal Manual...',
               subtitle: 'Tentukan tanggal mulai dan selesai sendiri',
-              isSelected: historyState.filter.dateRange != null &&
+              isSelected:
+                  historyState.filter.dateRange != null &&
                   historyState.filter.dateRangeLabel != 'Hari Ini' &&
                   historyState.filter.dateRangeLabel != '7 Hari Terakhir' &&
                   historyState.filter.dateRangeLabel != 'Bulan Ini',
@@ -145,7 +146,8 @@ class HistoryDateFilterSheet extends StatelessWidget {
       context: context,
       firstDate: DateTime(now.year - 3),
       lastDate: DateTime(now.year + 1),
-      initialDateRange: historyState.filter.dateRange ??
+      initialDateRange:
+          historyState.filter.dateRange ??
           DateTimeRange(
             start: now.subtract(const Duration(days: 30)),
             end: now,
@@ -233,4 +235,3 @@ class HistoryDateFilterSheet extends StatelessWidget {
     return const SizedBox.shrink();
   }
 }
-

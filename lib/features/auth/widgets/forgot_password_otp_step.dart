@@ -247,8 +247,9 @@ class ForgotPasswordOtpStep extends StatelessWidget {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         )
                       : Row(
@@ -300,4 +301,3 @@ class ForgotPasswordOtpStep extends StatelessWidget {
     );
   }
 }
-

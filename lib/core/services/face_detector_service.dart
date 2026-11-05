@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 
 class FaceDetectionResult {
@@ -12,23 +13,17 @@ class FaceDetectionResult {
     this.errorMessage,
   });
 
-  factory FaceDetectionResult.success(int count) => FaceDetectionResult(
-        hasFace: count > 0,
-        faceCount: count,
-      );
+  factory FaceDetectionResult.success(int count) =>
+      FaceDetectionResult(hasFace: count > 0, faceCount: count);
 
   factory FaceDetectionResult.noFace() => const FaceDetectionResult(
-        hasFace: false,
-        faceCount: 0,
-        errorMessage:
-            'Wajah tidak terdeteksi. Pastikan wajah Anda terlihat jelas di dalam kamera.',
-      );
+    hasFace: false,
+    faceCount: 0,
+    errorMessage: 'Wajah tidak terdeteksi. Pastikan wajah Anda terlihat jelas di dalam kamera.',
+  );
 
-  factory FaceDetectionResult.error(String err) => FaceDetectionResult(
-        hasFace: false,
-        faceCount: 0,
-        errorMessage: err,
-      );
+  factory FaceDetectionResult.error(String err) =>
+      FaceDetectionResult(hasFace: false, faceCount: 0, errorMessage: err);
 }
 
 class FaceDetectorService {
@@ -76,4 +71,3 @@ class FaceDetectorService {
     _detector = null;
   }
 }
-

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/utils/app_haptics.dart';
 import '../../../core/utils/file_download_helper.dart';
 import '../../../core/widgets/auto_oriented_image.dart';

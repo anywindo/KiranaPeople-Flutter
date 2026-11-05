@@ -182,6 +182,53 @@ void main() {
       expect(find.text('Kebijakan Privasi'), findsOneWidget);
       expect(find.text('Versi Aplikasi'), findsOneWidget);
     });
+
+    testWidgets('ProfileStickyHeaderDelegate pins smaller profile section when scrolled down', (tester) async {
+      final user = UserModel(
+        id: 1,
+        name: 'Alexander Balmaceda José Miller',
+        employeeId: 'user',
+        email: 'arw.prt@gmail.com',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: [
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: ProfileStickyHeaderDelegate(
+                    user: user,
+                    topPadding: 44.0,
+                    onAvatarEditTap: () {},
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200,
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Initially at top (shrinkOffset = 0):
+      expect(find.text('Alexander Balmaceda José Miller'), findsOneWidget);
+      expect(find.text('user'), findsOneWidget);
+      expect(find.byIcon(Icons.camera_alt_rounded), findsOneWidget);
+
+      // Scroll down by 500px:
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+
+      // Smaller profile section sticks on top:
+      expect(find.text('Alexander Balmaceda José Miller'), findsOneWidget);
+      expect(find.text('user'), findsOneWidget);
+    });
   });
 }
 

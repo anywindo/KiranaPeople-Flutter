@@ -70,10 +70,10 @@ class NotificationService {
 
       const DarwinInitializationSettings darwinSettings =
           DarwinInitializationSettings(
-        requestAlertPermission: false,
-        requestBadgePermission: false,
-        requestSoundPermission: false,
-      );
+            requestAlertPermission: false,
+            requestBadgePermission: false,
+            requestSoundPermission: false,
+          );
 
       const InitializationSettings initSettings = InitializationSettings(
         android: androidSettings,
@@ -128,8 +128,8 @@ class NotificationService {
             AndroidFlutterLocalNotificationsPlugin
           >();
 
-      final androidGranted =
-          await androidPlugin?.requestNotificationsPermission();
+      final androidGranted = await androidPlugin
+          ?.requestNotificationsPermission();
 
       final iosPlugin = _notificationsPlugin
           .resolvePlatformSpecificImplementation<
@@ -210,8 +210,7 @@ class NotificationService {
       await _scheduleZonedNotification(
         id: idShiftStart15Min,
         title: '⏰ Pengingat Presensi Masuk (15 Menit)',
-        body:
-            '15 menit lagi shift Anda dimulai, jangan lupa lakukan presensi tepat waktu!',
+        body: '15 menit lagi shift Anda dimulai, jangan lupa lakukan presensi tepat waktu!',
         scheduledDate: time15Min,
         matchDateTimeComponents: DateTimeComponents.time,
       );
@@ -503,9 +502,7 @@ class NotificationService {
         '[NotificationService] Failed attendance notification sent: ${payload.title}',
       );
     } catch (e) {
-      debugPrint(
-        '[NotificationService] Error showing failed notification: $e',
-      );
+      debugPrint('[NotificationService] Error showing failed notification: $e');
     }
   }
 }

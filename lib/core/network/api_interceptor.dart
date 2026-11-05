@@ -58,10 +58,7 @@ class ApiInterceptor extends Interceptor {
   }
 
   @override
-  void onResponse(
-    Response response,
-    ResponseInterceptorHandler handler,
-  ) {
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
     developer.log(
       '[API Response] ${response.requestOptions.method} ${response.requestOptions.path} (${response.statusCode})',
       name: 'ApiClient',
@@ -71,10 +68,7 @@ class ApiInterceptor extends Interceptor {
   }
 
   @override
-  void onError(
-    DioException err,
-    ErrorInterceptorHandler handler,
-  ) {
+  void onError(DioException err, ErrorInterceptorHandler handler) {
     final uri = err.requestOptions.uri;
     if (kDebugMode) {
       developer.log(
@@ -109,7 +103,8 @@ class ApiInterceptor extends Interceptor {
       // Network connection failure or timeout -> server unreachable
       onServerReachabilityChanged?.call(false);
     }
-    String message = 'Terjadi kesalahan koneksi. Periksa koneksi internet Anda.';
+    String message =
+        'Terjadi kesalahan koneksi. Periksa koneksi internet Anda.';
     dynamic errors;
 
     if (response != null) {
@@ -135,7 +130,8 @@ class ApiInterceptor extends Interceptor {
             }
           }
         } else {
-          final m = data['message'] ?? data['meta']?['message'] ?? data['error'];
+          final m =
+              data['message'] ?? data['meta']?['message'] ?? data['error'];
           if (m != null && m.toString().isNotEmpty) {
             message = m.toString();
             hasCustomMessage = true;
@@ -187,8 +183,7 @@ class ApiInterceptor extends Interceptor {
         err.error is TlsException) {
       message = 'Gagal terhubung ke server. Periksa koneksi internet Anda.';
     } else {
-      message =
-          'Terjadi gangguan saat berkomunikasi dengan server. Silakan coba lagi.';
+      message = 'Terjadi gangguan saat berkomunikasi dengan server. Silakan coba lagi.';
     }
 
     final customException = ApiException(
@@ -207,4 +202,3 @@ class ApiInterceptor extends Interceptor {
     );
   }
 }
-

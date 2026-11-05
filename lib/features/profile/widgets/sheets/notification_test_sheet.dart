@@ -11,9 +11,7 @@ class NotificationTestSheet extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(20),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) => const NotificationTestSheet(),
     );
@@ -24,29 +22,20 @@ class NotificationTestSheet extends StatelessWidget {
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 16,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
                 'Uji Coba Suara & Notifikasi',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 12),
               ListTile(
                 leading: const CircleAvatar(
                   backgroundColor: Color(0xFFEFF6FF),
-                  child: Icon(
-                    Icons.alarm_on_rounded,
-                    color: Color(0xFF3B82F6),
-                  ),
+                  child: Icon(Icons.alarm_on_rounded, color: Color(0xFF3B82F6)),
                 ),
                 title: const Text('Uji Pengingat Jadwal (5 Detik)'),
                 subtitle: const Text(
@@ -54,8 +43,9 @@ class NotificationTestSheet extends StatelessWidget {
                 ),
                 onTap: () async {
                   Navigator.pop(context);
-                  await NotificationService.instance
-                      .scheduleTestReminder(seconds: 5);
+                  await NotificationService.instance.scheduleTestReminder(
+                    seconds: 5,
+                  );
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -78,9 +68,7 @@ class NotificationTestSheet extends StatelessWidget {
                   ),
                 ),
                 title: const Text('Uji Pengingat Presensi (Langsung)'),
-                subtitle: const Text(
-                  'Kanal: attendance_reminders',
-                ),
+                subtitle: const Text('Kanal: attendance_reminders'),
                 onTap: () async {
                   Navigator.pop(context);
                   await NotificationService.instance.showTestNotification();
@@ -109,10 +97,7 @@ class NotificationTestSheet extends StatelessWidget {
               ListTile(
                 leading: const CircleAvatar(
                   backgroundColor: Color(0xFFFEE2E2),
-                  child: Icon(
-                    Icons.cancel_rounded,
-                    color: Color(0xFFEF4444),
-                  ),
+                  child: Icon(Icons.cancel_rounded, color: Color(0xFFEF4444)),
                 ),
                 title: const Text('Presensi Gagal (Fallback)'),
                 subtitle: const Text(

@@ -47,10 +47,7 @@ class HistoryLocationHeader extends StatelessWidget {
                       height: 44,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
+                        border: Border.all(color: AppColors.primary, width: 2),
                       ),
                       child: ClipOval(
                         child: AutoOrientedImage(
@@ -239,4 +236,3 @@ class HistoryLocationHeader extends StatelessWidget {
     );
   }
 }
-

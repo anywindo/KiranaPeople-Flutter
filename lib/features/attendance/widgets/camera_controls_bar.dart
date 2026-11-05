@@ -35,8 +35,8 @@ class CameraControlsBar extends StatelessWidget {
               color: isFlashOn
                   ? AppColors.warning.withValues(alpha: 0.2)
                   : (isScreenFlashWarmup
-                      ? const Color(0xFFE4E4E7)
-                      : const Color(0xFF27272A)),
+                        ? const Color(0xFFE4E4E7)
+                        : const Color(0xFF27272A)),
               shape: BoxShape.circle,
               border: isFlashOn
                   ? Border.all(color: AppColors.warning, width: 2)
@@ -45,9 +45,7 @@ class CameraControlsBar extends StatelessWidget {
             child: IconButton(
               tooltip: isFlashOn ? 'Flash On' : 'Flash Off',
               icon: Icon(
-                isFlashOn
-                    ? Icons.flash_on_rounded
-                    : Icons.flash_off_rounded,
+                isFlashOn ? Icons.flash_on_rounded : Icons.flash_off_rounded,
                 color: isFlashOn
                     ? AppColors.warning
                     : (isScreenFlashWarmup ? Colors.black54 : Colors.white70),
@@ -124,4 +122,3 @@ class CameraControlsBar extends StatelessWidget {
     );
   }
 }
-

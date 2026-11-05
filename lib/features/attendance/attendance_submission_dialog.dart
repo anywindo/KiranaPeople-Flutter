@@ -93,8 +93,7 @@ class _AttendanceSubmissionDialogState
           }
         } catch (_) {}
         // Face detection verification
-        final faceResult =
-            await FaceDetectorService.instance.detectFaces(file);
+        final faceResult = await FaceDetectorService.instance.detectFaces(file);
         if (!faceResult.hasFace && mounted) {
           try {
             if (file.existsSync()) {

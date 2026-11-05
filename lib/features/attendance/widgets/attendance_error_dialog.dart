@@ -28,9 +28,7 @@ class AttendanceErrorDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: const Text(
         'Presensi Belum Tersimpan',
         style: TextStyle(fontWeight: FontWeight.bold),
@@ -48,4 +46,3 @@ class AttendanceErrorDialog extends StatelessWidget {
     );
   }
 }
-

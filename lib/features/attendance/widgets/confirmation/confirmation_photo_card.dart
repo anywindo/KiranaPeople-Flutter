@@ -54,7 +54,9 @@ class ConfirmationPhotoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final formattedTime = _formatWibTimestamp(now);
-    final accuracyMeters = currentPosition != null ? currentPosition!.accuracy.round() : 6;
+    final accuracyMeters = currentPosition != null
+        ? currentPosition!.accuracy.round()
+        : 6;
     final locationName = workLocation?.name ?? 'Kantor Utama (Tersono, Batang)';
 
     return ClipRRect(
@@ -63,10 +65,7 @@ class ConfirmationPhotoCard extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           // Photo Image
-          Image.file(
-            photoFile,
-            fit: BoxFit.cover,
-          ),
+          Image.file(photoFile, fit: BoxFit.cover),
 
           // Top Badges (Radius & Peta)
           Positioned(
@@ -99,8 +98,8 @@ class ConfirmationPhotoCard extends StatelessWidget {
                           color: currentPosition == null
                               ? const Color(0xFFF59E0B)
                               : (isWithinRadius
-                                  ? AppColors.success
-                                  : AppColors.error),
+                                    ? AppColors.success
+                                    : AppColors.error),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -109,14 +108,14 @@ class ConfirmationPhotoCard extends StatelessWidget {
                         isLoadingLocation
                             ? 'Mencari GPS...'
                             : (currentPosition == null
-                                ? (locationError ?? 'GPS Tidak Aktif')
-                                : 'Akurasi ${accuracyMeters}m • ${isWithinRadius ? 'Dalam Radius' : 'Diluar Radius'}'),
+                                  ? (locationError ?? 'GPS Tidak Aktif')
+                                  : 'Akurasi ${accuracyMeters}m • ${isWithinRadius ? 'Dalam Radius' : 'Diluar Radius'}'),
                         style: TextStyle(
                           color: currentPosition == null
                               ? const Color(0xFFFBBF24)
                               : (isWithinRadius
-                                  ? const Color(0xFF4ADE80)
-                                  : const Color(0xFFF87171)),
+                                    ? const Color(0xFF4ADE80)
+                                    : const Color(0xFFF87171)),
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
@@ -144,11 +143,7 @@ class ConfirmationPhotoCard extends StatelessWidget {
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.map_rounded,
-                          color: Colors.white,
-                          size: 14,
-                        ),
+                        Icon(Icons.map_rounded, color: Colors.white, size: 14),
                         SizedBox(width: 6),
                         Text(
                           'Peta',
@@ -235,9 +230,7 @@ class ConfirmationPhotoCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            maxWidth: 140,
-                          ),
+                          constraints: const BoxConstraints(maxWidth: 140),
                           child: Text(
                             locationName,
                             maxLines: 2,
@@ -261,4 +254,3 @@ class ConfirmationPhotoCard extends StatelessWidget {
     );
   }
 }
-

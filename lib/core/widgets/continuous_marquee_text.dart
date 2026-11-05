@@ -52,7 +52,11 @@ class _ContinuousMarqueeTextState extends State<ContinuousMarqueeText>
     super.dispose();
   }
 
-  void _calculateAndAnimate(double maxWidth, TextStyle effectiveStyle, TextScaler textScaler) {
+  void _calculateAndAnimate(
+    double maxWidth,
+    TextStyle effectiveStyle,
+    TextScaler textScaler,
+  ) {
     if (maxWidth.isInfinite || maxWidth <= 0) return;
 
     final textPainter = TextPainter(
@@ -69,7 +73,8 @@ class _ContinuousMarqueeTextState extends State<ContinuousMarqueeText>
 
     if (isOverflowing) {
       final totalScrollDistance = _textWidth + widget.blankSpace;
-      final durationMs = ((totalScrollDistance / widget.velocity) * 1000).round();
+      final durationMs = ((totalScrollDistance / widget.velocity) * 1000)
+          .round();
       final newDuration = Duration(milliseconds: durationMs.clamp(1000, 60000));
 
       if (_controller.duration != newDuration) {
@@ -148,7 +153,12 @@ class _ContinuousMarqueeTextState extends State<ContinuousMarqueeText>
                       Colors.black,
                       Colors.transparent,
                     ],
-                    stops: [0.0, leftFadeActive ? fadeStop : 0.0, 1.0 - fadeStop, 1.0],
+                    stops: [
+                      0.0,
+                      leftFadeActive ? fadeStop : 0.0,
+                      1.0 - fadeStop,
+                      1.0,
+                    ],
                   ).createShader(bounds);
                 },
                 blendMode: BlendMode.dstIn,

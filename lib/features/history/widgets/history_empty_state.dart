@@ -5,10 +5,7 @@ import '../../../core/theme/app_theme.dart';
 class HistoryEmptyState extends StatelessWidget {
   final VoidCallback onResetFilter;
 
-  const HistoryEmptyState({
-    super.key,
-    required this.onResetFilter,
-  });
+  const HistoryEmptyState({super.key, required this.onResetFilter});
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +40,7 @@ class HistoryEmptyState extends StatelessWidget {
             Text(
               'Coba ubah status, shift, atau rentang tanggal yang dipilih.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: context.textMutedColor,
-              ),
+              style: TextStyle(fontSize: 13, color: context.textMutedColor),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
@@ -74,4 +68,3 @@ class HistoryEmptyState extends StatelessWidget {
     );
   }
 }
-

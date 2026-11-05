@@ -25,4 +25,3 @@ final appVersionDisplayProvider = Provider<String>((ref) {
     orElse: () => '1.0.2 ',
   );
 });
-

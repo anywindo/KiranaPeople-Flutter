@@ -21,11 +21,7 @@ class CameraTopBar extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            icon: Icon(
-              Icons.chevron_left_rounded,
-              color: textColor,
-              size: 28,
-            ),
+            icon: Icon(Icons.chevron_left_rounded, color: textColor, size: 28),
             onPressed: onBack,
           ),
           Expanded(
@@ -45,4 +41,3 @@ class CameraTopBar extends StatelessWidget {
     );
   }
 }
-

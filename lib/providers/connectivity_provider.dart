@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -52,9 +53,12 @@ class ConnectivityNotifier extends Notifier<bool> {
 
     // Listen to device network interface changes (Wi-Fi on/off, Airplane mode, Mobile data)
     try {
-      _subscription = _connectivity.onConnectivityChanged.listen((results) async {
+      _subscription = _connectivity.onConnectivityChanged.listen((
+        results,
+      ) async {
         if (!ref.mounted) return;
-        final hasNoNetwork = results.isEmpty ||
+        final hasNoNetwork =
+            results.isEmpty ||
             results.every((r) => r == ConnectivityResult.none);
 
         if (hasNoNetwork) {
@@ -80,8 +84,8 @@ class ConnectivityNotifier extends Notifier<bool> {
 
     try {
       final results = await _connectivity.checkConnectivity();
-      final hasNoNetwork = results.isEmpty ||
-          results.every((r) => r == ConnectivityResult.none);
+      final hasNoNetwork =
+          results.isEmpty || results.every((r) => r == ConnectivityResult.none);
 
       if (hasNoNetwork) {
         _setOffline();
@@ -111,7 +115,8 @@ class ConnectivityNotifier extends Notifier<bool> {
   }
 
   void _setOffline({bool force = false}) {
-    if (!ref.mounted || state == true) return; // Already offline, no-op (no flicker)
+    if (!ref.mounted || state == true)
+      return; // Already offline, no-op (no flicker)
 
     final now = DateTime.now();
     if (!force &&
@@ -131,7 +136,8 @@ class ConnectivityNotifier extends Notifier<bool> {
   }
 
   void _setOnline({bool force = false}) {
-    if (!ref.mounted || state == false) return; // Already online, no-op (no flicker)
+    if (!ref.mounted || state == false)
+      return; // Already online, no-op (no flicker)
 
     final now = DateTime.now();
     if (!force &&

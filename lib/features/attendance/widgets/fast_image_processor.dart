@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image/image.dart' as img;
 
 class ImageProcessParams {
@@ -19,9 +18,8 @@ class ImageProcessParams {
 class FastImageProcessor {
   FastImageProcessor._();
 
-  /// Native hardware-accelerated image processor (50-80ms execution time)
-  /// Uses Android/iOS native C/NDK codecs for lightning-fast downsampling to max 1000px,
-  /// maintaining crisp biometric detail while keeping network payload minimal (~70KB).
+  /// Background isolate image processor to keep UI thread 100% responsive and avoid ANR/OOM.
+  /// Downsamples to max 1000px, bakes orientation/rotation, and compresses at 75 quality.
   static Future<void> processImageFast({
     required String path,
     required int sensorOrientation,
@@ -30,44 +28,6 @@ class FastImageProcessor {
     final file = File(path);
     if (!await file.exists()) return;
 
-    try {
-      // 1. Native hardware compression & resize down to max 1000px (~40-60ms)
-      final compressedBytes = await FlutterImageCompress.compressWithFile(
-        path,
-        minWidth: 1000,
-        minHeight: 1000,
-        quality: 75,
-        autoCorrectionAngle: true,
-        format: CompressFormat.jpeg,
-      );
-
-      if (compressedBytes != null && compressedBytes.isNotEmpty) {
-        final decoded = img.decodeJpg(compressedBytes);
-        if (decoded != null) {
-          img.Image working = img.bakeOrientation(decoded);
-          if (working.width > working.height) {
-            final rotationAngle = sensorOrientation == 90 ? 90 : 270;
-            working = img.copyRotate(working, angle: rotationAngle);
-          }
-          if (isFrontCamera) {
-            working = img.flipHorizontal(working);
-          }
-          final finalJpg = img.encodeJpg(working, quality: 75);
-          final tmpFile = File('$path.tmp');
-          await tmpFile.writeAsBytes(finalJpg, flush: true);
-          await tmpFile.rename(path);
-          return;
-        }
-        final tmpFile = File('$path.tmp');
-        await tmpFile.writeAsBytes(compressedBytes, flush: true);
-        await tmpFile.rename(path);
-        return;
-      }
-    } catch (_) {
-      // Fallback for tests/environments without native platform channel
-    }
-
-    // Pure Dart fallback for headless test runners
     await compute(
       processImageInIsolate,
       ImageProcessParams(
@@ -78,7 +38,7 @@ class FastImageProcessor {
     );
   }
 
-  /// Background isolate image processor to keep UI thread 100% responsive and avoid ANR/OOM
+  /// Background isolate image processor to keep UI thread 100% responsive
   static Future<void> processImageInIsolate(ImageProcessParams params) async {
     final file = File(params.path);
     if (!await file.exists()) return;
@@ -116,4 +76,3 @@ class FastImageProcessor {
     await tmpFile.rename(params.path);
   }
 }
-

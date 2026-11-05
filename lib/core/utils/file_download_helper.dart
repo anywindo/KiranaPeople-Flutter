@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -31,7 +32,9 @@ class FileDownloadHelper {
       String? segment = uri?.pathSegments.isNotEmpty == true
           ? uri!.pathSegments.last
           : null;
-      if (segment != null && segment.trim().isNotEmpty && segment.contains('.')) {
+      if (segment != null &&
+          segment.trim().isNotEmpty &&
+          segment.contains('.')) {
         return Uri.decodeComponent(segment.trim());
       }
     } catch (_) {}
@@ -112,7 +115,9 @@ class FileDownloadHelper {
         // 1. Try reading from cached image first for instant download
         File? cachedFile;
         try {
-          final fileInfo = await DefaultCacheManager().getFileFromCache(fullUrl);
+          final fileInfo = await DefaultCacheManager().getFileFromCache(
+            fullUrl,
+          );
           if (fileInfo != null && await fileInfo.file.exists()) {
             cachedFile = fileInfo.file;
           }
@@ -221,7 +226,9 @@ class FileDownloadHelper {
         // 1. Check cached image first
         File? cachedFile;
         try {
-          final fileInfo = await DefaultCacheManager().getFileFromCache(fullUrl);
+          final fileInfo = await DefaultCacheManager().getFileFromCache(
+            fullUrl,
+          );
           if (fileInfo != null && await fileInfo.file.exists()) {
             cachedFile = fileInfo.file;
           }
@@ -294,4 +301,3 @@ class FileDownloadHelper {
     }
   }
 }
-

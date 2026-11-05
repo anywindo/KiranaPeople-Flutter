@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/bouncing_button.dart';
 
 class HistoryFilterChip extends StatelessWidget {
   final String label;
@@ -23,9 +24,10 @@ class HistoryFilterChip extends StatelessWidget {
     final activeBg = selectedBg ?? AppColors.primary.withValues(alpha: 0.12);
     final activeText = selectedColor ?? AppColors.primary;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+    return BouncingButton(
+      scaleDown: 0.93,
+      hapticType: BouncingHapticType.selection,
+      onPressed: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
@@ -48,4 +50,3 @@ class HistoryFilterChip extends StatelessWidget {
     );
   }
 }
-

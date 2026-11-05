@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/auto_oriented_image.dart';
+import '../../../core/widgets/bouncing_button.dart';
 import '../../../data/models/attendance_event_model.dart';
 
 class TodayActivityCard extends StatelessWidget {
@@ -57,9 +58,25 @@ class TodayActivityCard extends StatelessWidget {
         border: Border.all(
           color: context.isDarkMode
               ? const Color(0xFF334155)
-              : const Color(0xFFE2E8F0),
-          width: 1.2,
+              : const Color(0xFFCBD5E1),
+          width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: context.isDarkMode ? 0.40 : 0.08,
+            ),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: context.isDarkMode ? 0.25 : 0.04,
+            ),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -75,8 +92,10 @@ class TodayActivityCard extends StatelessWidget {
                   color: context.textPrimaryColor,
                 ),
               ),
-              InkWell(
-                onTap: onViewFullHistory,
+              BouncingButton(
+                scaleDown: 0.94,
+                hapticType: BouncingHapticType.light,
+                onPressed: onViewFullHistory,
                 child: const Row(
                   children: [
                     Text(
@@ -155,52 +174,39 @@ class TodayActivityCard extends StatelessWidget {
                     ? _formatIndoFullDate(localDt)
                     : 'Hari Ini';
 
-                return Material(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                  child: InkWell(
-                    onTap: () => onEventTap(event),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 6,
-                        horizontal: 2,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // Circular Selfie or Fallback
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: context.borderColor,
-                                width: 1.5,
-                              ),
+                return BouncingButton(
+                  scaleDown: 0.98,
+                  hapticType: BouncingHapticType.light,
+                  onPressed: () => onEventTap(event),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 6,
+                      horizontal: 2,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Circular Selfie or Fallback
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: context.borderColor,
+                              width: 1.5,
                             ),
-                            child: ClipOval(
-                              child:
-                                  (event.fullSelfieUrl != null &&
-                                      event.fullSelfieUrl!.isNotEmpty)
-                                  ? AutoOrientedImage(
-                                      imageUrl: event.fullSelfieUrl!,
-                                      width: 44,
-                                      height: 44,
-                                      fit: BoxFit.cover,
-                                      errorWidget: Container(
-                                        color: AppColors.primary.withValues(
-                                          alpha: 0.12,
-                                        ),
-                                        child: Icon(
-                                          _getEventIcon(event.eventType),
-                                          color: AppColors.primary,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    )
-                                  : Container(
+                          ),
+                          child: ClipOval(
+                            child:
+                                (event.fullSelfieUrl != null &&
+                                    event.fullSelfieUrl!.isNotEmpty)
+                                ? AutoOrientedImage(
+                                    imageUrl: event.fullSelfieUrl!,
+                                    width: 44,
+                                    height: 44,
+                                    fit: BoxFit.cover,
+                                    errorWidget: Container(
                                       color: AppColors.primary.withValues(
                                         alpha: 0.12,
                                       ),
@@ -210,85 +216,95 @@ class TodayActivityCard extends StatelessWidget {
                                         size: 20,
                                       ),
                                     ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  event.eventType.label,
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: context.textPrimaryColor,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Row(
-                                  children: [
-                                    Text(
-                                      formattedDate,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: context.textSecondaryColor,
-                                      ),
+                                  )
+                                : Container(
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.12,
                                     ),
-                                    if (event.latitude != null &&
-                                        event.longitude != null) ...[
-                                      const SizedBox(width: 6),
-                                      Container(
-                                        width: 3,
-                                        height: 3,
-                                        decoration: BoxDecoration(
-                                          color: context.borderColor,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      // Jelek
-                                      // const Icon(
-                                      //   Icons.location_on_rounded,
-                                      //   size: 11,
-                                      //   color: Color(0xFF94A3B8),
-                                      // ),
-                                      // const SizedBox(width: 2),
-                                      // Text(
-                                      //   'Lokasi GPS',
-                                      //   style: TextStyle(
-                                      //     fontSize: 11,
-                                      //     color: context.textMutedColor,
-                                      //     fontWeight: FontWeight.w500,
-                                      //   ),
-                                      // ),
-                                    ],
-                                  ],
-                                ),
-                              ],
-                            ),
+                                    child: Icon(
+                                      _getEventIcon(event.eventType),
+                                      color: AppColors.primary,
+                                      size: 20,
+                                    ),
+                                  ),
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                formattedTime,
+                                event.eventType.label,
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
                                   color: context.textPrimaryColor,
                                 ),
                               ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                Icons.chevron_right_rounded,
-                                size: 18,
-                                color: context.textMutedColor,
+                              const SizedBox(height: 2),
+                              Row(
+                                children: [
+                                  Text(
+                                    formattedDate,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: context.textSecondaryColor,
+                                    ),
+                                  ),
+                                  if (event.latitude != null &&
+                                      event.longitude != null) ...[
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      width: 3,
+                                      height: 3,
+                                      decoration: BoxDecoration(
+                                        color: context.borderColor,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    // Jelek
+                                    // const Icon(
+                                    //   Icons.location_on_rounded,
+                                    //   size: 11,
+                                    //   color: Color(0xFF94A3B8),
+                                    // ),
+                                    // const SizedBox(width: 2),
+                                    // Text(
+                                    //   'Lokasi GPS',
+                                    //   style: TextStyle(
+                                    //     fontSize: 11,
+                                    //     color: context.textMutedColor,
+                                    //     fontWeight: FontWeight.w500,
+                                    //   ),
+                                    // ),
+                                  ],
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              formattedTime,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: context.textPrimaryColor,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              size: 18,
+                              color: context.textMutedColor,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -299,4 +315,3 @@ class TodayActivityCard extends StatelessWidget {
     );
   }
 }
-

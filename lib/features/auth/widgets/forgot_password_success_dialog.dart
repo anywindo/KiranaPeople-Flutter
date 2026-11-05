@@ -57,9 +57,7 @@ class ForgotPasswordSuccessDialog extends StatelessWidget {
         ],
       ),
       content: Text(
-        message.isNotEmpty
-            ? message
-            : 'Kata sandi Anda berhasil diperbarui. Silakan masuk menggunakan kata sandi baru.',
+        message.isNotEmpty ? message : 'Kata sandi Anda berhasil diperbarui. Silakan masuk menggunakan kata sandi baru.',
         style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
       ),
       actions: [
@@ -88,4 +86,3 @@ class ForgotPasswordSuccessDialog extends StatelessWidget {
     );
   }
 }
-

@@ -74,7 +74,8 @@ class _ShiftConfirmationDialogState extends State<ShiftConfirmationDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final hasBreakTime = _selectedShift.breakStartTime != null &&
+    final hasBreakTime =
+        _selectedShift.breakStartTime != null &&
         _selectedShift.breakEndTime != null &&
         _selectedShift.breakStartTime!.isNotEmpty &&
         _selectedShift.breakEndTime!.isNotEmpty;
@@ -138,8 +139,10 @@ class _ShiftConfirmationDialogState extends State<ShiftConfirmationDialog> {
               onTap: _openShiftPicker,
               borderRadius: BorderRadius.circular(14),
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: context.surfaceSecondaryColor,
                   borderRadius: BorderRadius.circular(14),
@@ -287,10 +290,7 @@ class _ShiftConfirmationDialogState extends State<ShiftConfirmationDialog> {
                   ),
                   child: const Text(
                     'Lanjutkan',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                   ),
                 ),
               ),

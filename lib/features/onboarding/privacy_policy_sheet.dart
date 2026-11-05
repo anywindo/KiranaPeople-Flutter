@@ -52,7 +52,9 @@ class PrivacyPolicySheet extends StatelessWidget {
               width: 44,
               height: 4,
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF475569) : const Color(0xFFE2E8F0),
+                color: isDark
+                    ? const Color(0xFF475569)
+                    : const Color(0xFFE2E8F0),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -66,7 +68,9 @@ class PrivacyPolicySheet extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(9),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: isDark ? 0.20 : 0.12),
+                    color: AppColors.primary.withValues(
+                      alpha: isDark ? 0.20 : 0.12,
+                    ),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -109,7 +113,8 @@ class PrivacyPolicySheet extends StatelessWidget {
                               vertical: 1.5,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                              color: const Color(0xFF10B981)
+                                  .withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: const Text(

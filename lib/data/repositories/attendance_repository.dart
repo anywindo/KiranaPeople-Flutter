@@ -73,8 +73,9 @@ class AttendanceRepository {
     }
 
     if (deviceTimestamp != null) {
-      formDataMap['device_timestamp'] =
-          deviceTimestamp.toUtc().toIso8601String();
+      formDataMap['device_timestamp'] = deviceTimestamp
+          .toUtc()
+          .toIso8601String();
     }
 
     if (shiftId != null) {

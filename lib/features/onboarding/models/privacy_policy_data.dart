@@ -64,15 +64,13 @@ const List<PrivacyPolicySection> privacySections = [
     title: 'Ruang Lingkup & Landasan Hukum (UU PDP No. 27/2022)',
     badge: 'Kepatuhan Regulasi',
     badgeColor: Color(0xFF3B82F6),
-    content:
-        'Kebijakan Privasi ini mengatur tata cara perolehan, pemrosesan, penyimpanan, dan perlindungan data pribadi para karyawan, staf operasional, dan pihak berkepentingan oleh PT Kirana Desain Indonesia (Kirana Group) selaku Pengendali Data Pribadi.\n\nKebijakan ini disusun berdasarkan Undang-Undang Republik Indonesia Nomor 27 Tahun 2022 tentang Perlindungan Data Pribadi (UU PDP), Peraturan Pemerintah terkait ketenagakerjaan, serta Peraturan Perusahaan Kirana Group.',
+    content: 'Kebijakan Privasi ini mengatur tata cara perolehan, pemrosesan, penyimpanan, dan perlindungan data pribadi para karyawan, staf operasional, dan pihak berkepentingan oleh PT Kirana Desain Indonesia (Kirana Group) selaku Pengendali Data Pribadi.\n\nKebijakan ini disusun berdasarkan Undang-Undang Republik Indonesia Nomor 27 Tahun 2022 tentang Perlindungan Data Pribadi (UU PDP), Peraturan Pemerintah terkait ketenagakerjaan, serta Peraturan Perusahaan Kirana Group.',
   ),
   PrivacyPolicySection(
     icon: Icons.badge_outlined,
     sectionNumber: '2',
     title: 'Data Pribadi yang Kami Kumpulkan & Cara Perolehannya',
-    content:
-        'Dalam menunjang operasional sistem presensi dan manajemen ketenagakerjaan, kami mengumpulkan jenis data berikut secara sah dan proporsional:',
+    content: 'Dalam menunjang operasional sistem presensi dan manajemen ketenagakerjaan, kami mengumpulkan jenis data berikut secara sah dan proporsional:',
     bulletPoints: [
       'Data Identitas Karyawan: Nama lengkap, Nomor Induk Kependudukan (NIK), Nomor Induk Pegawai/ID Karyawan, alamat email terdaftar, nomor telepon seluler (WhatsApp), tanggal lahir, divisi/departemen, jabatan, dan tanggal bergabung.',
       'Data Kehadiran & Jadwal Kerja: Waktu check-in, waktu check-out, istirahat masuk/selesai, jadwal shift terpilih, status ketepatan waktu (on-time vs terlambat berdasarkan batas waktu shift), serta catatan dinas luar.',
@@ -87,8 +85,7 @@ const List<PrivacyPolicySection> privacySections = [
     title: 'Batasan Tegas Terkait Lokasi & Kamera (Anti-Spying)',
     badge: 'Prinsip Privasi',
     badgeColor: Color(0xFF10B981),
-    content:
-        'Kami menghargai privasi dan kemerdekaan personal setiap karyawan. Kirana People menerapkan prinsip perlindungan ketat sebagai berikut:',
+    content: 'Kami menghargai privasi dan kemerdekaan personal setiap karyawan. Kirana People menerapkan prinsip perlindungan ketat sebagai berikut:',
     bulletPoints: [
       'Tanpa Pelacakan Lokasi Latar Belakang (No Background Tracking): Koordinat GPS HANYA dibaca secara instan (point-in-time snapshot) saat Anda menekan tombol presensi (Masuk, Istirahat, Pulang). Aplikasi TIDAK melacak jejak rute perjalanan atau memantau lokasi Anda secara kontinu.',
       'Kamera On-Demand Saja: Akses kamera depan HANYA aktif saat Anda membuka tampilan selfie presensi. Aplikasi TIDAK PERNAH mengakses kamera di latar belakang atau merekam video/audio diam-diam.',
@@ -99,8 +96,7 @@ const List<PrivacyPolicySection> privacySections = [
     icon: Icons.track_changes_rounded,
     sectionNumber: '4',
     title: 'Tujuan Pemrosesan Data Pribadi',
-    content:
-        'Seluruh data yang dikumpulkan hanya diproses untuk tujuan ketenagakerjaan yang sah, meliputi:',
+    content: 'Seluruh data yang dikumpulkan hanya diproses untuk tujuan ketenagakerjaan yang sah, meliputi:',
     bulletPoints: [
       'Verifikasi Kehadiran Resmi: Memvalidasi keabsahan kehadiran fisik staf di lokasi kantor/proyek yang ditentukan (geofencing) sesuai jadwal shift kerja.',
       'Perhitungan Penggajian & Kompensasi: Menjadi dasar perhitungan absensi, keterlambatan, uang lembur, tunjangan kehadiran, dan payroll oleh Divisi SDM & Keuangan.',
@@ -114,8 +110,7 @@ const List<PrivacyPolicySection> privacySections = [
     title: 'Hak-Hak Anda sebagai Subjek Data (Sesuai UU PDP)',
     badge: 'Hak Anda',
     badgeColor: AppColors.primary,
-    content:
-        'Berdasarkan Pasal 5 sampai dengan Pasal 13 UU PDP No. 27/2022, Anda selaku Subjek Data memiliki hak-hak yang dijamin hukum:',
+    content: 'Berdasarkan Pasal 5 sampai dengan Pasal 13 UU PDP No. 27/2022, Anda selaku Subjek Data memiliki hak-hak yang dijamin hukum:',
     bulletPoints: [
       'Hak Akses Informasi: Mengetahui kejelasan identitas pengendali data, dasar hukum, serta tujuan pemrosesan data pribadi Anda.',
       'Hak Akses Data Kehadiran: Melihat seluruh riwayat kehadiran harian, waktu check-in/out, dan foto selfie presensi melalui tab "Riwayat" pada aplikasi.',
@@ -128,8 +123,7 @@ const List<PrivacyPolicySection> privacySections = [
     icon: Icons.lock_rounded,
     sectionNumber: '6',
     title: 'Keamanan, Enkripsi, & Penyimpanan Data',
-    content:
-        'Kami menerapkan standar keamanan teknis dan organisasional tingkat industri guna melindungi data Anda:',
+    content: 'Kami menerapkan standar keamanan teknis dan organisasional tingkat industri guna melindungi data Anda:',
     bulletPoints: [
       'Enkripsi Data dalam Transit: Seluruh pertukaran data antara aplikasi mobile dan server pusat menggunakan protokol HTTPS yang diamankan enkripsi TLS 1.2 / TLS 1.3.',
       'Penyimpanan Terenkripsi Perangkat: Token otentikasi (JWT) dan kredensial sesi disimpan di Secure Enclave / KeyStore perangkat keras melalui FlutterSecureStorage.',
@@ -141,8 +135,7 @@ const List<PrivacyPolicySection> privacySections = [
     icon: Icons.cloud_off_rounded,
     sectionNumber: '7',
     title: 'Penyimpanan Offline & Sinkronisasi Lokal',
-    content:
-        'Apabila presensi dilakukan saat koneksi internet terputus atau sinyal seluler lemah di lapangan:',
+    content: 'Apabila presensi dilakukan saat koneksi internet terputus atau sinyal seluler lemah di lapangan:',
     bulletPoints: [
       'Data presensi dan foto selfie akan disimpan sementara dalam penyimpanan lokal perangkat yang terenkripsi.',
       'Saat koneksi internet terhubung kembali, aplikasi secara otomatis melakukan sinkronisasi aman (secure background sync) ke server.',
@@ -153,8 +146,7 @@ const List<PrivacyPolicySection> privacySections = [
     icon: Icons.timer_outlined,
     sectionNumber: '8',
     title: 'Masa Retensi & Pemusnahan Data',
-    content:
-        'Data catatan kehadiran dan foto presensi disimpan selama masa kerja karyawan aktif di PT Kirana Desain Indonesia.\n\nSetelah hubungan kerja berakhir, data rekam kehadiran akan diarsipkan selama minimal 3 (tiga) tahun atau sesuai batas retensi dokumen ketenagakerjaan dan audit hukum yang berlaku di Indonesia. Setelah periode retensi terlampaui, data akan dimusnahkan secara permanen atau dianonimkan untuk keperluan statistik agregat.',
+    content: 'Data catatan kehadiran dan foto presensi disimpan selama masa kerja karyawan aktif di PT Kirana Desain Indonesia.\n\nSetelah hubungan kerja berakhir, data rekam kehadiran akan diarsipkan selama minimal 3 (tiga) tahun atau sesuai batas retensi dokumen ketenagakerjaan dan audit hukum yang berlaku di Indonesia. Setelah periode retensi terlampaui, data akan dimusnahkan secara permanen atau dianonimkan untuk keperluan statistik agregat.',
   ),
   PrivacyPolicySection(
     icon: Icons.share_location_rounded,
@@ -162,8 +154,7 @@ const List<PrivacyPolicySection> privacySections = [
     title: 'Kerahasiaan & Pembagian Data (Zero Third-Party Sharing)',
     badge: 'Bebas Iklan',
     badgeColor: Color(0xFF8B5CF6),
-    content:
-        'PT Kirana Desain Indonesia menegaskan komitmen berikut:',
+    content: 'PT Kirana Desain Indonesia menegaskan komitmen berikut:',
     bulletPoints: [
       'Tidak Menjual Data: Kami TIDAK PERNAH dan TIDAK AKAN menjual, menyewakan, meminjamkan, atau memperdagangkan data pribadi karyawan kepada pihak ketiga mana pun.',
       'Tanpa Iklan Pihak Ketiga: Aplikasi ini bersih dari pustaka pelacakan periklanan (ad trackers) atau SDK analitik pihak ketiga yang bersifat komersial.',
@@ -174,8 +165,7 @@ const List<PrivacyPolicySection> privacySections = [
     icon: Icons.perm_device_information_rounded,
     sectionNumber: '10',
     title: 'Daftar Izin Perangkat (Device Permissions)',
-    content:
-        'Aplikasi memerlukan izin perangkat berikut dengan alasan penggunaan yang transparan:',
+    content: 'Aplikasi memerlukan izin perangkat berikut dengan alasan penggunaan yang transparan:',
     bulletPoints: [
       'Akses Lokasi (ACCESS_FINE_LOCATION & COARSE): Menghitung jarak perangkat ke titik koordinat kantor saat tombol presensi ditekan guna memvalidasi geofence.',
       'Akses Kamera (CAMERA): Mengambil foto selfie verifikasi wajah real-time saat presensi.',
@@ -187,8 +177,7 @@ const List<PrivacyPolicySection> privacySections = [
     icon: Icons.verified_user_rounded,
     sectionNumber: '11',
     title: 'Integritas Karyawan & Larangan Pelanggaran',
-    content:
-        'Karyawan wajib menjaga kerahasiaan kata sandi dan integritas data kehadiran pribadi. Tindakan berikut merupakan pelanggaran disiplin berat terhadap Peraturan Perusahaan:',
+    content: 'Karyawan wajib menjaga kerahasiaan kata sandi dan integritas data kehadiran pribadi. Tindakan berikut merupakan pelanggaran disiplin berat terhadap Peraturan Perusahaan:',
     bulletPoints: [
       'Meminjamkan atau memberikan akses akun presensi kepada orang lain (titip absen).',
       'Menggunakan aplikasi pemalsu koordinat (Fake GPS / Mock Location).',
@@ -200,8 +189,7 @@ const List<PrivacyPolicySection> privacySections = [
     icon: Icons.contact_support_rounded,
     sectionNumber: '12',
     title: 'Kontak Layanan Dukungan & Petugas Perlindungan Data',
-    content:
-        'Apabila Anda memiliki pertanyaan, klarifikasi, atau permohonan terkait perlindungan data pribadi dan penggunaan aplikasi Kirana People, Anda dapat menghubungi:',
+    content: 'Apabila Anda memiliki pertanyaan, klarifikasi, atau permohonan terkait perlindungan data pribadi dan penggunaan aplikasi Kirana People, Anda dapat menghubungi:',
     bulletPoints: [
       'Divisi: Human Resources & IT Support (PT Kirana Desain Indonesia)',
       'Email Bantuan: support@kiranadesainindonesia.com / hr@kiranadesainindonesia.com',
@@ -210,4 +198,3 @@ const List<PrivacyPolicySection> privacySections = [
     ],
   ),
 ];
-

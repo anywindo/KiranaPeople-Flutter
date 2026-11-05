@@ -36,10 +36,7 @@ class HistoryFilterSheet extends ConsumerStatefulWidget {
     HistoryShiftFilterSheet.show(context, ref, shifts);
   }
 
-  static Future<void> pickCustomDateRange(
-    BuildContext context,
-    WidgetRef ref,
-  ) {
+  static Future<void> pickCustomDateRange(BuildContext context, WidgetRef ref) {
     return HistoryDateFilterSheet.pickCustomDateRange(context, ref);
   }
 
@@ -232,7 +229,8 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primary,
                 side: BorderSide(
-                  color: _tempRange != null &&
+                  color:
+                      _tempRange != null &&
                           _tempRangeLabel != 'Hari Ini' &&
                           _tempRangeLabel != '7 Hari Terakhir' &&
                           _tempRangeLabel != 'Bulan Ini'
@@ -253,7 +251,8 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
                   context: context,
                   firstDate: DateTime(now.year - 3),
                   lastDate: DateTime(now.year + 1),
-                  initialDateRange: _tempRange ??
+                  initialDateRange:
+                      _tempRange ??
                       DateTimeRange(
                         start: now.subtract(const Duration(days: 30)),
                         end: now,
@@ -279,8 +278,9 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
                 if (picked != null) {
                   setState(() {
                     _tempRange = picked;
-                    _tempRangeLabel =
-                        HistoryFilterSheet.formatDateRangeLabel(picked);
+                    _tempRangeLabel = HistoryFilterSheet.formatDateRangeLabel(
+                      picked,
+                    );
                   });
                 }
               },

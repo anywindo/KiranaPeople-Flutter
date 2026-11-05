@@ -11,8 +11,9 @@ class ShiftInfoCardSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = context.isDarkMode;
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final cardBorder =
-        isDark ? const Color(0xFF334155) : const Color(0xFFE5E7EB);
+    final cardBorder = isDark
+        ? const Color(0xFF334155)
+        : const Color(0xFFE5E7EB);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -50,8 +51,9 @@ class ShiftInfoCardSkeleton extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color:
-                    isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+                color: isDark
+                    ? const Color(0xFF0F172A)
+                    : const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
@@ -130,8 +132,9 @@ class AttendanceScreenSkeleton extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color:
-                    context.isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+                color: context.isDarkMode
+                    ? const Color(0xFF1E293B)
+                    : Colors.white,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -173,4 +176,3 @@ class TimelineRowSkeleton extends StatelessWidget {
     );
   }
 }
-

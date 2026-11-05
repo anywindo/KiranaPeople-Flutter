@@ -3,18 +3,12 @@ import 'package:flutter/material.dart';
 class SubmissionErrorBanner extends StatelessWidget {
   final String errorMessage;
 
-  const SubmissionErrorBanner({
-    super.key,
-    required this.errorMessage,
-  });
+  const SubmissionErrorBanner({super.key, required this.errorMessage});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 10,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: const Color(0xFFEF4444).withValues(alpha: 0.1),
@@ -46,4 +40,3 @@ class SubmissionErrorBanner extends StatelessWidget {
     );
   }
 }
-

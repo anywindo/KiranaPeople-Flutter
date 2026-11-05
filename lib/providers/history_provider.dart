@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../data/models/attendance_model.dart';
 import '../data/models/shift_model.dart';
 import '../data/models/attendance_event_model.dart';
@@ -50,8 +51,9 @@ class HistoryFilter {
     return HistoryFilter(
       status: status ?? this.status,
       dateRange: dateRange != null ? dateRange() : this.dateRange,
-      dateRangeLabel:
-          dateRangeLabel != null ? dateRangeLabel() : this.dateRangeLabel,
+      dateRangeLabel: dateRangeLabel != null
+          ? dateRangeLabel()
+          : this.dateRangeLabel,
       shift: shift != null ? shift() : this.shift,
     );
   }
@@ -110,7 +112,9 @@ class HistoryState {
           final localDt = dt != null ? (dt.isUtc ? dt.toLocal() : dt) : null;
           checkInTime = localDt != null
               ? '${localDt.hour.toString().padLeft(2, '0')}:${localDt.minute.toString().padLeft(2, '0')}'
-              : (startShiftEvent.timestamp.length >= 16 ? startShiftEvent.timestamp.substring(11, 16) : null);
+              : (startShiftEvent.timestamp.length >= 16
+                    ? startShiftEvent.timestamp.substring(11, 16)
+                    : null);
         }
         final isShiftLate = Shift.isShiftStartLate(
           actualTime: checkInTime,
@@ -119,7 +123,8 @@ class HistoryState {
           ruleMinutes: item.shift?.attendanceRuleMinutes ?? 15,
         );
 
-        final isLate = rawStatus == 'LATE' ||
+        final isLate =
+            rawStatus == 'LATE' ||
             rawStatus.contains('TERLAMBAT') ||
             (item.status?.toLowerCase().contains('terlambat') ?? false) ||
             (startShiftEvent != null && isShiftLate);
@@ -197,9 +202,7 @@ class HistoryNotifier extends Notifier<HistoryState> {
   }
 
   void setStatusFilter(AttendanceHistoryStatusFilter status) {
-    state = state.copyWith(
-      filter: state.filter.copyWith(status: status),
-    );
+    state = state.copyWith(filter: state.filter.copyWith(status: status));
   }
 
   void setDateRangeFilter(DateTimeRange? range, [String? label]) {
@@ -212,17 +215,11 @@ class HistoryNotifier extends Notifier<HistoryState> {
   }
 
   void setShiftFilter(String? shift) {
-    state = state.copyWith(
-      filter: state.filter.copyWith(
-        shift: () => shift,
-      ),
-    );
+    state = state.copyWith(filter: state.filter.copyWith(shift: () => shift));
   }
 
   void resetFilter() {
-    state = state.copyWith(
-      filter: const HistoryFilter(),
-    );
+    state = state.copyWith(filter: const HistoryFilter());
   }
 
   Future<void> loadHistory({int page = 1, bool isBackground = false}) async {
@@ -294,5 +291,6 @@ class HistoryNotifier extends Notifier<HistoryState> {
   }
 }
 
-final historyProvider =
-    NotifierProvider<HistoryNotifier, HistoryState>(HistoryNotifier.new);
+final historyProvider = NotifierProvider<HistoryNotifier, HistoryState>(
+  HistoryNotifier.new,
+);

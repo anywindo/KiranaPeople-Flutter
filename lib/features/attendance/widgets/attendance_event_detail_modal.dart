@@ -29,10 +29,8 @@ class AttendanceEventDetailModal extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => AttendanceEventDetailModal(
-        event: event,
-        workLocation: workLocation,
-      ),
+      builder: (ctx) =>
+          AttendanceEventDetailModal(event: event, workLocation: workLocation),
     );
   }
 
@@ -57,7 +55,8 @@ class _AttendanceEventDetailModalState
         ? LatLng(resolvedWorkLocation.latitude, resolvedWorkLocation.longitude)
         : const LatLng(-7.025801, 109.956894);
 
-    final officeName = (resolvedWorkLocation?.name != null &&
+    final officeName =
+        (resolvedWorkLocation?.name != null &&
             resolvedWorkLocation!.name.isNotEmpty)
         ? resolvedWorkLocation.name
         : 'Kantor Utama (Tersono, Batang)';
@@ -105,11 +104,7 @@ class _AttendanceEventDetailModalState
           ),
           const SizedBox(height: 14),
           if (_selectedTab == 1 && hasPhoto)
-            HistoryLocationPhotoView(
-              event: event,
-              lat: lat,
-              lng: lng,
-            )
+            HistoryLocationPhotoView(event: event, lat: lat, lng: lng)
           else ...[
             HistoryLocationMapView(
               userLatLng: userLatLng,

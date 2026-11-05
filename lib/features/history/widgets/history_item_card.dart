@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/auto_oriented_image.dart';
+import '../../../core/widgets/bouncing_button.dart';
 import '../../../data/models/attendance_event_model.dart';
 import '../../../data/models/attendance_model.dart';
 import '../../../data/models/shift_model.dart';
@@ -97,7 +98,8 @@ class HistoryItemCard extends StatelessWidget {
 
     final rawStatus =
         item.status ?? (isShiftStartLate ? 'LATE' : 'Tepat Waktu');
-    final isLate = rawStatus.toUpperCase() == 'LATE' ||
+    final isLate =
+        rawStatus.toUpperCase() == 'LATE' ||
         rawStatus.toLowerCase().contains('terlambat') ||
         (startShiftEvent != null && isShiftStartLate);
 
@@ -180,62 +182,66 @@ class HistoryItemCard extends StatelessWidget {
         ...item.events.map((event) {
           final timeStr = formatShortTime(event.timestamp);
 
-          return Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            decoration: BoxDecoration(
-              color: context.surfaceColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: context.isDarkMode
-                    ? const Color(0xFF334155)
-                    : const Color(0xFFE2E8F0),
-                width: 1.2,
-              ),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(16),
-              child: InkWell(
-                onTap: () => onEventTap(event),
+          return BouncingButton(
+            scaleDown: 0.98,
+            hapticType: BouncingHapticType.light,
+            onPressed: () => onEventTap(event),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                color: context.surfaceColor,
                 borderRadius: BorderRadius.circular(16),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
+                border: Border.all(
+                  color: context.isDarkMode
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFCBD5E1),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(
+                      alpha: context.isDarkMode ? 0.30 : 0.06,
+                    ),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
-                  child: Row(
-                    children: [
-                      // Circular Selfie Avatar or Event Icon
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: context.borderColor,
-                            width: 1.5,
-                          ),
+                  BoxShadow(
+                    color: Colors.black.withValues(
+                      alpha: context.isDarkMode ? 0.20 : 0.03,
+                    ),
+                    blurRadius: 3,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    // Circular Selfie Avatar or Event Icon
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: context.borderColor,
+                          width: 1.5,
                         ),
-                        child: ClipOval(
-                          child: (event.fullSelfieUrl != null &&
-                                  event.fullSelfieUrl!.isNotEmpty)
-                              ? AutoOrientedImage(
-                                  imageUrl: event.fullSelfieUrl!,
-                                  width: 44,
-                                  height: 44,
-                                  fit: BoxFit.cover,
-                                  errorWidget: Container(
-                                    color: AppColors.primary.withValues(
-                                      alpha: 0.12,
-                                    ),
-                                    child: Icon(
-                                      getEventIcon(event.eventType),
-                                      color: AppColors.primary,
-                                      size: 20,
-                                    ),
-                                  ),
-                                )
-                              : Container(
+                      ),
+                      child: ClipOval(
+                        child:
+                            (event.fullSelfieUrl != null &&
+                                event.fullSelfieUrl!.isNotEmpty)
+                            ? AutoOrientedImage(
+                                imageUrl: event.fullSelfieUrl!,
+                                width: 44,
+                                height: 44,
+                                fit: BoxFit.cover,
+                                errorWidget: Container(
                                   color: AppColors.primary.withValues(
                                     alpha: 0.12,
                                   ),
@@ -245,92 +251,76 @@ class HistoryItemCard extends StatelessWidget {
                                     size: 20,
                                   ),
                                 ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-
-                      // Event Title & Time
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              event.eventType.label,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: context.textPrimaryColor,
+                              )
+                            : Container(
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.12,
+                                ),
+                                child: Icon(
+                                  getEventIcon(event.eventType),
+                                  color: AppColors.primary,
+                                  size: 20,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 3),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.access_time_rounded,
-                                  size: 13,
-                                  color: context.textSecondaryColor,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  timeStr,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: context.textSecondaryColor,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                if (event.latitude != null &&
-                                    event.longitude != null) ...[
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    width: 3,
-                                    height: 3,
-                                    decoration: BoxDecoration(
-                                      color: context.borderColor,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Icon(
-                                    Icons.location_on_rounded,
-                                    size: 12,
-                                    color: Color(0xFF94A3B8),
-                                  ),
-                                  const SizedBox(width: 2),
-                                  Text(
-                                    'Lokasi GPS',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: context.textMutedColor,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ],
-                        ),
                       ),
+                    ),
+                    const SizedBox(width: 12),
 
-                      // Subtle Chevron Icon
-                      Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: context.surfaceSecondaryColor,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: context.borderColor,
+                    // Event Title & Time
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            event.eventType.label,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: context.textPrimaryColor,
+                            ),
                           ),
-                        ),
-                        child: Icon(
-                          Icons.chevron_right_rounded,
-                          color: context.textMutedColor,
-                          size: 18,
-                        ),
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_rounded,
+                                size: 13,
+                                color: context.textSecondaryColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                timeStr,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: context.textSecondaryColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              if (event.latitude != null &&
+                                  event.longitude != null) ...[
+                              ],
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+
+                    // Subtle Chevron Icon
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: context.surfaceSecondaryColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: context.borderColor),
+                      ),
+                      child: Icon(
+                        Icons.chevron_right_rounded,
+                        color: context.textMutedColor,
+                        size: 18,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

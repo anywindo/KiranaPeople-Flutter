@@ -3,7 +3,15 @@ import 'package:intl/intl.dart';
 class DateFormatter {
   static String formatFullDate(DateTime dateTime) {
     // e.g. "Senin, 19 Oktober 2026"
-    final days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    final days = [
+      'Minggu',
+      'Senin',
+      'Selasa',
+      'Rabu',
+      'Kamis',
+      'Jumat',
+      'Sabtu',
+    ];
     final months = [
       '',
       'Januari',
@@ -17,7 +25,7 @@ class DateFormatter {
       'September',
       'Oktober',
       'November',
-      'Desember'
+      'Desember',
     ];
     final dayName = days[dateTime.weekday % 7];
     final monthName = months[dateTime.month];

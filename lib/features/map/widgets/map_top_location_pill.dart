@@ -47,7 +47,9 @@ class MapTopLocationPill extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: isDark ? 0.20 : 0.12),
+                color: AppColors.primary.withValues(
+                  alpha: isDark ? 0.20 : 0.12,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
@@ -111,4 +113,3 @@ class MapTopLocationPill extends StatelessWidget {
     );
   }
 }
-

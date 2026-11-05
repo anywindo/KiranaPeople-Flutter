@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../data/models/work_location_model.dart';
 
@@ -61,7 +62,10 @@ class _AttendanceMapModalState extends State<AttendanceMapModal> {
 
   LatLng get _officeLatLng {
     if (widget.workLocation != null) {
-      return LatLng(widget.workLocation!.latitude, widget.workLocation!.longitude);
+      return LatLng(
+        widget.workLocation!.latitude,
+        widget.workLocation!.longitude,
+      );
     }
     return _userLatLng;
   }
@@ -91,11 +95,15 @@ class _AttendanceMapModalState extends State<AttendanceMapModal> {
                     ? CameraFit.coordinates(
                         coordinates: [_userLatLng, _officeLatLng],
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 50, vertical: 80),
+                          horizontal: 50,
+                          vertical: 80,
+                        ),
                         maxZoom: 17.5,
                       )
                     : null,
-                initialCenter: widget.workLocation != null ? _officeLatLng : _userLatLng,
+                initialCenter: widget.workLocation != null
+                    ? _officeLatLng
+                    : _userLatLng,
                 initialZoom: 17.5,
                 maxZoom: 19.0,
                 minZoom: 10.0,
@@ -103,7 +111,8 @@ class _AttendanceMapModalState extends State<AttendanceMapModal> {
               children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.kiranadesainindonesia.kiranapeople',
+                  userAgentPackageName:
+                      'com.kiranadesainindonesia.kiranapeople',
                 ),
 
                 // Office Geofence Circle
@@ -155,7 +164,9 @@ class _AttendanceMapModalState extends State<AttendanceMapModal> {
                             const SizedBox(height: 2),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(6),
@@ -192,7 +203,9 @@ class _AttendanceMapModalState extends State<AttendanceMapModal> {
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFF0284C7),
                               borderRadius: BorderRadius.circular(6),
@@ -270,7 +283,9 @@ class _AttendanceMapModalState extends State<AttendanceMapModal> {
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 6),
+                          horizontal: 14,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.40),
                           borderRadius: BorderRadius.circular(16),

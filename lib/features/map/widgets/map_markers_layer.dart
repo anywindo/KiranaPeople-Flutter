@@ -35,7 +35,8 @@ class MapMarkersLayer extends StatelessWidget {
                 point: officeLatLng,
                 radius: radius,
                 useRadiusInMeter: true,
-                color: const Color(0xFF10B981).withValues(alpha: isDark ? 0.22 : 0.18),
+                color: const Color(0xFF10B981)
+                    .withValues(alpha: isDark ? 0.22 : 0.18),
                 borderColor: const Color(0xFF10B981),
                 borderStrokeWidth: 2.0,
               ),
@@ -59,10 +60,7 @@ class MapMarkersLayer extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: AppColors.primary,
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 2,
-                        ),
+                        border: Border.all(color: Colors.white, width: 2),
                         boxShadow: const [
                           BoxShadow(
                             color: Colors.black26,
@@ -87,12 +85,16 @@ class MapMarkersLayer extends StatelessWidget {
                         color: context.surfaceColor,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isDark ? context.borderColor : Colors.transparent,
+                          color: isDark
+                              ? context.borderColor
+                              : Colors.transparent,
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
+                            color: Colors.black.withValues(
+                              alpha: isDark ? 0.35 : 0.12,
+                            ),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -153,10 +155,7 @@ class MapMarkersLayer extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: const Color(0xFF007AFF),
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 2,
-                        ),
+                        border: Border.all(color: Colors.white, width: 2),
                         boxShadow: const [
                           BoxShadow(
                             color: Colors.black26,
@@ -180,4 +179,3 @@ class MapMarkersLayer extends StatelessWidget {
     );
   }
 }
-

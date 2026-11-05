@@ -34,10 +34,7 @@ class OnboardingPolicyAgreement extends StatelessWidget {
         Expanded(
           child: GestureDetector(
             onTap: () {
-              PrivacyPolicySheet.show(
-                context,
-                onAccept: () => onChanged(true),
-              );
+              PrivacyPolicySheet.show(context, onAccept: () => onChanged(true));
             },
             child: RichText(
               text: const TextSpan(
@@ -65,4 +62,3 @@ class OnboardingPolicyAgreement extends StatelessWidget {
     );
   }
 }
-

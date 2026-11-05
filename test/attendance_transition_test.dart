@@ -49,6 +49,48 @@ void main() {
       expect(activeSegment, equals(0));
     });
 
+    testWidgets('AttendanceModeSwitcher can be dragged smoothly between Kerja and Istirahat', (tester) async {
+      int activeSegment = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                return SizedBox(
+                  width: 320,
+                  child: AttendanceModeSwitcher(
+                    activeSegment: activeSegment,
+                    onSegmentChanged: (newSegment) {
+                      setState(() {
+                        activeSegment = newSegment;
+                      });
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Initial state is Kerja (0)
+      expect(activeSegment, equals(0));
+
+      // Drag right from Kerja to Istirahat
+      await tester.drag(find.text('Kerja'), const Offset(150, 0));
+      await tester.pumpAndSettle();
+
+      expect(activeSegment, equals(1));
+
+      // Drag left from Istirahat to Kerja
+      await tester.drag(find.text('Istirahat'), const Offset(-150, 0));
+      await tester.pumpAndSettle();
+
+      expect(activeSegment, equals(0));
+    });
+
     testWidgets('ShiftInfoCard transitions smoothly with AnimatedSize and AnimatedSwitcher', (tester) async {
       final shift = Shift(
         id: 1,

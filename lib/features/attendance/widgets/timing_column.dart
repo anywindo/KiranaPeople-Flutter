@@ -163,4 +163,3 @@ class TimingColumn extends StatelessWidget {
     );
   }
 }
-

@@ -228,4 +228,3 @@ class ForgotPasswordEmailStep extends StatelessWidget {
     );
   }
 }
-

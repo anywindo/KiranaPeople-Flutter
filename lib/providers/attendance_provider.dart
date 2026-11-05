@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../data/models/shift_model.dart';
 import '../data/models/attendance_model.dart';
 import '../data/models/attendance_event_model.dart';
@@ -44,7 +46,8 @@ class TodayAttendanceState {
 }
 
 class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
-  AttendanceRepository get _repository => ref.read(attendanceRepositoryProvider);
+  AttendanceRepository get _repository =>
+      ref.read(attendanceRepositoryProvider);
 
   @override
   TodayAttendanceState build() {
@@ -79,9 +82,12 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
 
     try {
       final res = await _repository.getTodayAttendance();
-      final initialShift = state.selectedShift ??
+      final initialShift =
+          state.selectedShift ??
           res.shift ??
-          (res.availableShifts?.isNotEmpty == true ? res.availableShifts!.first : null);
+          (res.availableShifts?.isNotEmpty == true
+              ? res.availableShifts!.first
+              : null);
       state = state.copyWith(
         data: AsyncValue.data(res),
         selectedShift: initialShift,
@@ -149,8 +155,8 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
         activeBreak: eventType == AttendanceEventType.startBreak
             ? true
             : (eventType == AttendanceEventType.endBreak
-                ? false
-                : originalData.activeBreak),
+                  ? false
+                  : originalData.activeBreak),
         shift: originalData.shift ?? state.selectedShift,
         availableShifts: originalData.availableShifts,
         workLocation: originalData.workLocation,
@@ -158,9 +164,7 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
         attendanceRuleEnabled: originalData.attendanceRuleEnabled,
         attendanceRuleMinutes: originalData.attendanceRuleMinutes,
       );
-      state = state.copyWith(
-        data: AsyncValue.data(updatedData),
-      );
+      state = state.copyWith(data: AsyncValue.data(updatedData));
     }
 
     try {
@@ -214,27 +218,28 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
       // If the server received and processed the request before the client connection was aborted,
       // or if the event was already registered, verify if today's attendance actually contains the submitted event.
       final errorMessage = e.toString().toLowerCase();
-      final isTimeoutOrNetworkError = e is ApiException &&
+      final isTimeoutOrNetworkError =
+          e is ApiException &&
           (e.message.contains('waktu habis') ||
               e.message.contains('koneksi') ||
               e.message.contains('terputus') ||
               e.statusCode == null ||
               e.statusCode == 504);
 
-      final isAlreadyRecordedError = errorMessage.contains('sudah dilakukan') ||
+      final isAlreadyRecordedError =
+          errorMessage.contains('sudah dilakukan') ||
           errorMessage.contains('sudah dimulai') ||
           errorMessage.contains('sudah dicatat');
 
       if (isTimeoutOrNetworkError || isAlreadyRecordedError) {
         try {
           final res = await _repository.getTodayAttendance();
-          final hasEventRecorded = res.events?.any(
-                (event) => event.eventType == eventType,
-              ) ??
-              false;
+          final hasEventRecorded =
+              res.events?.any((event) => event.eventType == eventType) ?? false;
 
           if (hasEventRecorded) {
-            final initialShift = state.selectedShift ??
+            final initialShift =
+                state.selectedShift ??
                 res.shift ??
                 (res.availableShifts?.isNotEmpty == true
                     ? res.availableShifts!.first
@@ -286,4 +291,5 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
 
 final todayAttendanceProvider =
     NotifierProvider<TodayAttendanceNotifier, TodayAttendanceState>(
-        TodayAttendanceNotifier.new);
+      TodayAttendanceNotifier.new,
+    );

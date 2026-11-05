@@ -227,4 +227,3 @@ class CameraSessionController extends ChangeNotifier {
     super.dispose();
   }
 }
-

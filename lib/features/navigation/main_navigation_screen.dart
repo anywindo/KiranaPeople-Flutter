@@ -1,8 +1,10 @@
 import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/offline_banner.dart';
 import '../../data/models/user_model.dart';
@@ -19,7 +21,8 @@ class MainNavigationScreen extends ConsumerStatefulWidget {
   const MainNavigationScreen({super.key});
 
   @override
-  ConsumerState<MainNavigationScreen> createState() => MainNavigationScreenState();
+  ConsumerState<MainNavigationScreen> createState() =>
+      MainNavigationScreenState();
 
   static MainNavigationScreenState? of(BuildContext context) =>
       context.findAncestorStateOfType<MainNavigationScreenState>();
@@ -91,8 +94,8 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
           color: isSelected
               ? AppColors.primary
               : (context.isDarkMode
-                  ? AppColors.darkTextSecondary.withValues(alpha: 0.45)
-                  : AppColors.textSecondary.withValues(alpha: 0.35)),
+                    ? AppColors.darkTextSecondary.withValues(alpha: 0.45)
+                    : AppColors.textSecondary.withValues(alpha: 0.35)),
           width: isSelected ? 2.0 : 1.2,
         ),
       ),
@@ -103,9 +106,8 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                 fit: BoxFit.cover,
                 errorWidget: (_, _, _) =>
                     _buildNavFallback(context, user, isSelected),
-                placeholder: (_, _) => Container(
-                  color: context.surfaceSecondaryColor,
-                ),
+                placeholder: (_, _) =>
+                    Container(color: context.surfaceSecondaryColor),
               )
             : _buildNavFallback(context, user, isSelected),
       ),
@@ -130,8 +132,9 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color:
-                  isSelected ? AppColors.primary : context.textSecondaryColor,
+              color: isSelected
+                  ? AppColors.primary
+                  : context.textSecondaryColor,
             ),
           ),
         ),
@@ -187,11 +190,7 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                     return const LinearGradient(
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
-                      colors: [
-                        Colors.black,
-                        Colors.black,
-                        Colors.transparent,
-                      ],
+                      colors: [Colors.black, Colors.black, Colors.transparent],
                       stops: [0.0, 0.60, 1.0],
                     ).createShader(bounds);
                   },
@@ -242,6 +241,15 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                         : const Color(0xFFCBD5E1).withValues(alpha: 0.8),
                     width: 1.2,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(
+                        alpha: context.isDarkMode ? 0.35 : 0.08,
+                      ),
+                      blurRadius: 20,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(32),
@@ -260,28 +268,35 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                             alpha: context.isDarkMode ? 0.22 : 0.14,
                           ),
                           indicatorShape: const StadiumBorder(),
-                          labelTextStyle: WidgetStateProperty.resolveWith((states) {
-                            final isSelected = states.contains(WidgetState.selected);
+                          labelTextStyle: WidgetStateProperty.resolveWith((
+                            states,
+                          ) {
+                            final isSelected = states.contains(
+                              WidgetState.selected,
+                            );
                             return TextStyle(
                               fontSize: 11,
-                              fontWeight:
-                                  isSelected ? FontWeight.w600 : FontWeight.w500,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
                               color: isSelected
                                   ? AppColors.primary
                                   : (context.isDarkMode
-                                      ? AppColors.darkTextSecondary
-                                      : AppColors.textSecondary),
+                                        ? AppColors.darkTextSecondary
+                                        : AppColors.textSecondary),
                             );
                           }),
                           iconTheme: WidgetStateProperty.resolveWith((states) {
-                            final isSelected = states.contains(WidgetState.selected);
+                            final isSelected = states.contains(
+                              WidgetState.selected,
+                            );
                             return IconThemeData(
                               size: 22,
                               color: isSelected
                                   ? AppColors.primary
                                   : (context.isDarkMode
-                                      ? AppColors.darkTextSecondary
-                                      : AppColors.textSecondary),
+                                        ? AppColors.darkTextSecondary
+                                        : AppColors.textSecondary),
                             );
                           }),
                         ),
@@ -299,15 +314,19 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                           destinations: [
                             const NavigationDestination(
                               icon: Icon(Icons.home_outlined),
-                              selectedIcon:
-                                  Icon(Icons.home_rounded, color: AppColors.primary),
+                              selectedIcon: Icon(
+                                Icons.home_rounded,
+                                color: AppColors.primary,
+                              ),
                               label: 'Beranda',
                               tooltip: '',
                             ),
                             const NavigationDestination(
                               icon: Icon(Icons.map_outlined),
-                              selectedIcon:
-                                  Icon(Icons.map_rounded, color: AppColors.primary),
+                              selectedIcon: Icon(
+                                Icons.map_rounded,
+                                color: AppColors.primary,
+                              ),
                               label: 'Peta',
                               tooltip: '',
                             ),
@@ -348,4 +367,3 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     );
   }
 }
-

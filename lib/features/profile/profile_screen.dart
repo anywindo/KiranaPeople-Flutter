@@ -82,125 +82,125 @@ class ProfileScreen extends ConsumerWidget {
         ? user.phone!.trim()
         : 'Belum diatur';
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-      ),
-      child: Scaffold(
-        backgroundColor: context.scaffoldBg,
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 128),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. Header Banner with Avatar & User Info
-              ProfileHeaderBanner(
-                user: user,
-                onAvatarEditTap: () =>
-                    ProfileActions.showPhotoSourceSheet(context, ref),
-              ),
-              const SizedBox(height: 20),
+    final topPadding = MediaQuery.of(context).padding.top;
 
-              // Sections in horizontal padding
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  children: [
-                    // 2. Section: PENGATURAN AKUN & KEAMANAN
-                    ProfileAccountSecuritySection(
-                      phoneStr: phoneStr,
-                      userEmail: userEmail,
-                      onPhoneTap: () => ProfileActions.showEditPhoneBottomSheet(
-                        context,
-                        ref,
-                        user?.phone,
-                      ),
-                      onChangePasswordTap: () =>
-                          ChangePasswordDialog.show(context),
-                      onCopy: (text, label) =>
-                          _copyToClipboard(context, text, label),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // 3. Section: DATA KEPEGAWAIAN & LOKASI
-                    ProfileEmploymentLocationSection(
-                      employeeId: employeeId,
-                      roleName: roleName,
-                      officeName: officeName,
-                      radiusStr: radiusStr,
-                      joinedStr: joinedStr,
-                      onCopy: (text, label) =>
-                          _copyToClipboard(context, text, label),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // 4. Section: IDENTITAS PRIBADI
-                    ProfilePersonalInfoSection(
-                      nikStr: nikStr,
-                      dobStr: dobStr,
-                      onCopy: (text, label) =>
-                          _copyToClipboard(context, text, label),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // 5. Section: Preferences (Notif, Theme, Version)
-                    ProfilePreferencesSection(
-                      onShowToast: (msg, {isError = false}) =>
-                          ProfileActions.showCustomToast(
-                        context,
-                        msg,
-                        isError: isError,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // 6. Logout Button
-                    InkWell(
-                      onTap: () => ProfileActions.showLogoutDialog(context, ref),
-                      borderRadius: BorderRadius.circular(14),
-                      child: Container(
-                        width: double.infinity,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: context.isDarkMode
-                              ? const Color(0xFF3B151E)
-                              : const Color(0xFFFFF1F2),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: context.isDarkMode
-                                ? const Color(0xFF4C1D24)
-                                : const Color(0xFFFFE4E6),
-                          ),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.logout_rounded,
-                              color: Color(0xFFEF4444),
-                              size: 18,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'Keluar dari Akun',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFFEF4444),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+    return Scaffold(
+      backgroundColor: context.scaffoldBg,
+      body: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
         ),
+        slivers: [
+          // 1. Sticky Collapsible Profile Header (Pins smaller profile section on scroll)
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: ProfileStickyHeaderDelegate(
+              user: user,
+              topPadding: topPadding,
+              onAvatarEditTap: () =>
+                  ProfileActions.showPhotoSourceSheet(context, ref),
+            ),
+          ),
+
+          // 2. Profile Details Sections
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 128),
+              child: Column(
+                children: [
+                  // Section: PENGATURAN AKUN & KEAMANAN
+                  ProfileAccountSecuritySection(
+                    phoneStr: phoneStr,
+                    userEmail: userEmail,
+                    onPhoneTap: () => ProfileActions.showEditPhoneBottomSheet(
+                      context,
+                      ref,
+                      user?.phone,
+                    ),
+                    onChangePasswordTap: () =>
+                        ChangePasswordDialog.show(context),
+                    onCopy: (text, label) =>
+                        _copyToClipboard(context, text, label),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Section: DATA KEPEGAWAIAN & LOKASI
+                  ProfileEmploymentLocationSection(
+                    employeeId: employeeId,
+                    roleName: roleName,
+                    officeName: officeName,
+                    radiusStr: radiusStr,
+                    joinedStr: joinedStr,
+                    onCopy: (text, label) =>
+                        _copyToClipboard(context, text, label),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Section: IDENTITAS PRIBADI
+                  ProfilePersonalInfoSection(
+                    nikStr: nikStr,
+                    dobStr: dobStr,
+                    onCopy: (text, label) =>
+                        _copyToClipboard(context, text, label),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Section: Preferences (Notif, Theme, Version)
+                  ProfilePreferencesSection(
+                    onShowToast: (msg, {isError = false}) =>
+                        ProfileActions.showCustomToast(
+                          context,
+                          msg,
+                          isError: isError,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Logout Button
+                  InkWell(
+                    onTap: () =>
+                        ProfileActions.showLogoutDialog(context, ref),
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      width: double.infinity,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: context.isDarkMode
+                            ? const Color(0xFF3B151E)
+                            : const Color(0xFFFFF1F2),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: context.isDarkMode
+                              ? const Color(0xFF4C1D24)
+                              : const Color(0xFFFFE4E6),
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.logout_rounded,
+                            color: Color(0xFFEF4444),
+                            size: 18,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Keluar dari Akun',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFEF4444),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

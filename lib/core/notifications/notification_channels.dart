@@ -27,34 +27,33 @@ class NotificationChannels {
 
   static const AndroidNotificationChannel reminderChannel =
       AndroidNotificationChannel(
-    reminderChannelId,
-    reminderChannelName,
-    description: reminderChannelDesc,
-    importance: Importance.high,
-    playSound: true,
-    enableVibration: true,
-  );
+        reminderChannelId,
+        reminderChannelName,
+        description: reminderChannelDesc,
+        importance: Importance.high,
+        playSound: true,
+        enableVibration: true,
+      );
 
   static const AndroidNotificationChannel submissionChannel =
       AndroidNotificationChannel(
-    submissionChannelId,
-    submissionChannelName,
-    description: submissionChannelDesc,
-    importance: Importance.high,
-    playSound: true,
-    sound: RawResourceAndroidNotificationSound('successful'),
-    enableVibration: true,
-  );
+        submissionChannelId,
+        submissionChannelName,
+        description: submissionChannelDesc,
+        importance: Importance.high,
+        playSound: true,
+        sound: RawResourceAndroidNotificationSound('successful'),
+        enableVibration: true,
+      );
 
   static const AndroidNotificationChannel failureChannel =
       AndroidNotificationChannel(
-    failureChannelId,
-    failureChannelName,
-    description: failureChannelDesc,
-    importance: Importance.high,
-    playSound: true,
-    sound: RawResourceAndroidNotificationSound('unsuccessful'),
-    enableVibration: true,
-  );
+        failureChannelId,
+        failureChannelName,
+        description: failureChannelDesc,
+        importance: Importance.high,
+        playSound: true,
+        sound: RawResourceAndroidNotificationSound('unsuccessful'),
+        enableVibration: true,
+      );
 }
-

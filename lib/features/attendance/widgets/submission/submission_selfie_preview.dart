@@ -99,10 +99,7 @@ class SubmissionSelfiePreview extends StatelessWidget {
                   const SizedBox(height: 4),
                   const Text(
                     'Wajib verifikasi wajah',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textMuted,
-                    ),
+                    style: TextStyle(fontSize: 11, color: AppColors.textMuted),
                   ),
                 ],
               ),

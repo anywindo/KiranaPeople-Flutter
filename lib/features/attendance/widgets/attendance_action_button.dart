@@ -31,9 +31,15 @@ class AttendanceActionButton extends StatelessWidget {
 
   (Widget, String) _buildButton(BuildContext context) {
     final isDark = context.isDarkMode;
-    final disabledBg = isDark ? const Color(0xFF334155) : const Color(0xFFE5E7EB);
-    final disabledText = isDark ? const Color(0xFF94A3B8) : const Color(0xFF9CA3AF);
-    final completedBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFF3F4F6);
+    final disabledBg = isDark
+        ? const Color(0xFF334155)
+        : const Color(0xFFE5E7EB);
+    final disabledText = isDark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF9CA3AF);
+    final completedBg = isDark
+        ? const Color(0xFF1E293B)
+        : const Color(0xFFF3F4F6);
 
     if (isLoading) {
       return (
@@ -101,7 +107,9 @@ class AttendanceActionButton extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                    color: isDark
+                        ? const Color(0xFFCBD5E1)
+                        : const Color(0xFF334155),
                   ),
                 ),
               ],
@@ -275,6 +283,13 @@ class AttendanceActionButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.primary,
             borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -308,22 +323,13 @@ class AttendanceActionButton extends StatelessWidget {
       layoutBuilder: (currentChild, previousChildren) {
         return Stack(
           alignment: Alignment.center,
-          children: <Widget>[
-            ...previousChildren,
-            if (currentChild != null) currentChild,
-          ],
+          children: <Widget>[...previousChildren, ?currentChild],
         );
       },
       transitionBuilder: (child, animation) {
-        return FadeTransition(
-          opacity: animation,
-          child: child,
-        );
+        return FadeTransition(opacity: animation, child: child);
       },
-      child: KeyedSubtree(
-        key: ValueKey<String>(key),
-        child: button,
-      ),
+      child: KeyedSubtree(key: ValueKey<String>(key), child: button),
     );
   }
 }

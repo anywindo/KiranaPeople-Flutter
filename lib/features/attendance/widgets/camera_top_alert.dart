@@ -4,11 +4,7 @@ class CameraTopAlert extends StatelessWidget {
   final String message;
   final VoidCallback? onDismiss;
 
-  const CameraTopAlert({
-    super.key,
-    required this.message,
-    this.onDismiss,
-  });
+  const CameraTopAlert({super.key, required this.message, this.onDismiss});
 
   @override
   Widget build(BuildContext context) {
@@ -73,4 +69,3 @@ class CameraTopAlert extends StatelessWidget {
     );
   }
 }
-

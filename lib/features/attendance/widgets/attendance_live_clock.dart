@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -43,18 +43,14 @@ class _AttendanceLiveClockState extends State<AttendanceLiveClock> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: context.isDarkMode
-              ? [const Color(0xFF1E293B), const Color(0xFF172033)]
-              : [Colors.white, const Color(0xFFF8FAFC)],
-        ),
+        color: context.isDarkMode
+            ? const Color(0xFF0F172A)
+            : const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: context.isDarkMode
               ? const Color(0xFF334155)
-              : const Color(0xFFE2E8F0),
+              : const Color(0xFFCBD5E1),
           width: 1.2,
         ),
       ),

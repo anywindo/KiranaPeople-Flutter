@@ -42,8 +42,9 @@ class HistoryFilterOptionTile extends StatelessWidget {
               Icon(
                 icon,
                 size: 20,
-                color:
-                    isSelected ? AppColors.primary : context.textSecondaryColor,
+                color: isSelected
+                    ? AppColors.primary
+                    : context.textSecondaryColor,
               ),
               const SizedBox(width: 12),
             ],
@@ -55,8 +56,9 @@ class HistoryFilterOptionTile extends StatelessWidget {
                     title,
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w500,
                       color: isSelected
                           ? AppColors.primary
                           : context.textPrimaryColor,
@@ -87,4 +89,3 @@ class HistoryFilterOptionTile extends StatelessWidget {
     );
   }
 }
-

@@ -23,7 +23,10 @@ class Shift {
     bool? ruleEnabled;
     if (json.containsKey('attendance_rule_enabled')) {
       final raw = json['attendance_rule_enabled'];
-      ruleEnabled = raw == true || raw?.toString() == '1' || raw?.toString().toLowerCase() == 'true';
+      ruleEnabled =
+          raw == true ||
+          raw?.toString() == '1' ||
+          raw?.toString().toLowerCase() == 'true';
     }
 
     int? ruleMinutes;
@@ -33,12 +36,17 @@ class Shift {
     }
 
     return Shift(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
       name: json['name']?.toString() ?? '',
       startTime: json['start_time']?.toString() ?? '',
       endTime: json['end_time']?.toString() ?? '',
-      breakStartTime: json['break_start_time']?.toString() ?? json['break_start']?.toString(),
-      breakEndTime: json['break_end_time']?.toString() ?? json['break_end']?.toString(),
+      breakStartTime:
+          json['break_start_time']?.toString() ??
+          json['break_start']?.toString(),
+      breakEndTime:
+          json['break_end_time']?.toString() ?? json['break_end']?.toString(),
       attendanceRuleEnabled: ruleEnabled,
       attendanceRuleMinutes: ruleMinutes,
     );
@@ -61,8 +69,10 @@ class Shift {
       endTime: endTime ?? this.endTime,
       breakStartTime: breakStartTime ?? this.breakStartTime,
       breakEndTime: breakEndTime ?? this.breakEndTime,
-      attendanceRuleEnabled: attendanceRuleEnabled ?? this.attendanceRuleEnabled,
-      attendanceRuleMinutes: attendanceRuleMinutes ?? this.attendanceRuleMinutes,
+      attendanceRuleEnabled:
+          attendanceRuleEnabled ?? this.attendanceRuleEnabled,
+      attendanceRuleMinutes:
+          attendanceRuleMinutes ?? this.attendanceRuleMinutes,
     );
   }
 
@@ -74,8 +84,10 @@ class Shift {
       'end_time': endTime,
       'break_start_time': breakStartTime,
       'break_end_time': breakEndTime,
-      if (attendanceRuleEnabled != null) 'attendance_rule_enabled': attendanceRuleEnabled,
-      if (attendanceRuleMinutes != null) 'attendance_rule_minutes': attendanceRuleMinutes,
+      if (attendanceRuleEnabled != null)
+        'attendance_rule_enabled': attendanceRuleEnabled,
+      if (attendanceRuleMinutes != null)
+        'attendance_rule_minutes': attendanceRuleMinutes,
     };
   }
 
@@ -86,10 +98,17 @@ class Shift {
       return trimmed.length >= 5 ? trimmed.substring(0, 5) : trimmed;
     }
     // Midpoint minus 30 minutes calculation
-    int startH = int.tryParse(startTime.length >= 2 ? startTime.substring(0, 2) : '') ?? 8;
-    int startM = int.tryParse(startTime.length >= 5 ? startTime.substring(3, 5) : '') ?? 0;
-    int endH = int.tryParse(endTime.length >= 2 ? endTime.substring(0, 2) : '') ?? ((startH + 8) % 24);
-    int endM = int.tryParse(endTime.length >= 5 ? endTime.substring(3, 5) : '') ?? 0;
+    int startH =
+        int.tryParse(startTime.length >= 2 ? startTime.substring(0, 2) : '') ??
+        8;
+    int startM =
+        int.tryParse(startTime.length >= 5 ? startTime.substring(3, 5) : '') ??
+        0;
+    int endH =
+        int.tryParse(endTime.length >= 2 ? endTime.substring(0, 2) : '') ??
+        ((startH + 8) % 24);
+    int endM =
+        int.tryParse(endTime.length >= 5 ? endTime.substring(3, 5) : '') ?? 0;
 
     int duration = (endH * 60 + endM) - (startH * 60 + startM);
     if (duration <= 0) {
@@ -109,8 +128,11 @@ class Shift {
     }
     // Default to 1 hour after effectiveBreakStart
     final startStr = effectiveBreakStart;
-    final h = int.tryParse(startStr.length >= 2 ? startStr.substring(0, 2) : '') ?? 12;
-    final m = int.tryParse(startStr.length >= 5 ? startStr.substring(3, 5) : '') ?? 0;
+    final h =
+        int.tryParse(startStr.length >= 2 ? startStr.substring(0, 2) : '') ??
+        12;
+    final m =
+        int.tryParse(startStr.length >= 5 ? startStr.substring(3, 5) : '') ?? 0;
     final endH = (h + 1) % 24;
     return '${endH.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
   }
@@ -123,10 +145,12 @@ class Shift {
 
     try {
       final breakParts = breakStr.split(':');
-      final breakMinutes = int.parse(breakParts[0]) * 60 + int.parse(breakParts[1]);
+      final breakMinutes =
+          int.parse(breakParts[0]) * 60 + int.parse(breakParts[1]);
 
       final startParts = startStr.split(':');
-      final startMinutes = int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
+      final startMinutes =
+          int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
 
       final nowMinutes = now.hour * 60 + now.minute;
 
@@ -182,8 +206,7 @@ class Shift {
       final schedParts = scheduledTime.split(':');
       final actualMin =
           int.parse(actualParts[0]) * 60 + int.parse(actualParts[1]);
-      final schedMin =
-          int.parse(schedParts[0]) * 60 + int.parse(schedParts[1]);
+      final schedMin = int.parse(schedParts[0]) * 60 + int.parse(schedParts[1]);
 
       // Calculate signed difference in minutes from scheduled start (-720..+720)
       var diff = actualMin - schedMin;
@@ -208,11 +231,7 @@ class Shift {
   }
 
   /// Convenience instance method for this shift instance.
-  bool isStartLate(
-    String? actualTime, {
-    bool? ruleEnabled,
-    int? ruleMinutes,
-  }) {
+  bool isStartLate(String? actualTime, {bool? ruleEnabled, int? ruleMinutes}) {
     return isShiftStartLate(
       actualTime: actualTime,
       scheduledTime: startTime,

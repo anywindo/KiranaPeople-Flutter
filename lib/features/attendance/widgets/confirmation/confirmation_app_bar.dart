@@ -76,4 +76,3 @@ class ConfirmationAppBar extends StatelessWidget {
     );
   }
 }
-

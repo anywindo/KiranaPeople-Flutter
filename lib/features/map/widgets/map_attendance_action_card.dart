@@ -242,7 +242,9 @@ class MapAttendanceActionCard extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   color: isActionDisabled
-                      ? (isDark ? const Color(0xFF334155) : const Color(0xFFE5E7EB))
+                      ? (isDark
+                            ? const Color(0xFF334155)
+                            : const Color(0xFFE5E7EB))
                       : AppColors.primary,
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -254,7 +256,9 @@ class MapAttendanceActionCard extends StatelessWidget {
                       Icons.camera_alt_rounded,
                       size: 19,
                       color: isActionDisabled
-                          ? (isDark ? const Color(0xFF64748B) : const Color(0xFF9CA3AF))
+                          ? (isDark
+                                ? const Color(0xFF64748B)
+                                : const Color(0xFF9CA3AF))
                           : Colors.white,
                     ),
                     const SizedBox(width: 8),
@@ -264,8 +268,10 @@ class MapAttendanceActionCard extends StatelessWidget {
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: isActionDisabled
-                          ? (isDark ? const Color(0xFF64748B) : const Color(0xFF9CA3AF))
-                          : Colors.white,
+                            ? (isDark
+                                  ? const Color(0xFF64748B)
+                                  : const Color(0xFF9CA3AF))
+                            : Colors.white,
                       ),
                     ),
                   ],
@@ -278,4 +284,3 @@ class MapAttendanceActionCard extends StatelessWidget {
     );
   }
 }
-

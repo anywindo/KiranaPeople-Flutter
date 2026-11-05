@@ -16,10 +16,7 @@ export 'sheets/theme_mode_sheet.dart';
 class ProfilePreferencesSection extends ConsumerWidget {
   final void Function(String message, {bool isError}) onShowToast;
 
-  const ProfilePreferencesSection({
-    super.key,
-    required this.onShowToast,
-  });
+  const ProfilePreferencesSection({super.key, required this.onShowToast});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -49,11 +46,7 @@ class ProfilePreferencesSection extends ConsumerWidget {
           ),
           onTap: () => NotificationTestSheet.show(context),
         ),
-        Divider(
-          height: 1,
-          indent: 56,
-          color: context.dividerColor,
-        ),
+        Divider(height: 1, indent: 56, color: context.dividerColor),
         ProfileRowItem(
           iconBg: context.isDarkMode
               ? const Color(0xFF3B1524)
@@ -92,11 +85,7 @@ class ProfilePreferencesSection extends ConsumerWidget {
           ),
           onTap: () => ThemeModeSheet.show(context, ref),
         ),
-        Divider(
-          height: 1,
-          indent: 56,
-          color: context.dividerColor,
-        ),
+        Divider(height: 1, indent: 56, color: context.dividerColor),
         ProfileRowItem(
           iconBg: context.isDarkMode
               ? const Color(0xFF3B1524)
@@ -111,11 +100,7 @@ class ProfilePreferencesSection extends ConsumerWidget {
           ),
           onTap: () => PrivacyPolicySheet.show(context),
         ),
-        Divider(
-          height: 1,
-          indent: 56,
-          color: context.dividerColor,
-        ),
+        Divider(height: 1, indent: 56, color: context.dividerColor),
         ProfileRowItem(
           iconBg: context.isDarkMode
               ? const Color(0xFF283344)
@@ -125,10 +110,7 @@ class ProfilePreferencesSection extends ConsumerWidget {
           title: 'Versi Aplikasi',
           trailing: Text(
             appVersion,
-            style: TextStyle(
-              fontSize: 13,
-              color: context.textSecondaryColor,
-            ),
+            style: TextStyle(fontSize: 13, color: context.textSecondaryColor),
           ),
         ),
       ],

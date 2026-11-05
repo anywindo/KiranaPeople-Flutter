@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -85,7 +86,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 ),
                 error: (err, _) => Center(
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(24.0, listTopPadding, 24.0, 128.0),
+                    padding: EdgeInsets.fromLTRB(
+                      24.0,
+                      listTopPadding,
+                      24.0,
+                      128.0,
+                    ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -121,7 +127,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   if (records.isEmpty) {
                     return Center(
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(24.0, listTopPadding, 24.0, 128.0),
+                        padding: EdgeInsets.fromLTRB(
+                          24.0,
+                          listTopPadding,
+                          24.0,
+                          128.0,
+                        ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -148,7 +159,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   if (filteredList.isEmpty) {
                     return ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: EdgeInsets.fromLTRB(16, listTopPadding + 20, 16, 128),
+                      padding: EdgeInsets.fromLTRB(
+                        16,
+                        listTopPadding + 20,
+                        16,
+                        128,
+                      ),
                       children: [
                         HistoryEmptyState(
                           onResetFilter: () =>
@@ -203,11 +219,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     return const LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black,
-                        Colors.black,
-                        Colors.transparent,
-                      ],
+                      colors: [Colors.black, Colors.black, Colors.transparent],
                       stops: [0.0, 0.60, 1.0],
                     ).createShader(bounds);
                   },
@@ -273,7 +285,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           ),
                           // Filter Button
                           InkWell(
-                            onTap: () => HistoryFilterSheet.showFullFilter(context),
+                            onTap: () =>
+                                HistoryFilterSheet.showFullFilter(context),
                             borderRadius: BorderRadius.circular(20),
                             child: Container(
                               width: 36,
@@ -287,8 +300,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                   color: historyState.filter.isActive
                                       ? AppColors.primary
                                       : (context.isDarkMode
-                                          ? const Color(0xFF334155)
-                                          : const Color(0xFFE2E8F0)),
+                                            ? const Color(0xFF334155)
+                                            : const Color(0xFFE2E8F0)),
                                   width: 1.2,
                                 ),
                               ),
@@ -304,7 +317,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           const SizedBox(width: 8),
                           // Refresh Button
                           InkWell(
-                            onTap: () => ref.read(historyProvider.notifier).refresh(),
+                            onTap: () =>
+                                ref.read(historyProvider.notifier).refresh(),
                             borderRadius: BorderRadius.circular(20),
                             child: Container(
                               width: 36,

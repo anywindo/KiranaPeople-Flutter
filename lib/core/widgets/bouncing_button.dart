@@ -99,10 +99,8 @@ class _BouncingButtonState extends State<BouncingButton>
       onTapCancel: _onTapCancel,
       child: AnimatedBuilder(
         animation: _scaleAnimation,
-        builder: (context, child) => Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
-        ),
+        builder: (context, child) =>
+            Transform.scale(scale: _scaleAnimation.value, child: child),
         child: widget.child,
       ),
     );

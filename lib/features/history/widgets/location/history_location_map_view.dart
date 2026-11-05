@@ -43,7 +43,8 @@ class HistoryLocationMapView extends StatelessWidget {
               children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.kiranadesainindonesia.kiranapeople',
+                  userAgentPackageName:
+                      'com.kiranadesainindonesia.kiranapeople',
                 ),
                 CircleLayer(
                   circles: [
@@ -114,10 +115,7 @@ class HistoryLocationMapView extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: AppColors.primary,
                               shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 2,
-                              ),
+                              border: Border.all(color: Colors.white, width: 2),
                               boxShadow: const [
                                 BoxShadow(
                                   color: Colors.black26,
@@ -187,10 +185,7 @@ class HistoryLocationMapView extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: const Color(0xFF007AFF),
                               shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 2,
-                              ),
+                              border: Border.all(color: Colors.white, width: 2),
                               boxShadow: const [
                                 BoxShadow(
                                   color: Colors.black26,
@@ -292,4 +287,3 @@ class HistoryLocationMapView extends StatelessWidget {
     );
   }
 }
-

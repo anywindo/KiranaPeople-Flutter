@@ -61,7 +61,8 @@ class DeviceSecurityReport {
       developerMode: map['developerMode'] == true,
       fakeGpsAppInstalled: map['fakeGpsAppInstalled'] == true,
       appSignature: map['appSignature'] as String?,
-      signals: (map['signals'] as List?)?.map((e) => e.toString()).toList() ??
+      signals:
+          (map['signals'] as List?)?.map((e) => e.toString()).toList() ??
           const [],
     );
   }
@@ -93,8 +94,9 @@ class DeviceSecurityService {
   factory DeviceSecurityService() => _instance;
   DeviceSecurityService._internal();
 
-  static const MethodChannel _channel =
-      MethodChannel('com.kiranadesainindonesia.kiranapeople/security');
+  static const MethodChannel _channel = MethodChannel(
+    'com.kiranadesainindonesia.kiranapeople/security',
+  );
 
   /// Short-lived cache so the pre-check and the submit share one result
   /// without letting a stale "clean" verdict persist for the process lifetime

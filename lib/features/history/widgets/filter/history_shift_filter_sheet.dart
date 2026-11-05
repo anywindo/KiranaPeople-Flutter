@@ -8,11 +8,7 @@ import 'history_filter_option_tile.dart';
 class HistoryShiftFilterSheet extends StatelessWidget {
   const HistoryShiftFilterSheet({super.key});
 
-  static void show(
-    BuildContext context,
-    WidgetRef ref,
-    List<String> shifts,
-  ) {
+  static void show(BuildContext context, WidgetRef ref, List<String> shifts) {
     final historyState = ref.read(historyProvider);
     showModalBottomSheet(
       context: context,
@@ -72,4 +68,3 @@ class HistoryShiftFilterSheet extends StatelessWidget {
     return const SizedBox.shrink();
   }
 }
-

@@ -34,7 +34,8 @@ class ForgotPasswordResetStep extends StatefulWidget {
   });
 
   @override
-  State<ForgotPasswordResetStep> createState() => _ForgotPasswordResetStepState();
+  State<ForgotPasswordResetStep> createState() =>
+      _ForgotPasswordResetStepState();
 }
 
 class _ForgotPasswordResetStepState extends State<ForgotPasswordResetStep> {
@@ -291,7 +292,10 @@ class _ForgotPasswordResetStepState extends State<ForgotPasswordResetStep> {
                 widget.hasMixedCase,
               ),
               const SizedBox(height: 8),
-              _buildRequirementRow('Mengandung minimal 1 angka', widget.hasNumber),
+              _buildRequirementRow(
+                'Mengandung minimal 1 angka',
+                widget.hasNumber,
+              ),
               const SizedBox(height: 8),
               _buildRequirementRow(
                 'Konfirmasi kata sandi cocok',
@@ -368,4 +372,3 @@ class _ForgotPasswordResetStepState extends State<ForgotPasswordResetStep> {
     );
   }
 }
-

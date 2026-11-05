@@ -70,9 +70,7 @@ class ConfirmationActionButtons extends StatelessWidget {
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   elevation: 6,
-                  shadowColor: AppColors.primary.withValues(
-                    alpha: 0.50,
-                  ),
+                  shadowColor: AppColors.primary.withValues(alpha: 0.50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -109,4 +107,3 @@ class ConfirmationActionButtons extends StatelessWidget {
     );
   }
 }
-
