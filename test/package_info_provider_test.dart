@@ -7,7 +7,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('packageInfoProvider & appVersionDisplayProvider Tests', () {
-    test('appVersionDisplayProvider formats version and build number correctly', () async {
+    test('appVersionDisplayProvider formats version cleanly without build number', () async {
       final container = ProviderContainer(
         overrides: [
           packageInfoProvider.overrideWith(
@@ -15,7 +15,7 @@ void main() {
               PackageInfo(
                 appName: 'Kirana People',
                 packageName: 'com.kiranadesainindonesia.kiranapeople',
-                version: '1.0.2',
+                version: '1.0.3',
                 buildNumber: '1',
                 buildSignature: '',
               ),
@@ -27,7 +27,7 @@ void main() {
 
       await container.read(packageInfoProvider.future);
       final displayVersion = container.read(appVersionDisplayProvider);
-      expect(displayVersion, equals('1.0.2 (Build 1)'));
+      expect(displayVersion, equals('1.0.3'));
     });
 
     test('appVersionDisplayProvider formats without build number if buildNumber is empty', () async {
