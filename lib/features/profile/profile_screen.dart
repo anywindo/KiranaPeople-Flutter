@@ -86,11 +86,22 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      body: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
-        ),
-        slivers: [
+      body: RefreshIndicator(
+        color: AppColors.primary,
+        backgroundColor: context.surfaceColor,
+        edgeOffset: topPadding + 8.0,
+        onRefresh: () async {
+          AppHaptics.light();
+          await Future.wait([
+            ref.read(authProvider.notifier).refreshProfile(),
+            ref.read(todayAttendanceProvider.notifier).refresh(),
+          ]);
+        },
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          slivers: [
           // 1. Sticky Collapsible Profile Header (Pins smaller profile section on scroll)
           SliverPersistentHeader(
             pinned: true,
@@ -202,6 +213,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 }

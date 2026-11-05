@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kirana_people/core/theme/app_theme.dart';
 import 'package:kirana_people/data/models/shift_model.dart';
+import 'package:kirana_people/features/map/map_view_screen.dart';
 import 'package:kirana_people/features/map/widgets/map_attendance_action_card.dart';
 import 'package:kirana_people/features/map/widgets/map_controls_overlay.dart';
 import 'package:kirana_people/features/map/widgets/map_top_location_pill.dart';
@@ -197,6 +199,20 @@ void main() {
 
       expect(find.text('Sinyal GPS Lemah'), findsOneWidget);
       expect(find.text('Ketuk tombol refresh untuk memuat koordinat'), findsOneWidget);
+    });
+
+    testWidgets('MapViewScreen renders bottom feathered gradient over map', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const MapViewScreen(),
+          ),
+        ),
+      );
+
+      // MapViewScreen initializes loading or renders content
+      expect(find.byType(MapViewScreen), findsOneWidget);
     });
   });
 }

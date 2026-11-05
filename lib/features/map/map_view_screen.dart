@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -333,7 +335,58 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                   ),
                 ),
 
-                // 2. Top Floating Location Pill
+                // 2. Exact Feathered Blur Gradient from bottom to top behind navbar & action card
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: bottomPadding + 280.0,
+                  child: IgnorePointer(
+                    child: ClipRect(
+                      child: ShaderMask(
+                        shaderCallback: (Rect bounds) {
+                          return const LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              Colors.black,
+                              Colors.black,
+                              Colors.transparent,
+                            ],
+                            stops: [0.0, 0.45, 1.0],
+                          ).createShader(bounds);
+                        },
+                        blendMode: BlendMode.dstIn,
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  context.scaffoldBg.withValues(
+                                    alpha: context.isDarkMode ? 0.98 : 0.96,
+                                  ),
+                                  context.scaffoldBg.withValues(
+                                    alpha: context.isDarkMode ? 0.96 : 0.94,
+                                  ),
+                                  context.scaffoldBg.withValues(
+                                    alpha: context.isDarkMode ? 0.60 : 0.50,
+                                  ),
+                                  context.scaffoldBg.withValues(alpha: 0.0),
+                                ],
+                                stops: const [0.0, 0.38, 0.68, 1.0],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 3. Top Floating Location Pill
                 MapTopLocationPill(
                   officeName: officeName,
                   topPadding: topPadding,
@@ -344,7 +397,7 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                   },
                 ),
 
-                // 3. Bottom Floating Sheet Card + Right Map Controls
+                // 4. Bottom Floating Sheet Card + Right Map Controls
                 Positioned(
                   left: 16,
                   right: 16,

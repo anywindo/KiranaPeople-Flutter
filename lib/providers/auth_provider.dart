@@ -4,7 +4,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/network/api_client.dart';
-import '../core/network/api_exception.dart';
 import '../data/models/user_model.dart';
 import '../data/repositories/auth_repository.dart';
 import 'attendance_provider.dart';
@@ -109,6 +108,23 @@ class AuthNotifier extends Notifier<AuthState> {
         isAuthenticated: state.user != null,
         errorMessage: state.user == null ? _formatErrorMessage(e) : null,
       );
+    }
+  }
+
+  Future<void> refreshProfile() async {
+    try {
+      final freshProfile = await _repository.getProfile();
+      if (!ref.mounted) return;
+      state = state.copyWith(
+        isAuthenticated: true,
+        user: freshProfile,
+      );
+    } catch (e) {
+      if (!ref.mounted) return;
+      final isUnauthorized = e is ApiException && e.statusCode == 401;
+      if (isUnauthorized) {
+        await logout();
+      }
     }
   }
 

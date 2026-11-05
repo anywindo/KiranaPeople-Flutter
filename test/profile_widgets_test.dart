@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kirana_people/data/models/user_model.dart';
+import 'package:kirana_people/features/profile/profile_screen.dart';
 import 'package:kirana_people/features/profile/widgets/profile_account_security_section.dart';
 import 'package:kirana_people/features/profile/widgets/profile_card_group.dart';
 import 'package:kirana_people/features/profile/widgets/profile_employment_location_section.dart';
@@ -228,6 +229,19 @@ void main() {
       // Smaller profile section sticks on top:
       expect(find.text('Alexander Balmaceda José Miller'), findsOneWidget);
       expect(find.text('user'), findsOneWidget);
+    });
+
+    testWidgets('ProfileScreen contains RefreshIndicator for pull-to-refresh', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: ProfileScreen(),
+          ),
+        ),
+      );
+
+      expect(find.byType(RefreshIndicator), findsOneWidget);
+      expect(find.byType(CustomScrollView), findsOneWidget);
     });
   });
 }
