@@ -109,16 +109,38 @@ class ShiftBreakPanel extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 decoration: BoxDecoration(
                   color: !hasStartedBreak
                       ? (Shift.isBeforeBreakTime(selectedShift)
-                            ? const Color(0xFFF3F4F6)
-                            : AppColors.primary.withValues(alpha: 0.10))
+                            ? (context.isDarkMode
+                                ? const Color(0xFF1E293B)
+                                : const Color(0xFFE2E8F0))
+                            : AppColors.primary.withValues(alpha: 0.12))
                       : (!hasEndedBreak
-                            ? AppColors.success.withValues(alpha: 0.12)
-                            : context.surfaceColor),
+                            ? (context.isDarkMode
+                                ? const Color(0xFF064E3B)
+                                : const Color(0xFFD1FAE5))
+                            : (context.isDarkMode
+                                ? const Color(0xFF1E293B)
+                                : const Color(0xFFE2E8F0))),
                   borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: !hasStartedBreak
+                        ? (Shift.isBeforeBreakTime(selectedShift)
+                              ? (context.isDarkMode
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFCBD5E1))
+                              : AppColors.primary.withValues(alpha: 0.30))
+                        : (!hasEndedBreak
+                              ? (context.isDarkMode
+                                  ? const Color(0xFF059669)
+                                  : const Color(0xFF6EE7B7))
+                              : (context.isDarkMode
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFCBD5E1))),
+                    width: 1.2,
+                  ),
                 ),
                 child: Text(
                   !hasStartedBreak
@@ -131,11 +153,17 @@ class ShiftBreakPanel extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: !hasStartedBreak
                         ? (Shift.isBeforeBreakTime(selectedShift)
-                              ? const Color(0xFF6B7280)
+                              ? (context.isDarkMode
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF64748B))
                               : AppColors.primary)
                         : (!hasEndedBreak
-                              ? AppColors.success
-                              : context.textSecondaryColor),
+                              ? (context.isDarkMode
+                                  ? const Color(0xFF34D399)
+                                  : const Color(0xFF059669))
+                              : (context.isDarkMode
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF64748B))),
                   ),
                 ),
               ),

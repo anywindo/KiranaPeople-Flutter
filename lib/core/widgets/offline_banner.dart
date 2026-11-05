@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/connectivity_provider.dart';
+import '../utils/app_haptics.dart';
 
 class OfflineBanner extends ConsumerStatefulWidget {
   const OfflineBanner({super.key});
@@ -29,7 +30,10 @@ class _OfflineBannerState extends ConsumerState<OfflineBanner> {
 
     // Listen for reconnection to briefly show the green reconnected banner
     ref.listen<bool>(isOfflineProvider, (previous, next) {
-      if (previous == true && next == false) {
+      if (previous == false && next == true) {
+        AppHaptics.error();
+      } else if (previous == true && next == false) {
+        AppHaptics.selection();
         setState(() {
           _showReconnectedBanner = true;
         });
@@ -103,6 +107,7 @@ class _OfflineBannerState extends ConsumerState<OfflineBanner> {
                     onTap: _isChecking
                         ? null
                         : () async {
+                            AppHaptics.light();
                             setState(() {
                               _isChecking = true;
                             });
@@ -164,17 +169,31 @@ class OfflineCardWarning extends ConsumerWidget {
     final isOffline = ref.watch(isOfflineProvider);
     if (!isOffline) return const SizedBox.shrink();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF2D1214) : const Color(0xFFFEF2F2);
+    final borderColor =
+        isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFCA5A5);
+    final iconBg =
+        isDark ? const Color(0xFF450A0A) : const Color(0xFFFEE2E2);
+    final iconColor =
+        isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626);
+    final titleColor =
+        isDark ? const Color(0xFFFECACA) : const Color(0xFF991B1B);
+    final textColor =
+        isDark ? const Color(0xFFFCA5A5) : const Color(0xFF7F1D1D);
+    final shadowColor = Colors.black.withValues(alpha: isDark ? 0.35 : 0.08);
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF2F2),
+        color: bgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFCA5A5), width: 1),
+        border: Border.all(color: borderColor, width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFEF4444).withValues(alpha: 0.08),
+            color: shadowColor,
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -186,12 +205,12 @@ class OfflineCardWarning extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFFFEE2E2),
+              color: iconBg,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.wifi_off_rounded,
-              color: Color(0xFFDC2626),
+              color: iconColor,
               size: 20,
             ),
           ),
@@ -200,20 +219,21 @@ class OfflineCardWarning extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Koneksi Internet Terputus',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
-                    color: Color(0xFF991B1B),
+                    color: titleColor,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  message ?? 'Perangkat Anda sedang offline. Presensi & sinkronisasi data memerlukan koneksi internet aktif.',
-                  style: const TextStyle(
+                  message ??
+                      'Perangkat Anda sedang offline. Presensi & sinkronisasi data memerlukan koneksi internet aktif.',
+                  style: TextStyle(
                     fontSize: 11.5,
-                    color: Color(0xFF7F1D1D),
+                    color: textColor,
                     height: 1.3,
                   ),
                 ),
@@ -223,8 +243,11 @@ class OfflineCardWarning extends ConsumerWidget {
           if (onRetry != null)
             IconButton(
               icon: const Icon(Icons.refresh_rounded, size: 20),
-              color: const Color(0xFF991B1B),
-              onPressed: onRetry,
+              color: titleColor,
+              onPressed: () {
+                AppHaptics.light();
+                onRetry!();
+              },
               tooltip: 'Periksa ulang',
             ),
         ],

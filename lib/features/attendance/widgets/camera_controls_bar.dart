@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/app_haptics.dart';
 
 class CameraControlsBar extends StatelessWidget {
   final bool isFlashOn;
@@ -51,13 +52,21 @@ class CameraControlsBar extends StatelessWidget {
                     : (isScreenFlashWarmup ? Colors.black54 : Colors.white70),
                 size: 22,
               ),
-              onPressed: onToggleFlash,
+              onPressed: () {
+                AppHaptics.light();
+                onToggleFlash();
+              },
             ),
           ),
 
-          // Center Shutter Button (concentric circles + camera icon)
+          // Center Shutter Button (concentric circles + tactile shadow)
           GestureDetector(
-            onTap: onTakePicture,
+            onTap: isTakingPhoto
+                ? null
+                : () {
+                    AppHaptics.medium();
+                    onTakePicture();
+                  },
             child: Container(
               width: 76,
               height: 76,
@@ -67,6 +76,13 @@ class CameraControlsBar extends StatelessWidget {
                   color: isScreenFlashWarmup ? Colors.black87 : Colors.white,
                   width: 4,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.35),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               padding: const EdgeInsets.all(5),
               child: Container(
@@ -114,7 +130,10 @@ class CameraControlsBar extends StatelessWidget {
                 color: isScreenFlashWarmup ? Colors.black54 : Colors.white70,
                 size: 22,
               ),
-              onPressed: onToggleCamera,
+              onPressed: () {
+                AppHaptics.light();
+                onToggleCamera();
+              },
             ),
           ),
         ],

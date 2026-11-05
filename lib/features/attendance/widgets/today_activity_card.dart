@@ -252,34 +252,6 @@ class TodayActivityCard extends StatelessWidget {
                                       color: context.textSecondaryColor,
                                     ),
                                   ),
-                                  if (event.latitude != null &&
-                                      event.longitude != null) ...[
-                                    const SizedBox(width: 6),
-                                    Container(
-                                      width: 3,
-                                      height: 3,
-                                      decoration: BoxDecoration(
-                                        color: context.borderColor,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    // Jelek
-                                    // const Icon(
-                                    //   Icons.location_on_rounded,
-                                    //   size: 11,
-                                    //   color: Color(0xFF94A3B8),
-                                    // ),
-                                    // const SizedBox(width: 2),
-                                    // Text(
-                                    //   'Lokasi GPS',
-                                    //   style: TextStyle(
-                                    //     fontSize: 11,
-                                    //     color: context.textMutedColor,
-                                    //     fontWeight: FontWeight.w500,
-                                    //   ),
-                                    // ),
-                                  ],
                                 ],
                               ),
                             ],

@@ -6,7 +6,6 @@ import 'package:geolocator/geolocator.dart';
 
 import '../../core/security/device_security_service.dart';
 import '../../core/services/face_detector_service.dart';
-import '../../core/theme/app_theme.dart';
 import '../../core/utils/app_haptics.dart';
 import '../../core/utils/location_helper.dart';
 import '../../data/models/attendance_event_model.dart';
@@ -166,6 +165,7 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
       if (_capturedPhoto != null && _capturedPhoto!.path != photo.path) {
         _cleanupCapturedPhoto();
       }
+      AppHaptics.selection();
       setState(() {
         _capturedPhoto = photo;
       });
