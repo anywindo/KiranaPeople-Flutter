@@ -74,71 +74,91 @@ class _AttendanceEventDetailModalState
         event.fullSelfieUrl != null && event.fullSelfieUrl!.isNotEmpty;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      height: MediaQuery.of(context).size.height * 0.85,
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
       decoration: BoxDecoration(
         color: context.surfaceColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: context.borderColor,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          HistoryLocationHeader(
-            event: event,
-            lat: lat,
-            lng: lng,
-            hasPhoto: hasPhoto,
-            selectedTab: _selectedTab,
-            onTabChanged: (newTab) => setState(() => _selectedTab = newTab),
-          ),
-          const SizedBox(height: 14),
-          if (_selectedTab == 1 && hasPhoto)
-            HistoryLocationPhotoView(event: event, lat: lat, lng: lng)
-          else ...[
-            HistoryLocationMapView(
-              userLatLng: userLatLng,
-              officeLatLng: officeLatLng,
-              officeName: officeName,
-              radius: radius,
-            ),
-            const SizedBox(height: 8),
-            HistoryLocationRadiusBadge(
-              isInside: isInside,
-              distance: distance,
-              radius: radius,
-            ),
-          ],
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 44,
+                height: 4.5,
+                decoration: BoxDecoration(
+                  color: context.borderColor,
+                  borderRadius: BorderRadius.circular(2.5),
                 ),
               ),
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'Tutup',
-                style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            HistoryLocationHeader(
+              event: event,
+              lat: lat,
+              lng: lng,
+              hasPhoto: hasPhoto,
+              selectedTab: _selectedTab,
+              onTabChanged: (newTab) => setState(() => _selectedTab = newTab),
+            ),
+            const SizedBox(height: 14),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    if (_selectedTab == 1 && hasPhoto)
+                      HistoryLocationPhotoView(
+                        event: event,
+                        lat: lat,
+                        lng: lng,
+                      )
+                    else ...[
+                      HistoryLocationMapView(
+                        userLatLng: userLatLng,
+                        officeLatLng: officeLatLng,
+                        officeName: officeName,
+                        radius: radius,
+                      ),
+                      const SizedBox(height: 10),
+                      HistoryLocationRadiusBadge(
+                        isInside: isInside,
+                        distance: distance,
+                        radius: radius,
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Tutup',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

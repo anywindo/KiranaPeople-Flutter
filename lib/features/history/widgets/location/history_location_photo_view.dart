@@ -36,7 +36,7 @@ class HistoryLocationPhotoView extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Container(
-              height: 220,
+              height: 360,
               width: double.infinity,
               color: const Color(0xFF0F172A),
               child: AutoOrientedImage(imageUrl: photoUrl, fit: BoxFit.contain),
