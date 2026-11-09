@@ -74,10 +74,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   void _scrollToTop() {
     AppHaptics.medium();
     if (_scrollController.hasClients) {
+      final currentOffset = _scrollController.offset;
+      final durationMs = (380 + (currentOffset / 20)).clamp(380, 550).toInt();
       _scrollController.animateTo(
         0,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeOutCubic,
+        duration: Duration(milliseconds: durationMs),
+        curve: Curves.fastOutSlowIn,
       );
     }
   }
@@ -415,57 +417,72 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             child: Center(
               child: IgnorePointer(
                 ignoring: !_showScrollToTop,
-                child: AnimatedScale(
-                  scale: _showScrollToTop ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 260),
-                  curve: Curves.easeOutBack,
-                  child: AnimatedOpacity(
-                    opacity: _showScrollToTop ? 1.0 : 0.0,
-                    duration: const Duration(milliseconds: 200),
-                    child: BouncingButton(
-                      scaleDown: 0.92,
-                      onPressed: _scrollToTop,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 9,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.18),
-                            width: 1.0,
+                child: AnimatedSlide(
+                  offset: _showScrollToTop
+                      ? Offset.zero
+                      : const Offset(0, 0.45),
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutCubic,
+                  child: AnimatedScale(
+                    scale: _showScrollToTop ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutCubic,
+                    child: AnimatedOpacity(
+                      opacity: _showScrollToTop ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOut,
+                      child: BouncingButton(
+                        scaleDown: 0.94,
+                        hapticType: BouncingHapticType.selection,
+                        onPressed: _scrollToTop,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 9,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(
-                                alpha: context.isDarkMode ? 0.35 : 0.12,
+                          decoration: BoxDecoration(
+                            color: context.isDarkMode
+                                ? AppColors.darkSurface
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: context.isDarkMode
+                                  ? AppColors.darkBorder
+                                  : const Color(0xFFE2E8F0),
+                              width: 1.0,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(
+                                  alpha: context.isDarkMode ? 0.35 : 0.08,
+                                ),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
                               ),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.arrow_upward_rounded,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                            SizedBox(width: 6),
-                            Text(
-                              'Kembali ke Atas',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                letterSpacing: 0.2,
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.arrow_upward_rounded,
+                                color: AppColors.primary,
+                                size: 16,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 6),
+                              Text(
+                                'Kembali ke Atas',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: context.isDarkMode
+                                      ? AppColors.darkTextPrimary
+                                      : AppColors.textPrimary,
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
