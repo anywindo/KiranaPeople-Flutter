@@ -192,21 +192,28 @@ class _AttendanceConfirmationViewState
     }
 
     // Submit attendance event
-    unawaited(
-      ref
-          .read(todayAttendanceProvider.notifier)
-          .submitEvent(
-            eventType: widget.action,
-            latitude: _currentPosition!.latitude,
-            longitude: _currentPosition!.longitude,
-            accuracy: _currentPosition!.accuracy,
-            altitude: _currentPosition!.altitude,
-            deviceTimestamp: _currentPosition!.timestamp,
-            isMocked: _currentPosition!.isMocked,
-            photoFile: widget.photoFile,
-            shiftId: widget.shiftId,
-          ),
-    );
+    final success = await ref
+        .read(todayAttendanceProvider.notifier)
+        .submitEvent(
+          eventType: widget.action,
+          latitude: _currentPosition!.latitude,
+          longitude: _currentPosition!.longitude,
+          accuracy: _currentPosition!.accuracy,
+          altitude: _currentPosition!.altitude,
+          deviceTimestamp: _currentPosition!.timestamp,
+          isMocked: _currentPosition!.isMocked,
+          photoFile: widget.photoFile,
+          shiftId: widget.shiftId,
+        );
+
+    if (!mounted) return;
+    setState(() {
+      _isSubmitting = false;
+    });
+
+    if (!success) {
+      return;
+    }
 
     double distance = 0.0;
     if (widget.workLocation != null && _currentPosition != null) {
