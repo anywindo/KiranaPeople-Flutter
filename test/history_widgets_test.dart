@@ -4,12 +4,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kirana_people/data/models/attendance_event_model.dart';
 import 'package:kirana_people/data/models/attendance_model.dart';
 import 'package:kirana_people/data/models/shift_model.dart';
+import 'package:kirana_people/features/history/history_screen.dart';
 import 'package:kirana_people/features/history/widgets/history_empty_state.dart';
 import 'package:kirana_people/features/history/widgets/history_filter_bar.dart';
 import 'package:kirana_people/features/history/widgets/history_item_card.dart';
 import 'package:kirana_people/features/history/widgets/history_summary_card.dart';
 import 'package:kirana_people/features/history/widgets/history_filter_sheet.dart';
 import 'package:kirana_people/features/history/widgets/history_location_modal.dart';
+import 'package:kirana_people/providers/history_provider.dart';
+
+class _FakeHistoryNotifier extends HistoryNotifier {
+  final HistoryState initialState;
+  _FakeHistoryNotifier(this.initialState);
+
+  @override
+  HistoryState build() => initialState;
+}
 
 void main() {
   group('History Sub-Widgets Tests', () {
@@ -314,6 +324,65 @@ void main() {
 
       expect(find.text('Lihat Analisis Detail'), findsOneWidget);
       expect(find.text('Tingkat Ketepatan Waktu'), findsNothing);
+    });
+
+    testWidgets('HistoryScreen displays floating scroll-to-top button on deep scroll and scrolls back up on tap', (tester) async {
+      final records = List.generate(
+        15,
+        (i) => AttendanceRecord(
+          id: i + 1,
+          date: '2026-11-${(i + 1).toString().padLeft(2, '0')}',
+          status: 'ON_TIME',
+          events: [
+            AttendanceEvent(
+              id: i + 1,
+              eventType: AttendanceEventType.startShift,
+              timestamp: '2026-11-${(i + 1).toString().padLeft(2, '0')} 08:00:00',
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            historyProvider.overrideWith(
+              () => _FakeHistoryNotifier(
+                HistoryState(records: AsyncValue.data(records)),
+              ),
+            ),
+          ],
+          child: const MaterialApp(
+            home: HistoryScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Initially at top: Scroll-to-top button scale is 0.0
+      final scaleFinder = find.byType(AnimatedScale);
+      expect(scaleFinder, findsOneWidget);
+      AnimatedScale scaleWidget = tester.widget(scaleFinder);
+      expect(scaleWidget.scale, equals(0.0));
+
+      // Drag list down to scroll > 280px
+      await tester.drag(find.byType(ListView), const Offset(0, -600));
+      await tester.pumpAndSettle();
+
+      // Button should now be scaled to 1.0 and show pill with text
+      scaleWidget = tester.widget(scaleFinder);
+      expect(scaleWidget.scale, equals(1.0));
+      expect(find.byIcon(Icons.arrow_upward_rounded), findsOneWidget);
+      expect(find.text('Kembali ke Atas'), findsOneWidget);
+
+      // Tap the floating pill scroll-to-top button
+      await tester.tap(find.text('Kembali ke Atas'));
+      await tester.pumpAndSettle();
+
+      // Should be back at top, button scaled back to 0.0
+      scaleWidget = tester.widget(scaleFinder);
+      expect(scaleWidget.scale, equals(0.0));
     });
   });
 }

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/app_haptics.dart';
+import '../../core/widgets/bouncing_button.dart';
 import '../../core/widgets/shimmer_loading.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/history_provider.dart';
@@ -24,6 +26,7 @@ class HistoryScreen extends ConsumerStatefulWidget {
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   final _scrollController = ScrollController();
   bool _isLoadingMore = false;
+  bool _showScrollToTop = false;
 
   @override
   void initState() {
@@ -40,6 +43,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   void _onScroll() async {
     if (!_scrollController.hasClients) return;
+
+    final shouldShow = _scrollController.offset > 280;
+    if (shouldShow != _showScrollToTop) {
+      setState(() {
+        _showScrollToTop = shouldShow;
+      });
+    }
+
     if (_scrollController.position.maxScrollExtent > 0 &&
         _scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 250) {
@@ -57,6 +68,17 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           });
         }
       }
+    }
+  }
+
+  void _scrollToTop() {
+    AppHaptics.medium();
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutCubic,
+      );
     }
   }
 
@@ -367,18 +389,89 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   AnimatedOpacity(
                     opacity: historyState.isBackgroundSyncing ? 1.0 : 0.0,
                     duration: const Duration(milliseconds: 200),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(1),
-                      child: LinearProgressIndicator(
-                        minHeight: 2,
-                        backgroundColor: Colors.transparent,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.primary.withValues(alpha: 0.6),
+                    child: historyState.isBackgroundSyncing
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(1),
+                            child: LinearProgressIndicator(
+                              minHeight: 2,
+                              backgroundColor: Colors.transparent,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.primary.withValues(alpha: 0.6),
+                              ),
+                            ),
+                          )
+                        : const SizedBox(height: 2),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // 4. Smooth Floating Center Pill Scroll-to-Top Button
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 104,
+            child: Center(
+              child: IgnorePointer(
+                ignoring: !_showScrollToTop,
+                child: AnimatedScale(
+                  scale: _showScrollToTop ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutBack,
+                  child: AnimatedOpacity(
+                    opacity: _showScrollToTop ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: BouncingButton(
+                      scaleDown: 0.92,
+                      onPressed: _scrollToTop,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 9,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.40),
+                              blurRadius: 18,
+                              offset: const Offset(0, 6),
+                            ),
+                            BoxShadow(
+                              color: Colors.black.withValues(
+                                alpha: context.isDarkMode ? 0.45 : 0.15,
+                              ),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.arrow_upward_rounded,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              'Kembali ke Atas',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ),
