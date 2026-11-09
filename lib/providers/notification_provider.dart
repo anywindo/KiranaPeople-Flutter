@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/notifications/notification_service.dart';
+import 'attendance_provider.dart';
 
 final notificationEnabledProvider =
     NotifierProvider<NotificationNotifier, bool>(NotificationNotifier.new);
@@ -22,6 +23,21 @@ class NotificationNotifier extends Notifier<bool> {
     await NotificationService.instance.setEnabled(enabled);
     if (enabled) {
       await NotificationService.instance.requestPermissions();
+      // Auto-reschedule if shift data is available in todayAttendanceProvider
+      final todayState = ref.read(todayAttendanceProvider);
+      final todayData = todayState.data.value;
+      if (todayData != null) {
+        final shift =
+            todayState.selectedShift ??
+            todayData.shift ??
+            (todayData.availableShifts?.isNotEmpty == true
+                ? todayData.availableShifts!.first
+                : null);
+        await NotificationService.instance.scheduleAttendanceReminders(
+          shift: shift,
+          events: todayData.events ?? [],
+        );
+      }
     }
   }
 }

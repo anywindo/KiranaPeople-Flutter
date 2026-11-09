@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kirana_people/data/models/attendance_event_model.dart';
-import 'package:kirana_people/features/attendance/widgets/camera_confirmation_bridge.dart';
 import 'package:kirana_people/features/attendance/widgets/camera_controls_bar.dart';
 import 'package:kirana_people/features/attendance/widgets/camera_device_integrity_dialog.dart';
 import 'package:kirana_people/features/attendance/widgets/camera_preview_surface.dart';

@@ -8,6 +8,9 @@ class NotificationChannels {
   static const int idShiftStart15Min = 102;
   static const int idBreakEnd = 103;
   static const int idShiftEnd = 104;
+  static const int idShiftStartNow = 105;
+  static const int idBreakStart = 106;
+  static const int idShiftLateWarning = 107;
 
   // Channel details
   static const String reminderChannelId = 'attendance_reminders';

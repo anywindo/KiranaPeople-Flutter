@@ -27,6 +27,9 @@ class NotificationService {
   static const int idShiftStart15Min = NotificationChannels.idShiftStart15Min;
   static const int idBreakEnd = NotificationChannels.idBreakEnd;
   static const int idShiftEnd = NotificationChannels.idShiftEnd;
+  static const int idShiftStartNow = NotificationChannels.idShiftStartNow;
+  static const int idBreakStart = NotificationChannels.idBreakStart;
+  static const int idShiftLateWarning = NotificationChannels.idShiftLateWarning;
 
   // Backward-compatible Channel details
   static const String channelId = NotificationChannels.reminderChannelId;
@@ -172,12 +175,18 @@ class NotificationService {
     required Shift? shift,
     List<AttendanceEvent> events = const [],
   }) async {
-    if (shift == null) return;
+    if (shift == null) {
+      await cancelAllReminders();
+      return;
+    }
     if (!await isEnabled()) return;
     if (!_isInitialized) await initialize();
 
     final hasStartedShift = events.any(
       (e) => e.eventType == AttendanceEventType.startShift,
+    );
+    final hasStartedBreak = events.any(
+      (e) => e.eventType == AttendanceEventType.startBreak,
     );
     final hasEndedBreak = events.any(
       (e) => e.eventType == AttendanceEventType.endBreak,
@@ -216,7 +225,78 @@ class NotificationService {
       );
     }
 
-    // 2. Schedule Break End Reminder (5 minutes before break ends)
+    // 2. Schedule Exact Shift Start Reminder (0 minutes / Jam Masuk)
+    final targetShiftStartNow = calculateNextTime(
+      timeStr: shift.startTime,
+      now: now,
+      subtractMinutes: 0,
+      alreadyDoneToday: hasStartedShift,
+    );
+
+    if (targetShiftStartNow != null) {
+      await _scheduleZonedNotification(
+        id: idShiftStartNow,
+        title: '⏰ Waktu Masuk Shift Telah Tiba',
+        body:
+            'Shift ${shift.name} dimulai sekarang pukul ${shift.startTime}. Buka aplikasi untuk presensi masuk!',
+        scheduledDate: targetShiftStartNow,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    } else {
+      await cancelReminder(idShiftStartNow);
+    }
+
+    // 3. Schedule Late Warning Reminder (2 minutes before tolerance cutoff)
+    if (shift.attendanceRuleEnabled == true &&
+        (shift.attendanceRuleMinutes ?? 0) >= 3) {
+      final toleranceMinutes = shift.attendanceRuleMinutes!;
+      final alertOffsetMinutes = toleranceMinutes - 2;
+      final targetLateWarning = calculateNextTime(
+        timeStr: shift.startTime,
+        now: now,
+        addMinutes: alertOffsetMinutes,
+        alreadyDoneToday: hasStartedShift,
+      );
+
+      if (targetLateWarning != null) {
+        await _scheduleZonedNotification(
+          id: idShiftLateWarning,
+          title: '⚠️ Peringatan Batas Toleransi Masuk',
+          body:
+              'Toleransi presensi masuk shift ${shift.name} berakhir 2 menit lagi. Lakukan presensi agar tidak tercatat terlambat!',
+          scheduledDate: targetLateWarning,
+          matchDateTimeComponents: DateTimeComponents.time,
+        );
+      }
+    } else {
+      await cancelReminder(idShiftLateWarning);
+    }
+
+    // 4. Schedule Break Start Reminder
+    final breakStartTimeStr = shift.effectiveBreakStart;
+    if (breakStartTimeStr.isNotEmpty) {
+      final targetBreakStart = calculateNextTime(
+        timeStr: breakStartTimeStr,
+        now: now,
+        subtractMinutes: 0,
+        alreadyDoneToday: hasStartedBreak,
+      );
+
+      if (targetBreakStart != null) {
+        await _scheduleZonedNotification(
+          id: idBreakStart,
+          title: '☕ Waktu Istirahat Dimulai',
+          body:
+              'Waktu istirahat (${shift.effectiveBreakStart} - ${shift.effectiveBreakEnd}) telah tiba. Silakan istirahat dan catat presensi!',
+          scheduledDate: targetBreakStart,
+          matchDateTimeComponents: DateTimeComponents.time,
+        );
+      }
+    } else {
+      await cancelReminder(idBreakStart);
+    }
+
+    // 5. Schedule Break End Reminder (5 minutes before break ends)
     final breakEndTimeStr = shift.effectiveBreakEnd;
     if (breakEndTimeStr.isNotEmpty) {
       final targetBreakEnd = calculateNextTime(
@@ -240,7 +320,7 @@ class NotificationService {
       await cancelReminder(idBreakEnd);
     }
 
-    // 3. Schedule Shift End (Jam Pulang) Reminder
+    // 6. Schedule Shift End (Jam Pulang) Reminder
     if (shift.endTime.isNotEmpty) {
       final targetShiftEnd = calculateNextTime(
         timeStr: shift.endTime,
@@ -313,6 +393,7 @@ class NotificationService {
     required String timeStr,
     required tz.TZDateTime now,
     int subtractMinutes = 0,
+    int addMinutes = 0,
     bool alreadyDoneToday = false,
   }) {
     try {
@@ -330,7 +411,9 @@ class NotificationService {
         minute,
       );
 
-      var target = baseTimeToday.subtract(Duration(minutes: subtractMinutes));
+      var target = baseTimeToday
+          .subtract(Duration(minutes: subtractMinutes))
+          .add(Duration(minutes: addMinutes));
 
       if (alreadyDoneToday) {
         if (target.isBefore(now) || target.day == now.day) {

@@ -18,6 +18,32 @@ void main() {
       final errorResult = FaceDetectionResult.error('Kamera error');
       expect(errorResult.hasFace, isFalse);
       expect(errorResult.errorMessage, equals('Kamera error'));
+
+      final multiFaceResult = FaceDetectionResult.multipleFaces(3);
+      expect(multiFaceResult.hasFace, isFalse);
+      expect(multiFaceResult.faceCount, equals(3));
+      expect(multiFaceResult.errorMessage, contains('Terdeteksi 3 wajah'));
+
+      final eyesClosedResult = FaceDetectionResult.eyesClosed(
+        leftEye: 0.05,
+        rightEye: 0.04,
+      );
+      expect(eyesClosedResult.hasFace, isFalse);
+      expect(eyesClosedResult.leftEyeOpenProbability, equals(0.05));
+      expect(eyesClosedResult.rightEyeOpenProbability, equals(0.04));
+      expect(eyesClosedResult.errorMessage, contains('Mata terpejam'));
+
+      final extremeAngleResult = FaceDetectionResult.extremeAngle(45.0);
+      expect(extremeAngleResult.hasFace, isFalse);
+      expect(extremeAngleResult.headEulerAngleY, equals(45.0));
+      expect(extremeAngleResult.errorMessage, contains('terlalu miring'));
+
+      final fullSuccess = FaceDetectionResult.success(1, 0.95, 0.92, 0.88, 5.0);
+      expect(fullSuccess.hasFace, isTrue);
+      expect(fullSuccess.leftEyeOpenProbability, equals(0.95));
+      expect(fullSuccess.rightEyeOpenProbability, equals(0.92));
+      expect(fullSuccess.smilingProbability, equals(0.88));
+      expect(fullSuccess.headEulerAngleY, equals(5.0));
     });
 
     test('detectFaces returns error when file does not exist', () async {

@@ -135,6 +135,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
       }
     }
 
+    if (!mounted) return;
     final res = await CameraSelfieView.push(
       context,
       action: targetAction,

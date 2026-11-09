@@ -221,5 +221,59 @@ void main() {
       expect(find.text('Terlambat'), findsOneWidget);
       expect(find.text('1'), findsOneWidget);
     });
+
+    testWidgets('HistorySummaryCard can be expanded to reveal analytics details', (tester) async {
+      final records = [
+        AttendanceRecord(
+          id: 1,
+          date: '2026-11-01',
+          status: 'ON_TIME',
+          events: [
+            AttendanceEvent(
+              id: 1,
+              eventType: AttendanceEventType.startShift,
+              timestamp: '2026-11-01 07:40:00',
+            ),
+            AttendanceEvent(
+              id: 2,
+              eventType: AttendanceEventType.endShift,
+              timestamp: '2026-11-01 16:50:00',
+            ),
+          ],
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: HistorySummaryCard(records: records),
+            ),
+          ),
+        ),
+      );
+
+      // Initially collapsed: expand button is shown
+      expect(find.text('Lihat Analisis Detail'), findsOneWidget);
+      expect(find.text('Tingkat Ketepatan Waktu'), findsNothing);
+
+      // Tap to expand
+      await tester.tap(find.text('Lihat Analisis Detail'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sembunyikan Analisis'), findsOneWidget);
+      expect(find.text('Tingkat Ketepatan Waktu'), findsOneWidget);
+      expect(find.text('100%'), findsOneWidget);
+      expect(find.text('Rata-rata Masuk'), findsOneWidget);
+      expect(find.text('Rata-rata Pulang'), findsOneWidget);
+      expect(find.text('Total Jam Kerja'), findsOneWidget);
+
+      // Tap again to collapse
+      await tester.tap(find.text('Sembunyikan Analisis'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Lihat Analisis Detail'), findsOneWidget);
+      expect(find.text('Tingkat Ketepatan Waktu'), findsNothing);
+    });
   });
 }

@@ -93,6 +93,12 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
         selectedShift: initialShift,
         isBackgroundSyncing: false,
       );
+      unawaited(
+        NotificationService.instance.scheduleAttendanceReminders(
+          shift: initialShift,
+          events: res.events ?? [],
+        ),
+      );
     } catch (e, st) {
       // If we already have data, preserve it silently and just clear syncing flag
       if (hasExistingData) {
@@ -108,6 +114,15 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
 
   void selectShift(Shift shift) {
     state = state.copyWith(selectedShift: shift);
+    final data = state.data.value;
+    if (data != null) {
+      unawaited(
+        NotificationService.instance.scheduleAttendanceReminders(
+          shift: shift,
+          events: data.events ?? [],
+        ),
+      );
+    }
   }
 
   Future<bool> submitEvent({

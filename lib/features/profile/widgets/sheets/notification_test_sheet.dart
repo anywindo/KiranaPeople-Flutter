@@ -112,6 +112,54 @@ class NotificationTestSheet extends StatelessWidget {
                       );
                 },
               ),
+              ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0xFFF3E8FF),
+                  child: Icon(Icons.schedule_rounded, color: Color(0xFF9333EA)),
+                ),
+                title: const Text('Jadwal Pengingat Aktif'),
+                subtitle: const Text('Lihat notifikasi dan status alarm aktif'),
+                onTap: () async {
+                  final pending = await NotificationService.instance
+                      .getPendingNotifications();
+                  if (context.mounted) {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Pengingat Terjadwal'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Total notifikasi terjadwal: ${pending.length}',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 8),
+                            if (pending.isEmpty)
+                              const Text(
+                                'Belum ada notifikasi yang sedang aktif atau shift belum dimuat.',
+                              )
+                            else
+                              ...pending.map(
+                                (p) => Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4),
+                                  child: Text('• ${p.title ?? "Pengingat"} (#${p.id})'),
+                                ),
+                              ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx),
+                            child: const Text('Tutup'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+              ),
             ],
           ),
         ),

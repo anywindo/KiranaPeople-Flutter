@@ -193,6 +193,7 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
       }
     }
 
+    if (!mounted) return;
     final res = await CameraSelfieView.push(
       context,
       action: targetAction,

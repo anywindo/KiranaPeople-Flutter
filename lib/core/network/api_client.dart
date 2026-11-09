@@ -7,7 +7,6 @@ import 'package:dio/io.dart';
 
 import '../config/api_config.dart';
 import '../storage/secure_storage_service.dart';
-import 'api_error_localizer.dart';
 import 'api_exception.dart';
 import 'api_interceptor.dart';
 

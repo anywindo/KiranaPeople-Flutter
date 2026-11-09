@@ -204,5 +204,44 @@ void main() {
       expect(shiftEndDone!.day, 5);
       expect(shiftEndDone.hour, 16);
     });
+
+    test('calculateNextTime supports addMinutes for late tolerance warning', () {
+      final service = NotificationService.instance;
+      final now = tz.TZDateTime(tz.local, 2026, 11, 4, 7, 30); // 07:30 AM
+
+      // Shift starts at 08:00, 15m tolerance rule, alert 2 min before cutoff (+13m) -> 08:13 AM
+      final lateWarning = service.calculateNextTime(
+        timeStr: '08:00',
+        now: now,
+        addMinutes: 13,
+        alreadyDoneToday: false,
+      );
+      expect(lateWarning, isNotNull);
+      expect(lateWarning!.day, 4);
+      expect(lateWarning.hour, 8);
+      expect(lateWarning.minute, 13);
+
+      // If user already clocked in, warning rolls over to tomorrow
+      final lateWarningDone = service.calculateNextTime(
+        timeStr: '08:00',
+        now: now,
+        addMinutes: 13,
+        alreadyDoneToday: true,
+      );
+      expect(lateWarningDone, isNotNull);
+      expect(lateWarningDone!.day, 5);
+      expect(lateWarningDone.hour, 8);
+      expect(lateWarningDone.minute, 13);
+    });
+
+    test('Smart notification channels and IDs are defined correctly', () {
+      expect(NotificationService.idShiftStart30Min, 101);
+      expect(NotificationService.idShiftStart15Min, 102);
+      expect(NotificationService.idBreakEnd, 103);
+      expect(NotificationService.idShiftEnd, 104);
+      expect(NotificationService.idShiftStartNow, 105);
+      expect(NotificationService.idBreakStart, 106);
+      expect(NotificationService.idShiftLateWarning, 107);
+    });
   });
 }

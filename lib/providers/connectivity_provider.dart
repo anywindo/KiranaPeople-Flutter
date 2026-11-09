@@ -115,8 +115,9 @@ class ConnectivityNotifier extends Notifier<bool> {
   }
 
   void _setOffline({bool force = false}) {
-    if (!ref.mounted || state == true)
+    if (!ref.mounted || state == true) {
       return; // Already offline, no-op (no flicker)
+    }
 
     final now = DateTime.now();
     if (!force &&
@@ -136,8 +137,9 @@ class ConnectivityNotifier extends Notifier<bool> {
   }
 
   void _setOnline({bool force = false}) {
-    if (!ref.mounted || state == false)
+    if (!ref.mounted || state == false) {
       return; // Already online, no-op (no flicker)
+    }
 
     final now = DateTime.now();
     if (!force &&

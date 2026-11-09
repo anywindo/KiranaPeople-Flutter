@@ -3,10 +3,6 @@ import 'package:shimmer/shimmer.dart';
 
 import '../theme/app_theme.dart';
 
-import 'shimmers/attendance_skeletons.dart';
-import 'shimmers/history_skeletons.dart';
-import 'shimmers/profile_skeletons.dart';
-
 export 'shimmers/attendance_skeletons.dart';
 export 'shimmers/history_skeletons.dart';
 export 'shimmers/profile_skeletons.dart';

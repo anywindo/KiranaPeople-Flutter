@@ -5,7 +5,6 @@ import 'package:dio/dio.dart';
 
 import '../models/user_model.dart';
 import '../../core/network/api_client.dart';
-import '../../core/network/api_exception.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/storage/secure_storage_service.dart';
 
