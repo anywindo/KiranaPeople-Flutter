@@ -10,6 +10,7 @@ import '../../core/utils/app_haptics.dart';
 import '../../core/utils/location_helper.dart';
 import '../../core/widgets/offline_banner.dart';
 import '../../data/models/attendance_event_model.dart';
+import '../../data/models/attendance_submission_result.dart';
 import '../../data/models/work_location_model.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -20,6 +21,7 @@ import 'widgets/confirmation/confirmation_app_bar.dart';
 import 'widgets/confirmation/confirmation_dialogs.dart';
 import 'widgets/confirmation/confirmation_photo_card.dart';
 
+export '../../data/models/attendance_submission_result.dart';
 export 'widgets/confirmation/confirmation_action_buttons.dart';
 export 'widgets/confirmation/confirmation_app_bar.dart';
 export 'widgets/confirmation/confirmation_dialogs.dart';
@@ -32,6 +34,7 @@ class AttendanceConfirmationView extends ConsumerStatefulWidget {
   final WorkLocation? workLocation;
   final VoidCallback onRetake;
   final VoidCallback onSubmittedSuccess;
+  final ValueChanged<AttendanceSubmissionResult>? onSubmittedResult;
   final Position? initialPosition;
   final Future<void>? imageProcessFuture;
   final bool isFrontCamera;
@@ -44,6 +47,7 @@ class AttendanceConfirmationView extends ConsumerStatefulWidget {
     this.workLocation,
     required this.onRetake,
     required this.onSubmittedSuccess,
+    this.onSubmittedResult,
     this.initialPosition,
     this.imageProcessFuture,
     this.isFrontCamera = true,
@@ -204,6 +208,25 @@ class _AttendanceConfirmationViewState
           ),
     );
 
+    double distance = 0.0;
+    if (widget.workLocation != null && _currentPosition != null) {
+      distance = Geolocator.distanceBetween(
+        _currentPosition!.latitude,
+        _currentPosition!.longitude,
+        widget.workLocation!.latitude,
+        widget.workLocation!.longitude,
+      );
+    }
+
+    final submissionResult = AttendanceSubmissionResult(
+      action: widget.action,
+      timestamp: DateTime.now(),
+      isWithinRadius: _isWithinRadius,
+      distance: distance,
+      locationName: widget.workLocation?.name ?? 'Kantor Utama',
+    );
+
+    widget.onSubmittedResult?.call(submissionResult);
     widget.onSubmittedSuccess();
   }
 

@@ -15,6 +15,7 @@ import '../../providers/attendance_provider.dart';
 import '../../providers/history_provider.dart';
 import '../attendance/camera_selfie_view.dart';
 import '../attendance/shift_picker_sheet.dart';
+import '../attendance/widgets/attendance_success_sheet.dart';
 import '../attendance/widgets/shift_confirmation_dialog.dart';
 import 'widgets/map_attendance_action_card.dart';
 import 'widgets/map_controls_overlay.dart';
@@ -200,18 +201,14 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
       shiftId: effectiveShift?.id ?? selectedShift?.id,
       workLocation: workLocation,
     );
-    if (res == true) {
+    if (res != null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${targetAction.label} berhasil dicatat!'),
-          backgroundColor: AppColors.success,
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 4),
-        ),
-      );
       ref.read(todayAttendanceProvider.notifier).refresh();
       ref.read(historyProvider.notifier).refresh();
+      await AttendanceSuccessSheet.show(
+        context,
+        result: res,
+      );
     }
   }
 

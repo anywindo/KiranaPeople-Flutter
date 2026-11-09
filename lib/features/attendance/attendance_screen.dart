@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/notifications/notification_service.dart';
 import '../../core/security/device_security_service.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/utils/app_haptics.dart';
 import '../../core/utils/location_helper.dart';
 import '../../core/widgets/shimmer_loading.dart';
 import '../../data/models/attendance_event_model.dart';
@@ -24,6 +23,7 @@ import 'widgets/attendance_event_detail_modal.dart';
 import 'widgets/attendance_header.dart';
 import 'widgets/attendance_logout_dialog.dart';
 import 'widgets/attendance_mode_switcher.dart';
+import 'widgets/attendance_success_sheet.dart';
 import 'widgets/shift_confirmation_dialog.dart';
 import 'widgets/shift_info_card.dart';
 import 'widgets/today_activity_card.dart';
@@ -142,15 +142,11 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
       shiftId: effectiveShift?.id ?? selectedShift?.id,
       workLocation: workLocation,
     );
-    if (res == true && mounted) {
-      AppHaptics.success();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${targetAction.label} berhasil dicatat!'),
-          backgroundColor: AppColors.success,
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 4),
-        ),
+    if (res != null && mounted) {
+      ref.read(todayAttendanceProvider.notifier).refresh();
+      await AttendanceSuccessSheet.show(
+        context,
+        result: res,
       );
     }
   }

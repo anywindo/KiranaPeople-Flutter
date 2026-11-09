@@ -9,6 +9,7 @@ import '../../core/services/face_detector_service.dart';
 import '../../core/utils/app_haptics.dart';
 import '../../core/utils/location_helper.dart';
 import '../../data/models/attendance_event_model.dart';
+import '../../data/models/attendance_submission_result.dart';
 import '../../data/models/work_location_model.dart';
 import 'widgets/camera_confirmation_bridge.dart';
 import 'widgets/camera_controls_bar.dart';
@@ -18,6 +19,7 @@ import 'widgets/camera_session_controller.dart';
 import 'widgets/camera_top_alert.dart';
 import 'widgets/camera_top_bar.dart';
 
+export '../../data/models/attendance_submission_result.dart';
 export 'widgets/camera_confirmation_bridge.dart';
 export 'widgets/camera_controls_bar.dart';
 export 'widgets/camera_device_integrity_dialog.dart';
@@ -38,7 +40,7 @@ class CameraSelfieView extends StatefulWidget {
     this.workLocation,
   });
 
-  static Future<bool?> push(
+  static Future<AttendanceSubmissionResult?> push(
     BuildContext context, {
     required AttendanceEventType action,
     int? shiftId,
@@ -48,11 +50,11 @@ class CameraSelfieView extends StatefulWidget {
     final isCompromised = await DeviceSecurityService().isDeviceCompromised();
     if (isCompromised && context.mounted) {
       await CameraDeviceIntegrityDialog.show(context);
-      return false;
+      return null;
     }
 
-    if (!context.mounted) return false;
-    return Navigator.push<bool>(
+    if (!context.mounted) return null;
+    final dynamic res = await Navigator.push<dynamic>(
       context,
       MaterialPageRoute(
         builder: (_) => CameraSelfieView(
@@ -62,6 +64,10 @@ class CameraSelfieView extends StatefulWidget {
         ),
       ),
     );
+    if (res is AttendanceSubmissionResult) {
+      return res;
+    }
+    return null;
   }
 
   @override
@@ -196,8 +202,12 @@ class _CameraSelfieViewState extends State<CameraSelfieView>
         imageProcessFuture: _imageProcessFuture,
         isFrontCamera: _cameraSession.isCurrentCameraFront,
         onRetake: _retakePhoto,
+        onSubmittedResult: (result) {
+          _cleanupCapturedPhoto();
+          Navigator.pop(context, result);
+        },
         onSubmittedSuccess: () {
-          Navigator.pop(context, true);
+          _cleanupCapturedPhoto();
         },
       );
     }

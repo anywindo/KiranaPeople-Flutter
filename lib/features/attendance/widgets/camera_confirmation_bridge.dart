@@ -17,6 +17,7 @@ class CameraConfirmationBridge extends StatelessWidget {
   final bool isFrontCamera;
   final Future<void> Function() onRetake;
   final VoidCallback onSubmittedSuccess;
+  final ValueChanged<AttendanceSubmissionResult>? onSubmittedResult;
 
   const CameraConfirmationBridge({
     super.key,
@@ -29,6 +30,7 @@ class CameraConfirmationBridge extends StatelessWidget {
     required this.isFrontCamera,
     required this.onRetake,
     required this.onSubmittedSuccess,
+    this.onSubmittedResult,
   });
 
   @override
@@ -49,6 +51,7 @@ class CameraConfirmationBridge extends StatelessWidget {
         isFrontCamera: isFrontCamera,
         onRetake: onRetake,
         onSubmittedSuccess: onSubmittedSuccess,
+        onSubmittedResult: onSubmittedResult,
       ),
     );
   }
