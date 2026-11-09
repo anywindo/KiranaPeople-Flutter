@@ -411,7 +411,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           Positioned(
             left: 0,
             right: 0,
-            bottom: 104,
+            bottom: 124,
             child: Center(
               child: IgnorePointer(
                 ignoring: !_showScrollToTop,
@@ -433,18 +433,17 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         decoration: BoxDecoration(
                           color: AppColors.primary,
                           borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.18),
+                            width: 1.0,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.40),
-                              blurRadius: 18,
-                              offset: const Offset(0, 6),
-                            ),
-                            BoxShadow(
                               color: Colors.black.withValues(
-                                alpha: context.isDarkMode ? 0.45 : 0.15,
+                                alpha: context.isDarkMode ? 0.35 : 0.12,
                               ),
                               blurRadius: 8,
-                              offset: const Offset(0, 2),
+                              offset: const Offset(0, 3),
                             ),
                           ],
                         ),
