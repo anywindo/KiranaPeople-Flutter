@@ -7,6 +7,7 @@ import '../../core/notifications/notification_service.dart';
 import '../../core/security/device_security_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/location_helper.dart';
+import '../../core/widgets/haptic_refresh_indicator.dart';
 import '../../core/widgets/shimmer_loading.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../data/models/shift_model.dart';
@@ -217,7 +218,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
       body: Stack(
         children: [
           // 1. Scrollable Page Body (flows behind sticky top bar with blur gradient)
-          RefreshIndicator(
+          HapticRefreshIndicator(
             color: AppColors.primary,
             edgeOffset: topPadding + 48,
             onRefresh: () =>

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/app_haptics.dart';
+import '../../core/widgets/haptic_refresh_indicator.dart';
 import '../../data/models/user_model.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -86,12 +87,11 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,
-      body: RefreshIndicator(
+      body: HapticRefreshIndicator(
         color: AppColors.primary,
         backgroundColor: context.surfaceColor,
         edgeOffset: topPadding + 8.0,
         onRefresh: () async {
-          AppHaptics.light();
           await Future.wait([
             ref.read(authProvider.notifier).refreshProfile(),
             ref.read(todayAttendanceProvider.notifier).refresh(),

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/app_haptics.dart';
 import '../../core/widgets/bouncing_button.dart';
+import '../../core/widgets/haptic_refresh_indicator.dart';
 import '../../core/widgets/shimmer_loading.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/history_provider.dart';
@@ -101,7 +102,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         children: [
           // 1. History List / Content (Passes under the feathered blur header)
           Positioned.fill(
-            child: RefreshIndicator(
+            child: HapticRefreshIndicator(
               color: AppColors.primary,
               edgeOffset: headerContentHeight,
               onRefresh: () => ref.read(historyProvider.notifier).refresh(),
