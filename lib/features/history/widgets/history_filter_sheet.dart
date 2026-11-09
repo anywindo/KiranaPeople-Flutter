@@ -222,6 +222,33 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
                     });
                   },
                 ),
+                HistoryFilterChip(
+                  label: 'Bulan Lalu',
+                  isSelected: _tempRangeLabel == 'Bulan Lalu',
+                  onTap: () {
+                    final now = DateTime.now();
+                    final firstDayCurrentMonth = DateTime(now.year, now.month, 1);
+                    final lastDayPrevMonth = firstDayCurrentMonth.subtract(
+                      const Duration(days: 1),
+                    );
+                    final firstDayPrevMonth = DateTime(
+                      lastDayPrevMonth.year,
+                      lastDayPrevMonth.month,
+                      1,
+                    );
+                    setState(() {
+                      _tempRange = DateTimeRange(
+                        start: firstDayPrevMonth,
+                        end: DateTime(
+                          lastDayPrevMonth.year,
+                          lastDayPrevMonth.month,
+                          lastDayPrevMonth.day,
+                        ),
+                      );
+                      _tempRangeLabel = 'Bulan Lalu';
+                    });
+                  },
+                ),
               ],
             ),
             const SizedBox(height: 10),
@@ -233,7 +260,8 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
                       _tempRange != null &&
                           _tempRangeLabel != 'Hari Ini' &&
                           _tempRangeLabel != '7 Hari Terakhir' &&
-                          _tempRangeLabel != 'Bulan Ini'
+                          _tempRangeLabel != 'Bulan Ini' &&
+                          _tempRangeLabel != 'Bulan Lalu'
                       ? AppColors.primary
                       : context.borderColor,
                 ),

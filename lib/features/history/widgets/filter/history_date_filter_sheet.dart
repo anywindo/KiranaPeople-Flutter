@@ -117,13 +117,42 @@ class HistoryDateFilterSheet extends StatelessWidget {
               },
             ),
             HistoryFilterOptionTile(
+              title: 'Bulan Lalu',
+              subtitle: _formatPreviousMonthSubtitle(now),
+              isSelected: historyState.filter.dateRangeLabel == 'Bulan Lalu',
+              onTap: () {
+                final firstDayCurrentMonth = DateTime(now.year, now.month, 1);
+                final lastDayPrevMonth = firstDayCurrentMonth.subtract(
+                  const Duration(days: 1),
+                );
+                final firstDayPrevMonth = DateTime(
+                  lastDayPrevMonth.year,
+                  lastDayPrevMonth.month,
+                  1,
+                );
+                final range = DateTimeRange(
+                  start: firstDayPrevMonth,
+                  end: DateTime(
+                    lastDayPrevMonth.year,
+                    lastDayPrevMonth.month,
+                    lastDayPrevMonth.day,
+                  ),
+                );
+                ref
+                    .read(historyProvider.notifier)
+                    .setDateRangeFilter(range, 'Bulan Lalu');
+                Navigator.pop(ctx);
+              },
+            ),
+            HistoryFilterOptionTile(
               title: 'Pilih Rentang Tanggal Manual...',
               subtitle: 'Tentukan tanggal mulai dan selesai sendiri',
               isSelected:
                   historyState.filter.dateRange != null &&
                   historyState.filter.dateRangeLabel != 'Hari Ini' &&
                   historyState.filter.dateRangeLabel != '7 Hari Terakhir' &&
-                  historyState.filter.dateRangeLabel != 'Bulan Ini',
+                  historyState.filter.dateRangeLabel != 'Bulan Ini' &&
+                  historyState.filter.dateRangeLabel != 'Bulan Lalu',
               icon: Icons.date_range_rounded,
               onTap: () {
                 Navigator.pop(ctx);
@@ -206,6 +235,27 @@ class HistoryDateFilterSheet extends StatelessWidget {
       return '$startDay $startMonth - $endDay $endMonth';
     }
     return '$startDay $startMonth ${range.start.year} - $endDay $endMonth ${range.end.year}';
+  }
+
+  static String _formatPreviousMonthSubtitle(DateTime now) {
+    const months = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
+    final firstDayCurrentMonth = DateTime(now.year, now.month, 1);
+    final lastDayPrevMonth = firstDayCurrentMonth.subtract(const Duration(days: 1));
+    final prevMonthName = months[lastDayPrevMonth.month - 1];
+    return '1 - ${lastDayPrevMonth.day} $prevMonthName ${lastDayPrevMonth.year}';
   }
 
   static String formatIndoDateString(String dateStr) {

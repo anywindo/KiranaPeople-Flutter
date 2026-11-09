@@ -100,6 +100,10 @@ void main() {
       expect(find.text('Semua'), findsOneWidget);
       expect(find.text('Tepat Waktu'), findsOneWidget);
       expect(find.text('Terlambat'), findsOneWidget);
+      expect(find.text('Hari Ini'), findsOneWidget);
+      expect(find.text('7 Hari'), findsOneWidget);
+      expect(find.text('Bulan Ini'), findsOneWidget);
+      expect(find.text('Bulan Lalu'), findsOneWidget);
       expect(find.text('Tanggal'), findsOneWidget);
 
       // Tap on 'Tepat Waktu' pill
@@ -108,6 +112,42 @@ void main() {
 
       // Reset pill should now appear because a filter is active
       expect(find.text('Reset'), findsOneWidget);
+    });
+
+    testWidgets('HistoryFilterBar quick date presets toggle filters smoothly', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: HistoryFilterBar(),
+            ),
+          ),
+        ),
+      );
+
+      // Tap 'Hari Ini' preset
+      await tester.tap(find.text('Hari Ini'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Reset'));
+      expect(find.text('Reset'), findsOneWidget);
+
+      // Tap 'Hari Ini' again to toggle it off
+      await tester.tap(find.text('Hari Ini'));
+      await tester.pumpAndSettle();
+      expect(find.text('Reset'), findsNothing);
+
+      // Scroll and tap 'Bulan Lalu' preset
+      await tester.ensureVisible(find.text('Bulan Lalu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Bulan Lalu'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Reset'));
+      expect(find.text('Reset'), findsOneWidget);
+
+      // Tap 'Reset' button
+      await tester.tap(find.text('Reset'));
+      await tester.pumpAndSettle();
+      expect(find.text('Reset'), findsNothing);
     });
 
     testWidgets('HistoryFilterOptionTile renders and triggers callback', (tester) async {

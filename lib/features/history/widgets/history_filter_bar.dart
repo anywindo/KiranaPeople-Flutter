@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/app_haptics.dart';
 import '../../../providers/history_provider.dart';
 import 'history_filter_sheet.dart';
 
@@ -15,6 +16,13 @@ class HistoryFilterBar extends ConsumerWidget {
     final notifier = ref.read(historyProvider.notifier);
     final isDark = context.isDarkMode;
 
+    final isCustomDateSelected = filter.dateRange != null &&
+        filter.dateRangeLabel != 'Hari Ini' &&
+        filter.dateRangeLabel != '7 Hari' &&
+        filter.dateRangeLabel != '7 Hari Terakhir' &&
+        filter.dateRangeLabel != 'Bulan Ini' &&
+        filter.dateRangeLabel != 'Bulan Lalu';
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -24,9 +32,13 @@ class HistoryFilterBar extends ConsumerWidget {
           _buildQuickFilterPill(
             context,
             label: 'Semua',
-            isSelected: filter.status == AttendanceHistoryStatusFilter.all,
-            onTap: () =>
-                notifier.setStatusFilter(AttendanceHistoryStatusFilter.all),
+            isSelected: filter.status == AttendanceHistoryStatusFilter.all &&
+                filter.dateRange == null &&
+                (filter.shift == null || filter.shift == 'Semua Shift'),
+            onTap: () {
+              AppHaptics.selection();
+              notifier.resetFilter();
+            },
           ),
           const SizedBox(width: 8),
 
@@ -42,11 +54,14 @@ class HistoryFilterBar extends ConsumerWidget {
             activeBg: isDark
                 ? const Color(0xFF064E3B).withValues(alpha: 0.5)
                 : const Color(0xFFDCFCE7),
-            onTap: () => notifier.setStatusFilter(
-              filter.status == AttendanceHistoryStatusFilter.onTime
-                  ? AttendanceHistoryStatusFilter.all
-                  : AttendanceHistoryStatusFilter.onTime,
-            ),
+            onTap: () {
+              AppHaptics.selection();
+              notifier.setStatusFilter(
+                filter.status == AttendanceHistoryStatusFilter.onTime
+                    ? AttendanceHistoryStatusFilter.all
+                    : AttendanceHistoryStatusFilter.onTime,
+              );
+            },
           ),
           const SizedBox(width: 8),
 
@@ -62,28 +77,151 @@ class HistoryFilterBar extends ConsumerWidget {
             activeBg: isDark
                 ? const Color(0xFF4C1D24).withValues(alpha: 0.5)
                 : const Color(0xFFFFF1F2),
-            onTap: () => notifier.setStatusFilter(
-              filter.status == AttendanceHistoryStatusFilter.late
-                  ? AttendanceHistoryStatusFilter.all
-                  : AttendanceHistoryStatusFilter.late,
-            ),
+            onTap: () {
+              AppHaptics.selection();
+              notifier.setStatusFilter(
+                filter.status == AttendanceHistoryStatusFilter.late
+                    ? AttendanceHistoryStatusFilter.all
+                    : AttendanceHistoryStatusFilter.late,
+              );
+            },
           ),
           const SizedBox(width: 8),
 
-          // Date Range Chip
+          // Subtle Vertical Divider
+          Container(
+            height: 20,
+            width: 1,
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+          ),
+          const SizedBox(width: 8),
+
+          // Preset: Hari Ini
           _buildQuickFilterPill(
             context,
-            label: filter.dateRange != null
+            label: 'Hari Ini',
+            isSelected: filter.dateRangeLabel == 'Hari Ini',
+            onTap: () {
+              AppHaptics.selection();
+              if (filter.dateRangeLabel == 'Hari Ini') {
+                notifier.setDateRangeFilter(null);
+              } else {
+                final now = DateTime.now();
+                final today = DateTime(now.year, now.month, now.day);
+                notifier.setDateRangeFilter(
+                  DateTimeRange(start: today, end: today),
+                  'Hari Ini',
+                );
+              }
+            },
+          ),
+          const SizedBox(width: 8),
+
+          // Preset: 7 Hari
+          _buildQuickFilterPill(
+            context,
+            label: '7 Hari',
+            isSelected: filter.dateRangeLabel == '7 Hari Terakhir',
+            onTap: () {
+              AppHaptics.selection();
+              if (filter.dateRangeLabel == '7 Hari Terakhir') {
+                notifier.setDateRangeFilter(null);
+              } else {
+                final now = DateTime.now();
+                final today = DateTime(now.year, now.month, now.day);
+                notifier.setDateRangeFilter(
+                  DateTimeRange(
+                    start: today.subtract(const Duration(days: 6)),
+                    end: today,
+                  ),
+                  '7 Hari Terakhir',
+                );
+              }
+            },
+          ),
+          const SizedBox(width: 8),
+
+          // Preset: Bulan Ini
+          _buildQuickFilterPill(
+            context,
+            label: 'Bulan Ini',
+            isSelected: filter.dateRangeLabel == 'Bulan Ini',
+            onTap: () {
+              AppHaptics.selection();
+              if (filter.dateRangeLabel == 'Bulan Ini') {
+                notifier.setDateRangeFilter(null);
+              } else {
+                final now = DateTime.now();
+                final today = DateTime(now.year, now.month, now.day);
+                notifier.setDateRangeFilter(
+                  DateTimeRange(
+                    start: DateTime(today.year, today.month, 1),
+                    end: today,
+                  ),
+                  'Bulan Ini',
+                );
+              }
+            },
+          ),
+          const SizedBox(width: 8),
+
+          // Preset: Bulan Lalu
+          _buildQuickFilterPill(
+            context,
+            label: 'Bulan Lalu',
+            isSelected: filter.dateRangeLabel == 'Bulan Lalu',
+            onTap: () {
+              AppHaptics.selection();
+              if (filter.dateRangeLabel == 'Bulan Lalu') {
+                notifier.setDateRangeFilter(null);
+              } else {
+                final now = DateTime.now();
+                final firstDayCurrentMonth = DateTime(now.year, now.month, 1);
+                final lastDayPrevMonth = firstDayCurrentMonth.subtract(
+                  const Duration(days: 1),
+                );
+                final firstDayPrevMonth = DateTime(
+                  lastDayPrevMonth.year,
+                  lastDayPrevMonth.month,
+                  1,
+                );
+                notifier.setDateRangeFilter(
+                  DateTimeRange(
+                    start: firstDayPrevMonth,
+                    end: DateTime(
+                      lastDayPrevMonth.year,
+                      lastDayPrevMonth.month,
+                      lastDayPrevMonth.day,
+                    ),
+                  ),
+                  'Bulan Lalu',
+                );
+              }
+            },
+          ),
+          const SizedBox(width: 8),
+
+          // Date Range Chip (Custom Calendar Sheet)
+          _buildQuickFilterPill(
+            context,
+            label: isCustomDateSelected
                 ? (filter.dateRangeLabel ?? 'Rentang Tanggal')
                 : 'Tanggal',
             icon: Icons.calendar_month_rounded,
-            trailingIcon: filter.dateRange != null
+            trailingIcon: isCustomDateSelected
                 ? Icons.close_rounded
                 : Icons.keyboard_arrow_down_rounded,
-            isSelected: filter.dateRange != null,
-            onTap: () => HistoryFilterSheet.showDateFilter(context, ref),
-            onTrailingTap: filter.dateRange != null
-                ? () => notifier.setDateRangeFilter(null)
+            isSelected: isCustomDateSelected,
+            onTap: () {
+              AppHaptics.selection();
+              HistoryFilterSheet.showDateFilter(context, ref);
+            },
+            onTrailingTap: isCustomDateSelected
+                ? () {
+                    AppHaptics.selection();
+                    notifier.setDateRangeFilter(null);
+                  }
                 : null,
           ),
 
