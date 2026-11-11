@@ -202,7 +202,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
       selectedShift: selectedShift,
     );
     final events = todayData?.events ?? [];
-    final isOffline = ref.watch(isOfflineProvider);
+    final isBannerVisible = ref.watch(isOfflineBannerVisibleProvider);
 
     if (todayData == null && attendanceState.data.isLoading) {
       return Scaffold(
@@ -211,7 +211,8 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
       );
     }
 
-    final topPadding = isOffline ? 4.0 : MediaQuery.of(context).padding.top;
+    final topPadding =
+        isBannerVisible ? 4.0 : MediaQuery.of(context).padding.top;
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,

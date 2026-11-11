@@ -81,6 +81,46 @@ void main() {
       expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
     });
 
+    testWidgets('OfflineBanner renders green "Terhubung Kembali" banner without gap when reconnected', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            connectivityBannerProvider.overrideWith(() => _MockBannerNotifier(ConnectivityBannerStatus.reconnected)),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: OfflineBanner(),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Terhubung Kembali'), findsOneWidget);
+      expect(find.text('Data presensi sedang disinkronisasi.'), findsOneWidget);
+      // In reconnected state, manual refresh button should be absent
+      expect(find.byIcon(Icons.refresh_rounded), findsNothing);
+    });
+
+    test('isOfflineBannerVisibleProvider is true for offline and reconnected, and false for hidden', () {
+      final container = ProviderContainer(
+        overrides: [
+          connectivityBannerProvider.overrideWith(() => _MockBannerNotifier(ConnectivityBannerStatus.reconnected)),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      expect(container.read(isOfflineBannerVisibleProvider), isTrue);
+
+      final hiddenContainer = ProviderContainer(
+        overrides: [
+          connectivityBannerProvider.overrideWith(() => _MockBannerNotifier(ConnectivityBannerStatus.hidden)),
+        ],
+      );
+      addTearDown(hiddenContainer.dispose);
+
+      expect(hiddenContainer.read(isOfflineBannerVisibleProvider), isFalse);
+    });
+
     test('ApiClient.onServerReachabilityChanged updates ConnectivityNotifier state', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
@@ -144,4 +184,15 @@ class _MockConnectivityNotifier extends ConnectivityNotifier {
     return initialOffline;
   }
 }
+
+class _MockBannerNotifier extends ConnectivityBannerNotifier {
+  final ConnectivityBannerStatus initialStatus;
+  _MockBannerNotifier(this.initialStatus);
+
+  @override
+  ConnectivityBannerStatus build() {
+    return initialStatus;
+  }
+}
+
 

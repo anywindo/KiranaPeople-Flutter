@@ -246,31 +246,8 @@ class NotificationService {
       await cancelReminder(idShiftStartNow);
     }
 
-    // 3. Schedule Late Warning Reminder (2 minutes before tolerance cutoff)
-    if (shift.attendanceRuleEnabled == true &&
-        (shift.attendanceRuleMinutes ?? 0) >= 3) {
-      final toleranceMinutes = shift.attendanceRuleMinutes!;
-      final alertOffsetMinutes = toleranceMinutes - 2;
-      final targetLateWarning = calculateNextTime(
-        timeStr: shift.startTime,
-        now: now,
-        addMinutes: alertOffsetMinutes,
-        alreadyDoneToday: hasStartedShift,
-      );
-
-      if (targetLateWarning != null) {
-        await _scheduleZonedNotification(
-          id: idShiftLateWarning,
-          title: '⚠️ Peringatan Batas Toleransi Masuk',
-          body:
-              'Toleransi presensi masuk shift ${shift.name} berakhir 2 menit lagi. Lakukan presensi agar tidak tercatat terlambat!',
-          scheduledDate: targetLateWarning,
-          matchDateTimeComponents: DateTimeComponents.time,
-        );
-      }
-    } else {
-      await cancelReminder(idShiftLateWarning);
-    }
+    // 3. Ensure tolerance warning reminder is cancelled
+    await cancelReminder(idShiftLateWarning);
 
     // 4. Schedule Break Start Reminder
     final breakStartTimeStr = shift.effectiveBreakStart;

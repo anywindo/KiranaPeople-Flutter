@@ -15,7 +15,7 @@ void main() {
               PackageInfo(
                 appName: 'Kirana People',
                 packageName: 'com.kiranadesainindonesia.kiranapeople',
-                version: '1.0.3',
+                version: '1.0.4-beta',
                 buildNumber: '1',
                 buildSignature: '',
               ),
@@ -27,7 +27,7 @@ void main() {
 
       await container.read(packageInfoProvider.future);
       final displayVersion = container.read(appVersionDisplayProvider);
-      expect(displayVersion, equals('1.0.3'));
+      expect(displayVersion, equals('1.0.4 beta'));
     });
 
     test('appVersionDisplayProvider formats without build number if buildNumber is empty', () async {

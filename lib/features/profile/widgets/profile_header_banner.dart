@@ -294,159 +294,165 @@ class ProfileStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
             ? (isDark ? Brightness.dark : Brightness.light)
             : Brightness.dark,
       ),
-      child: ClipRect(
-        child: Container(
-          color: Colors.transparent,
-          child: Stack(
-            fit: StackFit.expand,
-            clipBehavior: Clip.hardEdge,
-            children: [
-              // 1. EXPANDED SECTION (Banner + Big Avatar + Big Title)
-              if (expandedOpacity > 0.0) ...[
-                // Parallax Banner Image
-                Positioned(
-                  top: -shrinkOffset * 0.4,
-                  left: 0,
-                  right: 0,
-                  height: bannerHeight,
-                  child: Opacity(
-                    opacity: expandedOpacity,
-                    child: Image.asset(
-                      'assets/images/header-bar.jpeg',
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Container(color: AppColors.primary),
-                    ),
-                  ),
-                ),
-
-                // Large Avatar (96px) + Camera Button
-                Positioned(
-                  left: 20,
-                  top: bannerHeight - avatarHalf - shrinkOffset,
-                  child: Opacity(
-                    opacity: expandedOpacity,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () =>
-                              _showEnlargedPhotoDialog(context, user, userName),
-                          child: Container(
-                            width: avatarDiameter,
-                            height: avatarDiameter,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isDark
-                                    ? const Color(0xFF334155)
-                                    : Colors.white,
-                                width: 3.5,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.18),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: ClipOval(
-                              child:
-                                  (user?.fullAvatarUrl != null &&
-                                      user!.fullAvatarUrl!.isNotEmpty)
-                                  ? CachedNetworkImage(
-                                      imageUrl: user!.fullAvatarUrl!,
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) =>
-                                          const ShimmerLoading(
-                                            child: SkeletonBox.circle(size: 88),
-                                          ),
-                                      errorWidget: (context, url, error) =>
-                                          _buildInitialAvatar(userName),
-                                    )
-                                  : _buildInitialAvatar(userName),
-                            ),
-                          ),
+      child: Stack(
+        fit: StackFit.expand,
+        clipBehavior: Clip.none,
+        children: [
+          // 1. EXPANDED SECTION (Banner + Big Avatar + Big Title)
+          // Clipped internally so it doesn't bleed during scroll collapse
+          if (expandedOpacity > 0.0)
+            Positioned.fill(
+              child: ClipRect(
+                child: Stack(
+                  clipBehavior: Clip.hardEdge,
+                  children: [
+                    // Parallax Banner Image
+                    Positioned(
+                      top: -shrinkOffset * 0.4,
+                      left: 0,
+                      right: 0,
+                      height: bannerHeight,
+                      child: Opacity(
+                        opacity: expandedOpacity,
+                        child: Image.asset(
+                          'assets/images/header-bar.jpeg',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(color: AppColors.primary),
                         ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: onAvatarEditTap,
-                            child: Container(
-                              width: 34,
-                              height: 34,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: isDark
-                                      ? context.scaffoldBg
-                                      : Colors.white,
-                                  width: 2.5,
+                      ),
+                    ),
+
+                    // Large Avatar (96px) + Camera Button
+                    Positioned(
+                      left: 20,
+                      top: bannerHeight - avatarHalf - shrinkOffset,
+                      child: Opacity(
+                        opacity: expandedOpacity,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () =>
+                                  _showEnlargedPhotoDialog(context, user, userName),
+                              child: Container(
+                                width: avatarDiameter,
+                                height: avatarDiameter,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isDark
+                                        ? const Color(0xFF334155)
+                                        : Colors.white,
+                                    width: 3.5,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.18),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: ClipOval(
+                                  child:
+                                      (user?.fullAvatarUrl != null &&
+                                          user!.fullAvatarUrl!.isNotEmpty)
+                                      ? CachedNetworkImage(
+                                          imageUrl: user!.fullAvatarUrl!,
+                                          fit: BoxFit.cover,
+                                          placeholder: (context, url) =>
+                                              const ShimmerLoading(
+                                                child: SkeletonBox.circle(size: 88),
+                                              ),
+                                          errorWidget: (context, url, error) =>
+                                              _buildInitialAvatar(userName),
+                                        )
+                                      : _buildInitialAvatar(userName),
                                 ),
                               ),
-                              child: const Icon(
-                                Icons.camera_alt_rounded,
-                                color: Colors.white,
-                                size: 16,
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: onAvatarEditTap,
+                                child: Container(
+                                  width: 34,
+                                  height: 34,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isDark
+                                          ? context.scaffoldBg
+                                          : Colors.white,
+                                      width: 2.5,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.camera_alt_rounded,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
 
-                // Big User Name & Handle below Avatar
-                Positioned(
-                  left: 20,
-                  right: 20,
-                  top: bannerHeight + avatarHalf + 10.0 - shrinkOffset,
-                  child: Opacity(
-                    opacity: expandedOpacity,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          userName,
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: context.textPrimaryColor,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        if (userHandle.isNotEmpty) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            userHandle,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: context.textSecondaryColor,
+                    // Big User Name & Handle below Avatar
+                    Positioned(
+                      left: 20,
+                      right: 20,
+                      top: bannerHeight + avatarHalf + 10.0 - shrinkOffset,
+                      child: Opacity(
+                        opacity: expandedOpacity,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              userName,
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: context.textPrimaryColor,
+                                letterSpacing: -0.3,
+                              ),
                             ),
-                          ),
-                        ],
-                      ],
+                            if (userHandle.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                userHandle,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: context.textSecondaryColor,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
+            ),
 
-              // 2. Feathered Blur Gradient behind the top floating pill
-              if (stickyBarOpacity > 0.0)
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: minExtent,
-                  child: Opacity(
+          // 2. Feathered Blur Gradient behind the top floating pill
+          if (stickyBarOpacity > 0.0)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: minExtent + 12.0,
+              child: Opacity(
                     opacity: stickyBarOpacity,
                     child: IgnorePointer(
                       child: ClipRect(
@@ -631,8 +637,6 @@ class ProfileStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
                 ),
             ],
           ),
-        ),
-      ),
-    );
+        );
   }
 }

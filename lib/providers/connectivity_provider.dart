@@ -191,6 +191,57 @@ class ConnectivityNotifier extends Notifier<bool> {
   }
 }
 
+enum ConnectivityBannerStatus {
+  hidden,
+  offline,
+  reconnected,
+}
+
+class ConnectivityBannerNotifier extends Notifier<ConnectivityBannerStatus> {
+  Timer? _reconnectedTimer;
+
+  @override
+  ConnectivityBannerStatus build() {
+    ref.onDispose(() {
+      _reconnectedTimer?.cancel();
+    });
+
+    final isOffline = ref.watch(isOfflineProvider);
+
+    ref.listen<bool>(isOfflineProvider, (previous, next) {
+      if (previous == true && next == false) {
+        _reconnectedTimer?.cancel();
+        state = ConnectivityBannerStatus.reconnected;
+        _reconnectedTimer = Timer(const Duration(seconds: 3), () {
+          if (ref.mounted && state == ConnectivityBannerStatus.reconnected) {
+            state = ConnectivityBannerStatus.hidden;
+          }
+        });
+      } else if (next == true) {
+        _reconnectedTimer?.cancel();
+        state = ConnectivityBannerStatus.offline;
+      } else if (previous == null && !next) {
+        state = ConnectivityBannerStatus.hidden;
+      }
+    });
+
+    return isOffline
+        ? ConnectivityBannerStatus.offline
+        : ConnectivityBannerStatus.hidden;
+  }
+}
+
 final isOfflineProvider = NotifierProvider<ConnectivityNotifier, bool>(
   ConnectivityNotifier.new,
 );
+
+final connectivityBannerProvider =
+    NotifierProvider<ConnectivityBannerNotifier, ConnectivityBannerStatus>(
+  ConnectivityBannerNotifier.new,
+);
+
+final isOfflineBannerVisibleProvider = Provider<bool>((ref) {
+  final status = ref.watch(connectivityBannerProvider);
+  return status != ConnectivityBannerStatus.hidden;
+});
+

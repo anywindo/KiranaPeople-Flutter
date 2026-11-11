@@ -1,12 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../providers/auth_provider.dart';
 import '../profile_actions.dart';
+import '../profile_camera_view.dart';
 
 class PhotoSourceSheet extends StatelessWidget {
   const PhotoSourceSheet({super.key});
@@ -84,7 +86,7 @@ class PhotoSourceSheet extends StatelessWidget {
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
-                  _pickAndUploadImage(context, ref, ImageSource.gallery);
+                  _pickAvatarFromGallery(context, ref);
                 },
               ),
               const SizedBox(height: 8),
@@ -121,7 +123,7 @@ class PhotoSourceSheet extends StatelessWidget {
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
-                  _pickAndUploadImage(context, ref, ImageSource.camera);
+                  _takeAvatarWithCamera(context, ref);
                 },
               ),
               const SizedBox(height: 12),
@@ -132,15 +134,33 @@ class PhotoSourceSheet extends StatelessWidget {
     );
   }
 
-  static Future<void> _pickAndUploadImage(
+  static Future<void> _takeAvatarWithCamera(
     BuildContext context,
     WidgetRef ref,
-    ImageSource source,
+  ) async {
+    File? file;
+    try {
+      // 1. Launch in-app camera (100% reliable, zero external activity intent dependencies)
+      file = await ProfileCameraView.push(context);
+    } catch (_) {}
+
+    if (file == null) {
+      // If user simply closed/cancelled camera, return silently
+      return;
+    }
+
+    if (!context.mounted) return;
+    await _confirmAndUpload(context, ref, file, isCamera: true);
+  }
+
+  static Future<void> _pickAvatarFromGallery(
+    BuildContext context,
+    WidgetRef ref,
   ) async {
     try {
       final picker = ImagePicker();
       final picked = await picker.pickImage(
-        source: source,
+        source: ImageSource.gallery,
         maxWidth: 1000,
         maxHeight: 1000,
         imageQuality: 85,
@@ -150,41 +170,14 @@ class PhotoSourceSheet extends StatelessWidget {
       final file = File(picked.path);
       if (!context.mounted) return;
 
-      final confirm = await PhotoConfirmDialog.show(context, file);
-
-      if (confirm != true) {
-        if (source == ImageSource.camera) {
-          try {
-            if (file.existsSync()) file.deleteSync();
-          } catch (_) {}
-        }
-        return;
-      }
-
-      try {
-        final success = await ref
-            .read(authProvider.notifier)
-            .updateProfile(avatarFile: file);
-        if (context.mounted) {
-          if (success) {
-            ProfileActions.showCustomToast(
-              context,
-              'Foto profil berhasil diperbarui!',
-            );
-          } else {
-            final err =
-                ref.read(authProvider).errorMessage ??
-                'Gagal memperbarui foto profil.';
-            ProfileActions.showCustomToast(context, err, isError: true);
-          }
-        }
-      } finally {
-        if (source == ImageSource.camera) {
-          try {
-            if (file.existsSync()) file.deleteSync();
-          } catch (_) {}
-        }
-      }
+      await _confirmAndUpload(context, ref, file, isCamera: false);
+    } on PlatformException catch (e) {
+      if (!context.mounted) return;
+      ProfileActions.showCustomToast(
+        context,
+        'Gagal mengakses galeri: ${e.message ?? e.code}',
+        isError: true,
+      );
     } catch (e) {
       if (context.mounted) {
         ProfileActions.showCustomToast(
@@ -192,6 +185,49 @@ class PhotoSourceSheet extends StatelessWidget {
           'Gagal memilih foto: $e',
           isError: true,
         );
+      }
+    }
+  }
+
+  static Future<void> _confirmAndUpload(
+    BuildContext context,
+    WidgetRef ref,
+    File file, {
+    required bool isCamera,
+  }) async {
+    final confirm = await PhotoConfirmDialog.show(context, file);
+
+    if (confirm != true) {
+      if (isCamera) {
+        try {
+          if (file.existsSync()) file.deleteSync();
+        } catch (_) {}
+      }
+      return;
+    }
+
+    try {
+      final success = await ref
+          .read(authProvider.notifier)
+          .updateProfile(avatarFile: file);
+      if (context.mounted) {
+        if (success) {
+          ProfileActions.showCustomToast(
+            context,
+            'Foto profil berhasil diperbarui!',
+          );
+        } else {
+          final err =
+              ref.read(authProvider).errorMessage ??
+              'Gagal memperbarui foto profil.';
+          ProfileActions.showCustomToast(context, err, isError: true);
+        }
+      }
+    } finally {
+      if (isCamera) {
+        try {
+          if (file.existsSync()) file.deleteSync();
+        } catch (_) {}
       }
     }
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,6 +10,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/connectivity_provider.dart';
 import '../../providers/package_info_provider.dart';
 import 'forgot_password_sheet.dart';
+import 'widgets/dev_api_endpoint_card.dart';
 import 'widgets/login_form_card.dart';
 import 'widgets/login_header.dart';
 import 'widgets/login_motivation_card.dart';
@@ -29,6 +31,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isPasswordVisible = false;
   bool _rememberMe = true;
   int _quoteIndex = 0;
+  bool _showDevEndpoint = false;
+  int _versionTapCount = 0;
+  DateTime? _lastVersionTap;
 
   @override
   void initState() {
@@ -50,15 +55,42 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final prefs = await SharedPreferences.getInstance();
       final savedId = prefs.getString('saved_login_identifier');
       final remember = prefs.getBool('remember_login_credentials') ?? true;
+      final devVisible = prefs.getBool('dev_api_endpoint_visible') ?? false;
       if (mounted) {
         setState(() {
           _rememberMe = remember;
+          _showDevEndpoint = devVisible;
           if (remember && savedId != null && savedId.isNotEmpty) {
             _identifierController.text = savedId;
           }
         });
       }
     } catch (_) {}
+  }
+
+  void _onVersionTap() async {
+    final now = DateTime.now();
+    if (_lastVersionTap != null &&
+        now.difference(_lastVersionTap!) > const Duration(seconds: 2)) {
+      _versionTapCount = 0;
+    }
+    _lastVersionTap = now;
+    _versionTapCount++;
+
+    if (_versionTapCount < 7) {
+      AppHaptics.selection();
+    } else {
+      _versionTapCount = 0;
+      final newState = !_showDevEndpoint;
+      setState(() {
+        _showDevEndpoint = newState;
+      });
+      AppHaptics.success();
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('dev_api_endpoint_visible', newState);
+      } catch (_) {}
+    }
   }
 
   @override
@@ -206,16 +238,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               onTap: _nextQuote,
                             ),
 
+                            // 4. Dev API Endpoint Config (Hidden by default, unlocked with 7 taps on Version)
+                            if (_showDevEndpoint) ...[
+                              const SizedBox(height: 16),
+                              const DevApiEndpointCard(forceVisible: true),
+                            ],
+
                             const Spacer(),
                             const SizedBox(height: 24),
 
-                            // 4. Version Section Footer
-                            Text(
-                              'Versi $appVersion',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: context.textMutedColor,
+                            // 5. Version Section Footer (7-Tap Developer Easter Egg)
+                            GestureDetector(
+                              key: const Key('login_version_footer'),
+                              onTap: _onVersionTap,
+                              behavior: HitTestBehavior.opaque,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                child: Text(
+                                  'Versi $appVersion',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: context.textMutedColor,
+                                  ),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 16),

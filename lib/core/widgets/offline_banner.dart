@@ -14,41 +14,27 @@ class OfflineBanner extends ConsumerStatefulWidget {
 }
 
 class _OfflineBannerState extends ConsumerState<OfflineBanner> {
-  bool _showReconnectedBanner = false;
-  Timer? _reconnectedTimer;
   bool _isChecking = false;
 
   @override
-  void dispose() {
-    _reconnectedTimer?.cancel();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final isOffline = ref.watch(isOfflineProvider);
+    final bannerStatus = ref.watch(connectivityBannerProvider);
+    final isVisible = bannerStatus != ConnectivityBannerStatus.hidden;
+    final isOffline = bannerStatus == ConnectivityBannerStatus.offline;
 
-    // Listen for reconnection to briefly show the green reconnected banner
-    ref.listen<bool>(isOfflineProvider, (previous, next) {
-      if (previous == false && next == true) {
+    // Listen for state changes to trigger haptics
+    ref.listen<ConnectivityBannerStatus>(connectivityBannerProvider, (
+      previous,
+      next,
+    ) {
+      if (previous != ConnectivityBannerStatus.offline &&
+          next == ConnectivityBannerStatus.offline) {
         AppHaptics.error();
-      } else if (previous == true && next == false) {
+      } else if (previous == ConnectivityBannerStatus.offline &&
+          next == ConnectivityBannerStatus.reconnected) {
         AppHaptics.selection();
-        setState(() {
-          _showReconnectedBanner = true;
-        });
-        _reconnectedTimer?.cancel();
-        _reconnectedTimer = Timer(const Duration(seconds: 3), () {
-          if (mounted) {
-            setState(() {
-              _showReconnectedBanner = false;
-            });
-          }
-        });
       }
     });
-
-    final isVisible = isOffline || _showReconnectedBanner;
 
     return AnimatedCrossFade(
       duration: const Duration(milliseconds: 300),

@@ -205,11 +205,11 @@ void main() {
       expect(shiftEndDone.hour, 16);
     });
 
-    test('calculateNextTime supports addMinutes for late tolerance warning', () {
+    test('calculateNextTime supports addMinutes correctly', () {
       final service = NotificationService.instance;
       final now = tz.TZDateTime(tz.local, 2026, 11, 4, 7, 30); // 07:30 AM
 
-      // Shift starts at 08:00, 15m tolerance rule, alert 2 min before cutoff (+13m) -> 08:13 AM
+      // E.g. shift starts at 08:00, add 13 minutes -> 08:13 AM
       final lateWarning = service.calculateNextTime(
         timeStr: '08:00',
         now: now,
