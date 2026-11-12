@@ -5,11 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/app_haptics.dart';
+import '../../core/utils/date_formatter.dart';
 import '../../core/widgets/bouncing_button.dart';
 import '../../core/widgets/haptic_refresh_indicator.dart';
 import '../../core/widgets/shimmer_loading.dart';
+import '../../data/models/attendance_model.dart';
+import '../../data/models/user_model.dart';
+import '../../data/repositories/attendance_repository.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/history_provider.dart';
+import 'attendance_pdf_preview_screen.dart';
+import 'widgets/attendance_export_period_sheet.dart';
 import 'widgets/history_empty_state.dart';
 import 'widgets/history_filter_bar.dart';
 import 'widgets/history_filter_sheet.dart';
@@ -83,6 +89,105 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         curve: Curves.fastOutSlowIn,
       );
     }
+  }
+
+  Future<void> _openPdfExport(
+    BuildContext context,
+    HistoryState historyState,
+    UserModel? user,
+  ) async {
+    AppHaptics.selection();
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Data profil pengguna belum termuat.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    // 1. Show period selection sheet (Bulan Ini, Bulan Lalu, Bulan Lain, dll)
+    final periodResult = await AttendanceExportPeriodSheet.show(
+      context,
+      activeFilterLabel: historyState.filter.dateRangeLabel,
+      activeDateRange: historyState.filter.dateRange,
+    );
+
+    if (periodResult == null || !context.mounted) return;
+
+    final start = DateTime(
+      periodResult.startDate.year,
+      periodResult.startDate.month,
+      periodResult.startDate.day,
+    );
+    final end = DateTime(
+      periodResult.endDate.year,
+      periodResult.endDate.month,
+      periodResult.endDate.day,
+      23,
+      59,
+      59,
+    );
+
+    // 1. Filter local records strictly within the selected range
+    final allRecords = historyState.records.value ?? [];
+    List<AttendanceRecord> exportRecords = allRecords.where((r) {
+      final dt = DateTime.tryParse(r.date);
+      if (dt == null) return false;
+      return !dt.isBefore(start) && !dt.isAfter(end);
+    }).toList();
+
+    // 2. If local has no records for this month, try fetching from repository
+    if (exportRecords.isEmpty) {
+      try {
+        final startStr = DateFormatter.formatDateYmd(start);
+        final endStr = DateFormatter.formatDateYmd(end);
+        final fetched = await ref
+            .read(attendanceRepositoryProvider)
+            .getAttendanceHistory(startDate: startStr, endDate: endStr);
+        // Strictly filter fetched records by date range as well
+        final validFetched = fetched.where((r) {
+          final dt = DateTime.tryParse(r.date);
+          if (dt == null) return false;
+          return !dt.isBefore(start) && !dt.isAfter(end);
+        }).toList();
+
+        if (validFetched.isNotEmpty) {
+          exportRecords = validFetched;
+        }
+      } catch (_) {
+        // Fallback to local
+      }
+    }
+
+    if (!context.mounted) return;
+
+    if (exportRecords.isEmpty) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Tidak ada riwayat presensi tercatat pada ${periodResult.periodLabel}.',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AttendancePdfPreviewScreen(
+          user: user,
+          records: exportRecords,
+          periodLabel: periodResult.periodLabel,
+        ),
+      ),
+    );
   }
 
   @override
@@ -218,6 +323,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           records: historyState.filter.isActive
                               ? filteredList
                               : records,
+                          onExportPdf: () =>
+                              _openPdfExport(context, historyState, user),
                         );
                       }
 
@@ -310,7 +417,33 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
                         children: [
-                          const SizedBox(width: 80),
+                          // Export PDF Button (Left)
+                          InkWell(
+                            key: const Key('history_export_pdf_button'),
+                            onTap: () =>
+                                _openPdfExport(context, historyState, user),
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: context.surfaceSecondaryColor,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: context.isDarkMode
+                                      ? const Color(0xFF334155)
+                                      : const Color(0xFFCBD5E1),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.picture_as_pdf_outlined,
+                                color: AppColors.primary,
+                                size: 18,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 44),
                           Expanded(
                             child: Center(
                               child: Text(

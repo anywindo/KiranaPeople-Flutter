@@ -32,6 +32,25 @@ class DateFormatter {
     return '$dayName, ${dateTime.day} $monthName ${dateTime.year}';
   }
 
+  static String formatMonthYear(DateTime dateTime) {
+    const months = [
+      '',
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
+    return '${months[dateTime.month]} ${dateTime.year}';
+  }
+
   static String formatTime(DateTime dateTime) {
     return DateFormat('HH:mm').format(dateTime);
   }

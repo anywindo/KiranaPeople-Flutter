@@ -9,11 +9,13 @@ import '../../../data/models/attendance_model.dart';
 class HistorySummaryCard extends StatefulWidget {
   final List<AttendanceRecord> records;
   final bool initiallyExpanded;
+  final VoidCallback? onExportPdf;
 
   const HistorySummaryCard({
     super.key,
     required this.records,
     this.initiallyExpanded = false,
+    this.onExportPdf,
   });
 
   @override
@@ -504,6 +506,45 @@ class _HistorySummaryCardState extends State<HistorySummaryCard>
                     ),
                   ],
                 ),
+                if (widget.onExportPdf != null) ...[
+                  const SizedBox(height: 12),
+                  InkWell(
+                    key: const Key('summary_export_pdf_button'),
+                    onTap: widget.onExportPdf,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.picture_as_pdf_outlined,
+                            size: 15,
+                            color: AppColors.primary,
+                          ),
+                          SizedBox(width: 6),
+                          Text(
+                            'Unduh / Cetak Rekap PDF',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
