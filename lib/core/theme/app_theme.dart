@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   // Brand & Accent Colors (matching TerribleNight / Kirana)
-  static const Color primary = Color(0xFFF775BA); // tnAccent
+  static const Color primary = Color(0xFFFF21A4); // tnAccent
   static const Color primaryDark = Color(0xFFDB2777); // tnPinkDark
   static const Color primaryLight = Color(0xFFFCE7F3); // tnPinkLight
 
