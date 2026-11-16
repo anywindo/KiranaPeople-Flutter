@@ -239,6 +239,24 @@ class _AttendanceConfirmationViewState
 
   void _openMap() {
     if (_currentPosition == null) {
+      final err = _locationError?.toLowerCase() ?? '';
+      final SnackBarAction? action;
+      if (err.contains('permanen')) {
+        action = SnackBarAction(
+          label: 'Pengaturan',
+          textColor: Colors.white,
+          onPressed: () => LocationHelper.openAppSettings(),
+        );
+      } else if (err.contains('nonaktif') || err.contains('gps')) {
+        action = SnackBarAction(
+          label: 'Aktifkan GPS',
+          textColor: Colors.white,
+          onPressed: () => LocationHelper.openLocationSettings(),
+        );
+      } else {
+        action = null;
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -246,6 +264,7 @@ class _AttendanceConfirmationViewState
                 'Lokasi GPS belum tersedia. Menghubungkan ulang...',
           ),
           backgroundColor: AppColors.primary,
+          action: action,
         ),
       );
       _fetchLocation();

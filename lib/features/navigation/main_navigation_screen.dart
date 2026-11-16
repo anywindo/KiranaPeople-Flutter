@@ -17,6 +17,16 @@ import '../history/history_screen.dart';
 import '../map/map_view_screen.dart';
 import '../profile/profile_screen.dart';
 
+class CurrentTabIndexNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void setIndex(int index) => state = index;
+}
+
+final currentTabIndexProvider =
+    NotifierProvider<CurrentTabIndexNotifier, int>(CurrentTabIndexNotifier.new);
+
 class MainNavigationScreen extends ConsumerStatefulWidget {
   const MainNavigationScreen({super.key});
 
@@ -36,6 +46,11 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentIndex);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(currentTabIndexProvider.notifier).setIndex(_currentIndex);
+      }
+    });
   }
 
   @override
@@ -51,6 +66,7 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     setState(() {
       _currentIndex = index;
     });
+    ref.read(currentTabIndexProvider.notifier).setIndex(index);
 
     if (_pageController.hasClients) {
       _pageController.animateToPage(
@@ -64,6 +80,8 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
 
   void _triggerSubtleTabSync(int index) {
     if (index == 0) {
+      ref.read(todayAttendanceProvider.notifier).refresh(isBackground: true);
+    } else if (index == 1) {
       ref.read(todayAttendanceProvider.notifier).refresh(isBackground: true);
     } else if (index == 2) {
       ref.read(historyProvider.notifier).refresh(isBackground: true);

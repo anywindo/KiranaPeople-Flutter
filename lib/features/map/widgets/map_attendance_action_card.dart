@@ -18,6 +18,7 @@ class MapAttendanceActionCard extends StatelessWidget {
   final bool isActionDisabled;
   final String actionBtnLabel;
   final VoidCallback onAction;
+  final VoidCallback? onResolveLocation;
 
   const MapAttendanceActionCard({
     super.key,
@@ -31,6 +32,7 @@ class MapAttendanceActionCard extends StatelessWidget {
     required this.isActionDisabled,
     required this.actionBtnLabel,
     required this.onAction,
+    this.onResolveLocation,
   });
 
   String _formatShortTime(String? timeStr) {
@@ -141,27 +143,31 @@ class MapAttendanceActionCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      statusTitle,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: statusColor,
+                child: InkWell(
+                  onTap: !hasLocation ? onResolveLocation : null,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        statusTitle,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: statusColor,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      statusSubtitle,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: context.textSecondaryColor,
+                      const SizedBox(height: 2),
+                      Text(
+                        statusSubtitle,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: context.textSecondaryColor,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               Material(

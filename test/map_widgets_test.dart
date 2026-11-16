@@ -201,6 +201,44 @@ void main() {
       expect(find.text('Ketuk tombol refresh untuk memuat koordinat'), findsOneWidget);
     });
 
+    testWidgets('MapAttendanceActionCard triggers onResolveLocation when tapped in no-location state', (tester) async {
+      bool resolved = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: MapAttendanceActionCard(
+                hasLocation: false,
+                locationError: 'Izin lokasi ditolak oleh pengguna',
+                isInsideRadius: false,
+                distance: 0,
+                officeLatLng: const LatLng(-6.9897, 109.8765),
+                officeName: 'Kantor Utama',
+                isActionDisabled: false,
+                actionBtnLabel: 'Izinkan Akses Lokasi',
+                onAction: () => resolved = true,
+                onResolveLocation: () => resolved = true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Izin lokasi ditolak oleh pengguna'), findsOneWidget);
+      expect(find.text('Izinkan Akses Lokasi'), findsOneWidget);
+
+      await tester.tap(find.text('Izinkan Akses Lokasi'));
+      await tester.pump();
+      expect(resolved, isTrue);
+
+      resolved = false;
+      await tester.tap(find.text('Izin lokasi ditolak oleh pengguna'));
+      await tester.pump();
+      expect(resolved, isTrue);
+    });
+
     testWidgets('MapViewScreen renders bottom feathered gradient over map', (tester) async {
       await tester.pumpWidget(
         ProviderScope(

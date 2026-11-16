@@ -17,6 +17,7 @@ import '../attendance/camera_selfie_view.dart';
 import '../attendance/shift_picker_sheet.dart';
 import '../attendance/widgets/attendance_success_sheet.dart';
 import '../attendance/widgets/shift_confirmation_dialog.dart';
+import '../navigation/main_navigation_screen.dart';
 import 'widgets/map_attendance_action_card.dart';
 import 'widgets/map_controls_overlay.dart';
 import 'widgets/map_markers_layer.dart';
@@ -29,7 +30,8 @@ class MapViewScreen extends ConsumerStatefulWidget {
   ConsumerState<MapViewScreen> createState() => _MapViewScreenState();
 }
 
-class _MapViewScreenState extends ConsumerState<MapViewScreen> {
+class _MapViewScreenState extends ConsumerState<MapViewScreen>
+    with WidgetsBindingObserver {
   final MapController _mapController = MapController();
   Position? _currentPosition;
   String? _locationError;
@@ -40,19 +42,35 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _fetchLocation();
-    _startLocationStream();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _positionStreamSubscription?.cancel();
     _mapController.dispose();
     super.dispose();
   }
 
-  void _startLocationStream() {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_currentPosition == null || _locationError != null) {
+        _fetchLocation(isManualRefresh: true);
+      } else {
+        _startLocationStream();
+      }
+    }
+  }
+
+  Future<void> _startLocationStream() async {
+    final hasPerm = await LocationHelper.hasPermission();
+    if (!hasPerm || !mounted) return;
+
     try {
+      await _positionStreamSubscription?.cancel();
       const locationSettings = LocationSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 3,
@@ -84,7 +102,9 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
     });
 
     try {
-      final pos = await LocationHelper.determinePosition();
+      final pos = await LocationHelper.determinePosition(
+        forceRefresh: isManualRefresh,
+      );
       if (!mounted) return;
       setState(() {
         _currentPosition = pos;
@@ -92,6 +112,10 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
         _isRefreshing = false;
         _locationError = null;
       });
+      _startLocationStream();
+      try {
+        _mapController.move(LatLng(pos.latitude, pos.longitude), 16.5);
+      } catch (_) {}
     } catch (e) {
       if (!mounted) return;
       final cleanErr = e.toString().replaceFirst('Exception: ', '');
@@ -101,6 +125,17 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
         _isRefreshing = false;
         _locationError = cleanErr;
       });
+    }
+  }
+
+  Future<void> _resolveLocationIssue() async {
+    final err = _locationError?.toLowerCase() ?? '';
+    if (err.contains('permanen')) {
+      await LocationHelper.openAppSettings();
+    } else if (err.contains('nonaktif') || err.contains('gps')) {
+      await LocationHelper.openLocationSettings();
+    } else {
+      await _fetchLocation(isManualRefresh: true);
     }
   }
 
@@ -214,6 +249,16 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<int>(currentTabIndexProvider, (previous, next) {
+      if (next == 1) {
+        if (_currentPosition == null || _locationError != null) {
+          _fetchLocation(isManualRefresh: true);
+        } else {
+          _startLocationStream();
+        }
+      }
+    });
+
     final attendanceState = ref.watch(todayAttendanceProvider);
     final todayData = attendanceState.data.value;
     final workLocation = todayData?.workLocation;
@@ -282,6 +327,29 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
       actionBtnLabel = 'Ambil Presensi: Pulang Kerja';
     } else {
       actionBtnLabel = 'Presensi Hari Ini Selesai';
+    }
+
+    String effectiveActionBtnLabel = actionBtnLabel;
+    VoidCallback effectiveOnAction = () => _handleTakeAttendance(
+      targetAction: targetAction,
+      selectedShift: selectedShift,
+      workLocation: workLocation,
+    );
+
+    if (_currentPosition == null) {
+      if (_isRefreshing || _isLoading) {
+        effectiveActionBtnLabel = 'Mencari Titik GPS...';
+      } else if (_locationError?.toLowerCase().contains('permanen') == true) {
+        effectiveActionBtnLabel = 'Buka Pengaturan Lokasi';
+        effectiveOnAction = _resolveLocationIssue;
+      } else if (_locationError?.toLowerCase().contains('nonaktif') == true ||
+          _locationError?.toLowerCase().contains('gps') == true) {
+        effectiveActionBtnLabel = 'Aktifkan Layanan GPS';
+        effectiveOnAction = _resolveLocationIssue;
+      } else {
+        effectiveActionBtnLabel = 'Izinkan Akses Lokasi';
+        effectiveOnAction = _resolveLocationIssue;
+      }
     }
 
     final topPadding = MediaQuery.of(context).padding.top;
@@ -448,14 +516,11 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen> {
                         officeLatLng: officeLatLng,
                         officeName: officeName,
                         selectedShift: selectedShift,
-                        isActionDisabled:
-                            hasEndedShift || isBreakActionDisabled,
-                        actionBtnLabel: actionBtnLabel,
-                        onAction: () => _handleTakeAttendance(
-                          targetAction: targetAction,
-                          selectedShift: selectedShift,
-                          workLocation: workLocation,
-                        ),
+                        isActionDisabled: _currentPosition != null &&
+                            (hasEndedShift || isBreakActionDisabled),
+                        actionBtnLabel: effectiveActionBtnLabel,
+                        onAction: effectiveOnAction,
+                        onResolveLocation: _resolveLocationIssue,
                       ),
                     ],
                   ),

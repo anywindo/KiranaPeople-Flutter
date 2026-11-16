@@ -49,11 +49,13 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    // Pre-warm device integrity report, GPS location, request notification permissions, and auto-refresh when screen is mounted
-    Future.microtask(() {
+    // Pre-warm device integrity report, GPS location, request notification permissions sequentially, and auto-refresh when screen is mounted
+    Future.microtask(() async {
       DeviceSecurityService().getReport();
-      LocationHelper.warmupPosition();
-      NotificationService.instance.requestPermissions();
+      // 1. Request location permission and warmup position first (essential for attendance & map)
+      await LocationHelper.warmupPosition();
+      // 2. Request notification permissions after location finishes so Android OS dialogs do not collide
+      await NotificationService.instance.requestPermissions();
       if (mounted && ref.read(authProvider).isAuthenticated) {
         ref.read(todayAttendanceProvider.notifier).refresh();
       }

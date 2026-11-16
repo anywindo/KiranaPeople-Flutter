@@ -17,6 +17,7 @@ class LocationHelper {
   static Position? _cachedPosition;
   static DateTime? _cachedAt;
   static Future<Position>? _inFlight;
+  static Future<LocationPermission>? _permissionInFlight;
 
   /// Visible for testing to clear cached position state
   @visibleForTesting
@@ -24,6 +25,7 @@ class LocationHelper {
     _cachedPosition = null;
     _cachedAt = null;
     _inFlight = null;
+    _permissionInFlight = null;
   }
 
   /// Visible for testing to seed cached position state
@@ -31,6 +33,59 @@ class LocationHelper {
   static void seedCache(Position position, {DateTime? cachedAt}) {
     _cachedPosition = position;
     _cachedAt = cachedAt ?? DateTime.now();
+  }
+
+  /// Checks if location permission has already been granted
+  static Future<bool> hasPermission() async {
+    try {
+      final permission = await Geolocator.checkPermission();
+      return permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Checks if device location service (GPS) is enabled
+  static Future<bool> isLocationServiceEnabled() async {
+    try {
+      return await Geolocator.isLocationServiceEnabled();
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Opens application system settings
+  static Future<bool> openAppSettings() => Geolocator.openAppSettings();
+
+  /// Opens device location settings (GPS toggle)
+  static Future<bool> openLocationSettings() =>
+      Geolocator.openLocationSettings();
+
+  /// Checks and requests location permission safely.
+  /// De-duplicates concurrent calls to prevent Android Activity dialog collision.
+  static Future<LocationPermission> checkAndRequestPermission() async {
+    if (_permissionInFlight != null) {
+      return _permissionInFlight!;
+    }
+
+    final future = _doCheckAndRequestPermission();
+    _permissionInFlight = future;
+    try {
+      return await future;
+    } finally {
+      if (identical(_permissionInFlight, future)) {
+        _permissionInFlight = null;
+      }
+    }
+  }
+
+  static Future<LocationPermission> _doCheckAndRequestPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    return permission;
   }
 
   /// Pre-warms GPS in the background (e.g., while user is framing their selfie)
@@ -81,27 +136,26 @@ class LocationHelper {
     required bool forceRefresh,
     required LocationAccuracy desiredAccuracy,
   }) async {
-    bool serviceEnabled;
-    LocationPermission permission;
+    // 1. Verify and request runtime location permission FIRST.
+    // This guarantees that the OS permission dialog is prompted on first install,
+    // even if device GPS hardware toggle is currently off.
+    final permission = await checkAndRequestPermission();
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      throw Exception(
-        'Layanan lokasi (GPS) nonaktif. Silakan aktifkan GPS pada perangkat Anda.',
-      );
-    }
-
-    permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        throw Exception('Izin lokasi ditolak oleh pengguna.');
-      }
+      throw Exception('Izin lokasi ditolak oleh pengguna.');
     }
 
     if (permission == LocationPermission.deniedForever) {
       throw Exception(
         'Izin lokasi ditolak permanen. Silakan aktifkan izin lokasi di Pengaturan Sistem.',
+      );
+    }
+
+    // 2. Once permission is secured, check if hardware GPS service is enabled.
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      throw Exception(
+        'Layanan lokasi (GPS) nonaktif. Silakan aktifkan GPS pada perangkat Anda.',
       );
     }
 
