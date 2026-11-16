@@ -242,7 +242,7 @@ class _DevApiEndpointCardState extends ConsumerState<DevApiEndpointCard> {
                     ),
                     decoration: InputDecoration(
                       labelText: 'API Base URL',
-                      hintText: 'https://kp.krtekstile.com/api/v1',
+                      hintText: 'https://app.kiranapeople.com/api/v1',
                       prefixIcon: const Icon(Icons.dns_outlined, size: 18),
                       suffixIcon: _controller.text.isNotEmpty
                           ? IconButton(

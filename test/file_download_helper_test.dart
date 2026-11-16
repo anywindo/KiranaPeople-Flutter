@@ -10,17 +10,17 @@ void main() {
   group('FileDownloadHelper Tests', () {
     test('extractFileName correctly parses original filename and format', () {
       expect(
-        FileDownloadHelper.extractFileName('https://kp.krtekstile.com/storage/photos/selfie_123.jpg'),
+        FileDownloadHelper.extractFileName('https://app.kiranapeople.com/storage/photos/selfie_123.jpg'),
         equals('selfie_123.jpg'),
       );
 
       expect(
-        FileDownloadHelper.extractFileName('https://kp.krtekstile.com/media/doc_scan.png?token=xyz#preview'),
+        FileDownloadHelper.extractFileName('https://app.kiranapeople.com/media/doc_scan.png?token=xyz#preview'),
         equals('doc_scan.png'),
       );
 
       expect(
-        FileDownloadHelper.extractFileName('https://kp.krtekstile.com/media/user%20photo.webp'),
+        FileDownloadHelper.extractFileName('https://app.kiranapeople.com/media/user%20photo.webp'),
         equals('user photo.webp'),
       );
 

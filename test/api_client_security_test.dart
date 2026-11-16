@@ -4,17 +4,17 @@ import 'package:kirana_people/core/network/api_client.dart';
 
 void main() {
   group('ApiConfig Tests', () {
-    test('ApiConfig is fixed to kp.krtekstile.com', () async {
+    test('ApiConfig is fixed to app.kiranapeople.com', () async {
       expect(
         ApiConfig.defaultBaseUrl,
-        equals('https://kp.krtekstile.com/api/v1'),
+        equals('https://app.kiranapeople.com/api/v1'),
       );
-      expect(ApiConfig.cachedHostOrigin, equals('https://kp.krtekstile.com'));
+      expect(ApiConfig.cachedHostOrigin, equals('https://app.kiranapeople.com'));
       expect(
         await ApiConfig.getBaseUrl(),
-        equals('https://kp.krtekstile.com/api/v1'),
+        equals('https://app.kiranapeople.com/api/v1'),
       );
-      expect(ApiConfig.getHostOrigin(), equals('https://kp.krtekstile.com'));
+      expect(ApiConfig.getHostOrigin(), equals('https://app.kiranapeople.com'));
     });
   });
 
@@ -25,7 +25,7 @@ void main() {
       // Remote cloud / production endpoints
       expect(
         ApiClient.shouldAcceptBadCertificate(
-          'kp.krtekstile.com',
+          'app.kiranapeople.com',
           isDebug: releaseMode,
         ),
         isFalse,
@@ -79,7 +79,7 @@ void main() {
         // Remote production / third-party endpoints must still enforce valid certificates in debug mode
         expect(
           ApiClient.shouldAcceptBadCertificate(
-            'kp.krtekstile.com',
+            'app.kiranapeople.com',
             isDebug: debugMode,
           ),
           isFalse,

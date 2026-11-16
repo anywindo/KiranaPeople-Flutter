@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiConfig {
-  static const String defaultBaseUrl = 'https://kp.krtekstile.com/api/v1';
-  static const String cachedHostOrigin = 'https://kp.krtekstile.com';
+  static const String defaultBaseUrl = 'https://app.kiranapeople.com/api/v1';
+  static const String cachedHostOrigin = 'https://app.kiranapeople.com';
   static const String prefKeyCustomBaseUrl = 'custom_dev_api_base_url';
 
   static String? _devBaseUrl;
