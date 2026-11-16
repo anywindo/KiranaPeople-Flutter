@@ -239,4 +239,48 @@ class Shift {
       ruleMinutes: ruleMinutes ?? attendanceRuleMinutes ?? 15,
     );
   }
+
+  /// Evaluates whether an actual clock-out time is early based on shift end time.
+  ///
+  /// Clocking out before [scheduledTime] is considered early (returns true).
+  /// Clocking out at or after [scheduledTime] is on time (returns false).
+  ///
+  /// Handles daytime shifts and overnight shifts that cross midnight.
+  static bool isShiftEndEarly({
+    required String? actualTime,
+    required String? scheduledTime,
+  }) {
+    if (actualTime == null || scheduledTime == null || scheduledTime.isEmpty) {
+      return false;
+    }
+    try {
+      final actualParts = actualTime.split(':');
+      final schedParts = scheduledTime.split(':');
+      final actualMin =
+          int.parse(actualParts[0]) * 60 + int.parse(actualParts[1]);
+      final schedMin =
+          int.parse(schedParts[0]) * 60 + int.parse(schedParts[1]);
+
+      // Calculate signed difference in minutes from scheduled end (-720..+720)
+      var diff = actualMin - schedMin;
+      if (diff < -720) {
+        diff += 1440;
+      } else if (diff > 720) {
+        diff -= 1440;
+      }
+
+      // Clocking out before scheduled end time (diff < 0) is early.
+      return diff < 0;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Convenience instance method for this shift instance.
+  bool isEndEarly(String? actualTime) {
+    return isShiftEndEarly(
+      actualTime: actualTime,
+      scheduledTime: endTime,
+    );
+  }
 }

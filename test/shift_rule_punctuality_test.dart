@@ -112,6 +112,43 @@ void main() {
       expect(shift.isStartLate('12:40'), isTrue);
       expect(shift.isStartLate('12:45'), isTrue);
     });
+
+    test('Shift.isShiftEndEarly evaluates early check-out correctly (13:39 check-out with 16:00 shift end is early / MERAH)', () {
+      final shift = Shift(
+        id: 1,
+        name: 'Pagi',
+        startTime: '08:00:00',
+        endTime: '16:00:00',
+      );
+
+      // User screenshot scenario: 13:39 check out when shift ends at 16:00 -> early (true)
+      expect(shift.isEndEarly('13:39'), isTrue, reason: '13:39 is earlier than 16:00 (harus merah)');
+      expect(Shift.isShiftEndEarly(actualTime: '13:39', scheduledTime: '16:00'), isTrue);
+
+      // Boundary tests
+      expect(shift.isEndEarly('15:59'), isTrue, reason: '15:59 is before 16:00 -> early');
+      expect(shift.isEndEarly('16:00'), isFalse, reason: '16:00 is exact end time -> on time (hijau)');
+      expect(shift.isEndEarly('16:05'), isFalse, reason: '16:05 is after 16:00 -> on time (hijau)');
+      expect(shift.isEndEarly(null), isFalse);
+    });
+
+    test('Overnight shift early check-out evaluation', () {
+      final nightShift = Shift(
+        id: 2,
+        name: 'Malam',
+        startTime: '22:00:00',
+        endTime: '06:00:00',
+      );
+
+      // End time is 06:00. Check-out at 05:45 is early
+      expect(nightShift.isEndEarly('05:45'), isTrue);
+      // Check-out at 06:00 is on-time
+      expect(nightShift.isEndEarly('06:00'), isFalse);
+      // Check-out at 06:30 is on-time
+      expect(nightShift.isEndEarly('06:30'), isFalse);
+      // Check-out at 23:30 (before midnight) is early
+      expect(nightShift.isEndEarly('23:30'), isTrue);
+    });
   });
 }
 

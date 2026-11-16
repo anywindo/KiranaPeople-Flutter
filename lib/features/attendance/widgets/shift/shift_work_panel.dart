@@ -12,6 +12,7 @@ class ShiftWorkPanel extends StatelessWidget {
   final TodayAttendanceData? todayData;
   final bool hasStartedShift;
   final bool isCheckInLate;
+  final bool isCheckOutEarly;
   final bool hasEndedShift;
   final String? checkInTime;
   final String? checkOutTime;
@@ -25,6 +26,7 @@ class ShiftWorkPanel extends StatelessWidget {
     required this.todayData,
     required this.hasStartedShift,
     required this.isCheckInLate,
+    this.isCheckOutEarly = false,
     required this.hasEndedShift,
     required this.checkInTime,
     required this.checkOutTime,
@@ -43,6 +45,9 @@ class ShiftWorkPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool hasTimingViolation =
+        isCheckInLate || (hasEndedShift && isCheckOutEarly);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -69,7 +74,7 @@ class ShiftWorkPanel extends StatelessWidget {
                 decoration: BoxDecoration(
                   color:
                       (hasStartedShift
-                              ? (isCheckInLate
+                              ? (hasTimingViolation
                                     ? AppColors.error
                                     : AppColors.success)
                               : AppColors.primary)
@@ -78,7 +83,7 @@ class ShiftWorkPanel extends StatelessWidget {
                   border: Border.all(
                     color:
                         (hasStartedShift
-                                ? (isCheckInLate
+                                ? (hasTimingViolation
                                       ? AppColors.error
                                       : AppColors.success)
                                 : AppColors.primary)
@@ -89,7 +94,9 @@ class ShiftWorkPanel extends StatelessWidget {
                 child: Icon(
                   Icons.access_time_filled_rounded,
                   color: hasStartedShift
-                      ? (isCheckInLate ? AppColors.error : AppColors.success)
+                      ? (hasTimingViolation
+                            ? AppColors.error
+                            : AppColors.success)
                       : AppColors.primary,
                   size: 18,
                 ),
@@ -175,7 +182,7 @@ class ShiftWorkPanel extends StatelessWidget {
               event: endShiftEvent,
               fallbackIcon: Icons.home_rounded,
               isCompleted: hasEndedShift,
-              isLate: false,
+              isEarly: isCheckOutEarly,
             ),
           ],
         ),

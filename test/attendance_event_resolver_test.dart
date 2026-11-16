@@ -105,6 +105,40 @@ void main() {
       expect(timeline.isOnBreak, isFalse);
       expect(timeline.checkInTime, equals('08:05'));
     });
+
+    test('AttendanceEventTimeline.fromData correctly identifies early check-out (13:39 with 16:00 shift)', () {
+      final shift = Shift(
+        id: 1,
+        name: 'Shift Kantor',
+        startTime: '08:00:00',
+        endTime: '16:00:00',
+      );
+
+      final data = TodayAttendanceData(
+        events: [
+          AttendanceEvent(
+            eventType: AttendanceEventType.startShift,
+            timestamp: '2026-11-16T07:40:00',
+          ),
+          AttendanceEvent(
+            eventType: AttendanceEventType.endShift,
+            timestamp: '2026-11-16T13:39:00',
+          ),
+        ],
+      );
+
+      final timeline = AttendanceEventTimeline.fromData(
+        data: data,
+        selectedShift: shift,
+      );
+
+      expect(timeline.hasStartedShift, isTrue);
+      expect(timeline.hasEndedShift, isTrue);
+      expect(timeline.checkInTime, equals('07:40'));
+      expect(timeline.checkOutTime, equals('13:39'));
+      expect(timeline.isCheckInLate, isFalse);
+      expect(timeline.isCheckOutEarly, isTrue, reason: '13:39 check out before 16:00 scheduled end must be early');
+    });
   });
 
   group('Attendance Dialogs Tests', () {

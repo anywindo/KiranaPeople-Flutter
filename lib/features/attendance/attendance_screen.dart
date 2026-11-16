@@ -256,6 +256,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
                     isSubmitting: attendanceState.isSubmitting,
                     hasStartedShift: timeline.hasStartedShift,
                     isCheckInLate: timeline.isCheckInLate,
+                    isCheckOutEarly: timeline.isCheckOutEarly,
                     hasEndedShift: timeline.hasEndedShift,
                     hasStartedBreak: timeline.hasStartedBreak,
                     hasEndedBreak: timeline.hasEndedBreak,

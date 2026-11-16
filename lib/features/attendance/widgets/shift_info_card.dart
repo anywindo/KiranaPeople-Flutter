@@ -19,6 +19,7 @@ class ShiftInfoCard extends StatelessWidget {
   final bool isSubmitting;
   final bool hasStartedShift;
   final bool isCheckInLate;
+  final bool isCheckOutEarly;
   final bool hasEndedShift;
   final bool hasStartedBreak;
   final bool hasEndedBreak;
@@ -42,6 +43,7 @@ class ShiftInfoCard extends StatelessWidget {
     required this.isSubmitting,
     required this.hasStartedShift,
     required this.isCheckInLate,
+    this.isCheckOutEarly = false,
     required this.hasEndedShift,
     required this.hasStartedBreak,
     required this.hasEndedBreak,
@@ -146,6 +148,7 @@ class ShiftInfoCard extends StatelessWidget {
                         todayData: todayData,
                         hasStartedShift: hasStartedShift,
                         isCheckInLate: isCheckInLate,
+                        isCheckOutEarly: isCheckOutEarly,
                         hasEndedShift: hasEndedShift,
                         checkInTime: checkInTime,
                         checkOutTime: checkOutTime,

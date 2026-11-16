@@ -15,6 +15,7 @@ class AttendanceEventTimeline {
 
   final bool hasStartedShift;
   final bool isCheckInLate;
+  final bool isCheckOutEarly;
   final bool hasEndedShift;
   final bool hasStartedBreak;
   final bool hasEndedBreak;
@@ -31,6 +32,7 @@ class AttendanceEventTimeline {
     this.endBreakTime,
     required this.hasStartedShift,
     required this.isCheckInLate,
+    this.isCheckOutEarly = false,
     required this.hasEndedShift,
     required this.hasStartedBreak,
     required this.hasEndedBreak,
@@ -92,6 +94,10 @@ class AttendanceEventTimeline {
         endShiftEvent != null ||
         data?.status?.toUpperCase() == 'COMPLETED' ||
         data?.status?.toUpperCase() == 'SELESAI';
+    final isCheckOutEarly = Shift.isShiftEndEarly(
+      actualTime: checkOutTime,
+      scheduledTime: selectedShift?.endTime ?? '16:00',
+    );
     final hasStartedBreak = startBreakEvent != null;
     final hasEndedBreak = endBreakEvent != null;
     final isOnBreak = hasStartedBreak && !hasEndedBreak;
@@ -107,6 +113,7 @@ class AttendanceEventTimeline {
       endBreakTime: endBreakTime,
       hasStartedShift: hasStartedShift,
       isCheckInLate: isCheckInLate,
+      isCheckOutEarly: isCheckOutEarly,
       hasEndedShift: hasEndedShift,
       hasStartedBreak: hasStartedBreak,
       hasEndedBreak: hasEndedBreak,

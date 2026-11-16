@@ -13,6 +13,7 @@ class TimingColumn extends StatelessWidget {
   final IconData fallbackIcon;
   final bool isCompleted;
   final bool isLate;
+  final bool isEarly;
 
   const TimingColumn({
     super.key,
@@ -23,7 +24,10 @@ class TimingColumn extends StatelessWidget {
     required this.fallbackIcon,
     required this.isCompleted,
     this.isLate = false,
+    this.isEarly = false,
   });
+
+  bool get _hasTimingViolation => isLate || isEarly;
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +152,7 @@ class TimingColumn extends StatelessWidget {
                       Icon(
                         Icons.check_circle_rounded,
                         size: 15,
-                        color: isLate
+                        color: _hasTimingViolation
                             ? const Color(0xFFEF4444)
                             : const Color(0xFF10B981),
                       ),
