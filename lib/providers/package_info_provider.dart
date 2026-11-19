@@ -8,20 +8,20 @@ final packageInfoProvider = FutureProvider<PackageInfo>((ref) async {
     return PackageInfo(
       appName: 'Kirana People',
       packageName: 'com.kiranadesainindonesia.kiranapeople',
-      version: '1.0.5',
+      version: '1.0.6',
       buildNumber: '1',
       buildSignature: '',
     );
   }
 });
 
-/// Returns formatted string, e.g. "1.0.5"
+/// Returns formatted string, e.g. "1.0.6"
 final appVersionDisplayProvider = Provider<String>((ref) {
   final infoAsync = ref.watch(packageInfoProvider);
   return infoAsync.maybeWhen(
     data: (info) => info.version.contains('-beta')
         ? info.version.replaceAll('-beta', ' beta')
         : info.version,
-    orElse: () => '1.0.5',
+    orElse: () => '1.0.6',
   );
 });

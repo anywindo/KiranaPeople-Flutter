@@ -140,8 +140,14 @@ class ApiInterceptor extends Interceptor {
           }
         }
       } else if (data is String && data.isNotEmpty) {
-        message = data;
-        hasCustomMessage = true;
+        final trimmed = data.trim();
+        final isHtml = trimmed.startsWith('<') ||
+            trimmed.toLowerCase().contains('<!doctype') ||
+            trimmed.toLowerCase().contains('<html');
+        if (!isHtml) {
+          message = data;
+          hasCustomMessage = true;
+        }
       }
 
       // Fallback status messages if no specific custom message was provided
@@ -168,9 +174,25 @@ class ApiInterceptor extends Interceptor {
         if (!hasCustomMessage) {
           message = 'Data yang dimasukkan tidak valid.';
         }
+      } else if (response.statusCode == 502) {
+        if (!hasCustomMessage) {
+          message =
+              'Server sedang tidak dapat dijangkau (502 Bad Gateway). Silakan coba beberapa saat lagi.';
+        }
+      } else if (response.statusCode == 503) {
+        if (!hasCustomMessage) {
+          message =
+              'Server sedang dalam pemeliharaan (503 Service Unavailable). Silakan coba beberapa saat lagi.';
+        }
+      } else if (response.statusCode == 504) {
+        if (!hasCustomMessage) {
+          message =
+              'Koneksi ke gateway waktu habis (504 Gateway Timeout). Silakan coba beberapa saat lagi.';
+        }
       } else if (response.statusCode != null && response.statusCode! >= 500) {
         if (!hasCustomMessage) {
-          message = 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
+          message =
+              'Terjadi kesalahan pada server (${response.statusCode}). Silakan coba lagi nanti.';
         }
       }
     } else if (err.type == DioExceptionType.connectionTimeout ||

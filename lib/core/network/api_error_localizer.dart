@@ -5,6 +5,13 @@ class ApiErrorLocalizer {
     final trimmed = raw.trim();
     final lower = trimmed.toLowerCase();
 
+    // Guard against raw HTML error pages (e.g. 502/503/504 Bad Gateway from cloud proxies)
+    if (trimmed.startsWith('<') ||
+        lower.contains('<!doctype') ||
+        lower.contains('<html')) {
+      return 'Server sedang tidak dapat dijangkau. Silakan coba beberapa saat lagi.';
+    }
+
     if (lower.contains('provided credentials are incorrect') ||
         lower.contains('credentials do not match') ||
         lower.contains('invalid credentials') ||
