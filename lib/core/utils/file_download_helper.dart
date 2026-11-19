@@ -24,8 +24,33 @@ class FileDownloadResult {
 }
 
 class FileDownloadHelper {
-  /// Extracts the original filename from a URL or file path.
+  /// Sanitizes a filename to prevent path traversal attacks (CWE-22)
+  /// and invalid filesystem characters.
+  static String sanitizeFileName(String fileName, {String? defaultName}) {
+    var clean = fileName.trim();
+    // Replace URL-encoded directory separators if any
+    clean = clean.replaceAll('%2f', '_').replaceAll('%2F', '_');
+    clean = clean.replaceAll('%5c', '_').replaceAll('%5C', '_');
+    // Strip all path delimiters (forward slash, backslash)
+    clean = clean.replaceAll(RegExp(r'[/\\]+'), '_');
+    // Remove directory traversal dots (e.g. .., ..., /../, \..\)
+    clean = clean.replaceAll(RegExp(r'\.{2,}'), '.');
+    // Strip leading dot, underscore, or space to prevent hidden files or root dots
+    clean = clean.replaceAll(RegExp(r'^[\._\s]+'), '');
+    // Remove control characters and illegal filesystem characters
+    clean = clean.replaceAll(RegExp(r'[\x00-\x1F\x7F<>:"|?*]'), '_');
+    clean = clean.trim();
+
+    if (clean.isEmpty || clean == '.' || !clean.contains('.')) {
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      return defaultName ?? 'kirana_media_$timestamp.jpg';
+    }
+    return clean;
+  }
+
+  /// Extracts the original filename from a URL or file path and sanitizes it.
   static String extractFileName(String urlOrPath, {String? defaultName}) {
+    String? rawName;
     try {
       final cleanUrl = urlOrPath.split('?').first.split('#').first;
       final uri = Uri.tryParse(cleanUrl);
@@ -35,9 +60,13 @@ class FileDownloadHelper {
       if (segment != null &&
           segment.trim().isNotEmpty &&
           segment.contains('.')) {
-        return Uri.decodeComponent(segment.trim());
+        rawName = Uri.decodeComponent(segment.trim());
       }
     } catch (_) {}
+
+    if (rawName != null && rawName.isNotEmpty) {
+      return sanitizeFileName(rawName, defaultName: defaultName);
+    }
 
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     return defaultName ?? 'kirana_media_$timestamp.jpg';
@@ -106,7 +135,8 @@ class FileDownloadHelper {
     }
 
     final fullUrl = resolveFullUrl(urlOrPath);
-    final fileName = customFileName ?? extractFileName(fullUrl);
+    final rawFileName = customFileName ?? extractFileName(fullUrl);
+    final fileName = sanitizeFileName(rawFileName);
 
     try {
       List<int> bytes;
@@ -186,12 +216,13 @@ class FileDownloadHelper {
   }
 
   static File _getUniqueFile(String directoryPath, String fileName) {
-    var file = File('$directoryPath/$fileName');
+    final safeName = sanitizeFileName(fileName);
+    var file = File('$directoryPath/$safeName');
     if (!file.existsSync()) return file;
 
-    final dotIndex = fileName.lastIndexOf('.');
-    final name = dotIndex != -1 ? fileName.substring(0, dotIndex) : fileName;
-    final ext = dotIndex != -1 ? fileName.substring(dotIndex) : '';
+    final dotIndex = safeName.lastIndexOf('.');
+    final name = dotIndex != -1 ? safeName.substring(0, dotIndex) : safeName;
+    final ext = dotIndex != -1 ? safeName.substring(dotIndex) : '';
 
     var counter = 1;
     while (file.existsSync()) {
@@ -217,7 +248,8 @@ class FileDownloadHelper {
     }
 
     final fullUrl = resolveFullUrl(urlOrPath);
-    final fileName = customFileName ?? extractFileName(fullUrl);
+    final rawFileName = customFileName ?? extractFileName(fullUrl);
+    final fileName = sanitizeFileName(rawFileName);
 
     try {
       String localFilePath;

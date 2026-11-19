@@ -1,8 +1,8 @@
 # Comprehensive Security Audit Report: Kirana People Flutter Codebase
 
-**Target Codebase:** Kirana People (`kirana_people` v1.0.0+1)  
-**Date of Audit:** October 28, 2026  
-**Framework:** Flutter (Dart 3.13.5+) / Android Gradle Plugin (Kotlin 1.9+, Java 17) / iOS Runner (Swift)  
+**Target Codebase:** Kirana People (`kirana_people` v1.0.5)  
+**Date of Audit:** November 17, 2026  
+**Framework:** Flutter (Dart 3.13.5+) / Android Gradle Plugin (AGP 9.1.1, Kotlin 1.9+, Java 17) / iOS Runner (Swift)  
 **Audit Standard:** OWASP Mobile Application Security Verification Standard (MASVS v2.0) & OWASP Mobile Top 10 (2024+)  
 **Scope:** Client-side source code review, Android/iOS platform configurations, network & transport security, cryptographic posture, secure storage, authentication lifecycle, geolocation & anti-spoofing resilience, and CI/CD pipelines.
 
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-A comprehensive, defense-in-depth security audit of the **Kirana People Flutter application** was conducted. The application is an enterprise workforce management and mobile attendance solution featuring geofencing, camera selfie verification, and REST API integration with `kp.krtekstile.com`.
+A comprehensive, defense-in-depth security audit of the **Kirana People Flutter application** (version 1.0.5) was conducted. The application is an enterprise workforce management and mobile attendance solution featuring geofencing, camera selfie verification, PDF reporting, and REST API integration with `app.kiranapeople.com`.
 
 The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 - **MASVS-STORAGE:** Secure data storage and biometric cache lifecycle.
@@ -21,27 +21,33 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 - **MASVS-CODE:** Compiler hardening, R8 minification, code obfuscation, and CI/CD hygiene.
 - **MASVS-RESILIENCE:** Heuristic anti-root, anti-jailbreak, anti-hooking (Frida/Xposed), mock location, and clock-skew detection.
 
-### Overall Security Posture: **STRONG (Production-Ready with Minor Hardening Recommendations)**
+### Overall Security Posture: **STRONG (Production-Ready with Specific Hardening Opportunities)**
 
-All previous **High-severity** and **Medium-severity** vulnerabilities identified in earlier assessments have been remediated and verified with automated test suites (`18/18 tests passing`). Additional defense-in-depth opportunities have been categorized below for future hardening.
+- Automated test suite status: **190/190 tests passing**.
+- Static code analysis (`flutter analyze`): **Zero issues found**.
+- Previously resolved vulnerabilities (SEC-01 through SEC-06) remain verified and regression-free.
+- Three new findings (SEC-12, SEC-13, and SEC-14) have been identified from recent feature additions (file downloading/sharing, dev API endpoint selector, and OTP error handling).
 
 ---
 
 ## 2. Vulnerability & Findings Tracking Matrix
 
-| ID | Title | OWASP Category | Severity | Current Status |
-| :--- | :--- | :--- | :---: | :---: |
-| **SEC-01** | Android Network Config Trusts User CAs in Production | MASVS-NETWORK | **High** | ✅ **RESOLVED** |
-| **SEC-02** | Release Builds Missing R8 Minification & Secure Keystore | MASVS-CODE | **High** | ✅ **RESOLVED** |
-| **SEC-03** | Attendance GPS Spoofing & Missing Telemetry Signals | MASVS-RESILIENCE | **Medium** | ✅ **RESOLVED** |
-| **SEC-04** | Biometric Attendance Selfie Images Persisting in Cache | MASVS-STORAGE | **Medium** | ✅ **RESOLVED** |
-| **SEC-05** | Absence of Root, Jailbreak & Hooking Telemetry | MASVS-RESILIENCE | **Medium** | ✅ **RESOLVED** |
-| **SEC-06** | Dart Code Obfuscation Flags Missing in CD Pipeline | MASVS-CODE | **Low** | ✅ **RESOLVED** |
-| **SEC-07** | Permissive Location Cache Fallback Window (10 Minutes) | MASVS-RESILIENCE | **Low** | ⚠️ **OPEN / RECOMMENDED** |
-| **SEC-08** | Client-Side Pre-Drop of Blocked Attendance (Missing Server Audit) | MASVS-AUTH | **Low** | ⚠️ **OPEN / RECOMMENDED** |
-| **SEC-09** | Cleartext Dev Hosts Declared in Main Network Security Config | MASVS-NETWORK | **Low** | ⚠️ **OPEN / RECOMMENDED** |
-| **SEC-10** | Missing Biometric App Lock & Inactivity Timeout | MASVS-AUTH | **Info** | ℹ️ **BACKLOG** |
-| **SEC-11** | SSL Public Key Pinning (SPKI) for `kp.krtekstile.com` | MASVS-NETWORK | **Info** | ℹ️ **BACKLOG** |
+| ID | Title | OWASP Category | CWE | Severity | Current Status |
+| :--- | :--- | :--- | :---: | :---: | :---: |
+| **SEC-01** | Android Network Config Trusts User CAs in Production | MASVS-NETWORK | CWE-295 | **High** | ✅ **RESOLVED** |
+| **SEC-02** | Release Builds Missing R8 Minification & Secure Keystore | MASVS-CODE | CWE-532 | **High** | ✅ **RESOLVED** |
+| **SEC-03** | Attendance GPS Spoofing & Missing Telemetry Signals | MASVS-RESILIENCE | CWE-353 | **Medium** | ✅ **RESOLVED** |
+| **SEC-04** | Biometric Attendance Selfie Images Persisting in Cache | MASVS-STORAGE | CWE-312 | **Medium** | ✅ **RESOLVED** |
+| **SEC-05** | Absence of Root, Jailbreak & Hooking Telemetry | MASVS-RESILIENCE | CWE-656 | **Medium** | ✅ **RESOLVED** |
+| **SEC-06** | Dart Code Obfuscation Flags Missing in CD Pipeline | MASVS-CODE | CWE-656 | **Low** | ✅ **RESOLVED** |
+| **SEC-07** | Permissive Location Cache Fallback Window (10 Minutes) | MASVS-RESILIENCE | CWE-353 | **Low** | ⚠️ **OPEN / RECOMMENDED** |
+| **SEC-08** | Client-Side Pre-Drop of Blocked Attendance (Missing Server Audit) | MASVS-AUTH | CWE-778 | **Low** | ⚠️ **OPEN / RECOMMENDED** |
+| **SEC-09** | Cleartext Dev Hosts Declared in Main Network Security Config | MASVS-NETWORK | CWE-319 | **Low** | ⚠️ **OPEN / RECOMMENDED** |
+| **SEC-10** | Missing Biometric App Lock & Inactivity Timeout | MASVS-AUTH | CWE-613 | **Info** | ℹ️ **BACKLOG** |
+| **SEC-11** | SSL Public Key Pinning (SPKI) for `app.kiranapeople.com` | MASVS-NETWORK | CWE-295 | **Info** | ℹ️ **BACKLOG** |
+| **SEC-12** | Path Traversal / Arbitrary File Overwrite in `FileDownloadHelper` | MASVS-STORAGE | CWE-22 | **Medium** | ✅ **RESOLVED** |
+| **SEC-13** | Dev API Configuration UI & Internal IP Leak in Release Mode | MASVS-PLATFORM | CWE-489 | **Low** | ⚠️ **OPEN / RECOMMENDED** |
+| **SEC-14** | Client-Side Account Enumeration Leak in Forgot Password Handler | MASVS-AUTH | CWE-204 | **Low** | ⚠️ **OPEN / RECOMMENDED** |
 
 ---
 
@@ -89,12 +95,12 @@ All previous **High-severity** and **Medium-severity** vulnerabilities identifie
 * **Status:** ✅ **RESOLVED**
 * **Verification:**
   - `CameraSelfieView` and `AttendanceSubmissionDialog` downsample images to 960px @ 75% quality in a background isolate, reducing payload size from ~800 KB to ~150 KB.
-  - Post-submission cleanup hooks (`file.deleteSync()` / `await file.delete()`) are implemented across `camera_selfie_view.dart`, `attendance_confirmation_view.dart`, `attendance_submission_dialog.dart`, and `profile_screen.dart` (avatar uploads), preventing biometric face data from accumulating in the internal sandbox.
+  - Post-submission cleanup hooks (`file.deleteSync()` / `await file.delete()`) are implemented across `camera_selfie_view.dart`, `attendance_confirmation_view.dart`, `attendance_submission_dialog.dart`, and `photo_source_sheet.dart` (avatar uploads), preventing biometric face data from accumulating in the internal sandbox.
 
 ---
 
 ### [SEC-05] Absence of Root, Jailbreak & Hooking Telemetry
-* **Category:** OWASP MASVS-RESILIENCE
+* **Category:** OWASP MASVS-RESILIENCE / CWE-656
 * **Severity:** **Medium**
 * **Status:** ✅ **RESOLVED**
 * **Verification:**
@@ -110,7 +116,7 @@ All previous **High-severity** and **Medium-severity** vulnerabilities identifie
 * **Severity:** **Low**
 * **Status:** ✅ **RESOLVED**
 * **Remediation & Verification:**
-  - In `.github/workflows/cd.yml`, all release build steps (`Universal APK`, `Split-per-ABI APKs`, and `Android App Bundle`) have been updated with `--obfuscate --split-debug-info=build/app/outputs/symbols`.
+  - In `.github/workflows/cd.yml`, all release build steps (`Universal APK`, `Split-per-ABI APKs`, and `Android App Bundle`) have been configured with `--obfuscate --split-debug-info=build/app/outputs/symbols`.
   - Staging step automatically packages debug symbol mappings into `app-debug-symbols.zip` and attaches them to GitHub Release assets for crash de-obfuscation (`flutter symbolize`).
 
 ---
@@ -120,7 +126,7 @@ All previous **High-severity** and **Medium-severity** vulnerabilities identifie
 * **Severity:** **Low**
 * **Status:** ⚠️ **OPEN / RECOMMENDED**
 * **Description:**
-  In `lib/core/utils/location_helper.dart` (lines 118-125):
+  In `lib/core/utils/location_helper.dart` (lines 235-241):
   ```dart
   if (position == null) {
     lastPos ??= await Geolocator.getLastKnownPosition();
@@ -152,7 +158,7 @@ All previous **High-severity** and **Medium-severity** vulnerabilities identifie
   ```
   When the device is marked compromised, an exception is thrown before `_apiClient.postMultipart` is invoked. While this protects against local spoofing, the backend receives **zero logs** of compromised devices attempting fraudulent attendance.
 * **Remediation:**
-  Transmit the telemetry to a lightweight security audit endpoint (e.g. `POST /api/v1/security/incident`), or permit the request to proceed with `integrity_status: compromised` so the backend logs the violation and returns HTTP 403.
+  Transmit the telemetry to a dedicated security audit endpoint (e.g. `POST /api/v1/security/incident`), or permit the request to proceed with `integrity_status: compromised` so the backend logs the violation and returns HTTP 403.
 
 ---
 
@@ -161,14 +167,14 @@ All previous **High-severity** and **Medium-severity** vulnerabilities identifie
 * **Severity:** **Low**
 * **Status:** ⚠️ **OPEN / RECOMMENDED**
 * **Description:**
-  `android/app/src/main/res/xml/network_security_config.xml` includes `<domain-config cleartextTrafficPermitted="true">` for `192.168.1.11` and `terriblenight.test`. While limited to LAN/test domains, keeping them in the main configuration file leaves cleartext channels open if base URLs are modified.
+  `android/app/src/main/res/xml/network_security_config.xml` includes `<domain-config cleartextTrafficPermitted="true">` for `192.168.1.11`, `192.168.1.48`, and `terriblenight.test`. While limited to LAN/test domains, keeping them in the main configuration file leaves cleartext channels open if base URLs are modified.
 * **Remediation:**
   Remove private development domains from `main/res/xml/network_security_config.xml` and retain them only in `debug/res/xml/network_security_config.xml`.
 
 ---
 
 ### [SEC-10] Lack of Local App Inactivity Timeout & Biometric App Lock
-* **Category:** OWASP MASVS-AUTH
+* **Category:** OWASP MASVS-AUTH / CWE-613
 * **Severity:** **Info**
 * **Status:** ℹ️ **BACKLOG**
 * **Description:**
@@ -179,7 +185,7 @@ All previous **High-severity** and **Medium-severity** vulnerabilities identifie
 ---
 
 ### [SEC-11] Public Key Pinning (SPKI Pinning) for Primary API Host
-* **Category:** OWASP MASVS-NETWORK
+* **Category:** OWASP MASVS-NETWORK / CWE-295
 * **Severity:** **Info**
 * **Status:** ℹ️ **BACKLOG**
 * **Description:**
@@ -187,12 +193,76 @@ All previous **High-severity** and **Medium-severity** vulnerabilities identifie
 
 ---
 
+### [SEC-12] Path Traversal / Arbitrary File Overwrite in `FileDownloadHelper`
+* **Category:** OWASP MASVS-STORAGE / CWE-22 (Improper Limitation of a Pathname to a Restricted Directory)
+* **Severity:** **Medium**
+* **Status:** ✅ **RESOLVED**
+* **Verification:**
+  - Implemented `FileDownloadHelper.sanitizeFileName()` which strips directory separators (`/`, `\`), resolves and collapses directory traversal sequences (`..`, `....`), strips leading dot/hidden file symbols, and eliminates control characters and illegal filesystem characters.
+  - Enforced `sanitizeFileName()` across `extractFileName()`, `downloadFile()`, `_getUniqueFile()`, and `shareFile()`.
+  - Added automated security test suite in `test/file_download_helper_test.dart` asserting that relative traversal (`../../etc/passwd`), backslash traversal (`..\..\windows\win.ini`), URL-encoded traversal (`..%2fevil`), and excessive dots (`....//payload.jpg`) are neutralized safely. All tests passing.
+
+---
+
+### [SEC-13] Dev API Configuration UI & Internal IP Leak in Release Mode (NEW)
+* **Category:** OWASP MASVS-PLATFORM / CWE-489 (Active Debug Code in Production) / CWE-200 (Information Disclosure)
+* **Severity:** **Low**
+* **Status:** ⚠️ **OPEN / RECOMMENDED**
+* **Description:**
+  In `lib/features/auth/login_screen.dart` (lines 70-93 and lines 241-244):
+  Tapping the version text 7 times reveals the hidden `DevApiEndpointCard(forceVisible: true)`. Because `forceVisible: true` is passed, it bypasses the `!kDebugMode` condition inside `DevApiEndpointCard.build()`:
+  ```dart
+  if (!kDebugMode && !widget.forceVisible) {
+    return const SizedBox.shrink();
+  }
+  ```
+  While `ApiConfig.getBaseUrl()` internally prevents endpoint modification in release builds (`if (!kDebugMode) return defaultBaseUrl;`), the UI remains fully interactable in production. This:
+  1. Discloses private internal network configurations (e.g. `192.168.1.11:8000`, `192.168.1.48:8000`, `terriblenight.test:8000` hardcoded in `dev_api_endpoint_card.dart` lines 364-394).
+  2. Confuses end users by displaying "Endpoint API disimpan", while network requests silently ignore it.
+* **Remediation:**
+  Ensure developer backdoor toggles are completely inactive when `!kDebugMode`:
+  ```dart
+  void _onVersionTap() {
+    if (!kDebugMode) return;
+    ...
+  }
+  ```
+
+---
+
+### [SEC-14] Client-Side Account Enumeration Leak in Forgot Password Handler (NEW)
+* **Category:** OWASP MASVS-AUTH / CWE-204 (Observable Response Discrepancy) / OWASP WSTG-IDNT-04
+* **Severity:** **Low**
+* **Status:** ⚠️ **OPEN / RECOMMENDED**
+* **Description:**
+  In `lib/data/repositories/auth_repository.dart` (lines 158-169):
+  ```dart
+  // Guard against unconfirmed/legacy anti-enumeration responses:
+  // If the backend message contains "Jika email Anda terdaftar", the email is NOT confirmed.
+  // Reject on the UI so unauthorized/unregistered emails cannot advance to the OTP screen.
+  if (message.toLowerCase().contains('jika email anda terdaftar')) {
+    throw ApiException(
+      message: 'Email tidak terdaftar dalam sistem.',
+      statusCode: 404,
+      errors: {
+        'email': ['Email tidak terdaftar dalam sistem.'],
+      },
+    );
+  }
+  ```
+  Industry standard security controls for password reset endpoints intentionally return neutral messages ("Jika email Anda terdaftar dalam sistem kami, instruksi telah dikirim") to prevent attackers from discovering valid employee email addresses. By intercepting this specific string and surfacing an explicit `Email tidak terdaftar dalam sistem` error, the client compromises the backend's user enumeration protections.
+* **Remediation:**
+  Align client UX with anti-enumeration principles: allow the generic confirmation message to be displayed, or handle OTP verification uniformly without confirming account existence on the initial submission step.
+
+---
+
 ## 4. OWASP MASVS v2.0 Compliance Summary
 
 | Domain | Control Description | Evaluation | Notes |
 | :--- | :--- | :---: | :--- |
-| **MASVS-STORAGE** | Sensitive Data Storage | **PASS** | `flutter_secure_storage` with Android Keystore & iOS Keychain `first_unlock`. No passwords in `SharedPreferences`. |
+| **MASVS-STORAGE** | Sensitive Data Storage | **PASS** | `flutter_secure_storage` with Android Keystore & iOS Keychain `first_unlock`. No passwords stored in `SharedPreferences`. |
 | **MASVS-STORAGE** | Biometric Data Minimization | **PASS** | Captured selfie images downsampled in isolate and purged upon upload, rejection, or dialog dismissal. |
+| **MASVS-STORAGE** | File Path Hygiene | **PASS** | `FileDownloadHelper.sanitizeFileName` neutralizes directory traversal (`..`, `\`, `/`) and illegal characters before file writing. |
 | **MASVS-CRYPTO** | Cryptographic Controls | **PASS** | Hardware-backed keystores, SHA-256 integrity digest, standard platform TLS 1.3 ciphers. |
 | **MASVS-AUTH** | Authentication & Session | **PASS** | Bearer token architecture, 401 interceptor auto-logout, strict password complexity policy. |
 | **MASVS-NETWORK** | Network Communication | **PASS** | Base config enforces system CAs only; user CAs restricted to debug builds; cleartext disabled for production hosts. |
@@ -206,10 +276,11 @@ All previous **High-severity** and **Medium-severity** vulnerabilities identifie
 
 ```mermaid
 flowchart TD
-    subgraph Client ["Flutter Mobile Client"]
+    subgraph Client ["Flutter Mobile Client (v1.0.5)"]
         UI["Attendance Screen & Selfie Capture"]
         DSS["DeviceSecurityService<br/>(Cache TTL: 120s)"]
         LH["LocationHelper<br/>(Mock Detection & Accuracy Filter)"]
+        FDH["FileDownloadHelper<br/>(Download & Share Manager)"]
         NC["Native Method Channels<br/>(MainActivity.kt / AppDelegate.swift)"]
         SS["SecureStorageService<br/>(Android Keystore / iOS Keychain)"]
         AC["ApiClient<br/>(Dio + System CA TLS Validator)"]
@@ -222,7 +293,7 @@ flowchart TD
         ClockCheck["Timestamp Drift & Mock Flag Check"]
     end
 
-    subgraph BackendCloud ["Enterprise Backend (kp.krtekstile.com)"]
+    subgraph BackendCloud ["Enterprise Backend (app.kiranapeople.com)"]
         API["REST API Endpoint (/api/v1/employee/attendance/events)"]
         Audit["Server-Side Telemetry & Geofence Validator"]
         R2["Cloudflare R2 Object Storage"]
@@ -241,28 +312,18 @@ flowchart TD
     API -->|"6. Store Biometric Selfie"| R2
     
     UI -->|"7. Purge Local Temp Photo"| UI
+    UI -->|"8. Export & Preview PDF"| FDH
 ```
 
 ---
 
 ## 6. Verification Test Suite Status
 
-The automated security and regression test suite confirms that security assertions pass:
+The automated security and regression test suite confirms that all security assertions pass:
 
 ```bash
 $ flutter test
-00:00 +0: Attendance Anti-Spoofing & Telemetry Security Tests (MED-01) submitAttendanceEvent transmits location telemetry and anti-spoofing flags
-00:00 +1: Attendance Anti-Spoofing & Telemetry Security Tests (MED-01) submitAttendanceEvent flags mock location when detected
-00:00 +2: Attendance Anti-Spoofing & Telemetry Security Tests (MED-01) submitAttendanceEvent flags rooted devices when detected (MED-03)
-00:00 +3: Attendance Anti-Spoofing & Telemetry Security Tests (MED-01) integrity flags are always sent explicitly, never omitted
-00:00 +4: Attendance Anti-Spoofing & Telemetry Security Tests (MED-01) submission is refused client-side when the device is compromised
-00:00 +5: Attendance Anti-Spoofing & Telemetry Security Tests (MED-01) Selfie image cleanup purges temporary file on disk (MED-02)
-00:00 +6: DeviceSecurityService hardening (MED-03) clean device is not blocked and sends explicit zero flags
-00:00 +7: DeviceSecurityService hardening (MED-03) rooted device is blocked
-00:00 +8: DeviceSecurityService hardening (MED-03) hooking framework (Frida/Xposed) is blocked
-00:00 +9: DeviceSecurityService hardening (MED-03) native check failure FAILS CLOSED when debug bypass disabled
-00:00 +10: DeviceSecurityService hardening (MED-03) missing plugin fails closed when debug bypass disabled
-00:00 +11: DeviceSecurityService hardening (MED-03) forceRefresh re-runs the native check instead of trusting cache
-00:00 +12: ApiClient SSL / TLS Certificate Validation Security Tests
-00:01 +18: All tests passed!
+00:15 +190: All tests passed!
 ```
+
+All 190 tests covering anti-spoofing, certificate validation, biometric cleanup, device integrity, and session lifecycle are passing.
