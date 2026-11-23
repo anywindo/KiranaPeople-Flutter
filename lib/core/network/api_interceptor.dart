@@ -44,9 +44,9 @@ class ApiInterceptor extends Interceptor {
       options.path = resolveFullPath(currentBaseUrl, options.path);
     }
 
-    // Add Bearer Token if present
+    // Add Bearer Token if present (SECURITY: only attach token to trusted hosts to avoid token leakage)
     final token = await storage.getToken();
-    if (token != null && token.isNotEmpty) {
+    if (token != null && token.isNotEmpty && ApiConfig.isTrustedHost(options.path)) {
       options.headers['Authorization'] = 'Bearer $token';
     }
 

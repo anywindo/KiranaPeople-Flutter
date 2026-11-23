@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -54,7 +55,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final prefs = await SharedPreferences.getInstance();
       final savedId = prefs.getString('saved_login_identifier');
       final remember = prefs.getBool('remember_login_credentials') ?? true;
-      final devVisible = prefs.getBool('dev_api_endpoint_visible') ?? false;
+      final devVisible = kDebugMode && (prefs.getBool('dev_api_endpoint_visible') ?? false);
       if (mounted) {
         setState(() {
           _rememberMe = remember;
@@ -68,6 +69,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _onVersionTap() async {
+    // SECURITY (SEC-13): Dev API endpoint backdoor is strictly disabled in release mode
+    if (!kDebugMode) return;
+
     final now = DateTime.now();
     if (_lastVersionTap != null &&
         now.difference(_lastVersionTap!) > const Duration(seconds: 2)) {
@@ -237,8 +241,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               onTap: _nextQuote,
                             ),
 
-                            // 4. Dev API Endpoint Config (Hidden by default, unlocked with 7 taps on Version)
-                            if (_showDevEndpoint) ...[
+                            // 4. Dev API Endpoint Config (Hidden by default, unlocked with 7 taps on Version in debug mode only)
+                            if (kDebugMode && _showDevEndpoint) ...[
                               const SizedBox(height: 16),
                               const DevApiEndpointCard(forceVisible: true),
                             ],

@@ -47,18 +47,6 @@ class LoginFormCard extends StatelessWidget {
           color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
           width: 1.5,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(22),
@@ -359,24 +347,6 @@ class LoginFormCard extends StatelessWidget {
                               : const Color(0xFFCBD5E1),
                           width: 1.0,
                         ),
-                  boxShadow: isFormValid && !isLoading
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withValues(
-                              alpha: isDark ? 0.45 : 0.16,
-                            ),
-                            blurRadius: 14,
-                            offset: const Offset(0, 6),
-                          ),
-                          BoxShadow(
-                            color: Colors.black.withValues(
-                              alpha: isDark ? 0.25 : 0.08,
-                            ),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : null,
                 ),
                 child: Center(
                   child: isLoading

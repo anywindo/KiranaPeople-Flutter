@@ -231,12 +231,14 @@ class LocationHelper {
         );
       } catch (_) {}
 
-      // Fallback 2: Accept recent cached position (max 10 minutes old)
+      // Fallback 2: Accept recent cached position (max 120 seconds old)
+      // SECURITY (SEC-07): Restrict fallback cached fix window to 120 seconds (2 minutes)
+      // to prevent accepting stale GPS fixes from outside workplace boundaries.
       if (position == null) {
         lastPos ??= await Geolocator.getLastKnownPosition();
         final fallbackNow = DateTime.now();
         if (lastPos != null &&
-            fallbackNow.difference(lastPos.timestamp).inMinutes.abs() <= 10) {
+            fallbackNow.difference(lastPos.timestamp).inSeconds.abs() <= 120) {
           position = lastPos;
         } else {
           throw Exception(

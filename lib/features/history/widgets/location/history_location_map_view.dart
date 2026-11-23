@@ -77,13 +77,6 @@ class HistoryLocationMapView extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: AppColors.primary,
                               borderRadius: BorderRadius.circular(8),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 4,
-                                  offset: Offset(0, 1),
-                                ),
-                              ],
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -116,13 +109,6 @@ class HistoryLocationMapView extends StatelessWidget {
                               color: AppColors.primary,
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.white, width: 2),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 6,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
                             ),
                             child: const Icon(
                               Icons.apartment_rounded,
@@ -151,13 +137,6 @@ class HistoryLocationMapView extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: const Color(0xFF007AFF),
                               borderRadius: BorderRadius.circular(8),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 4,
-                                  offset: Offset(0, 1),
-                                ),
-                              ],
                             ),
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
@@ -186,13 +165,6 @@ class HistoryLocationMapView extends StatelessWidget {
                               color: const Color(0xFF007AFF),
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.white, width: 2),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 6,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
                             ),
                             child: const Icon(
                               Icons.person_rounded,

@@ -99,7 +99,8 @@ class _DevApiEndpointCardState extends ConsumerState<DevApiEndpointCard> {
 
   @override
   Widget build(BuildContext context) {
-    if (!kDebugMode && !widget.forceVisible) {
+    // SECURITY (SEC-13): Dev API endpoint card and internal IPs must never be rendered in release mode
+    if (!kDebugMode) {
       return const SizedBox.shrink();
     }
 

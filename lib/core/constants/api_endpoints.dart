@@ -13,4 +13,7 @@ class ApiEndpoints {
   static const String todayAttendance = '/employee/attendance/today';
   static const String attendanceEvents = '/employee/attendance/events';
   static const String attendanceHistory = '/employee/attendance/history';
+
+  // Security Incident Audit (MASVS-AUTH / SEC-08)
+  static const String securityIncident = '/security/incident';
 }

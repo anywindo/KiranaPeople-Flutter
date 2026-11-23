@@ -73,22 +73,6 @@ class ShiftInfoCard extends StatelessWidget {
               : const Color(0xFFCBD5E1),
           width: 1.5,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: context.isDarkMode ? 0.40 : 0.08,
-            ),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: context.isDarkMode ? 0.25 : 0.04,
-            ),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

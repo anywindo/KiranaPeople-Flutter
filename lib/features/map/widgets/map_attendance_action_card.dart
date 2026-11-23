@@ -119,22 +119,6 @@ class MapAttendanceActionCard extends StatelessWidget {
           color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
           width: 1.5,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: isDark ? 0.35 : 0.08,
-            ),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: isDark ? 0.20 : 0.04,
-            ),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

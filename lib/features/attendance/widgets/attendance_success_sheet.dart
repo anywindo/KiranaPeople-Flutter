@@ -163,13 +163,6 @@ class _AttendanceSuccessSheetState extends State<AttendanceSuccessSheet>
       decoration: BoxDecoration(
         color: context.surfaceColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.6 : 0.15),
-            blurRadius: 30,
-            offset: const Offset(0, -6),
-          ),
-        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -193,20 +186,13 @@ class _AttendanceSuccessSheetState extends State<AttendanceSuccessSheet>
             child: Container(
               width: 76,
               height: 76,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   colors: [Color(0xFF10B981), Color(0xFF059669)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF10B981).withValues(alpha: 0.40),
-                    blurRadius: 22,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
               ),
               child: const Center(
                 child: Icon(
@@ -462,13 +448,6 @@ class _AttendanceSuccessSheetState extends State<AttendanceSuccessSheet>
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.35),
-                      blurRadius: 14,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
                 ),
                 child: const Center(
                   child: Text(

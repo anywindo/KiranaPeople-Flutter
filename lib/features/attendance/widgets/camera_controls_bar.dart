@@ -59,7 +59,7 @@ class CameraControlsBar extends StatelessWidget {
             ),
           ),
 
-          // Center Shutter Button (concentric circles + tactile shadow)
+          // Center Shutter Button (concentric circles)
           GestureDetector(
             onTap: isTakingPhoto
                 ? null
@@ -76,13 +76,6 @@ class CameraControlsBar extends StatelessWidget {
                   color: isScreenFlashWarmup ? Colors.black87 : Colors.white,
                   width: 4,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
               padding: const EdgeInsets.all(5),
               child: Container(

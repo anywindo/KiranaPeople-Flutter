@@ -259,15 +259,6 @@ class MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                         : const Color(0xFFCBD5E1).withValues(alpha: 0.8),
                     width: 1.2,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(
-                        alpha: context.isDarkMode ? 0.35 : 0.08,
-                      ),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(32),

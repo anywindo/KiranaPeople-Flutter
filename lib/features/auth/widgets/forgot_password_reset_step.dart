@@ -317,15 +317,6 @@ class _ForgotPasswordResetStepState extends State<ForgotPasswordResetStep> {
                   ? AppColors.primary
                   : const Color(0xFFE5E7EB),
               borderRadius: BorderRadius.circular(12),
-              boxShadow: widget.isResetFormValid && !widget.isLoading
-                  ? [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.30),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ]
-                  : [],
             ),
             child: Material(
               color: Colors.transparent,

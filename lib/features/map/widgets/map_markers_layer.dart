@@ -61,13 +61,6 @@ class MapMarkersLayer extends StatelessWidget {
                         color: AppColors.primary,
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white, width: 2.5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.25),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
                       ),
                       child: const Icon(
                         Icons.apartment_rounded,
@@ -90,15 +83,6 @@ class MapMarkersLayer extends StatelessWidget {
                               : const Color(0xFFCBD5E1),
                           width: 1.5,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(
-                              alpha: isDark ? 0.35 : 0.10,
-                            ),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
                       ),
                       child: Text(
                         officeName,
@@ -136,13 +120,6 @@ class MapMarkersLayer extends StatelessWidget {
                           color: Colors.white,
                           width: 1.2,
                         ),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 4,
-                            offset: Offset(0, 1),
-                          ),
-                        ],
                       ),
                       child: const Text(
                         'Posisi Anda',
@@ -160,13 +137,6 @@ class MapMarkersLayer extends StatelessWidget {
                         color: const Color(0xFF0284C7),
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white, width: 2.5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.25),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
                       ),
                       child: const Icon(
                         Icons.directions_walk_rounded,

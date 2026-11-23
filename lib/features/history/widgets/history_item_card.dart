@@ -190,22 +190,6 @@ class HistoryItemCard extends StatelessWidget {
                       : const Color(0xFFCBD5E1),
                   width: 1.5,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(
-                      alpha: context.isDarkMode ? 0.35 : 0.08,
-                    ),
-                    blurRadius: 14,
-                    offset: const Offset(0, 4),
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withValues(
-                      alpha: context.isDarkMode ? 0.18 : 0.03,
-                    ),
-                    blurRadius: 3,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(

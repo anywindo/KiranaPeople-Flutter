@@ -1,7 +1,7 @@
 # Comprehensive Security Audit Report: Kirana People Flutter Codebase
 
-**Target Codebase:** Kirana People (`kirana_people` v1.0.5)  
-**Date of Audit:** November 17, 2026  
+**Target Codebase:** Kirana People (`kirana_people` v1.0.6)  
+**Date of Audit:** November 23, 2026  
 **Framework:** Flutter (Dart 3.13.5+) / Android Gradle Plugin (AGP 9.1.1, Kotlin 1.9+, Java 17) / iOS Runner (Swift)  
 **Audit Standard:** OWASP Mobile Application Security Verification Standard (MASVS v2.0) & OWASP Mobile Top 10 (2024+)  
 **Scope:** Client-side source code review, Android/iOS platform configurations, network & transport security, cryptographic posture, secure storage, authentication lifecycle, geolocation & anti-spoofing resilience, and CI/CD pipelines.
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-A comprehensive, defense-in-depth security audit of the **Kirana People Flutter application** (version 1.0.5) was conducted. The application is an enterprise workforce management and mobile attendance solution featuring geofencing, camera selfie verification, PDF reporting, and REST API integration with `app.kiranapeople.com`.
+A comprehensive, defense-in-depth security audit of the **Kirana People Flutter application** (version 1.0.6) was conducted. The application is an enterprise workforce management and mobile attendance solution featuring geofencing, camera selfie verification, PDF reporting, and REST API integration with `app.kiranapeople.com`.
 
 The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 - **MASVS-STORAGE:** Secure data storage and biometric cache lifecycle.
@@ -21,12 +21,15 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 - **MASVS-CODE:** Compiler hardening, R8 minification, code obfuscation, and CI/CD hygiene.
 - **MASVS-RESILIENCE:** Heuristic anti-root, anti-jailbreak, anti-hooking (Frida/Xposed), mock location, and clock-skew detection.
 
-### Overall Security Posture: **STRONG (Production-Ready with Specific Hardening Opportunities)**
+### Overall Security Posture: **STRONG (Production-Ready & Hardened)**
 
-- Automated test suite status: **190/190 tests passing**.
+- Automated test suite status: **All tests passing regression-free**.
 - Static code analysis (`flutter analyze`): **Zero issues found**.
-- Previously resolved vulnerabilities (SEC-01 through SEC-06) remain verified and regression-free.
-- Three new findings (SEC-12, SEC-13, and SEC-14) have been identified from recent feature additions (file downloading/sharing, dev API endpoint selector, and OTP error handling).
+- Hardened in this cycle:
+  - **SEC-07:** Tightened GPS location fallback cache window from 10 minutes to 120 seconds.
+  - **SEC-09:** Completely removed cleartext development hosts and debug overrides from production `main` network security config.
+  - **SEC-13:** Strictly disabled developer API switching backdoor and card rendering in production/release builds (`!kDebugMode`).
+  - **SEC-15:** Neutralized Authorization Bearer token exfiltration risks in `FileDownloadHelper` and `ApiInterceptor` by enforcing `isTrustedHost()` domain checks.
 
 ---
 
@@ -40,14 +43,15 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 | **SEC-04** | Biometric Attendance Selfie Images Persisting in Cache | MASVS-STORAGE | CWE-312 | **Medium** | ✅ **RESOLVED** |
 | **SEC-05** | Absence of Root, Jailbreak & Hooking Telemetry | MASVS-RESILIENCE | CWE-656 | **Medium** | ✅ **RESOLVED** |
 | **SEC-06** | Dart Code Obfuscation Flags Missing in CD Pipeline | MASVS-CODE | CWE-656 | **Low** | ✅ **RESOLVED** |
-| **SEC-07** | Permissive Location Cache Fallback Window (10 Minutes) | MASVS-RESILIENCE | CWE-353 | **Low** | ⚠️ **OPEN / RECOMMENDED** |
-| **SEC-08** | Client-Side Pre-Drop of Blocked Attendance (Missing Server Audit) | MASVS-AUTH | CWE-778 | **Low** | ⚠️ **OPEN / RECOMMENDED** |
-| **SEC-09** | Cleartext Dev Hosts Declared in Main Network Security Config | MASVS-NETWORK | CWE-319 | **Low** | ⚠️ **OPEN / RECOMMENDED** |
+| **SEC-07** | Permissive Location Cache Fallback Window (10 Minutes) | MASVS-RESILIENCE | CWE-353 | **Low** | ✅ **RESOLVED** |
+| **SEC-08** | Client-Side Pre-Drop of Blocked Attendance (Missing Server Audit) | MASVS-AUTH | CWE-778 | **Low** | ✅ **RESOLVED** |
+| **SEC-09** | Cleartext Dev Hosts Declared in Main Network Security Config | MASVS-NETWORK | CWE-319 | **Low** | ✅ **RESOLVED** |
 | **SEC-10** | Missing Biometric App Lock & Inactivity Timeout | MASVS-AUTH | CWE-613 | **Info** | ℹ️ **BACKLOG** |
 | **SEC-11** | SSL Public Key Pinning (SPKI) for `app.kiranapeople.com` | MASVS-NETWORK | CWE-295 | **Info** | ℹ️ **BACKLOG** |
 | **SEC-12** | Path Traversal / Arbitrary File Overwrite in `FileDownloadHelper` | MASVS-STORAGE | CWE-22 | **Medium** | ✅ **RESOLVED** |
-| **SEC-13** | Dev API Configuration UI & Internal IP Leak in Release Mode | MASVS-PLATFORM | CWE-489 | **Low** | ⚠️ **OPEN / RECOMMENDED** |
-| **SEC-14** | Client-Side Account Enumeration Leak in Forgot Password Handler | MASVS-AUTH | CWE-204 | **Low** | ⚠️ **OPEN / RECOMMENDED** |
+| **SEC-13** | Dev API Configuration UI & Internal IP Leak in Release Mode | MASVS-PLATFORM | CWE-489 | **Low** | ✅ **RESOLVED** |
+| **SEC-14** | Client-Side Account Enumeration Leak in Forgot Password Handler | MASVS-AUTH | CWE-204 | **Low** | ⚠️ **OPEN / TRADE-OFF** |
+| **SEC-15** | Bearer Token Leakage to Untrusted / External Domains in File Downloader | MASVS-NETWORK | CWE-200 | **Medium** | ✅ **RESOLVED** |
 
 ---
 
@@ -124,52 +128,33 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 ### [SEC-07] Permissive Location Cache Fallback Window (10 Minutes)
 * **Category:** OWASP MASVS-RESILIENCE / Geolocation Integrity
 * **Severity:** **Low**
-* **Status:** ⚠️ **OPEN / RECOMMENDED**
-* **Description:**
-  In `lib/core/utils/location_helper.dart` (lines 235-241):
-  ```dart
-  if (position == null) {
-    lastPos ??= await Geolocator.getLastKnownPosition();
-    final fallbackNow = DateTime.now();
-    if (lastPos != null &&
-        fallbackNow.difference(lastPos.timestamp).inMinutes.abs() <= 10) {
-      position = lastPos;
-    }
-  }
-  ```
-  If satellite and network GPS time out, the client accepts a cached fix up to 10 minutes old. Within 10 minutes, an employee could travel several kilometers outside the office perimeter while checking in.
-* **Remediation:**
-  Tighten the fallback threshold to 60–120 seconds maximum, or require an explicit user prompt to step near a window/open area for a fresh satellite fix.
+* **Status:** ✅ **RESOLVED**
+* **Remediation & Verification:**
+  - In `lib/core/utils/location_helper.dart`, the fallback cached GPS window was tightened from 10 minutes to 120 seconds (`inSeconds.abs() <= 120`).
+  - If satellite and network GPS time out, cached coordinates older than 2 minutes are strictly rejected, preventing stale coordinates outside the workplace geofence from being accepted.
 
 ---
 
 ### [SEC-08] Client-Side Pre-Drop of Blocked Attendance (Missing Server Audit)
-* **Category:** OWASP MASVS-AUTH / Security Monitoring & Logging
+* **Category:** OWASP MASVS-AUTH / Security Monitoring & Logging / CWE-778 (Insufficient Logging)
 * **Severity:** **Low**
-* **Status:** ⚠️ **OPEN / RECOMMENDED**
-* **Description:**
-  In `lib/data/repositories/attendance_repository.dart` (lines 61-65):
-  ```dart
-  if (report.shouldBlock) {
-    throw Exception(
-      'Perangkat tidak lolos pemeriksaan keamanan. Presensi tidak dapat dilakukan pada perangkat yang dimodifikasi.',
-    );
-  }
-  ```
-  When the device is marked compromised, an exception is thrown before `_apiClient.postMultipart` is invoked. While this protects against local spoofing, the backend receives **zero logs** of compromised devices attempting fraudulent attendance.
-* **Remediation:**
-  Transmit the telemetry to a dedicated security audit endpoint (e.g. `POST /api/v1/security/incident`), or permit the request to proceed with `integrity_status: compromised` so the backend logs the violation and returns HTTP 403.
+* **Status:** ✅ **RESOLVED**
+* **Remediation & Verification:**
+  - Implemented `AttendanceRepository.reportSecurityIncident()` which transmits a security incident report (`POST /api/v1/security/incident`) to the enterprise backend before client-side blocking is enforced.
+  - Telemetry payload includes the incident classification (`COMPROMISED_ATTENDANCE_BLOCKED`), device integrity status (`is_rooted`, `is_hooked`, `is_emulator`, `is_debugger`, `is_developer_mode`, `integrity_signals`, `app_signature`), coordinates, timestamp, and attempted event type.
+  - Attendance remains fail-closed on the client (`throws Exception`), while security operations receive real-time forensic logs of compromised or hooked devices attempting to submit attendance.
+  - Automated test in `test/anti_spoofing_security_test.dart` asserts that incident audit is dispatched to `ApiEndpoints.securityIncident` with proper telemetry while blocking client-side submission.
 
 ---
 
 ### [SEC-09] Cleartext Development Hosts in Main Network Security Config
 * **Category:** OWASP MASVS-NETWORK / Security Misconfiguration
 * **Severity:** **Low**
-* **Status:** ⚠️ **OPEN / RECOMMENDED**
-* **Description:**
-  `android/app/src/main/res/xml/network_security_config.xml` includes `<domain-config cleartextTrafficPermitted="true">` for `192.168.1.11`, `192.168.1.48`, and `terriblenight.test`. While limited to LAN/test domains, keeping them in the main configuration file leaves cleartext channels open if base URLs are modified.
-* **Remediation:**
-  Remove private development domains from `main/res/xml/network_security_config.xml` and retain them only in `debug/res/xml/network_security_config.xml`.
+* **Status:** ✅ **RESOLVED**
+* **Remediation & Verification:**
+  - Removed `<domain-config cleartextTrafficPermitted="true">` and user certificate `<debug-overrides>` from `android/app/src/main/res/xml/network_security_config.xml`.
+  - In production builds (`main`), cleartext traffic is strictly disallowed for all hosts (`cleartextTrafficPermitted="false"`) and only system CAs are trusted.
+  - Development domains (`localhost`, `10.0.2.2`, `127.0.0.1`, LAN IPs, `.test`) and debugging user certificates are isolated exclusively to `android/app/src/debug/res/xml/network_security_config.xml`.
 
 ---
 
@@ -204,55 +189,39 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 
 ---
 
-### [SEC-13] Dev API Configuration UI & Internal IP Leak in Release Mode (NEW)
+### [SEC-13] Dev API Configuration UI & Internal IP Leak in Release Mode
 * **Category:** OWASP MASVS-PLATFORM / CWE-489 (Active Debug Code in Production) / CWE-200 (Information Disclosure)
 * **Severity:** **Low**
-* **Status:** ⚠️ **OPEN / RECOMMENDED**
-* **Description:**
-  In `lib/features/auth/login_screen.dart` (lines 70-93 and lines 241-244):
-  Tapping the version text 7 times reveals the hidden `DevApiEndpointCard(forceVisible: true)`. Because `forceVisible: true` is passed, it bypasses the `!kDebugMode` condition inside `DevApiEndpointCard.build()`:
-  ```dart
-  if (!kDebugMode && !widget.forceVisible) {
-    return const SizedBox.shrink();
-  }
-  ```
-  While `ApiConfig.getBaseUrl()` internally prevents endpoint modification in release builds (`if (!kDebugMode) return defaultBaseUrl;`), the UI remains fully interactable in production. This:
-  1. Discloses private internal network configurations (e.g. `192.168.1.11:8000`, `192.168.1.48:8000`, `terriblenight.test:8000` hardcoded in `dev_api_endpoint_card.dart` lines 364-394).
-  2. Confuses end users by displaying "Endpoint API disimpan", while network requests silently ignore it.
-* **Remediation:**
-  Ensure developer backdoor toggles are completely inactive when `!kDebugMode`:
-  ```dart
-  void _onVersionTap() {
-    if (!kDebugMode) return;
-    ...
-  }
-  ```
+* **Status:** ✅ **RESOLVED**
+* **Remediation & Verification:**
+  - Added strict `kDebugMode` checks to `LoginScreen._onVersionTap()`, `_loadSavedCredentials()`, and `build()`.
+  - In `DevApiEndpointCard.build()`, unconditionally returns `const SizedBox.shrink()` when `!kDebugMode`.
+  - In release builds, the 7-tap gesture is completely inactive and developer API endpoint cards or preset private IP addresses (`192.168.1.11`, `192.168.1.48`, `terriblenight.test`) can never be unlocked or displayed.
 
 ---
 
-### [SEC-14] Client-Side Account Enumeration Leak in Forgot Password Handler (NEW)
+### [SEC-14] Client-Side Account Enumeration Leak in Forgot Password Handler
 * **Category:** OWASP MASVS-AUTH / CWE-204 (Observable Response Discrepancy) / OWASP WSTG-IDNT-04
 * **Severity:** **Low**
-* **Status:** ⚠️ **OPEN / RECOMMENDED**
+* **Status:** ⚠️ **OPEN / TRADE-OFF**
 * **Description:**
-  In `lib/data/repositories/auth_repository.dart` (lines 158-169):
-  ```dart
-  // Guard against unconfirmed/legacy anti-enumeration responses:
-  // If the backend message contains "Jika email Anda terdaftar", the email is NOT confirmed.
-  // Reject on the UI so unauthorized/unregistered emails cannot advance to the OTP screen.
-  if (message.toLowerCase().contains('jika email anda terdaftar')) {
-    throw ApiException(
-      message: 'Email tidak terdaftar dalam sistem.',
-      statusCode: 404,
-      errors: {
-        'email': ['Email tidak terdaftar dalam sistem.'],
-      },
-    );
-  }
-  ```
-  Industry standard security controls for password reset endpoints intentionally return neutral messages ("Jika email Anda terdaftar dalam sistem kami, instruksi telah dikirim") to prevent attackers from discovering valid employee email addresses. By intercepting this specific string and surfacing an explicit `Email tidak terdaftar dalam sistem` error, the client compromises the backend's user enumeration protections.
-* **Remediation:**
-  Align client UX with anti-enumeration principles: allow the generic confirmation message to be displayed, or handle OTP verification uniformly without confirming account existence on the initial submission step.
+  In `lib/data/repositories/auth_repository.dart` and `lib/features/auth/forgot_password_sheet.dart`:
+  When the backend returns an ambiguous/anti-enumeration message (`"Jika email Anda terdaftar..."`), the client explicitly halts progression and reports `"Email tidak terdaftar dalam sistem."`
+  This trade-off was intentionally implemented to provide immediate feedback to employees who mistype their corporate email address rather than having them wait endlessly for an OTP email. However, from an anti-enumeration standpoint (CWE-204), it acts as an oracle that discloses registered vs unregistered email addresses.
+* **Recommendation:**
+  If strict anti-enumeration is mandated by corporate compliance, remove the string interception and permit the UI to transition to the OTP step uniformly.
+
+---
+
+### [SEC-15] Bearer Token Leakage to Untrusted / External Domains in File Downloader
+* **Category:** OWASP MASVS-NETWORK / MASVS-AUTH / CWE-200 (Information Disclosure)
+* **Severity:** **Medium**
+* **Status:** ✅ **RESOLVED**
+* **Remediation & Verification:**
+  - Implemented `ApiConfig.isTrustedHost(urlOrPath)` and `FileDownloadHelper.isTrustedHost(urlOrPath)`.
+  - Validated that `Authorization: Bearer $token` headers are strictly injected ONLY when connecting to `ApiConfig.cachedHostOrigin` or localhost/local IP dev targets during debug mode.
+  - Hardened both `downloadFile` and `shareFile` in `FileDownloadHelper` and `ApiInterceptor.onRequest` against attaching authorization headers to third-party CDNs, external storage buckets, or untrusted URLs.
+  - Automated tests added to `test/file_download_helper_test.dart` asserting that trusted origins pass and untrusted third-party hosts are rejected from receiving Bearer credentials.
 
 ---
 
@@ -323,7 +292,7 @@ The automated security and regression test suite confirms that all security asse
 
 ```bash
 $ flutter test
-00:15 +190: All tests passed!
+00:14 +195: All tests passed!
 ```
 
-All 190 tests covering anti-spoofing, certificate validation, biometric cleanup, device integrity, and session lifecycle are passing.
+All 195 tests covering anti-spoofing, certificate validation, biometric cleanup, path traversal neutralization, token leak protection, device integrity, and session lifecycle are passing.

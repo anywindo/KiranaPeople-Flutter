@@ -147,13 +147,6 @@ class _AttendanceMapModalState extends State<AttendanceMapModal> {
                               decoration: const BoxDecoration(
                                 color: AppColors.primary,
                                 shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 6,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
                               ),
                               child: const Icon(
                                 Icons.apartment_rounded,
@@ -170,13 +163,6 @@ class _AttendanceMapModalState extends State<AttendanceMapModal> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(6),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 4,
-                                    offset: Offset(0, 1),
-                                  ),
-                                ],
                               ),
                               child: Text(
                                 _officeName,
@@ -225,13 +211,6 @@ class _AttendanceMapModalState extends State<AttendanceMapModal> {
                             decoration: const BoxDecoration(
                               color: Color(0xFF0284C7),
                               shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 6,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
                             ),
                             child: const Icon(
                               Icons.directions_walk_rounded,

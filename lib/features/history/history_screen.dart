@@ -585,15 +585,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                   : const Color(0xFFE2E8F0),
                               width: 1.0,
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(
-                                  alpha: context.isDarkMode ? 0.35 : 0.08,
-                                ),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,

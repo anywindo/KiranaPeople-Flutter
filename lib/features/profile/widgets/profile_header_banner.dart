@@ -126,13 +126,6 @@ class ProfileHeaderBanner extends StatelessWidget {
                                 : Colors.white,
                             width: 3.5,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.18),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
                         ),
                         child: ClipOval(
                           child:
@@ -348,13 +341,6 @@ class ProfileStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
                                         : Colors.white,
                                     width: 3.5,
                                   ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.18),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
                                 ),
                                 child: ClipOval(
                                   child:
@@ -514,22 +500,6 @@ class ProfileStickyHeaderDelegate extends SliverPersistentHeaderDelegate {
                               : const Color(0xFFCBD5E1).withValues(alpha: 0.8),
                           width: 1.2,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(
-                              alpha: isDark ? 0.35 : 0.08,
-                            ),
-                            blurRadius: 20,
-                            offset: const Offset(0, 6),
-                          ),
-                          BoxShadow(
-                            color: Colors.black.withValues(
-                              alpha: isDark ? 0.18 : 0.04,
-                            ),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(32),

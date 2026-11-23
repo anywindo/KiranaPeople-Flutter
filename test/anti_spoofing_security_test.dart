@@ -12,6 +12,24 @@ import 'package:kirana_people/data/repositories/attendance_repository.dart';
 class MockApiClient extends ApiClient {
   String? lastPath;
   FormData? lastFormData;
+  String? lastPostPath;
+  dynamic lastPostData;
+
+  @override
+  Future<Response> post(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+  }) async {
+    lastPostPath = path;
+    lastPostData = data;
+    return Response(
+      requestOptions: RequestOptions(path: path),
+      statusCode: 200,
+      data: {'status': 'success'},
+    );
+  }
 
   @override
   Future<Response> postMultipart(
@@ -116,7 +134,7 @@ void main() {
       expect(fields['integrity_signals'], contains('debug_bypass'));
     });
 
-    test('submission is refused client-side when the device is compromised', () async {
+    test('submission is refused client-side when the device is compromised and audits incident to server (SEC-08)', () async {
       final messenger =
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
       const channel =
@@ -138,6 +156,10 @@ void main() {
         throwsException,
       );
       expect(mockClient.lastFormData, isNull);
+      expect(mockClient.lastPostPath, equals(ApiEndpoints.securityIncident));
+      expect(mockClient.lastPostData, isNotNull);
+      expect(mockClient.lastPostData['incident_type'], equals('COMPROMISED_ATTENDANCE_BLOCKED'));
+      expect(mockClient.lastPostData['is_hooked'], isTrue);
 
       messenger.setMockMethodCallHandler(channel, null);
       DeviceSecurityService().resetCache();

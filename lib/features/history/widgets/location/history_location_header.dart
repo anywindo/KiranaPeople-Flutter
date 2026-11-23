@@ -146,15 +146,6 @@ class HistoryLocationHeader extends StatelessWidget {
                             ? context.surfaceColor
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(9),
-                        boxShadow: selectedTab == 0
-                            ? [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.06),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ]
-                            : null,
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -194,15 +185,6 @@ class HistoryLocationHeader extends StatelessWidget {
                             ? context.surfaceColor
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(9),
-                        boxShadow: selectedTab == 1
-                            ? [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.06),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 1),
-                                ),
-                              ]
-                            : null,
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

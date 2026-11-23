@@ -167,7 +167,6 @@ class OfflineCardWarning extends ConsumerWidget {
         isDark ? const Color(0xFFFECACA) : const Color(0xFF991B1B);
     final textColor =
         isDark ? const Color(0xFFFCA5A5) : const Color(0xFF7F1D1D);
-    final shadowColor = Colors.black.withValues(alpha: isDark ? 0.35 : 0.08);
 
     return Container(
       width: double.infinity,
@@ -177,13 +176,6 @@ class OfflineCardWarning extends ConsumerWidget {
         color: bgColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: borderColor, width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: shadowColor,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

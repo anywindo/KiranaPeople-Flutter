@@ -35,13 +35,6 @@ class PrivacyPolicySheet extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.surfaceColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.15),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
-          ),
-        ],
       ),
       child: Column(
         children: [
@@ -190,13 +183,6 @@ class PrivacyPolicySheet extends StatelessWidget {
             decoration: BoxDecoration(
               color: context.surfaceColor,
               border: Border(top: BorderSide(color: context.borderColor)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -2),
-                ),
-              ],
             ),
             child: SizedBox(
               width: double.infinity,

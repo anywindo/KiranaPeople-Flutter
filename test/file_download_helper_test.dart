@@ -120,6 +120,37 @@ void main() {
         equals('config.json'),
       );
     });
+
+    test('isTrustedHost validates trusted vs untrusted domains (SEC-15)', () {
+      expect(
+        FileDownloadHelper.isTrustedHost('https://app.kiranapeople.com/storage/photos/test.jpg'),
+        isTrue,
+      );
+      expect(
+        FileDownloadHelper.isTrustedHost('/storage/photos/test.jpg'),
+        isTrue,
+      );
+      expect(
+        FileDownloadHelper.isTrustedHost('http://localhost:8000/api/v1/file.pdf'),
+        isTrue,
+      );
+      expect(
+        FileDownloadHelper.isTrustedHost('http://10.0.2.2:8000/file.png'),
+        isTrue,
+      );
+      expect(
+        FileDownloadHelper.isTrustedHost('https://evil-third-party.com/payload.jpg'),
+        isFalse,
+      );
+      expect(
+        FileDownloadHelper.isTrustedHost('https://attacker.org/exfiltrate'),
+        isFalse,
+      );
+      expect(
+        FileDownloadHelper.isTrustedHost(''),
+        isFalse,
+      );
+    });
   });
 
   group('PhotoPreviewDialog Download Button Tests', () {

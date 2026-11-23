@@ -24,6 +24,37 @@ class ApiConfig {
     }
   }
 
+  /// SECURITY (SEC-15): Validates whether a target URL/path belongs to the trusted application API host.
+  /// Used by interceptors and download helpers to prevent leaking Bearer tokens to untrusted third-party hosts.
+  static bool isTrustedHost(String urlOrPath) {
+    final trimmed = urlOrPath.trim();
+    if (trimmed.isEmpty) return false;
+    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+      return true; // Relative or local path resolves to trusted application backend
+    }
+    try {
+      final uri = Uri.parse(trimmed);
+      final host = uri.host.toLowerCase();
+      final trustedHost = Uri.parse(cachedHostOrigin).host.toLowerCase();
+      if (host == trustedHost) {
+        return true;
+      }
+      if (kDebugMode) {
+        if (host == 'localhost' ||
+            host == '127.0.0.1' ||
+            host == '10.0.2.2' ||
+            host.endsWith('.test') ||
+            host.startsWith('192.168.') ||
+            host.startsWith('10.')) {
+          return true;
+        }
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   static Future<String> getBaseUrl() async {
     if (!kDebugMode) return defaultBaseUrl;
     if (_devBaseUrl != null && _devBaseUrl!.isNotEmpty) {

@@ -405,7 +405,7 @@ class _OnboardingPasswordScreenState
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      elevation: _isFormValid ? 2 : 0,
+                      elevation: 0,
                     ),
                     onPressed: (_isFormValid && !authState.isLoading)
                         ? _submit

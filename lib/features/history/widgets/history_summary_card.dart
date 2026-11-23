@@ -227,22 +227,6 @@ class _HistorySummaryCardState extends State<HistorySummaryCard>
           color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
           width: 1.5,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: isDark ? 0.35 : 0.08,
-            ),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha: isDark ? 0.18 : 0.04,
-            ),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       padding: const EdgeInsets.all(16),
       child: Column(

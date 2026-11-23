@@ -59,6 +59,22 @@ class AttendanceRepository {
       formDataMap['is_rooted'] = isDeviceRooted ? '1' : '0';
     }
     if (report.shouldBlock) {
+      // SECURITY (SEC-08): Transmit security incident audit to backend so security
+      // operations have full forensic visibility into modified device abuse attempts.
+      await reportSecurityIncident(
+        incidentType: 'COMPROMISED_ATTENDANCE_BLOCKED',
+        report: report,
+        additionalDetails: {
+          'event_type': eventType.value,
+          'latitude': latitude,
+          'longitude': longitude,
+          'is_mocked': isMocked,
+          'accuracy': ?accuracy,
+          'altitude': ?altitude,
+          'shift_id': ?shiftId,
+        },
+      );
+
       throw Exception(
         'Perangkat tidak lolos pemeriksaan keamanan. Presensi tidak dapat dilakukan pada perangkat yang dimodifikasi.',
       );
@@ -130,5 +146,38 @@ class AttendanceRepository {
       }
     }
     return [];
+  }
+
+  /// SECURITY (SEC-08): Transmits a security audit incident to the backend when
+  /// a modified/compromised device or spoofing attempt is detected.
+  Future<void> reportSecurityIncident({
+    required String incidentType,
+    required DeviceSecurityReport report,
+    Map<String, dynamic>? additionalDetails,
+  }) async {
+    try {
+      final payload = <String, dynamic>{
+        'incident_type': incidentType,
+        'timestamp': DateTime.now().toUtc().toIso8601String(),
+        'integrity_status': report.status.value,
+        'is_rooted': report.rooted,
+        'is_hooked': report.hooked,
+        'is_emulator': report.emulator,
+        'is_debugger': report.debugger,
+        'is_developer_mode': report.developerMode,
+        'fake_gps_app_installed': report.fakeGpsAppInstalled,
+        'integrity_signals': report.signals,
+        if (report.appSignature != null) 'app_signature': report.appSignature,
+      };
+      if (additionalDetails != null) {
+        payload['details'] = additionalDetails;
+      }
+      await _apiClient.post(
+        ApiEndpoints.securityIncident,
+        data: payload,
+      );
+    } catch (_) {
+      // Best-effort audit transmission; failure to log must never suppress client-side enforcement
+    }
   }
 }

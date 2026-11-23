@@ -48,6 +48,10 @@ class FileDownloadHelper {
     return clean;
   }
 
+  /// SECURITY (SEC-15): Validates whether a target URL belongs to the trusted API host.
+  /// Bearer tokens are NEVER attached to third-party or untrusted domains to prevent token theft.
+  static bool isTrustedHost(String urlOrPath) => ApiConfig.isTrustedHost(urlOrPath);
+
   /// Extracts the original filename from a URL or file path and sanitizes it.
   static String extractFileName(String urlOrPath, {String? defaultName}) {
     String? rawName;
@@ -157,11 +161,21 @@ class FileDownloadHelper {
           bytes = await cachedFile.readAsBytes();
         } else {
           // 2. Fetch directly from network
-          final dio = dioClient ?? Dio();
-          final token = await SecureStorageService().getToken();
+          final dio = dioClient ??
+              Dio(
+                BaseOptions(
+                  connectTimeout: const Duration(seconds: 30),
+                  receiveTimeout: const Duration(seconds: 30),
+                  sendTimeout: const Duration(seconds: 30),
+                ),
+              );
           final headers = <String, dynamic>{};
-          if (token != null && token.isNotEmpty) {
-            headers['Authorization'] = 'Bearer $token';
+          // SECURITY (SEC-15): Only attach authorization header if target host is trusted
+          if (isTrustedHost(fullUrl)) {
+            final token = await SecureStorageService().getToken();
+            if (token != null && token.isNotEmpty) {
+              headers['Authorization'] = 'Bearer $token';
+            }
           }
 
           final response = await dio.get<List<int>>(
@@ -274,11 +288,21 @@ class FileDownloadHelper {
           localFilePath = target.path;
         } else {
           // 2. Fetch directly from network and save to temp file
-          final dio = dioClient ?? Dio();
-          final token = await SecureStorageService().getToken();
+          final dio = dioClient ??
+              Dio(
+                BaseOptions(
+                  connectTimeout: const Duration(seconds: 30),
+                  receiveTimeout: const Duration(seconds: 30),
+                  sendTimeout: const Duration(seconds: 30),
+                ),
+              );
           final headers = <String, dynamic>{};
-          if (token != null && token.isNotEmpty) {
-            headers['Authorization'] = 'Bearer $token';
+          // SECURITY (SEC-15): Only attach authorization header if target host is trusted
+          if (isTrustedHost(fullUrl)) {
+            final token = await SecureStorageService().getToken();
+            if (token != null && token.isNotEmpty) {
+              headers['Authorization'] = 'Bearer $token';
+            }
           }
 
           final tempDir = await getTemporaryDirectory();

@@ -23,18 +23,6 @@ class LoginHeader extends StatelessWidget {
               color: isDark ? const Color(0xFF475569) : const Color(0xFF1E293B),
               width: 2.0,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.60 : 0.16),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
           child: Image.asset(
             'assets/images/logoKiranaSquare.jpeg',

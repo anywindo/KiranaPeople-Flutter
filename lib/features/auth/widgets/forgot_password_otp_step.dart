@@ -225,15 +225,6 @@ class ForgotPasswordOtpStep extends StatelessWidget {
                   ? AppColors.primary
                   : const Color(0xFFE5E7EB),
               borderRadius: BorderRadius.circular(12),
-              boxShadow: isOtpValid && !isLoading
-                  ? [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.30),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ]
-                  : [],
             ),
             child: Material(
               color: Colors.transparent,
