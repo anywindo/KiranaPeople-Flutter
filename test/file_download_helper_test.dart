@@ -139,6 +139,14 @@ void main() {
         isTrue,
       );
       expect(
+        FileDownloadHelper.isTrustedHost('https://terriblenight.onrender.com/api/v1/attendance/today'),
+        isTrue,
+      );
+      expect(
+        ApiConfig.isTrustedHost('https://staging.internal.com/api/v1/test', 'https://staging.internal.com/api/v1'),
+        isTrue,
+      );
+      expect(
         FileDownloadHelper.isTrustedHost('https://evil-third-party.com/payload.jpg'),
         isFalse,
       );

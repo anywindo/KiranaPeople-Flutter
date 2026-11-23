@@ -153,29 +153,38 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  bool _isLoggingOut = false;
+
   Future<void> logout() async {
-    // 1. Immediately reset state to unauthenticated so UI redirects to LoginScreen without waiting
-    state = const AuthState(
-      isCheckingSession: false,
-      isAuthenticated: false,
-      isLoading: false,
-      user: null,
-    );
+    if (_isLoggingOut) return;
+    _isLoggingOut = true;
 
-    // 2. Clear image cache
-    PaintingBinding.instance.imageCache.clear();
-    PaintingBinding.instance.imageCache.clearLiveImages();
-
-    // 3. Reset in-memory attendance and history states
     try {
-      ref.read(todayAttendanceProvider.notifier).reset();
-      ref.read(historyProvider.notifier).reset();
-    } catch (_) {}
+      // 1. Immediately reset state to unauthenticated so UI redirects to LoginScreen without waiting
+      state = const AuthState(
+        isCheckingSession: false,
+        isAuthenticated: false,
+        isLoading: false,
+        user: null,
+      );
 
-    // 4. Clear storage and notify backend
-    try {
-      await _repository.logout();
-    } catch (_) {}
+      // 2. Clear image cache
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
+
+      // 3. Reset in-memory attendance and history states
+      try {
+        ref.read(todayAttendanceProvider.notifier).reset();
+        ref.read(historyProvider.notifier).reset();
+      } catch (_) {}
+
+      // 4. Clear storage and notify backend
+      try {
+        await _repository.logout();
+      } catch (_) {}
+    } finally {
+      _isLoggingOut = false;
+    }
   }
 
   Future<bool> changePassword({

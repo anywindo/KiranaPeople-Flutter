@@ -26,7 +26,7 @@ class ApiConfig {
 
   /// SECURITY (SEC-15): Validates whether a target URL/path belongs to the trusted application API host.
   /// Used by interceptors and download helpers to prevent leaking Bearer tokens to untrusted third-party hosts.
-  static bool isTrustedHost(String urlOrPath) {
+  static bool isTrustedHost(String urlOrPath, [String? currentBaseUrl]) {
     final trimmed = urlOrPath.trim();
     if (trimmed.isEmpty) return false;
     if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
@@ -39,13 +39,40 @@ class ApiConfig {
       if (host == trustedHost) {
         return true;
       }
+
+      // Check provided currentBaseUrl if available
+      if (currentBaseUrl != null && currentBaseUrl.isNotEmpty) {
+        final baseUri = Uri.tryParse(currentBaseUrl);
+        if (baseUri != null && baseUri.host.isNotEmpty && baseUri.host.toLowerCase() == host) {
+          return true;
+        }
+      }
+
+      // Check current in-memory dev base url
+      if (_devBaseUrl != null && _devBaseUrl!.isNotEmpty) {
+        final devUri = Uri.tryParse(_devBaseUrl!);
+        if (devUri != null && devUri.host.isNotEmpty && devUri.host.toLowerCase() == host) {
+          return true;
+        }
+      }
+
+      // Check known first-party staging/backend domains
+      if (host.endsWith('.onrender.com') ||
+          host == 'onrender.com' ||
+          host.endsWith('.kiranapeople.com') ||
+          host == 'kiranapeople.com') {
+        return true;
+      }
+
       if (kDebugMode) {
         if (host == 'localhost' ||
             host == '127.0.0.1' ||
             host == '10.0.2.2' ||
             host.endsWith('.test') ||
+            host.endsWith('.local') ||
             host.startsWith('192.168.') ||
-            host.startsWith('10.')) {
+            host.startsWith('10.') ||
+            host.startsWith('172.')) {
           return true;
         }
       }
