@@ -217,5 +217,71 @@ void main() {
 
       expect(find.text('Belum Masuk Kerja'), findsOneWidget);
     });
+
+    testWidgets('AttendanceActionButton shows active Pulang Kerja when hasStartedShift is true without break requirement', (tester) async {
+      bool actionPressed = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: AttendanceActionButton(
+              isLoading: false,
+              hasEndedShift: false,
+              hasStartedShift: true,
+              hasStartedBreak: false,
+              hasEndedBreak: false,
+              isOnBreak: false,
+              activeSegment: 0, // Kerja mode
+              selectedShift: null,
+              onAction: () => actionPressed = true,
+            ),
+          ),
+        ),
+      );
+
+      // Must display 'Pulang Kerja' and NOT 'Wajib Istirahat Dahulu'
+      expect(find.text('Pulang Kerja'), findsOneWidget);
+      expect(find.text('Wajib Istirahat Dahulu'), findsNothing);
+
+      // Tap 'Pulang Kerja'
+      await tester.tap(find.text('Pulang Kerja'));
+      await tester.pump();
+
+      expect(actionPressed, isTrue);
+    });
+
+    testWidgets('AttendanceActionButton shows active Pulang Kerja when isOnBreak is true without Selesaikan Istirahat Dahulu restriction', (tester) async {
+      bool actionPressed = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: AttendanceActionButton(
+              isLoading: false,
+              hasEndedShift: false,
+              hasStartedShift: true,
+              hasStartedBreak: true,
+              hasEndedBreak: false,
+              isOnBreak: true,
+              activeSegment: 0, // Kerja mode
+              selectedShift: null,
+              onAction: () => actionPressed = true,
+            ),
+          ),
+        ),
+      );
+
+      // Must display 'Pulang Kerja' and NOT 'Selesaikan Istirahat Dahulu'
+      expect(find.text('Pulang Kerja'), findsOneWidget);
+      expect(find.text('Selesaikan Istirahat Dahulu'), findsNothing);
+
+      // Tap 'Pulang Kerja'
+      await tester.tap(find.text('Pulang Kerja'));
+      await tester.pump();
+
+      expect(actionPressed, isTrue);
+    });
   });
 }

@@ -222,50 +222,6 @@ class AttendanceActionButton extends StatelessWidget {
       if (!hasStartedShift) {
         label = 'Masuk Kerja';
         icon = Icons.work_rounded;
-      } else if (!hasStartedBreak) {
-        return (
-          Container(
-            width: double.infinity,
-            height: 50,
-            decoration: BoxDecoration(
-              color: disabledBg,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Center(
-              child: Text(
-                'Wajib Istirahat Dahulu',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: disabledText,
-                ),
-              ),
-            ),
-          ),
-          'must_break_first',
-        );
-      } else if (isOnBreak) {
-        return (
-          Container(
-            width: double.infinity,
-            height: 50,
-            decoration: BoxDecoration(
-              color: disabledBg,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Center(
-              child: Text(
-                'Selesaikan Istirahat Dahulu',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: disabledText,
-                ),
-              ),
-            ),
-          ),
-          'finish_break_first',
-        );
       } else {
         label = 'Pulang Kerja';
         icon = Icons.home_rounded;
