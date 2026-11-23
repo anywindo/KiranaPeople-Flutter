@@ -195,14 +195,16 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
             ? todayData!.availableShifts!.first
             : null);
 
-    final targetAction = AttendanceEventTimeline.resolveTargetAction(
-      data: todayData,
-      activeSegment: _activeSegment,
-    );
     final timeline = AttendanceEventTimeline.fromData(
       data: todayData,
       selectedShift: selectedShift,
     );
+    final targetAction = _activeSegment == 0 && timeline.hasStartedShift
+        ? AttendanceEventType.endShift
+        : AttendanceEventTimeline.resolveTargetAction(
+            data: todayData,
+            activeSegment: _activeSegment,
+          );
     final events = todayData?.events ?? [];
     final isBannerVisible = ref.watch(isOfflineBannerVisibleProvider);
 

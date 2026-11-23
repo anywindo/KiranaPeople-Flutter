@@ -156,10 +156,7 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen>
     if (!hasStartShift) {
       return AttendanceEventType.startShift;
     }
-    if (!hasStartBreak) {
-      return AttendanceEventType.startBreak;
-    }
-    if (!hasEndBreak) {
+    if (hasStartBreak && !hasEndBreak) {
       return AttendanceEventType.endBreak;
     }
     if (!hasEndShift) {
@@ -308,19 +305,11 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen>
     );
     final isOnBreak = hasStartedBreak && !hasEndedBreak;
 
-    final isBeforeBreak = Shift.isBeforeBreakTime(selectedShift);
-    final isBreakActionDisabled =
-        hasStartedShift && !hasStartedBreak && isBeforeBreak;
-
     final targetAction = _resolveTargetAction(events);
 
     String actionBtnLabel = 'Ambil Presensi: Masuk Kerja';
     if (!hasStartedShift) {
       actionBtnLabel = 'Ambil Presensi: Masuk Kerja';
-    } else if (!hasStartedBreak) {
-      actionBtnLabel = isBreakActionDisabled
-          ? 'Belum Waktunya Istirahat'
-          : 'Ambil Presensi: Mulai Istirahat';
     } else if (isOnBreak) {
       actionBtnLabel = 'Ambil Presensi: Selesai Istirahat';
     } else if (!hasEndedShift) {
@@ -516,8 +505,8 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen>
                         officeLatLng: officeLatLng,
                         officeName: officeName,
                         selectedShift: selectedShift,
-                        isActionDisabled: _currentPosition != null &&
-                            (hasEndedShift || isBreakActionDisabled),
+                        isActionDisabled:
+                            _currentPosition != null && hasEndedShift,
                         actionBtnLabel: effectiveActionBtnLabel,
                         onAction: effectiveOnAction,
                         onResolveLocation: _resolveLocationIssue,

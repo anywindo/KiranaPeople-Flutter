@@ -38,15 +38,15 @@ class ApiInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     // Construct explicit full URL so Dio doesn't strip baseUrl subpath (e.g. /api/v1)
+    final currentBaseUrl = await ApiConfig.getBaseUrl();
     if (!options.path.startsWith('http://') &&
         !options.path.startsWith('https://')) {
-      final currentBaseUrl = await ApiConfig.getBaseUrl();
       options.path = resolveFullPath(currentBaseUrl, options.path);
     }
 
     // Add Bearer Token if present (SECURITY: only attach token to trusted hosts to avoid token leakage)
     final token = await storage.getToken();
-    if (token != null && token.isNotEmpty && ApiConfig.isTrustedHost(options.path)) {
+    if (token != null && token.isNotEmpty && ApiConfig.isTrustedHost(options.path, currentBaseUrl)) {
       options.headers['Authorization'] = 'Bearer $token';
     }
 
@@ -155,7 +155,8 @@ class ApiInterceptor extends Interceptor {
         if (!hasCustomMessage) {
           message = 'Sesi Anda telah berakhir atau identitas login salah.';
         }
-        if (!err.requestOptions.path.contains('/login')) {
+        final path = err.requestOptions.path.toLowerCase();
+        if (!path.contains('/login') && !path.contains('/logout')) {
           onUnauthorized?.call();
         }
       } else if (response.statusCode == 429) {

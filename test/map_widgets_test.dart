@@ -239,6 +239,45 @@ void main() {
       expect(resolved, isTrue);
     });
 
+    testWidgets('MapAttendanceActionCard renders Pulang Kerja action state without break restriction', (tester) async {
+      bool actionTapped = false;
+      final shift = Shift(
+        id: 1,
+        name: 'Pagi',
+        startTime: '08:00:00',
+        endTime: '17:00:00',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: MapAttendanceActionCard(
+                hasLocation: true,
+                isInsideRadius: true,
+                distance: 10.0,
+                officeLatLng: const LatLng(-6.9897, 109.8765),
+                officeName: 'Kantor Utama',
+                selectedShift: shift,
+                isActionDisabled: false,
+                actionBtnLabel: 'Ambil Presensi: Pulang Kerja',
+                onAction: () => actionTapped = true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Dalam Radius Presensi'), findsOneWidget);
+      expect(find.text('Ambil Presensi: Pulang Kerja'), findsOneWidget);
+
+      await tester.tap(find.text('Ambil Presensi: Pulang Kerja'));
+      await tester.pump();
+
+      expect(actionTapped, isTrue);
+    });
+
     testWidgets('MapViewScreen renders bottom feathered gradient over map', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
