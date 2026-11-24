@@ -165,34 +165,6 @@
       text-align: center;
     }
 
-    .badge-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 16px;
-      background: rgba(255, 33, 164, 0.12);
-      border: 1px solid rgba(255, 33, 164, 0.3);
-      color: var(--primary);
-      border-radius: var(--radius-full);
-      font-size: 0.85rem;
-      font-weight: 700;
-      margin-bottom: 24px;
-    }
-
-    .badge-dot {
-      width: 8px;
-      height: 8px;
-      background-color: var(--accent-green);
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-      70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-    }
-
     .hero-title {
       font-size: clamp(2.3rem, 5vw, 3.6rem);
       font-weight: 800;
@@ -549,11 +521,6 @@
   <!-- Hero Section -->
   <main class="container">
     <section class="hero">
-      <div class="badge-pill">
-        <span class="badge-dot"></span>
-        <span id="releaseVersion">Versi v1.0.6 Stabil</span>
-      </div>
-
       <h1 class="hero-title">
         Presensi Tim Cepat,<br>
         Akurat & Terverifikasi.
@@ -572,6 +539,10 @@
           </p>
 
           <div class="download-meta">
+            <div class="download-meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+              <span id="releaseVersion">v1.0.6</span>
+            </div>
             <div class="download-meta-item">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               <span id="assetSize">~35 MB</span>
@@ -773,7 +744,7 @@
         
         if (data.tag_name) {
           const versionEl = document.getElementById('releaseVersion');
-          if (versionEl) versionEl.textContent = `Versi ${data.tag_name} Stabil`;
+          if (versionEl) versionEl.textContent = data.tag_name;
         }
 
         if (data.published_at) {
