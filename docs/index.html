@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS CDN with Baseline Configuration -->
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -42,7 +42,10 @@
   </script>
 
   <style>
-    /* Baseline CSS Enhancements */
+    /* Strict Squared Corners & Baseline CSS */
+    *, ::before, ::after {
+      border-radius: 0 !important;
+    }
     @supports (text-wrap: balance) {
       h1, h2, h3, h4, h5, h6 {
         text-wrap: balance;
@@ -66,36 +69,35 @@
 <body class="min-h-dvh bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100 transition-colors duration-150 ease-out motion-reduce:transition-none">
 
   <!-- Accessible Skip Link -->
-  <a href="#main-download" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-slate-900 focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 dark:focus:bg-white dark:focus:text-slate-900 dark:focus:ring-offset-slate-950">
+  <a href="#main-download" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-slate-900 focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:outline-none focus:ring-2 focus:ring-pink-600 focus:ring-offset-2 dark:focus:bg-white dark:focus:text-slate-900 dark:focus:ring-offset-slate-950">
     Lewati langsung ke tombol unduh
   </a>
 
-  <!-- Navigation Bar (Safe-Area Aware, Fixed z-index) -->
-  <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-sm pt-[env(safe-area-inset-top)] dark:border-slate-800 dark:bg-slate-900/90 transition-colors duration-150 ease-out motion-reduce:transition-none" role="banner">
+  <!-- Simple Header (Safe-Area Aware, Squared) -->
+  <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-sm pt-[env(safe-area-inset-top)] dark:border-slate-800 dark:bg-slate-900/95 transition-colors duration-150 ease-out motion-reduce:transition-none" role="banner">
     <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
       
       <!-- Brand -->
-      <a href="#" class="flex items-center gap-3 text-slate-900 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-2 rounded-lg">
-        <img src="assets/app-icon.png" alt="Logo Kirana People" class="size-10 rounded-lg border border-slate-200 object-cover shadow-sm dark:border-slate-800" width="40" height="40">
+      <a href="#" class="flex items-center gap-3 text-slate-900 dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600">
+        <img src="assets/app-icon.png" alt="Logo Kirana People" class="size-9 border border-slate-200 object-cover dark:border-slate-800" width="36" height="36">
         <div>
           <span class="block text-base font-extrabold leading-tight">Kirana People</span>
           <span class="block text-xs font-medium text-slate-500 dark:text-slate-400">Presensi Karyawan</span>
         </div>
       </a>
 
-      <!-- Action Items & Theme Toggle -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <a href="#install" class="hidden sm:inline-flex text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white px-3 py-1.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 transition-colors duration-150 ease-out motion-reduce:transition-none">
-          Panduan Pasang
+      <!-- Navigation & Controls -->
+      <div class="flex items-center gap-3">
+        <a href="#install" class="hidden sm:inline-flex text-xs font-semibold uppercase tracking-wider text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 transition-colors duration-150 ease-out motion-reduce:transition-none">
+          Panduan
         </a>
-        <a href="#features" class="hidden sm:inline-flex text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white px-3 py-1.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 transition-colors duration-150 ease-out motion-reduce:transition-none">
+        <a href="#features" class="hidden sm:inline-flex text-xs font-semibold uppercase tracking-wider text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 transition-colors duration-150 ease-out motion-reduce:transition-none">
           Fitur
         </a>
 
-        <!-- Dark / Light Mode Toggle Button (with aria-label) -->
-        <button type="button" id="themeToggle" aria-label="Ubah tema tampilan terang atau gelap" class="inline-flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900 transition-colors duration-150 ease-out motion-reduce:transition-none">
-          <!-- Sun Icon (shown in dark mode) -->
-          <svg id="sunIcon" class="hidden size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <!-- Squared Theme Toggle -->
+        <button type="button" id="themeToggle" aria-label="Ubah tema tampilan terang atau gelap" class="inline-flex size-9 items-center justify-center border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-offset-slate-900 transition-colors duration-150 ease-out motion-reduce:transition-none">
+          <svg id="sunIcon" class="hidden size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -106,8 +108,7 @@
             <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
           </svg>
-          <!-- Moon Icon (shown in light mode) -->
-          <svg id="moonIcon" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg id="moonIcon" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
         </button>
@@ -116,167 +117,147 @@
     </div>
   </header>
 
-  <!-- Main Content Wrapper -->
+  <!-- Main Container -->
   <main class="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8" id="main-content">
     
-    <!-- Hero / Primary Download Section -->
-    <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8 mb-8" id="main-download" aria-labelledby="heading-download">
+    <!-- Hero / Main Download Section (Squared Box) -->
+    <section class="border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8 mb-8" id="main-download" aria-labelledby="heading-download">
       
       <div class="max-w-2xl">
-        <!-- Status Pill -->
-        <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-pink-50 px-3 py-1 text-xs font-semibold text-pink-700 dark:border-pink-900/50 dark:bg-pink-950/40 dark:text-pink-300">
-          <span class="size-2 rounded-full bg-emerald-500" aria-hidden="true"></span>
-          <span>Rilis Stabil</span>
+        <!-- Squared Status Tag -->
+        <div class="mb-4 inline-flex items-center gap-2 border border-pink-300 bg-pink-50 px-2.5 py-1 text-xs font-bold text-pink-700 dark:border-pink-900 dark:bg-pink-950/60 dark:text-pink-300">
+          <span class="size-2 bg-emerald-500" aria-hidden="true"></span>
+          <span>RILIS STABIL</span>
           <span class="text-pink-400 dark:text-pink-600" aria-hidden="true">&bull;</span>
-          <span id="releaseVersion" class="tabular-nums font-mono font-bold">v1.0.6</span>
+          <span id="releaseVersion" class="tabular-nums font-mono">v1.0.6</span>
         </div>
 
-        <h1 id="heading-download" class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl lg:text-4xl">
+        <h1 id="heading-download" class="text-2xl font-extrabold text-slate-900 dark:text-white sm:text-3xl lg:text-4xl">
           Unduh Aplikasi Kirana People
         </h1>
 
-        <p class="mt-3 text-base text-slate-600 dark:text-slate-300 sm:text-lg">
-          Aplikasi mobile resmi untuk pencatatan presensi kerja, verifikasi radius geofence GPS, dan validasi foto wajah AI di perangkat Android.
+        <p class="mt-3 text-sm text-slate-600 dark:text-slate-300 sm:text-base">
+          Aplikasi presensi mobile resmi dengan validasi geofence GPS, AI deteksi wajah liveness, dan pencatatan jam kerja untuk perangkat Android.
         </p>
       </div>
 
-      <!-- Action Panel & QR Card -->
+      <!-- Action Area & QR Code -->
       <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center">
         
-        <!-- Primary Action -->
+        <!-- Primary Download Action -->
         <div class="lg:col-span-8">
-          <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-release.apk" id="mainDownloadBtn" class="inline-flex w-full sm:w-auto items-center justify-center gap-3 rounded-lg bg-pink-600 px-6 py-4 text-base font-semibold text-white shadow-sm hover:bg-pink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 transition-colors duration-150 ease-out motion-reduce:transition-none">
+          <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-release.apk" id="mainDownloadBtn" class="inline-flex w-full sm:w-auto items-center justify-center gap-3 border border-pink-600 bg-pink-600 px-6 py-3.5 text-base font-bold text-white hover:bg-pink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 transition-colors duration-150 ease-out motion-reduce:transition-none">
             <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            <span>Unduh File APK (Universal)</span>
+            <span>UNDUH FILE APK (UNIVERSAL)</span>
           </a>
 
-          <!-- Metadata Tags -->
+          <!-- Metadata -->
           <div class="mt-4 flex flex-wrap items-center gap-y-2 gap-x-4 text-xs font-medium text-slate-500 dark:text-slate-400">
-            <div class="flex items-center gap-1.5">
-              <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              <span>Ukuran: <strong id="assetSize" class="tabular-nums font-mono text-slate-700 dark:text-slate-200">~35 MB</strong></span>
-            </div>
+            <div>Ukuran: <strong id="assetSize" class="tabular-nums font-mono text-slate-800 dark:text-slate-200">~35 MB</strong></div>
+            <div>&bull;</div>
+            <div>Diperbarui: <strong id="releaseDate" class="tabular-nums font-mono text-slate-800 dark:text-slate-200">24 Nov 2026</strong></div>
+            <div>&bull;</div>
+            <div>Kompatibilitas: <strong class="text-slate-800 dark:text-slate-200">Android 5.0+</strong></div>
+          </div>
 
-            <div class="flex items-center gap-1.5">
-              <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-              <span>Diperbarui: <strong id="releaseDate" class="tabular-nums font-mono text-slate-700 dark:text-slate-200">24 Nov 2026</strong></span>
-            </div>
-
-            <div class="flex items-center gap-1.5">
-              <svg class="size-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              </svg>
-              <span>Target: <strong class="text-slate-700 dark:text-slate-200">Android 5.0+</strong></span>
+          <!-- Architecture Variants -->
+          <div class="mt-6 border-t border-slate-100 pt-4 dark:border-slate-800">
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5">
+              Berkas Per Arsitektur CPU:
+            </span>
+            <div class="flex flex-wrap gap-2">
+              <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-arm64-v8a-release.apk" class="inline-flex items-center gap-1.5 border border-slate-300 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 transition-colors duration-150 ease-out motion-reduce:transition-none">
+                <span>ARM64 (Modern)</span>
+                <span class="tabular-nums font-mono text-slate-500 dark:text-slate-400">~34 MB</span>
+              </a>
+              <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-armeabi-v7a-release.apk" class="inline-flex items-center gap-1.5 border border-slate-300 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 transition-colors duration-150 ease-out motion-reduce:transition-none">
+                <span>ARMv7a (32-bit)</span>
+                <span class="tabular-nums font-mono text-slate-500 dark:text-slate-400">~29 MB</span>
+              </a>
+              <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-x86_64-release.apk" class="inline-flex items-center gap-1.5 border border-slate-300 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 transition-colors duration-150 ease-out motion-reduce:transition-none">
+                <span>x86_64 (Emulator)</span>
+                <span class="tabular-nums font-mono text-slate-500 dark:text-slate-400">~36 MB</span>
+              </a>
+              <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-release.aab" class="inline-flex items-center gap-1.5 border border-slate-300 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 transition-colors duration-150 ease-out motion-reduce:transition-none">
+                <span>Bundle Play Store (AAB)</span>
+              </a>
             </div>
           </div>
         </div>
 
-        <!-- QR Code Card for Mobile Scanning -->
-        <div class="lg:col-span-4 flex sm:inline-flex flex-col items-center justify-center rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
-          <div class="size-28 rounded-md bg-white p-1.5 border border-slate-200 shadow-sm dark:border-slate-700">
+        <!-- Squared QR Code Box -->
+        <div class="lg:col-span-4 flex flex-col items-center justify-center border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+          <div class="size-28 bg-white p-1.5 border border-slate-300 dark:border-slate-700">
             <img id="qrCodeImg" src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-release.apk" alt="Kode QR Unduh APK Kirana People" class="size-full object-contain" width="112" height="112">
           </div>
-          <span class="mt-2 text-center text-xs font-semibold text-slate-600 dark:text-slate-400">
-            Arahkan kamera HP untuk unduh
+          <span class="mt-2 text-center text-xs font-bold text-slate-700 dark:text-slate-300">
+            Scan untuk Unduh di Ponsel
           </span>
         </div>
 
       </div>
 
-      <!-- Architecture Variants (Disclosure) -->
-      <details class="mt-6 border-t border-slate-100 pt-5 dark:border-slate-800">
-        <summary class="cursor-pointer text-xs font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 rounded">
-          Pilihan berkas per arsitektur CPU (Ukuran lebih ringkas)
-        </summary>
-        <div class="mt-3 flex flex-wrap gap-2 pt-1">
-          <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-arm64-v8a-release.apk" class="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 transition-colors duration-150 ease-out motion-reduce:transition-none">
-            <span>ARM64 (HP Android Modern)</span>
-            <span class="tabular-nums font-mono text-slate-500 dark:text-slate-400">~34 MB</span>
-          </a>
-          <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-armeabi-v7a-release.apk" class="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 transition-colors duration-150 ease-out motion-reduce:transition-none">
-            <span>ARMv7a (HP Android Lama 32-bit)</span>
-            <span class="tabular-nums font-mono text-slate-500 dark:text-slate-400">~29 MB</span>
-          </a>
-          <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-x86_64-release.apk" class="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 transition-colors duration-150 ease-out motion-reduce:transition-none">
-            <span>x86_64 (Emulator / PC)</span>
-            <span class="tabular-nums font-mono text-slate-500 dark:text-slate-400">~36 MB</span>
-          </a>
-          <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-release.aab" class="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 transition-colors duration-150 ease-out motion-reduce:transition-none">
-            <span>Bundle Google Play (.AAB)</span>
-          </a>
-        </div>
-      </details>
-
     </section>
 
-    <!-- Installation Steps Section -->
-    <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8 mb-8" id="install" aria-labelledby="heading-install">
+    <!-- Installation Steps Section (Squared) -->
+    <section class="border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8 mb-8" id="install" aria-labelledby="heading-install">
       
       <div class="mb-6">
-        <h2 id="heading-install" class="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
+        <h2 id="heading-install" class="text-xl font-bold text-slate-900 dark:text-white sm:text-2xl">
           Panduan Pemasangan APK di HP Android
         </h2>
-        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-          Ikuti urutan langkah praktis berikut untuk memasang aplikasi di perangkat Anda:
+        <p class="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+          Ikuti 4 langkah sederhana berikut setelah menekan tombol unduh:
         </p>
       </div>
 
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         
         <!-- Step 1 -->
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-4 dark:border-slate-800/80 dark:bg-slate-800/40">
-          <div class="flex size-7 items-center justify-center rounded-full bg-pink-600 text-xs font-bold text-white mb-3" aria-hidden="true">
+        <div class="border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+          <div class="flex size-7 items-center justify-center bg-pink-600 text-xs font-bold text-white mb-3" aria-hidden="true">
             1
           </div>
           <h3 class="text-sm font-bold text-slate-900 dark:text-white">Unduh Berkas</h3>
           <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            Ketuk tombol <strong>Unduh File APK</strong> di atas dan tunggu proses pengunduhan di peramban selesai.
+            Ketuk tombol <strong>UNDUH FILE APK</strong> di atas dan tunggu hingga unduhan selesai di peramban.
           </p>
         </div>
 
         <!-- Step 2 -->
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-4 dark:border-slate-800/80 dark:bg-slate-800/40">
-          <div class="flex size-7 items-center justify-center rounded-full bg-pink-600 text-xs font-bold text-white mb-3" aria-hidden="true">
+        <div class="border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+          <div class="flex size-7 items-center justify-center bg-pink-600 text-xs font-bold text-white mb-3" aria-hidden="true">
             2
           </div>
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Buka Notifikasi</h3>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Buka Berkas</h3>
           <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            Tarik panel notifikasi atas layar HP Anda, lalu ketuk berkas <strong>app-release.apk</strong> yang telah selesai diunduh.
+            Tarik bilah notifikasi ponsel Anda, lalu ketuk berkas <strong>app-release.apk</strong> yang telah selesai diunduh.
           </p>
         </div>
 
         <!-- Step 3 -->
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-4 dark:border-slate-800/80 dark:bg-slate-800/40">
-          <div class="flex size-7 items-center justify-center rounded-full bg-pink-600 text-xs font-bold text-white mb-3" aria-hidden="true">
+        <div class="border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+          <div class="flex size-7 items-center justify-center bg-pink-600 text-xs font-bold text-white mb-3" aria-hidden="true">
             3
           </div>
           <h3 class="text-sm font-bold text-slate-900 dark:text-white">Izin Sumber Luar</h3>
           <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            Jika muncul dialog keamanan sistem, pilih <strong>Pengaturan</strong> lalu centang <em>"Izinkan dari sumber ini"</em>.
+            Jika muncul peringatan keamanan, pilih <strong>Pengaturan</strong> lalu centang <em>"Izinkan dari sumber ini"</em>.
           </p>
         </div>
 
         <!-- Step 4 -->
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-4 dark:border-slate-800/80 dark:bg-slate-800/40">
-          <div class="flex size-7 items-center justify-center rounded-full bg-pink-600 text-xs font-bold text-white mb-3" aria-hidden="true">
+        <div class="border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+          <div class="flex size-7 items-center justify-center bg-pink-600 text-xs font-bold text-white mb-3" aria-hidden="true">
             4
           </div>
           <h3 class="text-sm font-bold text-slate-900 dark:text-white">Pasang & Mulai</h3>
           <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            Ketuk <strong>Pasang (Install)</strong>. Buka aplikasi dan izinkan akses Kamera dan Lokasi GPS untuk kebutuhan presensi.
+            Ketuk <strong>Pasang (Install)</strong>. Buka aplikasi dan izinkan akses Kamera dan Lokasi GPS untuk presensi.
           </p>
         </div>
 
@@ -284,71 +265,71 @@
 
     </section>
 
-    <!-- Key Features Section -->
-    <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8" id="features" aria-labelledby="heading-features">
+    <!-- Key Features Section (Squared) -->
+    <section class="border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8" id="features" aria-labelledby="heading-features">
       
       <div class="mb-6">
-        <h2 id="heading-features" class="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
-          Kemampuan & Fitur Aplikasi
+        <h2 id="heading-features" class="text-xl font-bold text-slate-900 dark:text-white sm:text-2xl">
+          Kemampuan & Fitur Utama
         </h2>
-        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-          Infrastruktur presensi yang dirancang untuk keandalan dan akurasi tinggi:
+        <p class="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+          Fitur esensial untuk akurasi dan kemudahan operasional tim:
         </p>
       </div>
 
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         
         <!-- Feature 1 -->
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-5 dark:border-slate-800/80 dark:bg-slate-800/40">
-          <div class="mb-3 text-xl" aria-hidden="true">📍</div>
-          <h3 class="text-base font-bold text-slate-900 dark:text-white">Geofencing & Anti-Mock GPS</h3>
-          <p class="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            Mendeteksi koordinat secara akurat dalam radius kantor dan dilengkapi perlindungan anti-spoofing terhadap aplikasi lokasi palsu.
+        <div class="border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+          <div class="mb-2 text-lg" aria-hidden="true">📍</div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Geofencing & Anti-Mock GPS</h3>
+          <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+            Validasi koordinat dalam radius kantor dengan proteksi terhadap aplikasi pemalsu lokasi.
           </p>
         </div>
 
         <!-- Feature 2 -->
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-5 dark:border-slate-800/80 dark:bg-slate-800/40">
-          <div class="mb-3 text-xl" aria-hidden="true">👤</div>
-          <h3 class="text-base font-bold text-slate-900 dark:text-white">AI Biometrik Wajah</h3>
-          <p class="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            Pengenalan wajah on-device dengan Google MLKit untuk memvalidasi identitas saat check-in tanpa membebani kuota data.
+        <div class="border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+          <div class="mb-2 text-lg" aria-hidden="true">👤</div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">AI Biometrik Wajah</h3>
+          <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+            Deteksi liveness wajah on-device dengan Google MLKit untuk memastikan kehadiran asli.
           </p>
         </div>
 
         <!-- Feature 3 -->
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-5 dark:border-slate-800/80 dark:bg-slate-800/40">
-          <div class="mb-3 text-xl" aria-hidden="true">⏱️</div>
-          <h3 class="text-base font-bold text-slate-900 dark:text-white">Mode Kerja & Istirahat</h3>
-          <p class="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            Pencatatan fleksibel untuk jam masuk kerja, jeda istirahat, dan waktu pulang dengan kalkulasi durasi otomatis.
+        <div class="border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+          <div class="mb-2 text-lg" aria-hidden="true">⏱️</div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Mode Kerja & Istirahat</h3>
+          <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+            Pencatatan jam masuk, istirahat, dan pulang secara fleksibel dengan kalkulasi otomatis.
           </p>
         </div>
 
         <!-- Feature 4 -->
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-5 dark:border-slate-800/80 dark:bg-slate-800/40">
-          <div class="mb-3 text-xl" aria-hidden="true">📄</div>
-          <h3 class="text-base font-bold text-slate-900 dark:text-white">Ekspor Laporan PDF</h3>
-          <p class="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            Membuat dan mencetak rekapitulasi kehadiran bulanan resmi langsung dari aplikasi dalam format dokumen PDF multi-halaman.
+        <div class="border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+          <div class="mb-2 text-lg" aria-hidden="true">📄</div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Ekspor Laporan PDF</h3>
+          <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+            Cetak rekapitulasi kehadiran bulanan resmi langsung dari perangkat dalam format PDF.
           </p>
         </div>
 
         <!-- Feature 5 -->
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-5 dark:border-slate-800/80 dark:bg-slate-800/40">
-          <div class="mb-3 text-xl" aria-hidden="true">📡</div>
-          <h3 class="text-base font-bold text-slate-900 dark:text-white">Mode Offline & Sinkronisasi</h3>
-          <p class="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            Dapat melakukan absensi saat koneksi internet terputus. Data disimpan aman secara lokal dan disinkronkan saat online kembali.
+        <div class="border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+          <div class="mb-2 text-lg" aria-hidden="true">📡</div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Mode Offline & Sinkronisasi</h3>
+          <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+            Absensi tetap dapat dilakukan saat koneksi terputus dan otomatis tersinkron saat online.
           </p>
         </div>
 
         <!-- Feature 6 -->
-        <div class="rounded-lg border border-slate-100 bg-slate-50 p-5 dark:border-slate-800/80 dark:bg-slate-800/40">
-          <div class="mb-3 text-xl" aria-hidden="true">🛡️</div>
-          <h3 class="text-base font-bold text-slate-900 dark:text-white">Keamanan Kredensial (SEC-15)</h3>
-          <p class="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-            Penyimpanan token terenkripsi di keystore hardware perangkat dan perlindungan terhadap kebocoran token ke domain pihak ketiga.
+        <div class="border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+          <div class="mb-2 text-lg" aria-hidden="true">🛡️</div>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Keamanan Kredensial (SEC-15)</h3>
+          <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+            Penyimpanan token terenkripsi di keystore perangkat dengan isolasi host terpercaya.
           </p>
         </div>
 
@@ -358,28 +339,28 @@
 
   </main>
 
-  <!-- Accessible Footer -->
-  <footer class="border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 transition-colors duration-150 ease-out motion-reduce:transition-none" role="contentinfo">
+  <!-- Squared Footer -->
+  <footer class="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 transition-colors duration-150 ease-out motion-reduce:transition-none" role="contentinfo">
     <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
       <p>&copy; 2026 PT Kirana Desain Indonesia. Hak Cipta Dilindungi.</p>
       
       <div class="flex items-center gap-4 font-medium">
-        <a href="https://github.com/anywindo/KiranaPeople-Flutter" target="_blank" rel="noopener" class="hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 rounded">
-          Repositori GitHub
+        <a href="https://github.com/anywindo/KiranaPeople-Flutter" target="_blank" rel="noopener" class="hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600">
+          GitHub
         </a>
         <span>&bull;</span>
-        <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases" target="_blank" rel="noopener" class="hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 rounded">
+        <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases" target="_blank" rel="noopener" class="hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600">
           Semua Rilis
         </a>
         <span>&bull;</span>
-        <a href="https://github.com/anywindo/KiranaPeople-Flutter/issues" target="_blank" rel="noopener" class="hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600 rounded">
-          Laporkan Kendala
+        <a href="https://github.com/anywindo/KiranaPeople-Flutter/issues" target="_blank" rel="noopener" class="hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-600">
+          Bantuan
         </a>
       </div>
     </div>
   </footer>
 
-  <!-- Script for Theme and Live Releases -->
+  <!-- Script for Theme & Live Release Fetch -->
   <script>
     // 1. Dark/Light Mode Switcher with System Preference Fallback
     const themeToggleBtn = document.getElementById('themeToggle');
