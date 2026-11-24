@@ -154,7 +154,7 @@
     <!-- Download Section (Clear, Functional, Directly Accessible) -->
     <section id="unduh" class="px-6 sm:px-12 md:px-16 py-12 border-t border-neutral-100 bg-neutral-50/60">
       <div class="max-w-4xl">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="flex flex-col md:flex-row md:items-baseline justify-between gap-3">
           <div>
             <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900">
               Unduh Aplikasi Kirana People Android
@@ -164,10 +164,9 @@
             </p>
           </div>
 
-          <!-- Version Pill -->
-          <div class="inline-flex items-center gap-2 bg-white border border-neutral-200 px-4 py-2 rounded-full text-xs font-mono text-neutral-700 shadow-sm self-start md:self-auto">
-            <span class="size-2 rounded-full bg-emerald-500"></span>
-            <span id="releaseVersion">v1.0.6</span>
+          <!-- Plain Release Info -->
+          <div class="text-xs font-mono text-neutral-500 space-x-1.5 self-start md:self-auto">
+            <span id="releaseVersion" class="font-semibold text-neutral-800">v1.0.6</span>
             <span class="text-neutral-300">&bull;</span>
             <span id="assetSize">~35 MB</span>
             <span class="text-neutral-300">&bull;</span>
@@ -178,8 +177,7 @@
         <!-- Download Buttons Grid -->
         <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-release.apk" id="mainDownloadBtn" class="flex flex-col justify-between p-4 bg-neutral-900 text-white rounded-2xl hover:bg-neutral-800 transition shadow-sm group">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold uppercase tracking-wider text-neutral-400">Rekomendasi</span>
+            <div class="flex items-center justify-end">
               <svg class="size-4 text-white group-hover:translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
               </svg>
@@ -191,8 +189,7 @@
           </a>
 
           <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-arm64-v8a-release.apk" class="flex flex-col justify-between p-4 bg-white border border-neutral-200 text-neutral-900 rounded-2xl hover:border-neutral-400 hover:shadow-sm transition group">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-mono text-neutral-500 font-medium">64-bit</span>
+            <div class="flex items-center justify-end">
               <svg class="size-4 text-neutral-500 group-hover:translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
               </svg>
@@ -204,8 +201,7 @@
           </a>
 
           <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-armeabi-v7a-release.apk" class="flex flex-col justify-between p-4 bg-white border border-neutral-200 text-neutral-900 rounded-2xl hover:border-neutral-400 hover:shadow-sm transition group">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-mono text-neutral-500 font-medium">32-bit</span>
+            <div class="flex items-center justify-end">
               <svg class="size-4 text-neutral-500 group-hover:translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
               </svg>
@@ -217,8 +213,7 @@
           </a>
 
           <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-x86_64-release.apk" class="flex flex-col justify-between p-4 bg-white border border-neutral-200 text-neutral-900 rounded-2xl hover:border-neutral-400 hover:shadow-sm transition group">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-mono text-neutral-500 font-medium">x86_64</span>
+            <div class="flex items-center justify-end">
               <svg class="size-4 text-neutral-500 group-hover:translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
               </svg>
