@@ -288,49 +288,6 @@
       color: var(--text-dim);
     }
 
-    /* Sub-downloads / ABI Variants */
-    .variants-section {
-      margin-top: 24px;
-      padding-top: 20px;
-      border-top: 1px dashed var(--surface-border);
-    }
-
-    .variants-title {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 12px;
-    }
-
-    .variants-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .variant-chip {
-      background: var(--surface);
-      border: 1px solid var(--surface-border);
-      color: var(--text-main);
-      padding: 8px 14px;
-      border-radius: var(--radius-sm);
-      font-size: 0.82rem;
-      font-weight: 600;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: var(--transition);
-    }
-
-    .variant-chip:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      transform: translateY(-1px);
-    }
-
     /* Section Title */
     .section-title {
       text-align: left;
@@ -534,7 +491,7 @@
         <div class="download-info">
           <h3>Download untuk Android</h3>
           <p style="color: var(--text-muted); font-size: 0.95rem;">
-            Pilih paket instalasi APK sesuai perangkat Anda.
+            Unduh file APK resmi untuk perangkat Android.
           </p>
 
           <div class="download-meta">
@@ -554,30 +511,8 @@
 
           <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-release.apk" id="mainDownloadBtn" class="btn-main-download">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download APK (Universal)
+            Download APK
           </a>
-
-          <!-- Architecture Variants -->
-          <div class="variants-section">
-            <div class="variants-title">Varian Arsitektur:</div>
-            <div class="variants-list">
-              <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-arm64-v8a-release.apk" class="variant-chip">
-                <span>ARM64</span>
-                <small style="color:var(--text-dim);">~34 MB</small>
-              </a>
-              <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-armeabi-v7a-release.apk" class="variant-chip">
-                <span>ARMv7a</span>
-                <small style="color:var(--text-dim);">~29 MB</small>
-              </a>
-              <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-x86_64-release.apk" class="variant-chip">
-                <span>x86_64</span>
-                <small style="color:var(--text-dim);">~36 MB</small>
-              </a>
-              <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases/latest/download/app-release.aab" class="variant-chip">
-                <span>AAB (Bundle)</span>
-              </a>
-            </div>
-          </div>
         </div>
 
         <!-- Scan to Download QR -->
