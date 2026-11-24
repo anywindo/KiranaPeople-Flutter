@@ -490,33 +490,33 @@
 
       <div class="features-grid">
         <div class="feature-card">
-          <h4>Validasi Lokasi GPS</h4>
-          <p>Memeriksa koordinat perangkat terhadap radius kantor yang ditentukan dan memblokir penggunaan aplikasi fake GPS.</p>
+          <h4>Pemeriksaan Mock Location & Geofence</h4>
+          <p>Membaca posisi melalui GPS hardware dan memeriksa flag <code>isMocked</code> dari penyedia lokasi Android. Presensi ditolak jika berada di luar radius koordinat kantor atau terdeteksi memakai fake GPS.</p>
         </div>
 
         <div class="feature-card">
-          <h4>Deteksi Wajah</h4>
-          <p>Memvalidasi keberadaan wajah pengguna melalui kamera saat mengirim presensi masuk dan pulang.</p>
+          <h4>Deteksi Wajah Google ML Kit</h4>
+          <p>Memproses frame foto selfie langsung di perangkat (on-device) untuk memverifikasi tepat satu wajah manusia, keterbukaan mata, dan sudut rotasi kepala sebelum payload presensi dikirim.</p>
         </div>
 
         <div class="feature-card">
-          <h4>Pencatatan Shift & Istirahat</h4>
-          <p>Mencatat jam masuk kerja, mulai istirahat, selesai istirahat, dan jam pulang secara berurutan atau langsung.</p>
+          <h4>Manajemen Shift & Jam Istirahat</h4>
+          <p>Mencatat timestamp akurat untuk jam masuk, mulai istirahat, selesai istirahat, dan jam pulang. Mendukung shift kerja fleksibel tanpa membatasi alur pengembalian presensi harian.</p>
         </div>
 
         <div class="feature-card">
-          <h4>Ekspor Rekap PDF</h4>
-          <p>Membuat file laporan rekapitulasi kehadiran bulanan dalam format dokumen PDF langsung dari perangkat.</p>
+          <h4>Generator Dokumen PDF A4</h4>
+          <p>Menghasilkan berkas rekap kehadiran bulanan berformat PDF tabel formal lengkap dengan rincian durasi kerja, keterlambatan, dan status verifikasi langsung di memori perangkat.</p>
         </div>
 
         <div class="feature-card">
-          <h4>Penyimpanan Offline</h4>
-          <p>Menyimpan data presensi secara lokal saat tidak ada internet dan mengirimkannya ke server saat kembali online.</p>
+          <h4>Antrean Sinkronisasi Offline</h4>
+          <p>Menyimpan riwayat dan cache sesi pengguna secara lokal saat koneksi internet terputus, lalu otomatis memvalidasi ulang endpoint API saat status jaringan kembali aktif.</p>
         </div>
 
         <div class="feature-card">
-          <h4>Penyimpanan Kredensial Aman</h4>
-          <p>Menyimpan token sesi di storage terenkripsi perangkat dan membatasi pengiriman token hanya ke server aplikasi.</p>
+          <h4>Enkripsi Token di Android Keystore</h4>
+          <p>Menyimpan JWT dan token otentikasi menggunakan <code>FlutterSecureStorage</code> dengan enkripsi AES hardware-backed di Android Keystore, terisolasi dari akses aplikasi lain.</p>
         </div>
       </div>
     </section>
