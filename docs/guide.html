@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Panduan Penggunaan & Instalasi — Kirana People by Kirana Group</title>
+  <meta name="description" content="Panduan lengkap instalasi APK manual, konfigurasi izin perangkat, dan alur operasional presensi aplikasi Kirana People.">
+  <meta name="theme-color" content="#ffffff">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Panduan Penggunaan & Instalasi — Kirana People by Kirana Group">
+  <meta property="og:description" content="Panduan lengkap instalasi APK manual dan alur operasional presensi aplikasi Kirana People.">
+  <meta property="og:image" content="assets/logoKiranaSquare.jpeg">
+  <meta property="og:type" content="website">
+
+  <link rel="icon" type="image/jpeg" href="assets/logoKiranaSquare.jpeg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    @supports (text-wrap: balance) {
+      h1, h2, h3 {
+        text-wrap: balance;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-neutral-900 text-neutral-900 font-sans p-3 sm:p-6 md:p-10 lg:p-14 flex items-center justify-center">
+
+  <!-- Outer Canvas Window -->
+  <div class="w-full max-w-7xl bg-white rounded-3xl sm:rounded-[36px] overflow-hidden shadow-2xl transition-all duration-300">
+    
+    <!-- Top Navigation Bar -->
+    <header class="px-6 sm:px-12 md:px-16 pt-8 pb-6 flex items-center justify-between border-b border-neutral-100">
+      <!-- Brand Logo / Name -->
+      <a href="index.html" class="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 rounded-lg">
+        <img src="assets/logoKiranaSquare.jpeg" alt="Logo Kirana" class="w-8 h-8 rounded-lg object-cover shadow-sm ring-1 ring-neutral-200" width="32" height="32">
+        <div class="leading-none">
+          <span class="text-base font-bold tracking-tight text-neutral-900">Kirana People</span>
+          <span class="block text-[11px] font-medium text-neutral-400 mt-0.5">by Kirana Group</span>
+        </div>
+      </a>
+
+      <!-- Center Nav Links -->
+      <nav class="hidden md:flex items-center gap-8 text-xs lg:text-sm font-medium text-neutral-600" aria-label="Navigasi">
+        <a href="index.html" class="hover:text-neutral-900 transition-colors">Beranda</a>
+        <a href="download.html" class="hover:text-neutral-900 transition-colors">Unduh APK</a>
+        <a href="guide.html" class="text-neutral-900 font-semibold transition-colors">Panduan</a>
+        <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases" target="_blank" rel="noopener" class="hover:text-neutral-900 transition-colors">Rilis</a>
+      </nav>
+
+      <!-- Primary Action CTA -->
+      <div>
+        <a href="download.html" class="inline-flex items-center justify-center bg-neutral-900 text-white hover:bg-neutral-800 text-xs sm:text-sm font-medium px-5 sm:px-6 py-2.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900">
+          Unduh APK
+        </a>
+      </div>
+    </header>
+
+    <!-- Header Title Area -->
+    <div class="px-6 sm:px-12 md:px-16 pt-12 pb-8 border-b border-neutral-100">
+      <div class="max-w-3xl">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-neutral-900">
+          Panduan Penggunaan & Instalasi
+        </h1>
+        <p class="text-xs sm:text-sm text-neutral-500 mt-2 leading-relaxed">
+          Instruksi operasional pencatatan kehadiran harian, langkah-langkah instalasi berkas APK manual pada perangkat Android, serta pemecahan masalah teknis.
+        </p>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="px-6 sm:px-12 md:px-16 py-12">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+        
+        <!-- Section 1: Alur Kerja Operasional Presensi -->
+        <div>
+          <h2 class="text-lg sm:text-xl font-bold tracking-tight text-neutral-900 mb-6">
+            Alur Presensi Karyawan
+          </h2>
+          <div class="space-y-6">
+            <div class="flex gap-4">
+              <span class="font-mono text-xs font-bold text-neutral-400 pt-0.5">01</span>
+              <div>
+                <h3 class="text-sm font-semibold text-neutral-900">Validasi Geofence GPS</h3>
+                <p class="text-xs text-neutral-500 mt-1 leading-relaxed">
+                  Ponsel memverifikasi posisi koordinat satelit terhadap radius kantor dan memblokir aplikasi fake GPS / mock provider.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <span class="font-mono text-xs font-bold text-neutral-400 pt-0.5">02</span>
+              <div>
+                <h3 class="text-sm font-semibold text-neutral-900">Verifikasi Wajah (Google MLKit)</h3>
+                <p class="text-xs text-neutral-500 mt-1 leading-relaxed">
+                  Pengambilan foto selfie depan diproses langsung di memori perangkat secara privat tanpa dikirim ke server pihak ketiga.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <span class="font-mono text-xs font-bold text-neutral-400 pt-0.5">03</span>
+              <div>
+                <h3 class="text-sm font-semibold text-neutral-900">Pencatatan Istirahat & Pulang</h3>
+                <p class="text-xs text-neutral-500 mt-1 leading-relaxed">
+                  Dukungan break monitoring fleksibel dan clock out aman yang otomatis menghitung total durasi shift kerja harian.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-4">
+              <span class="font-mono text-xs font-bold text-neutral-400 pt-0.5">04</span>
+              <div>
+                <h3 class="text-sm font-semibold text-neutral-900">Antrean Offline & Ekspor PDF</h3>
+                <p class="text-xs text-neutral-500 mt-1 leading-relaxed">
+                  Data presensi tersimpan di SQLite lokal saat offline dan disinkronkan otomatis saat ada koneksi. Ekspor berkas rekapitulasi PDF bulanan langsung dari aplikasi.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Panduan Instalasi APK Manual -->
+        <div>
+          <h2 class="text-lg sm:text-xl font-bold tracking-tight text-neutral-900 mb-6">
+            Panduan Instalasi APK Manual
+          </h2>
+          <ol class="space-y-4 text-xs text-neutral-600">
+            <li class="flex items-start gap-3">
+              <span class="size-5 rounded-full bg-neutral-100 flex items-center justify-center font-mono font-bold text-neutral-800 shrink-0">1</span>
+              <div>
+                <strong class="font-semibold text-neutral-900">Unduh berkas instalasi</strong>
+                <p class="text-neutral-500 mt-0.5 leading-relaxed">Unduh berkas <code>app-release.apk</code> melalui <a href="download.html" class="text-neutral-900 underline font-medium">Halaman Unduh</a>.</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="size-5 rounded-full bg-neutral-100 flex items-center justify-center font-mono font-bold text-neutral-800 shrink-0">2</span>
+              <div>
+                <strong class="font-semibold text-neutral-900">Buka berkas dari pengelola file</strong>
+                <p class="text-neutral-500 mt-0.5 leading-relaxed">Buka berkas unduhan dari aplikasi Pengelola Berkas (Files/Downloads) atau bilah notifikasi ponsel.</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="size-5 rounded-full bg-neutral-100 flex items-center justify-center font-mono font-bold text-neutral-800 shrink-0">3</span>
+              <div>
+                <strong class="font-semibold text-neutral-900">Izinkan instalasi sumber luar</strong>
+                <p class="text-neutral-500 mt-0.5 leading-relaxed">Jika muncul peringatan keamanan sistem, buka <strong>Pengaturan</strong> lalu aktifkan opsi <em>"Izinkan dari sumber ini"</em>.</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="size-5 rounded-full bg-neutral-100 flex items-center justify-center font-mono font-bold text-neutral-800 shrink-0">4</span>
+              <div>
+                <strong class="font-semibold text-neutral-900">Selesaikan instalasi & beri izin</strong>
+                <p class="text-neutral-500 mt-0.5 leading-relaxed">Tekan <strong>Install</strong>. Setelah selesai, buka aplikasi dan setujui izin <strong>Lokasi</strong> dan <strong>Kamera</strong>.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+
+      </div>
+
+      <!-- Section 3: Pemecahan Masalah (FAQ) -->
+      <div class="mt-14 pt-12 border-t border-neutral-100">
+        <h2 class="text-lg sm:text-xl font-bold tracking-tight text-neutral-900 mb-6">
+          Pertanyaan Umum & Pemecahan Masalah
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-neutral-600">
+          <div class="p-5 bg-neutral-50/70 rounded-2xl border border-neutral-100">
+            <h3 class="font-bold text-neutral-900 text-sm mb-1.5">Lokasi berada di luar radius kantor</h3>
+            <p class="text-neutral-500 leading-relaxed">
+              Pastikan pengaturan GPS perangkat Anda berada dalam mode Akurasi Tinggi. Jika berada di dalam gedung bertingkat, geser ke dekat jendela untuk mendapatkan sinyal satelit GPS yang stabil.
+            </p>
+          </div>
+
+          <div class="p-5 bg-neutral-50/70 rounded-2xl border border-neutral-100">
+            <h3 class="font-bold text-neutral-900 text-sm mb-1.5">Kamera tidak mendeteksi wajah</h3>
+            <p class="text-neutral-500 leading-relaxed">
+              Posisikan wajah tepat di tengah lingkaran panduan kamera depan dengan pencahayaan ruangan yang cukup terang. Hindari kacamata hitam gelap atau masker penutup muka.
+            </p>
+          </div>
+
+          <div class="p-5 bg-neutral-50/70 rounded-2xl border border-neutral-100">
+            <h3 class="font-bold text-neutral-900 text-sm mb-1.5">Pencatatan saat koneksi internet terputus</h3>
+            <p class="text-neutral-500 leading-relaxed">
+              Kirana People mendukung antrean offline lokal. Data presensi tetap tersimpan aman terenkripsi di ponsel dan otomatis terkirim saat internet kembali terhubung.
+            </p>
+          </div>
+
+          <div class="p-5 bg-neutral-50/70 rounded-2xl border border-neutral-100">
+            <h3 class="font-bold text-neutral-900 text-sm mb-1.5">Pembaruan ke versi aplikasi terbaru</h3>
+            <p class="text-neutral-500 leading-relaxed">
+              Cukup unduh berkas APK versi terbaru dari halaman unduh dan instal langsung tanpa perlu menghapus aplikasi lama terlebih dahulu.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clean Footer -->
+    <footer class="px-6 sm:px-12 md:px-16 py-8 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-400">
+      <p>&copy; 2026 Kirana People by Kirana Group. Seluruh hak cipta dilindungi.</p>
+      <div class="flex items-center gap-6 text-neutral-600 font-medium">
+        <a href="index.html" class="hover:text-neutral-900">Beranda</a>
+        <a href="download.html" class="hover:text-neutral-900">Unduh APK</a>
+        <a href="https://github.com/anywindo/KiranaPeople-Flutter" target="_blank" rel="noopener" class="hover:text-neutral-900">GitHub Repository</a>
+      </div>
+    </footer>
+
+  </div>
+
+</body>
+</html>

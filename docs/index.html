@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Kirana People by Kirana Group — Aplikasi Presensi Karyawan Mobile</title>
-  <meta name="description" content="Aplikasi pencatatan presensi mobile karyawan Kirana People by Kirana Group dengan verifikasi geofence GPS dan deteksi wajah Google MLKit.">
+  <meta name="description"
+    content="Aplikasi pencatatan presensi mobile karyawan Kirana People by Kirana Group dengan verifikasi geofence GPS dan deteksi wajah Google MLKit.">
   <meta name="theme-color" content="#ffffff">
 
   <!-- Open Graph -->
@@ -16,7 +18,9 @@
   <link rel="icon" type="image/jpeg" href="assets/logoKiranaSquare.jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -45,32 +49,41 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
-    
+
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
+
     .no-scrollbar {
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
 
     @supports (text-wrap: balance) {
-      h1, h2, h3 {
+
+      h1,
+      h2,
+      h3 {
         text-wrap: balance;
       }
     }
   </style>
 </head>
-<body class="min-h-screen bg-neutral-900 text-neutral-900 font-sans p-3 sm:p-6 md:p-10 lg:p-14 flex items-center justify-center">
+
+<body
+  class="min-h-screen bg-neutral-900 text-neutral-900 font-sans p-3 sm:p-6 md:p-10 lg:p-14 flex items-center justify-center">
 
   <!-- Outer Canvas Window (Pure Showcase Display) -->
-  <div class="w-full max-w-7xl bg-white rounded-3xl sm:rounded-[36px] overflow-hidden shadow-2xl transition-all duration-300">
-    
+  <div
+    class="w-full max-w-7xl bg-white rounded-3xl sm:rounded-[36px] overflow-hidden shadow-2xl transition-all duration-300">
+
     <!-- Top Navigation Bar -->
     <header class="px-6 sm:px-12 md:px-16 pt-8 pb-6 flex items-center justify-between border-b border-neutral-100">
       <!-- Brand Logo / Name -->
-      <a href="index.html" class="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 rounded-lg">
-        <img src="assets/logoKiranaSquare.jpeg" alt="Logo Kirana" class="w-8 h-8 rounded-lg object-cover shadow-sm ring-1 ring-neutral-200" width="32" height="32">
+      <a href="index.html"
+        class="flex items-center gap-3 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 rounded-lg">
+        <img src="assets/logoKiranaSquare.jpeg" alt="Logo Kirana"
+          class="w-8 h-8 rounded-lg object-cover shadow-sm ring-1 ring-neutral-200" width="32" height="32">
         <div class="leading-none">
           <span class="text-base font-bold tracking-tight text-neutral-900">Kirana People</span>
           <span class="block text-[11px] font-medium text-neutral-400 mt-0.5">by Kirana Group</span>
@@ -78,17 +91,19 @@
       </a>
 
       <!-- Center Nav Links -->
-      <nav class="hidden md:flex items-center gap-8 text-xs lg:text-sm font-medium text-neutral-600" aria-label="Navigasi">
+      <nav class="hidden md:flex items-center gap-8 text-xs lg:text-sm font-medium text-neutral-600"
+        aria-label="Navigasi">
         <a href="index.html" class="text-neutral-900 font-semibold transition-colors">Beranda</a>
         <a href="download.html" class="hover:text-neutral-900 transition-colors">Unduh APK</a>
-        <a href="download.html#alur" class="hover:text-neutral-900 transition-colors">Alur Presensi</a>
-        <a href="download.html#panduan" class="hover:text-neutral-900 transition-colors">Panduan</a>
-        <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases" target="_blank" rel="noopener" class="hover:text-neutral-900 transition-colors">Rilis</a>
+        <a href="guide.html" class="hover:text-neutral-900 transition-colors">Panduan</a>
+        <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases" target="_blank" rel="noopener"
+          class="hover:text-neutral-900 transition-colors">Rilis</a>
       </nav>
 
       <!-- Primary Action CTA -->
       <div>
-        <a href="download.html" class="inline-flex items-center justify-center bg-neutral-900 text-white hover:bg-neutral-800 text-xs sm:text-sm font-medium px-5 sm:px-6 py-2.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900">
+        <a href="download.html"
+          class="inline-flex items-center justify-center bg-neutral-900 text-white hover:bg-neutral-800 text-xs sm:text-sm font-medium px-5 sm:px-6 py-2.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900">
           Unduh APK
         </a>
       </div>
@@ -102,7 +117,8 @@
           <span class="block text-neutral-400 font-semibold mt-1">kehadiran terverifikasi secara instan.</span>
         </h1>
         <p class="mt-4 text-sm sm:text-base text-neutral-500 max-w-xl leading-relaxed">
-          Sistem pencatatan kehadiran karyawan PT Kirana Desain Indonesia berbasis mobile dengan validasi GPS geofence radius kantor dan deteksi wajah on-device Google MLKit.
+          Sistem pencatatan kehadiran karyawan PT Kirana Desain Indonesia berbasis mobile dengan validasi GPS geofence
+          radius kantor dan deteksi wajah on-device Google MLKit.
         </p>
       </div>
     </div>
@@ -110,35 +126,43 @@
     <!-- Hero Device Showcase Banner (Pure Display Screen Presentation) -->
     <div class="px-4 sm:px-10 md:px-14 pb-14">
       <div class="w-full bg-[#EAE0D2] rounded-2xl sm:rounded-3xl p-6 sm:p-10 md:p-14 overflow-hidden relative">
-        
+
         <!-- Screenshots Row Container -->
         <div class="flex items-center justify-center gap-4 sm:gap-6 md:gap-8 overflow-x-auto no-scrollbar py-2 sm:py-4">
-          
+
           <!-- Phone 1: Dashboard / Home -->
-          <div class="shrink-0 w-[180px] sm:w-[220px] md:w-[240px] aspect-[9/19] rounded-[28px] sm:rounded-[34px] p-[3px] sm:p-1 bg-black border border-neutral-800">
+          <div
+            class="shrink-0 w-[180px] sm:w-[220px] md:w-[240px] aspect-[9/19] rounded-[28px] sm:rounded-[34px] p-[3px] sm:p-1 bg-black border border-neutral-800">
             <div class="w-full h-full rounded-[24px] sm:rounded-[30px] overflow-hidden bg-neutral-950 relative">
-              <img src="assets/1.jpeg" alt="Screenshot Dashboard Presensi Kirana People" class="w-full h-full object-cover object-top" loading="lazy">
+              <img src="assets/1.jpeg" alt="Screenshot Dashboard Presensi Kirana People"
+                class="w-full h-full object-cover object-top" loading="lazy">
             </div>
           </div>
 
           <!-- Phone 2: Face Capture / Presensi -->
-          <div class="shrink-0 w-[180px] sm:w-[220px] md:w-[240px] aspect-[9/19] rounded-[28px] sm:rounded-[34px] p-[3px] sm:p-1 bg-black border border-neutral-800">
+          <div
+            class="shrink-0 w-[180px] sm:w-[220px] md:w-[240px] aspect-[9/19] rounded-[28px] sm:rounded-[34px] p-[3px] sm:p-1 bg-black border border-neutral-800">
             <div class="w-full h-full rounded-[24px] sm:rounded-[30px] overflow-hidden bg-neutral-950 relative">
-              <img src="assets/2.jpeg" alt="Screenshot Verifikasi Wajah dan Lokasi" class="w-full h-full object-cover object-top" loading="lazy">
+              <img src="assets/2.jpeg" alt="Screenshot Verifikasi Wajah dan Lokasi"
+                class="w-full h-full object-cover object-top" loading="lazy">
             </div>
           </div>
 
           <!-- Phone 3: Riwayat Kehadiran -->
-          <div class="shrink-0 w-[180px] sm:w-[220px] md:w-[240px] aspect-[9/19] rounded-[28px] sm:rounded-[34px] p-[3px] sm:p-1 bg-black border border-neutral-800">
+          <div
+            class="shrink-0 w-[180px] sm:w-[220px] md:w-[240px] aspect-[9/19] rounded-[28px] sm:rounded-[34px] p-[3px] sm:p-1 bg-black border border-neutral-800">
             <div class="w-full h-full rounded-[24px] sm:rounded-[30px] overflow-hidden bg-neutral-950 relative">
-              <img src="assets/4.jpeg" alt="Screenshot Riwayat Presensi Bulanan" class="w-full h-full object-cover object-top" loading="lazy">
+              <img src="assets/4.jpeg" alt="Screenshot Riwayat Presensi Bulanan"
+                class="w-full h-full object-cover object-top" loading="lazy">
             </div>
           </div>
 
           <!-- Phone 4: Profil & Rekap PDF -->
-          <div class="shrink-0 w-[180px] sm:w-[220px] md:w-[240px] aspect-[9/19] rounded-[28px] sm:rounded-[34px] p-[3px] sm:p-1 bg-black border border-neutral-800">
+          <div
+            class="shrink-0 w-[180px] sm:w-[220px] md:w-[240px] aspect-[9/19] rounded-[28px] sm:rounded-[34px] p-[3px] sm:p-1 bg-black border border-neutral-800">
             <div class="w-full h-full rounded-[24px] sm:rounded-[30px] overflow-hidden bg-neutral-950 relative">
-              <img src="assets/5.jpeg" alt="Screenshot Profil & Unduh Rekap PDF" class="w-full h-full object-cover object-top" loading="lazy">
+              <img src="assets/5.jpeg" alt="Screenshot Profil & Unduh Rekap PDF"
+                class="w-full h-full object-cover object-top" loading="lazy">
             </div>
           </div>
 
@@ -148,16 +172,21 @@
     </div>
 
     <!-- Clean Minimal Footer -->
-    <footer class="px-6 sm:px-12 md:px-16 py-8 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-400">
+    <footer
+      class="px-6 sm:px-12 md:px-16 py-8 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-400">
       <p>&copy; 2026 Kirana People by Kirana Group. Seluruh hak cipta dilindungi.</p>
       <div class="flex items-center gap-6 text-neutral-600 font-medium">
-        <a href="download.html" class="hover:text-neutral-900">Halaman Unduh APK</a>
-        <a href="https://github.com/anywindo/KiranaPeople-Flutter" target="_blank" rel="noopener" class="hover:text-neutral-900">GitHub Repository</a>
-        <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases" target="_blank" rel="noopener" class="hover:text-neutral-900">Catatan Rilis</a>
+        <a href="download.html" class="hover:text-neutral-900">Unduh APK</a>
+        <a href="guide.html" class="hover:text-neutral-900">Panduan</a>
+        <a href="https://github.com/anywindo/KiranaPeople-Flutter" target="_blank" rel="noopener"
+          class="hover:text-neutral-900">GitHub Repository</a>
+        <a href="https://github.com/anywindo/KiranaPeople-Flutter/releases" target="_blank" rel="noopener"
+          class="hover:text-neutral-900">Catatan Rilis</a>
       </div>
     </footer>
 
   </div>
 
 </body>
+
 </html>
