@@ -67,20 +67,6 @@
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* Ambient Background Light */
-    .ambient-glow {
-      position: fixed;
-      top: -20%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 900px;
-      height: 600px;
-      background: radial-gradient(circle, var(--primary-glow) 0%, rgba(219, 39, 119, 0.12) 45%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-      filter: blur(80px);
-    }
-
     .container {
       max-width: 1140px;
       margin: 0 auto;
@@ -215,10 +201,8 @@
       margin-bottom: 18px;
     }
 
-    .hero-title .gradient-text {
-      background: linear-gradient(135deg, #FF21A4 15%, #F43F5E 55%, #F59E0B 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .hero-title .highlight-text {
+      color: var(--primary);
     }
 
     .hero-subtitle {
@@ -284,22 +268,23 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      background: var(--primary);
       color: #FFFFFF;
       font-size: 1.05rem;
       font-weight: 700;
       padding: 15px 30px;
       border-radius: var(--radius-md);
       text-decoration: none;
-      box-shadow: 0 8px 25px var(--primary-glow);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
       transition: var(--transition);
       cursor: pointer;
       border: none;
     }
 
     .btn-main-download:hover {
+      background: var(--primary-dark);
       transform: translateY(-2px);
-      box-shadow: 0 12px 30px rgba(255, 33, 164, 0.55);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     }
 
     .qr-container {
@@ -550,8 +535,6 @@
   </style>
 </head>
 <body>
-  <div class="ambient-glow"></div>
-
   <!-- Header / Navigation -->
   <header>
     <div class="container nav-inner">
@@ -581,7 +564,7 @@
 
       <h1 class="hero-title">
         Presensi Tim Cepat,<br>
-        <span class="gradient-text">Akurat & Terverifikasi.</span>
+        <span class="highlight-text">Akurat & Terverifikasi.</span>
       </h1>
 
       <p class="hero-subtitle">
