@@ -182,10 +182,7 @@ class AttendanceEventDetailModal extends StatelessWidget {
                 onPressed: () => Navigator.pop(context),
                 child: const Text(
                   'Tutup',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

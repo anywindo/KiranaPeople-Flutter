@@ -37,8 +37,9 @@ class AttendancePdfService {
     Uint8List? effectiveLogoBytes = logoBytes;
     if (effectiveLogoBytes == null) {
       try {
-        final byteData =
-            await rootBundle.load('assets/images/logoKiranaSquare.jpeg');
+        final byteData = await rootBundle.load(
+          'assets/images/logoKiranaSquare.jpeg',
+        );
         effectiveLogoBytes = byteData.buffer.asUint8List();
       } catch (_) {
         // Graceful fallback in headless testing environments
@@ -104,9 +105,7 @@ class AttendancePdfService {
     return pw.Container(
       padding: const pw.EdgeInsets.only(bottom: 10),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(
-          bottom: pw.BorderSide(color: inkBlack, width: 2.0),
-        ),
+        border: pw.Border(bottom: pw.BorderSide(color: inkBlack, width: 2.0)),
       ),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -260,8 +259,10 @@ class AttendancePdfService {
               style: const pw.TextStyle(fontSize: 8.5, color: textMuted),
             ),
           ),
-          pw.Text(': ',
-              style: const pw.TextStyle(fontSize: 8.5, color: textMuted)),
+          pw.Text(
+            ': ',
+            style: const pw.TextStyle(fontSize: 8.5, color: textMuted),
+          ),
           pw.Expanded(
             child: pw.Text(
               value,
@@ -351,8 +352,10 @@ class AttendancePdfService {
           decoration: const pw.BoxDecoration(color: tableHeaderBg),
           children: headers.map((h) {
             return pw.Padding(
-              padding:
-                  const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+              padding: const pw.EdgeInsets.symmetric(
+                vertical: 6,
+                horizontal: 4,
+              ),
               child: pw.Text(
                 h,
                 style: pw.TextStyle(
@@ -374,16 +377,23 @@ class AttendancePdfService {
           final r = entry.value;
 
           final dt = DateTime.tryParse(r.date);
-          final dateStr =
-              dt != null ? DateFormatter.formatFullDate(dt) : r.date;
+          final dateStr = dt != null
+              ? DateFormatter.formatFullDate(dt)
+              : r.date;
 
-          final checkInStr =
-              _extractEventTime(r, AttendanceEventType.startShift);
-          final breakStart =
-              _extractEventTime(r, AttendanceEventType.startBreak);
+          final checkInStr = _extractEventTime(
+            r,
+            AttendanceEventType.startShift,
+          );
+          final breakStart = _extractEventTime(
+            r,
+            AttendanceEventType.startBreak,
+          );
           final breakEnd = _extractEventTime(r, AttendanceEventType.endBreak);
-          final checkOutStr =
-              _extractEventTime(r, AttendanceEventType.endShift);
+          final checkOutStr = _extractEventTime(
+            r,
+            AttendanceEventType.endShift,
+          );
 
           String breakStr = '-';
           if (breakStart != '-' && breakEnd != '-') {
@@ -397,9 +407,7 @@ class AttendancePdfService {
           final isEven = index % 2 == 0;
 
           return pw.TableRow(
-            decoration: pw.BoxDecoration(
-              color: isEven ? rowEvenBg : rowOddBg,
-            ),
+            decoration: pw.BoxDecoration(color: isEven ? rowEvenBg : rowOddBg),
             children: [
               _buildCell('$index', align: pw.TextAlign.center),
               _buildCell(dateStr, isBold: true),
@@ -408,12 +416,16 @@ class AttendancePdfService {
               _buildCell(breakStr),
               _buildCell(checkOutStr),
               pw.Padding(
-                padding:
-                    const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                padding: const pw.EdgeInsets.symmetric(
+                  vertical: 4,
+                  horizontal: 4,
+                ),
                 child: pw.Center(
                   child: pw.Container(
                     padding: const pw.EdgeInsets.symmetric(
-                        horizontal: 5, vertical: 2),
+                      horizontal: 5,
+                      vertical: 2,
+                    ),
                     decoration: pw.BoxDecoration(
                       color: isLate ? tableHeaderBg : PdfColors.white,
                       borderRadius: pw.BorderRadius.circular(3),
@@ -426,8 +438,9 @@ class AttendancePdfService {
                       statusLabel,
                       style: pw.TextStyle(
                         fontSize: 7.5,
-                        fontWeight:
-                            isLate ? pw.FontWeight.bold : pw.FontWeight.normal,
+                        fontWeight: isLate
+                            ? pw.FontWeight.bold
+                            : pw.FontWeight.normal,
                         color: inkBlack,
                       ),
                     ),
@@ -461,7 +474,9 @@ class AttendancePdfService {
   }
 
   static String _extractEventTime(
-      AttendanceRecord r, AttendanceEventType type) {
+    AttendanceRecord r,
+    AttendanceEventType type,
+  ) {
     for (final e in r.events) {
       if (e.eventType == type) {
         final dt = DateTime.tryParse(e.timestamp);

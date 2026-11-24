@@ -147,10 +147,7 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
     );
     if (res != null && mounted) {
       ref.read(todayAttendanceProvider.notifier).refresh();
-      await AttendanceSuccessSheet.show(
-        context,
-        result: res,
-      );
+      await AttendanceSuccessSheet.show(context, result: res);
     }
   }
 
@@ -215,8 +212,9 @@ class _AttendanceScreenState extends ConsumerState<AttendanceScreen>
       );
     }
 
-    final topPadding =
-        isBannerVisible ? 4.0 : MediaQuery.of(context).padding.top;
+    final topPadding = isBannerVisible
+        ? 4.0
+        : MediaQuery.of(context).padding.top;
 
     return Scaffold(
       backgroundColor: context.scaffoldBg,

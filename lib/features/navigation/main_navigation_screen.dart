@@ -24,8 +24,9 @@ class CurrentTabIndexNotifier extends Notifier<int> {
   void setIndex(int index) => state = index;
 }
 
-final currentTabIndexProvider =
-    NotifierProvider<CurrentTabIndexNotifier, int>(CurrentTabIndexNotifier.new);
+final currentTabIndexProvider = NotifierProvider<CurrentTabIndexNotifier, int>(
+  CurrentTabIndexNotifier.new,
+);
 
 class MainNavigationScreen extends ConsumerStatefulWidget {
   const MainNavigationScreen({super.key});

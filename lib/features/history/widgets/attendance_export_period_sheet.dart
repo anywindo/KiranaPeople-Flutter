@@ -349,7 +349,8 @@ class _AttendanceExportPeriodSheetState
                   AttendanceExportPeriodResult(
                     startDate: widget.activeDateRange!.start,
                     endDate: widget.activeDateRange!.end,
-                    periodLabel: widget.activeFilterLabel ??
+                    periodLabel:
+                        widget.activeFilterLabel ??
                         '${DateFormatter.formatFullDate(widget.activeDateRange!.start)} s.d ${DateFormatter.formatFullDate(widget.activeDateRange!.end)}',
                   ),
                 );
@@ -403,8 +404,7 @@ class _AttendanceExportPeriodSheetState
                     title,
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight:
-                          isPrimary ? FontWeight.bold : FontWeight.w600,
+                      fontWeight: isPrimary ? FontWeight.bold : FontWeight.w600,
                       color: context.textPrimaryColor,
                     ),
                   ),
@@ -430,4 +430,3 @@ class _AttendanceExportPeriodSheetState
     );
   }
 }
-

@@ -70,10 +70,7 @@ class _HistorySummaryCardState extends State<HistorySummaryCard>
       end: Offset.zero,
     ).animate(curved);
 
-    _rotateAnimation = Tween<double>(
-      begin: 0.0,
-      end: 0.5,
-    ).animate(curved);
+    _rotateAnimation = Tween<double>(begin: 0.0, end: 0.5).animate(curved);
   }
 
   @override
@@ -167,7 +164,9 @@ class _HistorySummaryCardState extends State<HistorySummaryCard>
       }
     }
 
-    final onTimeRatio = totalDays > 0 ? (onTimeCount / totalDays).clamp(0.0, 1.0) : 1.0;
+    final onTimeRatio = totalDays > 0
+        ? (onTimeCount / totalDays).clamp(0.0, 1.0)
+        : 1.0;
     final onTimePercent = (onTimeRatio * 100).round();
 
     // Average Check-in
@@ -263,7 +262,10 @@ class _HistorySummaryCardState extends State<HistorySummaryCard>
                     ],
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: context.surfaceSecondaryColor,
                       borderRadius: BorderRadius.circular(8),
@@ -400,8 +402,12 @@ class _HistorySummaryCardState extends State<HistorySummaryCard>
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         color: onTimePercent >= 85
-                            ? (isDark ? const Color(0xFF34D399) : const Color(0xFF16A34A))
-                            : (isDark ? const Color(0xFFF87171) : const Color(0xFFE11D48)),
+                            ? (isDark
+                                  ? const Color(0xFF34D399)
+                                  : const Color(0xFF16A34A))
+                            : (isDark
+                                  ? const Color(0xFFF87171)
+                                  : const Color(0xFFE11D48)),
                       ),
                     ),
                   ],
@@ -415,8 +421,12 @@ class _HistorySummaryCardState extends State<HistorySummaryCard>
                         height: 6,
                         width: double.infinity,
                         color: lateCount > 0
-                            ? (isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFFCDD2))
-                            : (isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
+                            ? (isDark
+                                  ? const Color(0xFF7F1D1D)
+                                  : const Color(0xFFFFCDD2))
+                            : (isDark
+                                  ? const Color(0xFF1E293B)
+                                  : const Color(0xFFE2E8F0)),
                       ),
                       AnimatedBuilder(
                         animation: _expandAnimation,
@@ -426,7 +436,9 @@ class _HistorySummaryCardState extends State<HistorySummaryCard>
                             child: Container(
                               height: 6,
                               decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF10B981) : const Color(0xFF059669),
+                                color: isDark
+                                    ? const Color(0xFF10B981)
+                                    : const Color(0xFF059669),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             ),
@@ -498,7 +510,10 @@ class _HistorySummaryCardState extends State<HistorySummaryCard>
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(10),
@@ -542,7 +557,10 @@ class _HistorySummaryCardState extends State<HistorySummaryCard>
               hapticType: BouncingHapticType.selection,
               onPressed: _toggle,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -552,7 +570,9 @@ class _HistorySummaryCardState extends State<HistorySummaryCard>
                         return FadeTransition(opacity: animation, child: child);
                       },
                       child: Text(
-                        _isExpanded ? 'Sembunyikan Analisis' : 'Lihat Analisis Detail',
+                        _isExpanded
+                            ? 'Sembunyikan Analisis'
+                            : 'Lihat Analisis Detail',
                         key: ValueKey<bool>(_isExpanded),
                         style: const TextStyle(
                           fontSize: 11,

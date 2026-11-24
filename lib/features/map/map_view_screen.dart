@@ -75,21 +75,21 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen>
         accuracy: LocationAccuracy.high,
         distanceFilter: 3,
       );
-      _positionStreamSubscription = Geolocator.getPositionStream(
-        locationSettings: locationSettings,
-      ).listen(
-        (pos) {
-          if (!mounted) return;
-          setState(() {
-            _currentPosition = pos;
-            _isLoading = false;
-            _locationError = null;
-          });
-        },
-        onError: (_) {
-          // Gracefully continue with static fetch on stream error
-        },
-      );
+      _positionStreamSubscription =
+          Geolocator.getPositionStream(locationSettings: locationSettings)
+              .listen(
+                (pos) {
+                  if (!mounted) return;
+                  setState(() {
+                    _currentPosition = pos;
+                    _isLoading = false;
+                    _locationError = null;
+                  });
+                },
+                onError: (_) {
+                  // Gracefully continue with static fetch on stream error
+                },
+              );
     } catch (_) {}
   }
 
@@ -237,10 +237,7 @@ class _MapViewScreenState extends ConsumerState<MapViewScreen>
       if (!mounted) return;
       ref.read(todayAttendanceProvider.notifier).refresh();
       ref.read(historyProvider.notifier).refresh();
-      await AttendanceSuccessSheet.show(
-        context,
-        result: res,
-      );
+      await AttendanceSuccessSheet.show(context, result: res);
     }
   }
 

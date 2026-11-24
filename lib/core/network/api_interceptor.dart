@@ -46,7 +46,9 @@ class ApiInterceptor extends Interceptor {
 
     // Add Bearer Token if present (SECURITY: only attach token to trusted hosts to avoid token leakage)
     final token = await storage.getToken();
-    if (token != null && token.isNotEmpty && ApiConfig.isTrustedHost(options.path, currentBaseUrl)) {
+    if (token != null &&
+        token.isNotEmpty &&
+        ApiConfig.isTrustedHost(options.path, currentBaseUrl)) {
       options.headers['Authorization'] = 'Bearer $token';
     }
 
@@ -141,7 +143,8 @@ class ApiInterceptor extends Interceptor {
         }
       } else if (data is String && data.isNotEmpty) {
         final trimmed = data.trim();
-        final isHtml = trimmed.startsWith('<') ||
+        final isHtml =
+            trimmed.startsWith('<') ||
             trimmed.toLowerCase().contains('<!doctype') ||
             trimmed.toLowerCase().contains('<html');
         if (!isHtml) {
@@ -177,18 +180,15 @@ class ApiInterceptor extends Interceptor {
         }
       } else if (response.statusCode == 502) {
         if (!hasCustomMessage) {
-          message =
-              'Server sedang tidak dapat dijangkau (502 Bad Gateway). Silakan coba beberapa saat lagi.';
+          message = 'Server sedang tidak dapat dijangkau (502 Bad Gateway). Silakan coba beberapa saat lagi.';
         }
       } else if (response.statusCode == 503) {
         if (!hasCustomMessage) {
-          message =
-              'Server sedang dalam pemeliharaan (503 Service Unavailable). Silakan coba beberapa saat lagi.';
+          message = 'Server sedang dalam pemeliharaan (503 Service Unavailable). Silakan coba beberapa saat lagi.';
         }
       } else if (response.statusCode == 504) {
         if (!hasCustomMessage) {
-          message =
-              'Koneksi ke gateway waktu habis (504 Gateway Timeout). Silakan coba beberapa saat lagi.';
+          message = 'Koneksi ke gateway waktu habis (504 Gateway Timeout). Silakan coba beberapa saat lagi.';
         }
       } else if (response.statusCode != null && response.statusCode! >= 500) {
         if (!hasCustomMessage) {

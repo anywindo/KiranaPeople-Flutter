@@ -206,9 +206,7 @@ class MapAttendanceActionCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: isDark
-                  ? const Color(0xFF0F172A)
-                  : const Color(0xFFF8FAFC),
+              color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isDark

@@ -12,7 +12,9 @@ import 'package:kirana_people/features/profile/widgets/profile_preferences_secti
 
 void main() {
   group('Profile Sub-Widgets Tests', () {
-    testWidgets('ProfileCardGroup and ProfileRowItem render properly', (tester) async {
+    testWidgets('ProfileCardGroup and ProfileRowItem render properly', (
+      tester,
+    ) async {
       bool itemTapped = false;
 
       await tester.pumpWidget(
@@ -44,79 +46,87 @@ void main() {
       expect(itemTapped, isTrue);
     });
 
-    testWidgets('ProfileHeaderBanner renders user name and employee ID handle', (tester) async {
-      bool avatarEditTapped = false;
-      final user = UserModel(
-        id: 1,
-        name: 'Budi Santoso',
-        employeeId: 'KTI-001',
-        email: 'budi@kirana.com',
-      );
+    testWidgets(
+      'ProfileHeaderBanner renders user name and employee ID handle',
+      (tester) async {
+        bool avatarEditTapped = false;
+        final user = UserModel(
+          id: 1,
+          name: 'Budi Santoso',
+          employeeId: 'KTI-001',
+          email: 'budi@kirana.com',
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: ProfileHeaderBanner(
-                user: user,
-                onAvatarEditTap: () => avatarEditTapped = true,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: ProfileHeaderBanner(
+                  user: user,
+                  onAvatarEditTap: () => avatarEditTapped = true,
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Budi Santoso'), findsOneWidget);
-      expect(find.text('KTI-001'), findsOneWidget);
-      expect(find.byIcon(Icons.camera_alt_rounded), findsOneWidget);
+        expect(find.text('Budi Santoso'), findsOneWidget);
+        expect(find.text('KTI-001'), findsOneWidget);
+        expect(find.byIcon(Icons.camera_alt_rounded), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.camera_alt_rounded));
-      await tester.pump();
+        await tester.tap(find.byIcon(Icons.camera_alt_rounded));
+        await tester.pump();
 
-      expect(avatarEditTapped, isTrue);
-    });
+        expect(avatarEditTapped, isTrue);
+      },
+    );
 
-    testWidgets('ProfileAccountSecuritySection renders details and triggers callbacks', (tester) async {
-      bool phoneTapped = false;
-      bool changePasswordTapped = false;
-      String? copiedLabel;
+    testWidgets(
+      'ProfileAccountSecuritySection renders details and triggers callbacks',
+      (tester) async {
+        bool phoneTapped = false;
+        bool changePasswordTapped = false;
+        String? copiedLabel;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ProfileAccountSecuritySection(
-              phoneStr: '08123456789',
-              userEmail: 'budi@kirana.com',
-              onPhoneTap: () => phoneTapped = true,
-              onChangePasswordTap: () => changePasswordTapped = true,
-              onCopy: (text, label) => copiedLabel = label,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ProfileAccountSecuritySection(
+                phoneStr: '08123456789',
+                userEmail: 'budi@kirana.com',
+                onPhoneTap: () => phoneTapped = true,
+                onChangePasswordTap: () => changePasswordTapped = true,
+                onCopy: (text, label) => copiedLabel = label,
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('PENGATURAN AKUN & KEAMANAN'), findsOneWidget);
-      expect(find.text('Nomor Telepon'), findsOneWidget);
-      expect(find.text('08123456789'), findsOneWidget);
-      expect(find.text('Kata Sandi'), findsOneWidget);
-      expect(find.text('Ubah Sandi'), findsOneWidget);
-      expect(find.text('Email'), findsOneWidget);
-      expect(find.text('budi@kirana.com'), findsOneWidget);
+        expect(find.text('PENGATURAN AKUN & KEAMANAN'), findsOneWidget);
+        expect(find.text('Nomor Telepon'), findsOneWidget);
+        expect(find.text('08123456789'), findsOneWidget);
+        expect(find.text('Kata Sandi'), findsOneWidget);
+        expect(find.text('Ubah Sandi'), findsOneWidget);
+        expect(find.text('Email'), findsOneWidget);
+        expect(find.text('budi@kirana.com'), findsOneWidget);
 
-      await tester.tap(find.text('Nomor Telepon'));
-      await tester.pump();
-      expect(phoneTapped, isTrue);
+        await tester.tap(find.text('Nomor Telepon'));
+        await tester.pump();
+        expect(phoneTapped, isTrue);
 
-      await tester.tap(find.text('Ubah Sandi'));
-      await tester.pump();
-      expect(changePasswordTapped, isTrue);
+        await tester.tap(find.text('Ubah Sandi'));
+        await tester.pump();
+        expect(changePasswordTapped, isTrue);
 
-      await tester.tap(find.byIcon(Icons.copy_rounded));
-      await tester.pump();
-      expect(copiedLabel, equals('Email'));
-    });
+        await tester.tap(find.byIcon(Icons.copy_rounded));
+        await tester.pump();
+        expect(copiedLabel, equals('Email'));
+      },
+    );
 
-    testWidgets('ProfileEmploymentLocationSection renders employment details', (tester) async {
+    testWidgets('ProfileEmploymentLocationSection renders employment details', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -145,7 +155,9 @@ void main() {
       expect(find.text('1 Januari 2024'), findsOneWidget);
     });
 
-    testWidgets('ProfilePersonalInfoSection renders NIK and DOB', (tester) async {
+    testWidgets('ProfilePersonalInfoSection renders NIK and DOB', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -165,92 +177,93 @@ void main() {
       expect(find.text('15 Mei 1995'), findsOneWidget);
     });
 
-    testWidgets('ProfilePreferencesSection renders notif toggle, theme row, and version', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: ProfilePreferencesSection(
-                onShowToast: (_, {isError = false}) {},
+    testWidgets(
+      'ProfilePreferencesSection renders notif toggle, theme row, and version',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: ProfilePreferencesSection(
+                  onShowToast: (_, {isError = false}) {},
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Pengingat Presensi'), findsOneWidget);
-      expect(find.text('Tema Tampilan'), findsOneWidget);
-      expect(find.text('Kebijakan Privasi'), findsOneWidget);
-      expect(find.text('Versi Aplikasi'), findsOneWidget);
-    });
+        expect(find.text('Pengingat Presensi'), findsOneWidget);
+        expect(find.text('Tema Tampilan'), findsOneWidget);
+        expect(find.text('Kebijakan Privasi'), findsOneWidget);
+        expect(find.text('Versi Aplikasi'), findsOneWidget);
+      },
+    );
 
-    testWidgets('ProfileStickyHeaderDelegate pins smaller profile section when scrolled down', (tester) async {
-      final user = UserModel(
-        id: 1,
-        name: 'Alexander Balmaceda José Miller',
-        employeeId: 'user',
-        email: 'arw.prt@gmail.com',
-      );
+    testWidgets(
+      'ProfileStickyHeaderDelegate pins smaller profile section when scrolled down',
+      (tester) async {
+        final user = UserModel(
+          id: 1,
+          name: 'Alexander Balmaceda José Miller',
+          employeeId: 'user',
+          email: 'arw.prt@gmail.com',
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: CustomScrollView(
-              slivers: [
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: ProfileStickyHeaderDelegate(
-                    user: user,
-                    topPadding: 44.0,
-                    onAvatarEditTap: () {},
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CustomScrollView(
+                slivers: [
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: ProfileStickyHeaderDelegate(
+                      user: user,
+                      topPadding: 44.0,
+                      onAvatarEditTap: () {},
+                    ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: Container(
-                    height: 1200,
-                    color: Colors.blue,
+                  SliverToBoxAdapter(
+                    child: Container(height: 1200, color: Colors.blue),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      // Initially at top (shrinkOffset = 0):
-      expect(find.text('Alexander Balmaceda José Miller'), findsOneWidget);
-      expect(find.text('user'), findsOneWidget);
-      expect(find.byIcon(Icons.camera_alt_rounded), findsOneWidget);
+        // Initially at top (shrinkOffset = 0):
+        expect(find.text('Alexander Balmaceda José Miller'), findsOneWidget);
+        expect(find.text('user'), findsOneWidget);
+        expect(find.byIcon(Icons.camera_alt_rounded), findsOneWidget);
 
-      // Scroll down by 500px:
-      await tester.drag(find.byType(CustomScrollView), const Offset(0, -500));
-      await tester.pumpAndSettle();
+        // Scroll down by 500px:
+        await tester.drag(find.byType(CustomScrollView), const Offset(0, -500));
+        await tester.pumpAndSettle();
 
-      // Smaller profile section sticks on top:
-      expect(find.text('Alexander Balmaceda José Miller'), findsOneWidget);
-      expect(find.text('user'), findsOneWidget);
+        // Smaller profile section sticks on top:
+        expect(find.text('Alexander Balmaceda José Miller'), findsOneWidget);
+        expect(find.text('user'), findsOneWidget);
 
-      // Verify pill-shaped container decoration (matching navbar style)
-      final pillContainers = tester
-          .widgetList<Container>(find.byType(Container))
-          .where((c) {
-        final dec = c.decoration;
-        if (dec is BoxDecoration &&
-            dec.borderRadius == BorderRadius.circular(32)) {
-          return true;
-        }
-        return false;
-      });
-      expect(pillContainers, isNotEmpty);
-    });
+        // Verify pill-shaped container decoration (matching navbar style)
+        final pillContainers = tester
+            .widgetList<Container>(find.byType(Container))
+            .where((c) {
+              final dec = c.decoration;
+              if (dec is BoxDecoration &&
+                  dec.borderRadius == BorderRadius.circular(32)) {
+                return true;
+              }
+              return false;
+            });
+        expect(pillContainers, isNotEmpty);
+      },
+    );
 
-    testWidgets('ProfileScreen contains RefreshIndicator for pull-to-refresh', (tester) async {
+    testWidgets('ProfileScreen contains RefreshIndicator for pull-to-refresh', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: ProfileScreen(),
-          ),
-        ),
+        const ProviderScope(child: MaterialApp(home: ProfileScreen())),
       );
 
       expect(find.byType(RefreshIndicator), findsOneWidget);
@@ -258,4 +271,3 @@ void main() {
     });
   });
 }
-

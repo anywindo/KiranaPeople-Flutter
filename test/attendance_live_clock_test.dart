@@ -6,13 +6,11 @@ import 'package:kirana_people/features/attendance/widgets/attendance_live_clock.
 
 void main() {
   group('AttendanceLiveClock & AttendanceHeader Tests', () {
-    testWidgets('AttendanceLiveClock renders icon and time string', (tester) async {
+    testWidgets('AttendanceLiveClock renders icon and time string', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: AttendanceLiveClock(),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: AttendanceLiveClock())),
       );
 
       expect(find.byType(AttendanceLiveClock), findsOneWidget);
@@ -31,60 +29,66 @@ void main() {
       expect(timeFinder, findsOneWidget);
     });
 
-    testWidgets('AttendanceHeader renders both user greeting and live clock side-by-side',
-        (tester) async {
-      final dummyUser = UserModel(
-        id: 1,
-        name: 'Budi Santoso',
-        email: 'budi@kirana.com',
-      );
+    testWidgets(
+      'AttendanceHeader renders both user greeting and live clock side-by-side',
+      (tester) async {
+        final dummyUser = UserModel(
+          id: 1,
+          name: 'Budi Santoso',
+          email: 'budi@kirana.com',
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: AttendanceHeader(
-              user: dummyUser,
-              isBackgroundSyncing: false,
-              onRefresh: () {},
-              onLogout: () {},
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text('Budi Santoso'), findsOneWidget);
-    });
-
-    testWidgets('AttendanceHeader renders long user name gracefully with ContinuousMarqueeText',
-        (tester) async {
-      final longNameUser = UserModel(
-        id: 2,
-        name: 'Alexander Balmacéda José Miller Wilson',
-        email: 'alex@kirana.com',
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              width: 360, // Lebar layar ponsel standar
-              child: AttendanceHeader(
-                user: longNameUser,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AttendanceHeader(
+                user: dummyUser,
                 isBackgroundSyncing: false,
                 onRefresh: () {},
                 onLogout: () {},
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+        expect(find.text('Budi Santoso'), findsOneWidget);
+      },
+    );
 
-      expect(find.text('Alexander Balmacéda José Miller Wilson'), findsWidgets);
-      expect(tester.takeException(), isNull); // zero layout overflow
-    });
+    testWidgets(
+      'AttendanceHeader renders long user name gracefully with ContinuousMarqueeText',
+      (tester) async {
+        final longNameUser = UserModel(
+          id: 2,
+          name: 'Alexander Balmacéda José Miller Wilson',
+          email: 'alex@kirana.com',
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                width: 360, // Lebar layar ponsel standar
+                child: AttendanceHeader(
+                  user: longNameUser,
+                  isBackgroundSyncing: false,
+                  onRefresh: () {},
+                  onLogout: () {},
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+
+        expect(
+          find.text('Alexander Balmacéda José Miller Wilson'),
+          findsWidgets,
+        );
+        expect(tester.takeException(), isNull); // zero layout overflow
+      },
+    );
   });
 }
-

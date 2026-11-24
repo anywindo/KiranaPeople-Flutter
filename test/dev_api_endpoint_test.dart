@@ -24,20 +24,35 @@ void main() {
       expect(ApiConfig.getHostOrigin(), equals(ApiConfig.cachedHostOrigin));
     });
 
-    test('Setting custom base URL updates getBaseUrl and getHostOrigin', () async {
-      await ApiConfig.setBaseUrl('http://10.0.2.2:8000/api/v1');
-      expect(await ApiConfig.getBaseUrl(), equals('http://10.0.2.2:8000/api/v1'));
-      expect(ApiConfig.getHostOrigin(), equals('http://10.0.2.2:8000'));
+    test(
+      'Setting custom base URL updates getBaseUrl and getHostOrigin',
+      () async {
+        await ApiConfig.setBaseUrl('http://10.0.2.2:8000/api/v1');
+        expect(
+          await ApiConfig.getBaseUrl(),
+          equals('http://10.0.2.2:8000/api/v1'),
+        );
+        expect(ApiConfig.getHostOrigin(), equals('http://10.0.2.2:8000'));
 
-      // Test with custom domain
-      await ApiConfig.setBaseUrl('https://staging-api.kirana.com/api/v1');
-      expect(await ApiConfig.getBaseUrl(), equals('https://staging-api.kirana.com/api/v1'));
-      expect(ApiConfig.getHostOrigin(), equals('https://staging-api.kirana.com'));
-    });
+        // Test with custom domain
+        await ApiConfig.setBaseUrl('https://staging-api.kirana.com/api/v1');
+        expect(
+          await ApiConfig.getBaseUrl(),
+          equals('https://staging-api.kirana.com/api/v1'),
+        );
+        expect(
+          ApiConfig.getHostOrigin(),
+          equals('https://staging-api.kirana.com'),
+        );
+      },
+    );
 
     test('Resetting base URL restores default', () async {
       await ApiConfig.setBaseUrl('http://192.168.1.50:8000/api/v1');
-      expect(await ApiConfig.getBaseUrl(), equals('http://192.168.1.50:8000/api/v1'));
+      expect(
+        await ApiConfig.getBaseUrl(),
+        equals('http://192.168.1.50:8000/api/v1'),
+      );
 
       await ApiConfig.resetBaseUrl();
       expect(await ApiConfig.getBaseUrl(), equals(ApiConfig.defaultBaseUrl));
@@ -46,7 +61,9 @@ void main() {
   });
 
   group('DevApiEndpointCard Widget Tests', () {
-    testWidgets('renders DevApiEndpointCard header with default status', (tester) async {
+    testWidgets('renders DevApiEndpointCard header with default status', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
@@ -65,7 +82,9 @@ void main() {
       expect(find.text(ApiConfig.defaultBaseUrl), findsOneWidget);
     });
 
-    testWidgets('expands card and allows entering and saving custom endpoint', (tester) async {
+    testWidgets('expands card and allows entering and saving custom endpoint', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
@@ -95,9 +114,17 @@ void main() {
       await tester.tap(find.text('Simpan'));
       await tester.pumpAndSettle();
 
-      expect(await ApiConfig.getBaseUrl(), equals('http://10.0.2.2:8000/api/v1'));
+      expect(
+        await ApiConfig.getBaseUrl(),
+        equals('http://10.0.2.2:8000/api/v1'),
+      );
       expect(find.text('CUSTOM'), findsOneWidget);
-      expect(find.textContaining('Endpoint API disimpan: http://10.0.2.2:8000/api/v1'), findsOneWidget);
+      expect(
+        find.textContaining(
+          'Endpoint API disimpan: http://10.0.2.2:8000/api/v1',
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Reset Default button restores default URL', (tester) async {
@@ -128,55 +155,57 @@ void main() {
 
       expect(await ApiConfig.getBaseUrl(), equals(ApiConfig.defaultBaseUrl));
       expect(find.text('DEFAULT'), findsOneWidget);
-      expect(find.text('Endpoint API dikembalikan ke default.'), findsOneWidget);
-    });
-
-    testWidgets('LoginScreen hides DevApiEndpointCard by default and reveals it after 7 taps on Version footer', (tester) async {
-      tester.view.physicalSize = const Size(800, 1400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
-
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: LoginScreen(),
-          ),
-        ),
+      expect(
+        find.text('Endpoint API dikembalikan ke default.'),
+        findsOneWidget,
       );
-      await tester.pumpAndSettle();
-
-      // DevApiEndpointCard is hidden initially
-      expect(find.text('Dev: API Endpoint'), findsNothing);
-
-      final versionFinder = find.byKey(const Key('login_version_footer'));
-      expect(versionFinder, findsOneWidget);
-      await tester.ensureVisible(versionFinder);
-      await tester.pumpAndSettle();
-
-      // Tap 6 times - should still be hidden
-      for (int i = 0; i < 6; i++) {
-        await tester.tap(versionFinder);
-        await tester.pump(const Duration(milliseconds: 100));
-      }
-      expect(find.text('Dev: API Endpoint'), findsNothing);
-
-      // 7th tap - unlocks and reveals card
-      await tester.tap(versionFinder);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Dev: API Endpoint'), findsOneWidget);
-
-      // Tap 7 more times - toggles off and hides card
-      for (int i = 0; i < 7; i++) {
-        await tester.tap(versionFinder);
-        await tester.pump(const Duration(milliseconds: 100));
-      }
-      await tester.pumpAndSettle();
-
-      expect(find.text('Dev: API Endpoint'), findsNothing);
     });
+
+    testWidgets(
+      'LoginScreen hides DevApiEndpointCard by default and reveals it after 7 taps on Version footer',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        await tester.pumpWidget(
+          const ProviderScope(child: MaterialApp(home: LoginScreen())),
+        );
+        await tester.pumpAndSettle();
+
+        // DevApiEndpointCard is hidden initially
+        expect(find.text('Dev: API Endpoint'), findsNothing);
+
+        final versionFinder = find.byKey(const Key('login_version_footer'));
+        expect(versionFinder, findsOneWidget);
+        await tester.ensureVisible(versionFinder);
+        await tester.pumpAndSettle();
+
+        // Tap 6 times - should still be hidden
+        for (int i = 0; i < 6; i++) {
+          await tester.tap(versionFinder);
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+        expect(find.text('Dev: API Endpoint'), findsNothing);
+
+        // 7th tap - unlocks and reveals card
+        await tester.tap(versionFinder);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Dev: API Endpoint'), findsOneWidget);
+
+        // Tap 7 more times - toggles off and hides card
+        for (int i = 0; i < 7; i++) {
+          await tester.tap(versionFinder);
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+        await tester.pumpAndSettle();
+
+        expect(find.text('Dev: API Endpoint'), findsNothing);
+      },
+    );
   });
 }

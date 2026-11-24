@@ -20,7 +20,10 @@ class AttendancePdfPreviewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sanitizedName = user.name.trim().toLowerCase().replaceAll(RegExp(r'\s+'), '_');
+    final sanitizedName = user.name.trim().toLowerCase().replaceAll(
+      RegExp(r'\s+'),
+      '_',
+    );
     final dateSuffix = DateTime.now().toIso8601String().substring(0, 10);
     final filename = 'rekap_presensi_${sanitizedName}_$dateSuffix.pdf';
 
@@ -60,9 +63,7 @@ class AttendancePdfPreviewScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: context.surfaceColor,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: context.borderColor,
-                ),
+                border: Border.all(color: context.borderColor),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -126,4 +127,3 @@ class AttendancePdfPreviewScreen extends StatelessWidget {
     );
   }
 }
-

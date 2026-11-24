@@ -19,4 +19,3 @@ class AttendanceSubmissionResult {
     this.isLate,
   });
 }
-

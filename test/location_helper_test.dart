@@ -72,31 +72,43 @@ void main() {
       );
     });
 
-    test('throws Exception when position timestamp is far in the future (>60s)', () {
-      final futureTime = DateTime.now().add(const Duration(minutes: 5));
-      final pos = createTestPosition(timestamp: futureTime);
-      expect(
-        () => LocationHelper.validatePosition(pos),
-        throwsA(
-          isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('Waktu perangkat tidak sinkron'),
+    test(
+      'throws Exception when position timestamp is far in the future (>60s)',
+      () {
+        final futureTime = DateTime.now().add(const Duration(minutes: 5));
+        final pos = createTestPosition(timestamp: futureTime);
+        expect(
+          () => LocationHelper.validatePosition(pos),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains('Waktu perangkat tidak sinkron'),
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   });
 
   group('LocationHelper caching & power optimization', () {
-    test('reuses cached position when under 60 seconds old without forceRefresh', () async {
-      final initialPos = createTestPosition(latitude: -6.123456, longitude: 106.654321);
-      LocationHelper.seedCache(initialPos, cachedAt: DateTime.now().subtract(const Duration(seconds: 15)));
+    test(
+      'reuses cached position when under 60 seconds old without forceRefresh',
+      () async {
+        final initialPos = createTestPosition(
+          latitude: -6.123456,
+          longitude: 106.654321,
+        );
+        LocationHelper.seedCache(
+          initialPos,
+          cachedAt: DateTime.now().subtract(const Duration(seconds: 15)),
+        );
 
-      final pos = await LocationHelper.determinePosition(forceRefresh: false);
-      expect(pos.latitude, equals(-6.123456));
-      expect(pos.longitude, equals(106.654321));
-    });
+        final pos = await LocationHelper.determinePosition(forceRefresh: false);
+        expect(pos.latitude, equals(-6.123456));
+        expect(pos.longitude, equals(106.654321));
+      },
+    );
 
     test('resetCache clears cached position state', () {
       final initialPos = createTestPosition();

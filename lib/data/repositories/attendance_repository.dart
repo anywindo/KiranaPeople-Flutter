@@ -172,10 +172,7 @@ class AttendanceRepository {
       if (additionalDetails != null) {
         payload['details'] = additionalDetails;
       }
-      await _apiClient.post(
-        ApiEndpoints.securityIncident,
-        data: payload,
-      );
+      await _apiClient.post(ApiEndpoints.securityIncident, data: payload);
     } catch (_) {
       // Best-effort audit transmission; failure to log must never suppress client-side enforcement
     }

@@ -253,7 +253,9 @@ class HistoryDateFilterSheet extends StatelessWidget {
       'Desember',
     ];
     final firstDayCurrentMonth = DateTime(now.year, now.month, 1);
-    final lastDayPrevMonth = firstDayCurrentMonth.subtract(const Duration(days: 1));
+    final lastDayPrevMonth = firstDayCurrentMonth.subtract(
+      const Duration(days: 1),
+    );
     final prevMonthName = months[lastDayPrevMonth.month - 1];
     return '1 - ${lastDayPrevMonth.day} $prevMonthName ${lastDayPrevMonth.year}';
   }

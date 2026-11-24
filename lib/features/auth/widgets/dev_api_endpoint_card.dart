@@ -10,10 +10,7 @@ import '../../../providers/connectivity_provider.dart';
 class DevApiEndpointCard extends ConsumerStatefulWidget {
   final bool forceVisible;
 
-  const DevApiEndpointCard({
-    super.key,
-    this.forceVisible = false,
-  });
+  const DevApiEndpointCard({super.key, this.forceVisible = false});
 
   @override
   ConsumerState<DevApiEndpointCard> createState() => _DevApiEndpointCardState();
@@ -370,10 +367,7 @@ class _DevApiEndpointCardState extends ConsumerState<DevApiEndpointCard> {
     );
   }
 
-  Widget _buildPresetChip({
-    required String label,
-    required String url,
-  }) {
+  Widget _buildPresetChip({required String label, required String url}) {
     final isSelected = _controller.text.trim() == url;
     return InkWell(
       onTap: () {

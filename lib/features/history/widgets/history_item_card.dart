@@ -109,20 +109,20 @@ class HistoryItemCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isLate
                         ? (context.isDarkMode
-                            ? const Color(0xFF3B151E)
-                            : const Color(0xFFFFF1F2))
+                              ? const Color(0xFF3B151E)
+                              : const Color(0xFFFFF1F2))
                         : (context.isDarkMode
-                            ? const Color(0xFF064E3B).withValues(alpha: 0.5)
-                            : const Color(0xFFDCFCE7)),
+                              ? const Color(0xFF064E3B).withValues(alpha: 0.5)
+                              : const Color(0xFFDCFCE7)),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
                       color: isLate
                           ? (context.isDarkMode
-                              ? const Color(0xFF4C1D24)
-                              : const Color(0xFFFFE4E6))
+                                ? const Color(0xFF4C1D24)
+                                : const Color(0xFFFFE4E6))
                           : (context.isDarkMode
-                              ? const Color(0xFF047857).withValues(alpha: 0.4)
-                              : const Color(0xFFBBF7D0)),
+                                ? const Color(0xFF047857).withValues(alpha: 0.4)
+                                : const Color(0xFFBBF7D0)),
                       width: 1.0,
                     ),
                   ),
@@ -134,8 +134,8 @@ class HistoryItemCard extends StatelessWidget {
                       color: isLate
                           ? const Color(0xFFEF4444)
                           : (context.isDarkMode
-                              ? const Color(0xFF34D399)
-                              : const Color(0xFF15803D)),
+                                ? const Color(0xFF34D399)
+                                : const Color(0xFF15803D)),
                     ),
                   ),
                 ),
@@ -274,8 +274,8 @@ class HistoryItemCard extends StatelessWidget {
                                 ),
                               ),
                               if (event.latitude != null &&
-                                  event.longitude != null) ...[
-                              ],
+                                  event.longitude != null)
+                                ...[],
                             ],
                           ),
                         ],

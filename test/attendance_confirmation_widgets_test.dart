@@ -7,36 +7,41 @@ import 'package:kirana_people/features/attendance/widgets/confirmation/confirmat
 
 void main() {
   group('Attendance Confirmation Sub-Widgets Tests', () {
-    testWidgets('ConfirmationAppBar renders action title and triggers callbacks', (tester) async {
-      bool retakeCalled = false;
-      bool cancelCalled = false;
+    testWidgets(
+      'ConfirmationAppBar renders action title and triggers callbacks',
+      (tester) async {
+        bool retakeCalled = false;
+        bool cancelCalled = false;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ConfirmationAppBar(
-              action: AttendanceEventType.startShift,
-              onRetake: () => retakeCalled = true,
-              onCancel: () => cancelCalled = true,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ConfirmationAppBar(
+                action: AttendanceEventType.startShift,
+                onRetake: () => retakeCalled = true,
+                onCancel: () => cancelCalled = true,
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Masuk Kerja'), findsOneWidget);
-      expect(find.text('Foto'), findsOneWidget);
-      expect(find.text('Batal'), findsOneWidget);
+        expect(find.text('Masuk Kerja'), findsOneWidget);
+        expect(find.text('Foto'), findsOneWidget);
+        expect(find.text('Batal'), findsOneWidget);
 
-      await tester.tap(find.text('Foto'));
-      await tester.pump();
-      expect(retakeCalled, isTrue);
+        await tester.tap(find.text('Foto'));
+        await tester.pump();
+        expect(retakeCalled, isTrue);
 
-      await tester.tap(find.text('Batal'));
-      await tester.pump();
-      expect(cancelCalled, isTrue);
-    });
+        await tester.tap(find.text('Batal'));
+        await tester.pump();
+        expect(cancelCalled, isTrue);
+      },
+    );
 
-    testWidgets('ConfirmationActionButtons renders and triggers callbacks', (tester) async {
+    testWidgets('ConfirmationActionButtons renders and triggers callbacks', (
+      tester,
+    ) async {
       bool retakeCalled = false;
       bool submitCalled = false;
 
@@ -64,30 +69,36 @@ void main() {
       expect(submitCalled, isTrue);
     });
 
-    testWidgets('ConfirmationActionButtons shows progress spinner when isSubmitting is true', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ConfirmationActionButtons(
-              isSubmitting: true,
-              onRetake: () {},
-              onSubmit: () {},
+    testWidgets(
+      'ConfirmationActionButtons shows progress spinner when isSubmitting is true',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ConfirmationActionButtons(
+                isSubmitting: true,
+                onRetake: () {},
+                onSubmit: () {},
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.text('Simpan Presensi'), findsNothing);
-    });
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(find.text('Simpan Presensi'), findsNothing);
+      },
+    );
 
-    testWidgets('ConfirmationDialogs can render offline warning dialog', (tester) async {
+    testWidgets('ConfirmationDialogs can render offline warning dialog', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: Builder(
               builder: (context) => ElevatedButton(
-                onPressed: () => ConfirmationDialogs.showOfflineWarningDialog(context),
+                onPressed: () =>
+                    ConfirmationDialogs.showOfflineWarningDialog(context),
                 child: const Text('Open Dialog'),
               ),
             ),
@@ -108,4 +119,3 @@ void main() {
     });
   });
 }
-

@@ -11,10 +11,7 @@ import '../../../data/models/attendance_submission_result.dart';
 class AttendanceSuccessSheet extends StatefulWidget {
   final AttendanceSubmissionResult result;
 
-  const AttendanceSuccessSheet({
-    super.key,
-    required this.result,
-  });
+  const AttendanceSuccessSheet({super.key, required this.result});
 
   static Future<void> show(
     BuildContext context, {
@@ -195,11 +192,7 @@ class _AttendanceSuccessSheetState extends State<AttendanceSuccessSheet>
                 ),
               ),
               child: const Center(
-                child: Icon(
-                  Icons.check_rounded,
-                  color: Colors.white,
-                  size: 44,
-                ),
+                child: Icon(Icons.check_rounded, color: Colors.white, size: 44),
               ),
             ),
           ),
@@ -218,10 +211,7 @@ class _AttendanceSuccessSheetState extends State<AttendanceSuccessSheet>
           const SizedBox(height: 6),
           Text(
             'Kehadiran Anda telah terverifikasi secara akurat.',
-            style: TextStyle(
-              fontSize: 13,
-              color: context.textSecondaryColor,
-            ),
+            style: TextStyle(fontSize: 13, color: context.textSecondaryColor),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
@@ -253,11 +243,7 @@ class _AttendanceSuccessSheetState extends State<AttendanceSuccessSheet>
                             color: eventColor.withValues(alpha: 0.12),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
-                            eventIcon,
-                            size: 16,
-                            color: eventColor,
-                          ),
+                          child: Icon(eventIcon, size: 16, color: eventColor),
                         ),
                         const SizedBox(width: 10),
                         Text(
@@ -280,20 +266,23 @@ class _AttendanceSuccessSheetState extends State<AttendanceSuccessSheet>
                       decoration: BoxDecoration(
                         color: res.isWithinRadius
                             ? (isDark
-                                ? const Color(0xFF064E3B).withValues(alpha: 0.5)
-                                : const Color(0xFFDCFCE7))
+                                  ? const Color(0xFF064E3B)
+                                        .withValues(alpha: 0.5)
+                                  : const Color(0xFFDCFCE7))
                             : (isDark
-                                ? const Color(0xFF4C1D24).withValues(alpha: 0.5)
-                                : const Color(0xFFFFF1F2)),
+                                  ? const Color(0xFF4C1D24)
+                                        .withValues(alpha: 0.5)
+                                  : const Color(0xFFFFF1F2)),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: res.isWithinRadius
                               ? (isDark
-                                  ? const Color(0xFF047857).withValues(alpha: 0.4)
-                                  : const Color(0xFFBBF7D0))
+                                    ? const Color(0xFF047857)
+                                          .withValues(alpha: 0.4)
+                                    : const Color(0xFFBBF7D0))
                               : (isDark
-                                  ? const Color(0xFF7F1D1D)
-                                  : const Color(0xFFFFCDD2)),
+                                    ? const Color(0xFF7F1D1D)
+                                    : const Color(0xFFFFCDD2)),
                         ),
                       ),
                       child: Row(
@@ -316,11 +305,11 @@ class _AttendanceSuccessSheetState extends State<AttendanceSuccessSheet>
                               fontWeight: FontWeight.w700,
                               color: res.isWithinRadius
                                   ? (isDark
-                                      ? const Color(0xFF34D399)
-                                      : const Color(0xFF15803D))
+                                        ? const Color(0xFF34D399)
+                                        : const Color(0xFF15803D))
                                   : (isDark
-                                      ? const Color(0xFFF87171)
-                                      : const Color(0xFFE11D48)),
+                                        ? const Color(0xFFF87171)
+                                        : const Color(0xFFE11D48)),
                             ),
                           ),
                         ],

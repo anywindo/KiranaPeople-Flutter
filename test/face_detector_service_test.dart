@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kirana_people/core/services/face_detector_service.dart';
 
@@ -48,11 +49,12 @@ void main() {
 
     test('detectFaces returns error when file does not exist', () async {
       final nonExistentFile = File('/path/to/non_existent_selfie_image.jpg');
-      final result = await FaceDetectorService.instance.detectFaces(nonExistentFile);
+      final result = await FaceDetectorService.instance.detectFaces(
+        nonExistentFile,
+      );
 
       expect(result.hasFace, isFalse);
       expect(result.errorMessage, contains('tidak ditemukan'));
     });
   });
 }
-

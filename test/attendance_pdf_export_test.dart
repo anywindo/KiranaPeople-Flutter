@@ -121,11 +121,13 @@ void main() {
           events: [
             AttendanceEvent(
               eventType: AttendanceEventType.startShift,
-              timestamp: '2026-11-${(i + 1).toString().padLeft(2, '0')}T08:00:00.000Z',
+              timestamp:
+                  '2026-11-${(i + 1).toString().padLeft(2, '0')}T08:00:00.000Z',
             ),
             AttendanceEvent(
               eventType: AttendanceEventType.endShift,
-              timestamp: '2026-11-${(i + 1).toString().padLeft(2, '0')}T17:00:00.000Z',
+              timestamp:
+                  '2026-11-${(i + 1).toString().padLeft(2, '0')}T17:00:00.000Z',
             ),
           ],
         ),
@@ -157,66 +159,83 @@ void main() {
       expect(find.byType(PdfPreview), findsOneWidget);
     });
 
-    testWidgets('HistorySummaryCard renders PDF export button when expanded and triggers callback', (tester) async {
-      bool exportCalled = false;
+    testWidgets(
+      'HistorySummaryCard renders PDF export button when expanded and triggers callback',
+      (tester) async {
+        bool exportCalled = false;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: HistorySummaryCard(
-                records: mockRecords,
-                initiallyExpanded: true,
-                onExportPdf: () => exportCalled = true,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: HistorySummaryCard(
+                  records: mockRecords,
+                  initiallyExpanded: true,
+                  onExportPdf: () => exportCalled = true,
+                ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      final exportButton = find.byKey(const Key('summary_export_pdf_button'));
-      expect(exportButton, findsOneWidget);
+        final exportButton = find.byKey(const Key('summary_export_pdf_button'));
+        expect(exportButton, findsOneWidget);
 
-      await tester.tap(exportButton);
-      await tester.pump();
+        await tester.tap(exportButton);
+        await tester.pump();
 
-      expect(exportCalled, isTrue);
-    });
+        expect(exportCalled, isTrue);
+      },
+    );
 
-    testWidgets('AttendanceExportPeriodSheet renders month options and returns selected period', (tester) async {
-      AttendanceExportPeriodResult? selectedResult;
+    testWidgets(
+      'AttendanceExportPeriodSheet renders month options and returns selected period',
+      (tester) async {
+        AttendanceExportPeriodResult? selectedResult;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (ctx) => ElevatedButton(
-                onPressed: () async {
-                  selectedResult = await AttendanceExportPeriodSheet.show(ctx);
-                },
-                child: const Text('Buka Periode Sheet'),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (ctx) => ElevatedButton(
+                  onPressed: () async {
+                    selectedResult = await AttendanceExportPeriodSheet.show(
+                      ctx,
+                    );
+                  },
+                  child: const Text('Buka Periode Sheet'),
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      // Open sheet
-      await tester.tap(find.text('Buka Periode Sheet'));
-      await tester.pumpAndSettle();
+        // Open sheet
+        await tester.tap(find.text('Buka Periode Sheet'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Pilih Periode Ekspor PDF'), findsOneWidget);
-      expect(find.byKey(const Key('export_option_current_month')), findsOneWidget);
-      expect(find.byKey(const Key('export_option_last_month')), findsOneWidget);
-      expect(find.byKey(const Key('export_option_custom_month')), findsOneWidget);
+        expect(find.text('Pilih Periode Ekspor PDF'), findsOneWidget);
+        expect(
+          find.byKey(const Key('export_option_current_month')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('export_option_last_month')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('export_option_custom_month')),
+          findsOneWidget,
+        );
 
-      // Tap current month
-      await tester.tap(find.byKey(const Key('export_option_current_month')));
-      await tester.pumpAndSettle();
+        // Tap current month
+        await tester.tap(find.byKey(const Key('export_option_current_month')));
+        await tester.pumpAndSettle();
 
-      expect(selectedResult, isNotNull);
-      expect(selectedResult!.startDate.day, equals(1));
-    });
+        expect(selectedResult, isNotNull);
+        expect(selectedResult!.startDate.day, equals(1));
+      },
+    );
   });
 }

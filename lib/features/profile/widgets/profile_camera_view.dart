@@ -13,9 +13,7 @@ class ProfileCameraView extends StatefulWidget {
   static Future<File?> push(BuildContext context) async {
     return Navigator.push<File?>(
       context,
-      MaterialPageRoute(
-        builder: (_) => const ProfileCameraView(),
-      ),
+      MaterialPageRoute(builder: (_) => const ProfileCameraView()),
     );
   }
 
@@ -141,4 +139,3 @@ class _ProfileCameraViewState extends State<ProfileCameraView>
     );
   }
 }
-

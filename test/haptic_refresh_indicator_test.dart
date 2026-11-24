@@ -13,12 +13,7 @@ void main() {
           home: Scaffold(
             body: HapticRefreshIndicator(
               onRefresh: () async {},
-              child: ListView(
-                children: const [
-                  Text('Item 1'),
-                  Text('Item 2'),
-                ],
-              ),
+              child: ListView(children: const [Text('Item 1'), Text('Item 2')]),
             ),
           ),
         ),
@@ -29,7 +24,9 @@ void main() {
       expect(find.byType(RefreshIndicator), findsOneWidget);
     });
 
-    testWidgets('triggers onRefresh callback when dragged down', (tester) async {
+    testWidgets('triggers onRefresh callback when dragged down', (
+      tester,
+    ) async {
       bool refreshed = false;
 
       await tester.pumpWidget(
@@ -67,7 +64,9 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('handles overscroll with clamping physics without error', (tester) async {
+    testWidgets('handles overscroll with clamping physics without error', (
+      tester,
+    ) async {
       bool refreshed = false;
 
       await tester.pumpWidget(
@@ -90,7 +89,11 @@ void main() {
         ),
       );
 
-      await tester.fling(find.text('Clamping Item'), const Offset(0, 300), 1000);
+      await tester.fling(
+        find.text('Clamping Item'),
+        const Offset(0, 300),
+        1000,
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 

@@ -50,7 +50,8 @@ class FileDownloadHelper {
 
   /// SECURITY (SEC-15): Validates whether a target URL belongs to the trusted API host.
   /// Bearer tokens are NEVER attached to third-party or untrusted domains to prevent token theft.
-  static bool isTrustedHost(String urlOrPath) => ApiConfig.isTrustedHost(urlOrPath);
+  static bool isTrustedHost(String urlOrPath, [String? currentBaseUrl]) =>
+      ApiConfig.isTrustedHost(urlOrPath, currentBaseUrl);
 
   /// Extracts the original filename from a URL or file path and sanitizes it.
   static String extractFileName(String urlOrPath, {String? defaultName}) {
@@ -161,7 +162,8 @@ class FileDownloadHelper {
           bytes = await cachedFile.readAsBytes();
         } else {
           // 2. Fetch directly from network
-          final dio = dioClient ??
+          final dio =
+              dioClient ??
               Dio(
                 BaseOptions(
                   connectTimeout: const Duration(seconds: 30),
@@ -171,7 +173,8 @@ class FileDownloadHelper {
               );
           final headers = <String, dynamic>{};
           // SECURITY (SEC-15): Only attach authorization header if target host is trusted
-          if (isTrustedHost(fullUrl)) {
+          final baseUrl = await ApiConfig.getBaseUrl();
+          if (isTrustedHost(fullUrl, baseUrl)) {
             final token = await SecureStorageService().getToken();
             if (token != null && token.isNotEmpty) {
               headers['Authorization'] = 'Bearer $token';
@@ -288,7 +291,8 @@ class FileDownloadHelper {
           localFilePath = target.path;
         } else {
           // 2. Fetch directly from network and save to temp file
-          final dio = dioClient ??
+          final dio =
+              dioClient ??
               Dio(
                 BaseOptions(
                   connectTimeout: const Duration(seconds: 30),
@@ -298,7 +302,8 @@ class FileDownloadHelper {
               );
           final headers = <String, dynamic>{};
           // SECURITY (SEC-15): Only attach authorization header if target host is trusted
-          if (isTrustedHost(fullUrl)) {
+          final baseUrl = await ApiConfig.getBaseUrl();
+          if (isTrustedHost(fullUrl, baseUrl)) {
             final token = await SecureStorageService().getToken();
             if (token != null && token.isNotEmpty) {
               headers['Authorization'] = 'Bearer $token';

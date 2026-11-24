@@ -258,8 +258,7 @@ class Shift {
       final schedParts = scheduledTime.split(':');
       final actualMin =
           int.parse(actualParts[0]) * 60 + int.parse(actualParts[1]);
-      final schedMin =
-          int.parse(schedParts[0]) * 60 + int.parse(schedParts[1]);
+      final schedMin = int.parse(schedParts[0]) * 60 + int.parse(schedParts[1]);
 
       // Calculate signed difference in minutes from scheduled end (-720..+720)
       var diff = actualMin - schedMin;
@@ -278,9 +277,6 @@ class Shift {
 
   /// Convenience instance method for this shift instance.
   bool isEndEarly(String? actualTime) {
-    return isShiftEndEarly(
-      actualTime: actualTime,
-      scheduledTime: endTime,
-    );
+    return isShiftEndEarly(actualTime: actualTime, scheduledTime: endTime);
   }
 }

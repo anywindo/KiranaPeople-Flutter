@@ -10,7 +10,9 @@ import 'package:kirana_people/features/onboarding/widgets/onboarding_policy_agre
 
 void main() {
   group('Auth & Onboarding Sub-Widgets Tests (Paket D)', () {
-    testWidgets('ForgotPasswordStepperHeader renders title and actions', (tester) async {
+    testWidgets('ForgotPasswordStepperHeader renders title and actions', (
+      tester,
+    ) async {
       bool backTapped = false;
       bool closeTapped = false;
 
@@ -40,40 +42,45 @@ void main() {
       expect(closeTapped, isTrue);
     });
 
-    testWidgets('ForgotPasswordSuccessDialog renders and triggers login callback', (tester) async {
-      bool loginTapped = false;
+    testWidgets(
+      'ForgotPasswordSuccessDialog renders and triggers login callback',
+      (tester) async {
+        bool loginTapped = false;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => ElevatedButton(
-                onPressed: () => ForgotPasswordSuccessDialog.show(
-                  context,
-                  email: 'test@kirana.com',
-                  message: 'Berhasil direset!',
-                  onLoginNow: () => loginTapped = true,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => ElevatedButton(
+                  onPressed: () => ForgotPasswordSuccessDialog.show(
+                    context,
+                    email: 'test@kirana.com',
+                    message: 'Berhasil direset!',
+                    onLoginNow: () => loginTapped = true,
+                  ),
+                  child: const Text('Show Dialog'),
                 ),
-                child: const Text('Show Dialog'),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.tap(find.text('Show Dialog'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Show Dialog'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Berhasil'), findsOneWidget);
-      expect(find.text('Berhasil direset!'), findsOneWidget);
-      expect(find.text('Masuk Sekarang'), findsOneWidget);
+        expect(find.text('Berhasil'), findsOneWidget);
+        expect(find.text('Berhasil direset!'), findsOneWidget);
+        expect(find.text('Masuk Sekarang'), findsOneWidget);
 
-      await tester.tap(find.text('Masuk Sekarang'));
-      await tester.pumpAndSettle();
-      expect(loginTapped, isTrue);
-    });
+        await tester.tap(find.text('Masuk Sekarang'));
+        await tester.pumpAndSettle();
+        expect(loginTapped, isTrue);
+      },
+    );
 
-    testWidgets('OnboardingPasswordHeader renders user greeting', (tester) async {
+    testWidgets('OnboardingPasswordHeader renders user greeting', (
+      tester,
+    ) async {
       final user = UserModel(
         id: 1,
         name: 'Ahmad Fauzi',
@@ -82,9 +89,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: OnboardingPasswordHeader(user: user),
-          ),
+          home: Scaffold(body: OnboardingPasswordHeader(user: user)),
         ),
       );
 
@@ -93,7 +98,9 @@ void main() {
       expect(find.byIcon(Icons.key_rounded), findsOneWidget);
     });
 
-    testWidgets('OnboardingPasswordRequirements updates checklist icons', (tester) async {
+    testWidgets('OnboardingPasswordRequirements updates checklist icons', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -116,7 +123,9 @@ void main() {
       expect(find.byIcon(Icons.circle_outlined), findsNWidgets(2));
     });
 
-    testWidgets('OnboardingLogoutDialog renders and triggers logout action', (tester) async {
+    testWidgets('OnboardingLogoutDialog renders and triggers logout action', (
+      tester,
+    ) async {
       bool logoutTapped = false;
 
       await tester.pumpWidget(
@@ -147,7 +156,9 @@ void main() {
       expect(logoutTapped, isTrue);
     });
 
-    testWidgets('OnboardingPolicyAgreement renders and toggles checkbox', (tester) async {
+    testWidgets('OnboardingPolicyAgreement renders and toggles checkbox', (
+      tester,
+    ) async {
       bool currentVal = false;
 
       await tester.pumpWidget(
@@ -169,7 +180,9 @@ void main() {
         find.byWidgetPredicate(
           (w) =>
               w is RichText &&
-              w.text.toPlainText().contains('Saya telah membaca dan menyetujui'),
+              w.text.toPlainText().contains(
+                'Saya telah membaca dan menyetujui',
+              ),
         ),
         findsOneWidget,
       );

@@ -27,21 +27,19 @@ class FaceDetectionResult {
     double? rightEyeOpen,
     double? smiling,
     double? angleY,
-  ]) =>
-      FaceDetectionResult(
-        hasFace: count > 0,
-        faceCount: count,
-        leftEyeOpenProbability: leftEyeOpen,
-        rightEyeOpenProbability: rightEyeOpen,
-        smilingProbability: smiling,
-        headEulerAngleY: angleY,
-      );
+  ]) => FaceDetectionResult(
+    hasFace: count > 0,
+    faceCount: count,
+    leftEyeOpenProbability: leftEyeOpen,
+    rightEyeOpenProbability: rightEyeOpen,
+    smilingProbability: smiling,
+    headEulerAngleY: angleY,
+  );
 
   factory FaceDetectionResult.noFace() => const FaceDetectionResult(
     hasFace: false,
     faceCount: 0,
-    errorMessage:
-        'Wajah tidak terdeteksi. Pastikan wajah Anda terlihat jelas di dalam kamera.',
+    errorMessage: 'Wajah tidak terdeteksi. Pastikan wajah Anda terlihat jelas di dalam kamera.',
   );
 
   factory FaceDetectionResult.multipleFaces(int count) => FaceDetectionResult(
@@ -51,25 +49,22 @@ class FaceDetectionResult {
         'Terdeteksi $count wajah. Pastikan hanya Anda sendiri di dalam kamera (tidak boleh ada orang lain).',
   );
 
-  factory FaceDetectionResult.eyesClosed({
-    double? leftEye,
-    double? rightEye,
-  }) => FaceDetectionResult(
-    hasFace: false,
-    faceCount: 1,
-    leftEyeOpenProbability: leftEye,
-    rightEyeOpenProbability: rightEye,
-    errorMessage:
-        'Mata terpejam. Buka mata Anda dan tatap kamera dengan jelas untuk verifikasi liveness.',
-  );
+  factory FaceDetectionResult.eyesClosed({double? leftEye, double? rightEye}) =>
+      FaceDetectionResult(
+        hasFace: false,
+        faceCount: 1,
+        leftEyeOpenProbability: leftEye,
+        rightEyeOpenProbability: rightEye,
+        errorMessage: 'Mata terpejam. Buka mata Anda dan tatap kamera dengan jelas untuk verifikasi liveness.',
+      );
 
-  factory FaceDetectionResult.extremeAngle(double angleY) => FaceDetectionResult(
-    hasFace: false,
-    faceCount: 1,
-    headEulerAngleY: angleY,
-    errorMessage:
-        'Posisi wajah terlalu miring atau membelakangi kamera. Harap menghadap lurus ke depan.',
-  );
+  factory FaceDetectionResult.extremeAngle(double angleY) =>
+      FaceDetectionResult(
+        hasFace: false,
+        faceCount: 1,
+        headEulerAngleY: angleY,
+        errorMessage: 'Posisi wajah terlalu miring atau membelakangi kamera. Harap menghadap lurus ke depan.',
+      );
 
   factory FaceDetectionResult.error(String err) =>
       FaceDetectionResult(hasFace: false, faceCount: 0, errorMessage: err);

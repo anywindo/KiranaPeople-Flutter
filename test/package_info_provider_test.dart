@@ -7,28 +7,31 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('packageInfoProvider & appVersionDisplayProvider Tests', () {
-    test('appVersionDisplayProvider formats version cleanly without build number', () async {
-      final container = ProviderContainer(
-        overrides: [
-          packageInfoProvider.overrideWith(
-            (ref) => Future.value(
-              PackageInfo(
-                appName: 'Kirana People',
-                packageName: 'com.kiranadesainindonesia.kiranapeople',
-                version: '1.0.4-beta',
-                buildNumber: '1',
-                buildSignature: '',
+    test(
+      'appVersionDisplayProvider formats version cleanly without build number',
+      () async {
+        final container = ProviderContainer(
+          overrides: [
+            packageInfoProvider.overrideWith(
+              (ref) => Future.value(
+                PackageInfo(
+                  appName: 'Kirana People',
+                  packageName: 'com.kiranadesainindonesia.kiranapeople',
+                  version: '1.0.4-beta',
+                  buildNumber: '1',
+                  buildSignature: '',
+                ),
               ),
             ),
-          ),
-        ],
-      );
-      addTearDown(container.dispose);
+          ],
+        );
+        addTearDown(container.dispose);
 
-      await container.read(packageInfoProvider.future);
-      final displayVersion = container.read(appVersionDisplayProvider);
-      expect(displayVersion, equals('1.0.4 beta'));
-    });
+        await container.read(packageInfoProvider.future);
+        final displayVersion = container.read(appVersionDisplayProvider);
+        expect(displayVersion, equals('1.0.4 beta'));
+      },
+    );
 
     test('appVersionDisplayProvider formats without build number if buildNumber is empty', () async {
       final container = ProviderContainer(
@@ -53,14 +56,16 @@ void main() {
       expect(displayVersion, equals('2.0.0'));
     });
 
-    test('packageInfoProvider default fallback works safely when platform throws', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+    test(
+      'packageInfoProvider default fallback works safely when platform throws',
+      () async {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
 
-      final info = await container.read(packageInfoProvider.future);
-      expect(info.version, isNotEmpty);
-      expect(info.appName, equals('Kirana People'));
-    });
+        final info = await container.read(packageInfoProvider.future);
+        expect(info.version, isNotEmpty);
+        expect(info.appName, equals('Kirana People'));
+      },
+    );
   });
 }
-

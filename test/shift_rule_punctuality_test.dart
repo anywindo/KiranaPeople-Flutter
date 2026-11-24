@@ -14,7 +14,11 @@ void main() {
       );
 
       final isLate = shift.isStartLate('07:36');
-      expect(isLate, isFalse, reason: 'Presensi 07:36 sebelum batas 07:45 harus tepat waktu (hijau)');
+      expect(
+        isLate,
+        isFalse,
+        reason: 'Presensi 07:36 sebelum batas 07:45 harus tepat waktu (hijau)',
+      );
     });
 
     test('Acceptance Criteria 2: 07:46 check-in with 08:00 shift & 15m rule is late (TIDAK HIJAU)', () {
@@ -28,7 +32,12 @@ void main() {
       );
 
       final isLate = shift.isStartLate('07:46');
-      expect(isLate, isTrue, reason: 'Presensi 07:46 setelah batas 07:45 harus terlambat (tidak hijau)');
+      expect(
+        isLate,
+        isTrue,
+        reason:
+            'Presensi 07:46 setelah batas 07:45 harus terlambat (tidak hijau)',
+      );
     });
 
     test('Boundary comparison at cutoff: 07:44 vs 07:45', () {
@@ -62,16 +71,36 @@ void main() {
       );
 
       // Without rule, cutoff is scheduled shift start 08:00
-      expect(shift.isStartLate('07:46'), isFalse, reason: '07:46 is before 08:00');
-      expect(shift.isStartLate('08:00'), isFalse, reason: '08:00 is exact start time');
+      expect(
+        shift.isStartLate('07:46'),
+        isFalse,
+        reason: '07:46 is before 08:00',
+      );
+      expect(
+        shift.isStartLate('08:00'),
+        isFalse,
+        reason: '08:00 is exact start time',
+      );
       expect(shift.isStartLate('08:01'), isTrue, reason: '08:01 is past 08:00');
     });
 
-    test('Static Shift.isShiftStartLate with null or empty parameters fails safe', () {
-      expect(Shift.isShiftStartLate(actualTime: null, scheduledTime: '08:00'), isFalse);
-      expect(Shift.isShiftStartLate(actualTime: '07:30', scheduledTime: null), isFalse);
-      expect(Shift.isShiftStartLate(actualTime: 'invalid', scheduledTime: '08:00'), isFalse);
-    });
+    test(
+      'Static Shift.isShiftStartLate with null or empty parameters fails safe',
+      () {
+        expect(
+          Shift.isShiftStartLate(actualTime: null, scheduledTime: '08:00'),
+          isFalse,
+        );
+        expect(
+          Shift.isShiftStartLate(actualTime: '07:30', scheduledTime: null),
+          isFalse,
+        );
+        expect(
+          Shift.isShiftStartLate(actualTime: 'invalid', scheduledTime: '08:00'),
+          isFalse,
+        );
+      },
+    );
 
     test('Overnight shift crossing midnight (e.g., 00:10 shift start, 15m rule -> cutoff 23:55)', () {
       final nightShift = Shift(
@@ -122,13 +151,32 @@ void main() {
       );
 
       // User screenshot scenario: 13:39 check out when shift ends at 16:00 -> early (true)
-      expect(shift.isEndEarly('13:39'), isTrue, reason: '13:39 is earlier than 16:00 (harus merah)');
-      expect(Shift.isShiftEndEarly(actualTime: '13:39', scheduledTime: '16:00'), isTrue);
+      expect(
+        shift.isEndEarly('13:39'),
+        isTrue,
+        reason: '13:39 is earlier than 16:00 (harus merah)',
+      );
+      expect(
+        Shift.isShiftEndEarly(actualTime: '13:39', scheduledTime: '16:00'),
+        isTrue,
+      );
 
       // Boundary tests
-      expect(shift.isEndEarly('15:59'), isTrue, reason: '15:59 is before 16:00 -> early');
-      expect(shift.isEndEarly('16:00'), isFalse, reason: '16:00 is exact end time -> on time (hijau)');
-      expect(shift.isEndEarly('16:05'), isFalse, reason: '16:05 is after 16:00 -> on time (hijau)');
+      expect(
+        shift.isEndEarly('15:59'),
+        isTrue,
+        reason: '15:59 is before 16:00 -> early',
+      );
+      expect(
+        shift.isEndEarly('16:00'),
+        isFalse,
+        reason: '16:00 is exact end time -> on time (hijau)',
+      );
+      expect(
+        shift.isEndEarly('16:05'),
+        isFalse,
+        reason: '16:05 is after 16:00 -> on time (hijau)',
+      );
       expect(shift.isEndEarly(null), isFalse);
     });
 
@@ -151,4 +199,3 @@ void main() {
     });
   });
 }
-

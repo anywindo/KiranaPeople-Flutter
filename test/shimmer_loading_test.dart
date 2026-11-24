@@ -5,14 +5,14 @@ import 'package:kirana_people/core/widgets/shimmer_loading.dart';
 
 void main() {
   group('ShimmerLoading & Skeleton Widgets Tests', () {
-    testWidgets('ShimmerLoading renders child correctly in light mode', (tester) async {
+    testWidgets('ShimmerLoading renders child correctly in light mode', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.lightTheme,
           home: const Scaffold(
-            body: ShimmerLoading(
-              child: SkeletonBox(width: 100, height: 20),
-            ),
+            body: ShimmerLoading(child: SkeletonBox(width: 100, height: 20)),
           ),
         ),
       );
@@ -21,14 +21,14 @@ void main() {
       expect(find.byType(SkeletonBox), findsOneWidget);
     });
 
-    testWidgets('ShimmerLoading renders child correctly in dark mode', (tester) async {
+    testWidgets('ShimmerLoading renders child correctly in dark mode', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.darkTheme,
           home: const Scaffold(
-            body: ShimmerLoading(
-              child: SkeletonBox.circle(size: 40),
-            ),
+            body: ShimmerLoading(child: SkeletonBox.circle(size: 40)),
           ),
         ),
       );
@@ -37,40 +37,39 @@ void main() {
       expect(find.byType(SkeletonBox), findsOneWidget);
     });
 
-    testWidgets('HistoryListSkeleton renders designated item count', (tester) async {
+    testWidgets('HistoryListSkeleton renders designated item count', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.lightTheme,
-          home: const Scaffold(
-            body: HistoryListSkeleton(itemCount: 3),
-          ),
+          home: const Scaffold(body: HistoryListSkeleton(itemCount: 3)),
         ),
       );
 
       expect(find.byType(HistoryCardSkeleton), findsNWidgets(3));
     });
 
-    testWidgets('AttendanceScreenSkeleton renders all structural skeleton sections', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.lightTheme,
-          home: const Scaffold(
-            body: AttendanceScreenSkeleton(),
+    testWidgets(
+      'AttendanceScreenSkeleton renders all structural skeleton sections',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const Scaffold(body: AttendanceScreenSkeleton()),
           ),
-        ),
-      );
+        );
 
-      expect(find.byType(AttendanceScreenSkeleton), findsOneWidget);
-      expect(find.byType(ShiftInfoCardSkeleton), findsOneWidget);
-    });
+        expect(find.byType(AttendanceScreenSkeleton), findsOneWidget);
+        expect(find.byType(ShiftInfoCardSkeleton), findsOneWidget);
+      },
+    );
 
     testWidgets('ProfileHeaderSkeleton renders without error', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.darkTheme,
-          home: const Scaffold(
-            body: ProfileHeaderSkeleton(),
-          ),
+          home: const Scaffold(body: ProfileHeaderSkeleton()),
         ),
       );
 
@@ -78,4 +77,3 @@ void main() {
     });
   });
 }
-

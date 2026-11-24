@@ -227,7 +227,11 @@ class _HistoryFilterSheetState extends ConsumerState<HistoryFilterSheet> {
                   isSelected: _tempRangeLabel == 'Bulan Lalu',
                   onTap: () {
                     final now = DateTime.now();
-                    final firstDayCurrentMonth = DateTime(now.year, now.month, 1);
+                    final firstDayCurrentMonth = DateTime(
+                      now.year,
+                      now.month,
+                      1,
+                    );
                     final lastDayPrevMonth = firstDayCurrentMonth.subtract(
                       const Duration(days: 1),
                     );

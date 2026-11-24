@@ -5,20 +5,25 @@ class ApiConfig {
   static const String defaultBaseUrl = 'https://app.kiranapeople.com/api/v1';
   static const String cachedHostOrigin = 'https://app.kiranapeople.com';
   static const String prefKeyCustomBaseUrl = 'custom_dev_api_base_url';
+  static const String _defaultHost = 'app.kiranapeople.com';
 
   static String? _devBaseUrl;
 
   static String getHostOrigin([String? baseUrl]) {
     final target = baseUrl ?? (kDebugMode ? _devBaseUrl : null);
-    if (target == null || target.isEmpty) {
+    if (target == null || target.trim().isEmpty) {
       return cachedHostOrigin;
     }
     try {
-      final uri = Uri.parse(target);
+      final uri = Uri.tryParse(target.trim());
+      if (uri == null || uri.host.isEmpty) {
+        return cachedHostOrigin;
+      }
       final portPart = uri.hasPort && uri.port != 80 && uri.port != 443
           ? ':${uri.port}'
           : '';
-      return '${uri.scheme}://${uri.host}$portPart';
+      final scheme = uri.scheme.isNotEmpty ? uri.scheme : 'https';
+      return '$scheme://${uri.host}$portPart';
     } catch (_) {
       return cachedHostOrigin;
     }
@@ -33,25 +38,31 @@ class ApiConfig {
       return true; // Relative or local path resolves to trusted application backend
     }
     try {
-      final uri = Uri.parse(trimmed);
+      final uri = Uri.tryParse(trimmed);
+      if (uri == null || uri.host.isEmpty) {
+        return false;
+      }
       final host = uri.host.toLowerCase();
-      final trustedHost = Uri.parse(cachedHostOrigin).host.toLowerCase();
-      if (host == trustedHost) {
+      if (host == _defaultHost) {
         return true;
       }
 
       // Check provided currentBaseUrl if available
-      if (currentBaseUrl != null && currentBaseUrl.isNotEmpty) {
-        final baseUri = Uri.tryParse(currentBaseUrl);
-        if (baseUri != null && baseUri.host.isNotEmpty && baseUri.host.toLowerCase() == host) {
+      if (currentBaseUrl != null && currentBaseUrl.trim().isNotEmpty) {
+        final baseUri = Uri.tryParse(currentBaseUrl.trim());
+        if (baseUri != null &&
+            baseUri.host.isNotEmpty &&
+            baseUri.host.toLowerCase() == host) {
           return true;
         }
       }
 
       // Check current in-memory dev base url
-      if (_devBaseUrl != null && _devBaseUrl!.isNotEmpty) {
-        final devUri = Uri.tryParse(_devBaseUrl!);
-        if (devUri != null && devUri.host.isNotEmpty && devUri.host.toLowerCase() == host) {
+      if (_devBaseUrl != null && _devBaseUrl!.trim().isNotEmpty) {
+        final devUri = Uri.tryParse(_devBaseUrl!.trim());
+        if (devUri != null &&
+            devUri.host.isNotEmpty &&
+            devUri.host.toLowerCase() == host) {
           return true;
         }
       }

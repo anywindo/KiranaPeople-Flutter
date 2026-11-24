@@ -6,69 +6,76 @@ import 'package:kirana_people/features/attendance/widgets/attendance_success_she
 
 void main() {
   group('AttendanceSuccessSheet Tests', () {
-    testWidgets('renders success sheet with startShift details and inside radius badge', (tester) async {
-      final sampleResult = AttendanceSubmissionResult(
-        action: AttendanceEventType.startShift,
-        timestamp: DateTime(2026, 11, 9, 8, 2, 15),
-        isWithinRadius: true,
-        distance: 14.2,
-        locationName: 'Kantor Pusat Batang',
-      );
+    testWidgets(
+      'renders success sheet with startShift details and inside radius badge',
+      (tester) async {
+        final sampleResult = AttendanceSubmissionResult(
+          action: AttendanceEventType.startShift,
+          timestamp: DateTime(2026, 11, 9, 8, 2, 15),
+          isWithinRadius: true,
+          distance: 14.2,
+          locationName: 'Kantor Pusat Batang',
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: AttendanceSuccessSheet(result: sampleResult),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: AttendanceSuccessSheet(result: sampleResult)),
           ),
-        ),
-      );
+        );
 
-      // Verify title & reassuring subtitle
-      expect(find.text('Presensi Berhasil Dicatat!'), findsOneWidget);
-      expect(find.text('Kehadiran Anda telah terverifikasi secara akurat.'), findsOneWidget);
+        // Verify title & reassuring subtitle
+        expect(find.text('Presensi Berhasil Dicatat!'), findsOneWidget);
+        expect(
+          find.text('Kehadiran Anda telah terverifikasi secara akurat.'),
+          findsOneWidget,
+        );
 
-      // Verify action label
-      expect(find.text('Masuk Kerja'), findsOneWidget);
+        // Verify action label
+        expect(find.text('Masuk Kerja'), findsOneWidget);
 
-      // Verify radius status
-      expect(find.text('Dalam Radius'), findsOneWidget);
-      expect(find.byIcon(Icons.verified_rounded), findsOneWidget);
+        // Verify radius status
+        expect(find.text('Dalam Radius'), findsOneWidget);
+        expect(find.byIcon(Icons.verified_rounded), findsOneWidget);
 
-      // Verify time and location
-      expect(find.text('08:02:15 WIB'), findsOneWidget);
-      expect(find.text('Senin, 9 November 2026'), findsOneWidget);
-      expect(find.text('Kantor Pusat Batang'), findsOneWidget);
-      expect(find.text('14 m dari kantor'), findsOneWidget);
+        // Verify time and location
+        expect(find.text('08:02:15 WIB'), findsOneWidget);
+        expect(find.text('Senin, 9 November 2026'), findsOneWidget);
+        expect(find.text('Kantor Pusat Batang'), findsOneWidget);
+        expect(find.text('14 m dari kantor'), findsOneWidget);
 
-      // Verify "Selesai" button
-      expect(find.text('Selesai'), findsOneWidget);
-    });
+        // Verify "Selesai" button
+        expect(find.text('Selesai'), findsOneWidget);
+      },
+    );
 
-    testWidgets('renders success sheet with endShift details and outside radius badge', (tester) async {
-      final sampleResult = AttendanceSubmissionResult(
-        action: AttendanceEventType.endShift,
-        timestamp: DateTime(2026, 11, 9, 17, 30, 0),
-        isWithinRadius: false,
-        distance: 120.8,
-        locationName: 'Gudang Logistik',
-      );
+    testWidgets(
+      'renders success sheet with endShift details and outside radius badge',
+      (tester) async {
+        final sampleResult = AttendanceSubmissionResult(
+          action: AttendanceEventType.endShift,
+          timestamp: DateTime(2026, 11, 9, 17, 30, 0),
+          isWithinRadius: false,
+          distance: 120.8,
+          locationName: 'Gudang Logistik',
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: AttendanceSuccessSheet(result: sampleResult),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: AttendanceSuccessSheet(result: sampleResult)),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Pulang Kerja'), findsOneWidget);
-      expect(find.text('Luar Radius'), findsOneWidget);
-      expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
-      expect(find.text('17:30:00 WIB'), findsOneWidget);
-      expect(find.text('121 m dari kantor'), findsOneWidget);
-    });
+        expect(find.text('Pulang Kerja'), findsOneWidget);
+        expect(find.text('Luar Radius'), findsOneWidget);
+        expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+        expect(find.text('17:30:00 WIB'), findsOneWidget);
+        expect(find.text('121 m dari kantor'), findsOneWidget);
+      },
+    );
 
-    testWidgets('tapping Selesai dismisses the modal bottom sheet', (tester) async {
+    testWidgets('tapping Selesai dismisses the modal bottom sheet', (
+      tester,
+    ) async {
       final sampleResult = AttendanceSubmissionResult(
         action: AttendanceEventType.startBreak,
         timestamp: DateTime(2026, 11, 9, 12, 0, 0),
@@ -82,7 +89,8 @@ void main() {
           home: Builder(
             builder: (context) => Scaffold(
               body: ElevatedButton(
-                onPressed: () => AttendanceSuccessSheet.show(context, result: sampleResult),
+                onPressed: () =>
+                    AttendanceSuccessSheet.show(context, result: sampleResult),
                 child: const Text('Open Sheet'),
               ),
             ),
@@ -119,7 +127,8 @@ void main() {
           home: Builder(
             builder: (context) => Scaffold(
               body: ElevatedButton(
-                onPressed: () => AttendanceSuccessSheet.show(context, result: sampleResult),
+                onPressed: () =>
+                    AttendanceSuccessSheet.show(context, result: sampleResult),
                 child: const Text('Open Sheet'),
               ),
             ),

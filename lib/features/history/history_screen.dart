@@ -313,7 +313,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   return ListView.separated(
                     controller: _scrollController,
                     padding: EdgeInsets.fromLTRB(16, listTopPadding, 16, 128),
-                    itemCount: filteredList.length + 1 + (showLoadingMore ? 1 : 0),
+                    itemCount:
+                        filteredList.length + 1 + (showLoadingMore ? 1 : 0),
                     separatorBuilder: (context, index) =>
                         const SizedBox(height: 18),
                     itemBuilder: (context, index) {

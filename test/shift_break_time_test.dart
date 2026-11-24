@@ -47,23 +47,35 @@ void main() {
       expect(shift.isBeforeBreak(DateTime(2026, 10, 29, 1, 45)), isFalse);
     });
 
-    test('Shift with null breakStartTime calculates midpoint and works correctly', () {
-      final shift = Shift(
-        id: 3,
-        name: 'Office',
-        startTime: '08:00:00',
-        endTime: '16:00:00',
-      );
-      // Midpoint: 8h duration / 2 - 30m = 3h30m -> 11:30
-      expect(shift.effectiveBreakStart, equals('11:30'));
-      expect(shift.isBeforeBreak(DateTime(2026, 10, 28, 11, 0)), isTrue);
-      expect(shift.isBeforeBreak(DateTime(2026, 10, 28, 11, 30)), isFalse);
-    });
+    test(
+      'Shift with null breakStartTime calculates midpoint and works correctly',
+      () {
+        final shift = Shift(
+          id: 3,
+          name: 'Office',
+          startTime: '08:00:00',
+          endTime: '16:00:00',
+        );
+        // Midpoint: 8h duration / 2 - 30m = 3h30m -> 11:30
+        expect(shift.effectiveBreakStart, equals('11:30'));
+        expect(shift.isBeforeBreak(DateTime(2026, 10, 28, 11, 0)), isTrue);
+        expect(shift.isBeforeBreak(DateTime(2026, 10, 28, 11, 30)), isFalse);
+      },
+    );
 
     test('Shift.isBeforeBreakTime with null shift falls back to 12:00', () {
-      expect(Shift.isBeforeBreakTime(null, DateTime(2026, 10, 28, 11, 59)), isTrue);
-      expect(Shift.isBeforeBreakTime(null, DateTime(2026, 10, 28, 12, 0)), isFalse);
-      expect(Shift.isBeforeBreakTime(null, DateTime(2026, 10, 28, 13, 0)), isFalse);
+      expect(
+        Shift.isBeforeBreakTime(null, DateTime(2026, 10, 28, 11, 59)),
+        isTrue,
+      );
+      expect(
+        Shift.isBeforeBreakTime(null, DateTime(2026, 10, 28, 12, 0)),
+        isFalse,
+      );
+      expect(
+        Shift.isBeforeBreakTime(null, DateTime(2026, 10, 28, 13, 0)),
+        isFalse,
+      );
     });
   });
 }

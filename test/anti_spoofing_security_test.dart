@@ -101,20 +101,23 @@ void main() {
       expect(fields['is_mocked'], equals('1'));
     });
 
-    test('submitAttendanceEvent flags rooted devices when detected (MED-03)', () async {
-      final mockClient = MockApiClient();
-      final repository = AttendanceRepository(apiClient: mockClient);
+    test(
+      'submitAttendanceEvent flags rooted devices when detected (MED-03)',
+      () async {
+        final mockClient = MockApiClient();
+        final repository = AttendanceRepository(apiClient: mockClient);
 
-      await repository.submitAttendanceEvent(
-        eventType: AttendanceEventType.startShift,
-        latitude: -6.914744,
-        longitude: 107.609810,
-        isDeviceRooted: true,
-      );
+        await repository.submitAttendanceEvent(
+          eventType: AttendanceEventType.startShift,
+          latitude: -6.914744,
+          longitude: 107.609810,
+          isDeviceRooted: true,
+        );
 
-      final fields = Map.fromEntries(mockClient.lastFormData!.fields);
-      expect(fields['is_rooted'], equals('1'));
-    });
+        final fields = Map.fromEntries(mockClient.lastFormData!.fields);
+        expect(fields['is_rooted'], equals('1'));
+      },
+    );
 
     test('integrity flags are always sent explicitly, never omitted', () async {
       DeviceSecurityService().resetCache();
@@ -137,8 +140,9 @@ void main() {
     test('submission is refused client-side when the device is compromised and audits incident to server (SEC-08)', () async {
       final messenger =
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-      const channel =
-          MethodChannel('com.kiranadesainindonesia.kiranapeople/security');
+      const channel = MethodChannel(
+        'com.kiranadesainindonesia.kiranapeople/security',
+      );
       messenger.setMockMethodCallHandler(
         channel,
         (_) async => {'rooted': false, 'hooked': true},
@@ -158,26 +162,34 @@ void main() {
       expect(mockClient.lastFormData, isNull);
       expect(mockClient.lastPostPath, equals(ApiEndpoints.securityIncident));
       expect(mockClient.lastPostData, isNotNull);
-      expect(mockClient.lastPostData['incident_type'], equals('COMPROMISED_ATTENDANCE_BLOCKED'));
+      expect(
+        mockClient.lastPostData['incident_type'],
+        equals('COMPROMISED_ATTENDANCE_BLOCKED'),
+      );
       expect(mockClient.lastPostData['is_hooked'], isTrue);
 
       messenger.setMockMethodCallHandler(channel, null);
       DeviceSecurityService().resetCache();
     });
 
-    test('Selfie image cleanup purges temporary file on disk (MED-02)', () async {
-      final tempDir = Directory.systemTemp.createTempSync('selfie_lifecycle_test');
-      final testFile = File('${tempDir.path}/selfie.jpg');
-      await testFile.writeAsString('test_selfie_data');
-      expect(await testFile.exists(), isTrue);
+    test(
+      'Selfie image cleanup purges temporary file on disk (MED-02)',
+      () async {
+        final tempDir = Directory.systemTemp.createTempSync(
+          'selfie_lifecycle_test',
+        );
+        final testFile = File('${tempDir.path}/selfie.jpg');
+        await testFile.writeAsString('test_selfie_data');
+        expect(await testFile.exists(), isTrue);
 
-      // Perform lifecycle purge
-      if (await testFile.exists()) {
-        await testFile.delete();
-      }
+        // Perform lifecycle purge
+        if (await testFile.exists()) {
+          await testFile.delete();
+        }
 
-      expect(await testFile.exists(), isFalse);
-      tempDir.deleteSync(recursive: true);
-    });
+        expect(await testFile.exists(), isFalse);
+        tempDir.deleteSync(recursive: true);
+      },
+    );
   });
 }

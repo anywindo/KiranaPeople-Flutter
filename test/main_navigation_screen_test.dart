@@ -8,40 +8,41 @@ import 'package:kirana_people/providers/auth_provider.dart';
 
 void main() {
   group('MainNavigationScreen Page Transition Tests', () {
-    testWidgets('NavigationBar smoothly animates and transitions between tabs',
-        (tester) async {
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: MainNavigationScreen(),
-          ),
-        ),
-      );
+    testWidgets(
+      'NavigationBar smoothly animates and transitions between tabs',
+      (tester) async {
+        await tester.pumpWidget(
+          const ProviderScope(child: MaterialApp(home: MainNavigationScreen())),
+        );
 
-      // Pastikan awal di tab 0 (Beranda)
-      expect(find.byType(PageView), findsOneWidget);
-      expect(find.text('Beranda'), findsOneWidget);
-      expect(find.text('Profil'), findsOneWidget);
+        // Pastikan awal di tab 0 (Beranda)
+        expect(find.byType(PageView), findsOneWidget);
+        expect(find.text('Beranda'), findsOneWidget);
+        expect(find.text('Profil'), findsOneWidget);
 
-      // Tap tab 'Profil'
-      await tester.tap(find.text('Profil'));
-      await tester.pump(); // frame pertama
-      await tester.pump(const Duration(milliseconds: 350)); // selesaikan animasi PageView
-      await tester.pump(const Duration(milliseconds: 50));
+        // Tap tab 'Profil'
+        await tester.tap(find.text('Profil'));
+        await tester.pump(); // frame pertama
+        await tester.pump(
+          const Duration(milliseconds: 350),
+        ); // selesaikan animasi PageView
+        await tester.pump(const Duration(milliseconds: 50));
 
-      expect(tester.takeException(), isNull);
+        expect(tester.takeException(), isNull);
 
-      // Tap tab 'Riwayat'
-      await tester.tap(find.text('Riwayat'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 350));
-      await tester.pump(const Duration(milliseconds: 50));
+        // Tap tab 'Riwayat'
+        await tester.tap(find.text('Riwayat'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 350));
+        await tester.pump(const Duration(milliseconds: 50));
 
-      expect(tester.takeException(), isNull);
-    });
+        expect(tester.takeException(), isNull);
+      },
+    );
 
-    testWidgets('Profil destination displays user avatar when available',
-        (tester) async {
+    testWidgets('Profil destination displays user avatar when available', (
+      tester,
+    ) async {
       final dummyUser = UserModel(
         id: 1,
         name: 'Alexander Balmaceda',
@@ -56,9 +57,7 @@ void main() {
               () => AuthNotifierMock(AuthState(user: dummyUser)),
             ),
           ],
-          child: const MaterialApp(
-            home: MainNavigationScreen(),
-          ),
+          child: const MaterialApp(home: MainNavigationScreen()),
         ),
       );
 
@@ -75,4 +74,3 @@ class AuthNotifierMock extends AuthNotifier {
   @override
   AuthState build() => _initialState;
 }
-

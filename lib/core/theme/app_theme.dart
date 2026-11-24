@@ -287,10 +287,7 @@ class AppTheme {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(
-            color: Color(0xFF334155),
-            width: 1.2,
-          ),
+          side: const BorderSide(color: Color(0xFF334155), width: 1.2),
         ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(

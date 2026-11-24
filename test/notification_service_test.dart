@@ -103,32 +103,42 @@ void main() {
       expect(expectedFailBody, contains('Koneksi terputus'));
     });
 
-    test('calculateNextShiftStartReminders schedules today when before start time', () {
-      final service = NotificationService.instance;
-      final now = tz.TZDateTime(tz.local, 2026, 11, 4, 6, 30); // 06:30 AM
+    test(
+      'calculateNextShiftStartReminders schedules today when before start time',
+      () {
+        final service = NotificationService.instance;
+        final now = tz.TZDateTime(tz.local, 2026, 11, 4, 6, 30); // 06:30 AM
 
-      final reminders = service.calculateNextShiftStartReminders(
-        timeStr: '08:00',
-        now: now,
-        alreadyCheckedIn: false,
-      );
+        final reminders = service.calculateNextShiftStartReminders(
+          timeStr: '08:00',
+          now: now,
+          alreadyCheckedIn: false,
+        );
 
-      expect(reminders, isNotNull);
-      final (time30, time15) = reminders!;
-      // 30 min before 08:00 -> 07:30 today
-      expect(time30.day, 4);
-      expect(time30.hour, 7);
-      expect(time30.minute, 30);
+        expect(reminders, isNotNull);
+        final (time30, time15) = reminders!;
+        // 30 min before 08:00 -> 07:30 today
+        expect(time30.day, 4);
+        expect(time30.hour, 7);
+        expect(time30.minute, 30);
 
-      // 15 min before 08:00 -> 07:45 today
-      expect(time15.day, 4);
-      expect(time15.hour, 7);
-      expect(time15.minute, 45);
-    });
+        // 15 min before 08:00 -> 07:45 today
+        expect(time15.day, 4);
+        expect(time15.hour, 7);
+        expect(time15.minute, 45);
+      },
+    );
 
     test('calculateNextShiftStartReminders advances to tomorrow when time has passed', () {
       final service = NotificationService.instance;
-      final now = tz.TZDateTime(tz.local, 2026, 11, 4, 8, 30); // 08:30 AM (after 07:30 and 07:45)
+      final now = tz.TZDateTime(
+        tz.local,
+        2026,
+        11,
+        4,
+        8,
+        30,
+      ); // 08:30 AM (after 07:30 and 07:45)
 
       final reminders = service.calculateNextShiftStartReminders(
         timeStr: '08:00',

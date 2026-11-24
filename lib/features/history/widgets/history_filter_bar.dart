@@ -16,7 +16,8 @@ class HistoryFilterBar extends ConsumerWidget {
     final notifier = ref.read(historyProvider.notifier);
     final isDark = context.isDarkMode;
 
-    final isCustomDateSelected = filter.dateRange != null &&
+    final isCustomDateSelected =
+        filter.dateRange != null &&
         filter.dateRangeLabel != 'Hari Ini' &&
         filter.dateRangeLabel != '7 Hari' &&
         filter.dateRangeLabel != '7 Hari Terakhir' &&
@@ -32,7 +33,8 @@ class HistoryFilterBar extends ConsumerWidget {
           _buildQuickFilterPill(
             context,
             label: 'Semua',
-            isSelected: filter.status == AttendanceHistoryStatusFilter.all &&
+            isSelected:
+                filter.status == AttendanceHistoryStatusFilter.all &&
                 filter.dateRange == null &&
                 (filter.shift == null || filter.shift == 'Semua Shift'),
             onTap: () {

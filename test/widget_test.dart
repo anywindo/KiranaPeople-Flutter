@@ -4,11 +4,7 @@ import 'package:kirana_people/main.dart';
 
 void main() {
   testWidgets('App initializes smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: KiranaPeopleApp(),
-      ),
-    );
+    await tester.pumpWidget(const ProviderScope(child: KiranaPeopleApp()));
 
     // Initial check shows session check or login screen
     expect(find.byType(KiranaPeopleApp), findsOneWidget);

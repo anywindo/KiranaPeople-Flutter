@@ -55,7 +55,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final prefs = await SharedPreferences.getInstance();
       final savedId = prefs.getString('saved_login_identifier');
       final remember = prefs.getBool('remember_login_credentials') ?? true;
-      final devVisible = kDebugMode && (prefs.getBool('dev_api_endpoint_visible') ?? false);
+      final devVisible =
+          kDebugMode && (prefs.getBool('dev_api_endpoint_visible') ?? false);
       if (mounted) {
         setState(() {
           _rememberMe = remember;

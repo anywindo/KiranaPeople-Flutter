@@ -21,31 +21,38 @@ void main() {
       expect(isOffline([ConnectivityResult.wifi]), isFalse);
       expect(isOffline([ConnectivityResult.mobile]), isFalse);
       expect(isOffline([ConnectivityResult.ethernet]), isFalse);
-      expect(isOffline([ConnectivityResult.vpn, ConnectivityResult.none]), isFalse);
+      expect(
+        isOffline([ConnectivityResult.vpn, ConnectivityResult.none]),
+        isFalse,
+      );
     });
 
-    testWidgets('OfflineCardWarning does not render when device is online', (tester) async {
+    testWidgets('OfflineCardWarning does not render when device is online', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            isOfflineProvider.overrideWith(() => _MockConnectivityNotifier(false)),
-          ],
-          child: const MaterialApp(
-            home: Scaffold(
-              body: OfflineCardWarning(),
+            isOfflineProvider.overrideWith(
+              () => _MockConnectivityNotifier(false),
             ),
-          ),
+          ],
+          child: const MaterialApp(home: Scaffold(body: OfflineCardWarning())),
         ),
       );
 
       expect(find.text('Koneksi Internet Terputus'), findsNothing);
     });
 
-    testWidgets('OfflineCardWarning renders alert when device is offline', (tester) async {
+    testWidgets('OfflineCardWarning renders alert when device is offline', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            isOfflineProvider.overrideWith(() => _MockConnectivityNotifier(true)),
+            isOfflineProvider.overrideWith(
+              () => _MockConnectivityNotifier(true),
+            ),
           ],
           child: const MaterialApp(
             home: Scaffold(
@@ -66,45 +73,52 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            isOfflineProvider.overrideWith(() => _MockConnectivityNotifier(true)),
-          ],
-          child: const MaterialApp(
-            home: Scaffold(
-              body: OfflineBanner(),
+            isOfflineProvider.overrideWith(
+              () => _MockConnectivityNotifier(true),
             ),
-          ),
+          ],
+          child: const MaterialApp(home: Scaffold(body: OfflineBanner())),
         ),
       );
 
       expect(find.text('Mode Offline (Tidak Ada Internet)'), findsOneWidget);
-      expect(find.text('Periksa Wi-Fi atau kuota data seluler Anda.'), findsOneWidget);
+      expect(
+        find.text('Periksa Wi-Fi atau kuota data seluler Anda.'),
+        findsOneWidget,
+      );
       expect(find.byIcon(Icons.refresh_rounded), findsOneWidget);
     });
 
-    testWidgets('OfflineBanner renders green "Terhubung Kembali" banner without gap when reconnected', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            connectivityBannerProvider.overrideWith(() => _MockBannerNotifier(ConnectivityBannerStatus.reconnected)),
-          ],
-          child: const MaterialApp(
-            home: Scaffold(
-              body: OfflineBanner(),
-            ),
+    testWidgets(
+      'OfflineBanner renders green "Terhubung Kembali" banner without gap when reconnected',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              connectivityBannerProvider.overrideWith(
+                () => _MockBannerNotifier(ConnectivityBannerStatus.reconnected),
+              ),
+            ],
+            child: const MaterialApp(home: Scaffold(body: OfflineBanner())),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Terhubung Kembali'), findsOneWidget);
-      expect(find.text('Data presensi sedang disinkronisasi.'), findsOneWidget);
-      // In reconnected state, manual refresh button should be absent
-      expect(find.byIcon(Icons.refresh_rounded), findsNothing);
-    });
+        expect(find.text('Terhubung Kembali'), findsOneWidget);
+        expect(
+          find.text('Data presensi sedang disinkronisasi.'),
+          findsOneWidget,
+        );
+        // In reconnected state, manual refresh button should be absent
+        expect(find.byIcon(Icons.refresh_rounded), findsNothing);
+      },
+    );
 
     test('isOfflineBannerVisibleProvider is true for offline and reconnected, and false for hidden', () {
       final container = ProviderContainer(
         overrides: [
-          connectivityBannerProvider.overrideWith(() => _MockBannerNotifier(ConnectivityBannerStatus.reconnected)),
+          connectivityBannerProvider.overrideWith(
+            () => _MockBannerNotifier(ConnectivityBannerStatus.reconnected),
+          ),
         ],
       );
       addTearDown(container.dispose);
@@ -113,7 +127,9 @@ void main() {
 
       final hiddenContainer = ProviderContainer(
         overrides: [
-          connectivityBannerProvider.overrideWith(() => _MockBannerNotifier(ConnectivityBannerStatus.hidden)),
+          connectivityBannerProvider.overrideWith(
+            () => _MockBannerNotifier(ConnectivityBannerStatus.hidden),
+          ),
         ],
       );
       addTearDown(hiddenContainer.dispose);
@@ -137,31 +153,41 @@ void main() {
       expect(container.read(isOfflineProvider), isFalse);
     });
 
-    test('checkConnection sets offline when backend health check fails', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+    test(
+      'checkConnection sets offline when backend health check fails',
+      () async {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
 
-      final notifier = container.read(isOfflineProvider.notifier);
-      notifier.setDependencies(apiClient: _MockHealthApiClient(isHealthy: false));
+        final notifier = container.read(isOfflineProvider.notifier);
+        notifier.setDependencies(
+          apiClient: _MockHealthApiClient(isHealthy: false),
+        );
 
-      await notifier.checkConnection(force: true);
-      expect(container.read(isOfflineProvider), isTrue);
-    });
+        await notifier.checkConnection(force: true);
+        expect(container.read(isOfflineProvider), isTrue);
+      },
+    );
 
-    test('checkConnection sets online when backend health check succeeds', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+    test(
+      'checkConnection sets online when backend health check succeeds',
+      () async {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
 
-      final notifier = container.read(isOfflineProvider.notifier);
-      // First force offline
-      ApiClient.onServerReachabilityChanged?.call(false);
-      expect(container.read(isOfflineProvider), isTrue);
+        final notifier = container.read(isOfflineProvider.notifier);
+        // First force offline
+        ApiClient.onServerReachabilityChanged?.call(false);
+        expect(container.read(isOfflineProvider), isTrue);
 
-      // Verify health check restores online mode
-      notifier.setDependencies(apiClient: _MockHealthApiClient(isHealthy: true));
-      await notifier.checkConnection(force: true);
-      expect(container.read(isOfflineProvider), isFalse);
-    });
+        // Verify health check restores online mode
+        notifier.setDependencies(
+          apiClient: _MockHealthApiClient(isHealthy: true),
+        );
+        await notifier.checkConnection(force: true);
+        expect(container.read(isOfflineProvider), isFalse);
+      },
+    );
   });
 }
 
@@ -170,7 +196,9 @@ class _MockHealthApiClient extends ApiClient {
   _MockHealthApiClient({required this.isHealthy});
 
   @override
-  Future<bool> checkServerHealth({Duration timeout = const Duration(seconds: 4)}) async {
+  Future<bool> checkServerHealth({
+    Duration timeout = const Duration(seconds: 4),
+  }) async {
     return isHealthy;
   }
 }
@@ -194,5 +222,3 @@ class _MockBannerNotifier extends ConnectivityBannerNotifier {
     return initialStatus;
   }
 }
-
-

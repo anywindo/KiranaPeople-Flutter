@@ -20,7 +20,10 @@ void main() {
         ApiConfig.defaultBaseUrl,
         equals('https://app.kiranapeople.com/api/v1'),
       );
-      expect(ApiConfig.cachedHostOrigin, equals('https://app.kiranapeople.com'));
+      expect(
+        ApiConfig.cachedHostOrigin,
+        equals('https://app.kiranapeople.com'),
+      );
       expect(
         await ApiConfig.getBaseUrl(),
         equals('https://app.kiranapeople.com/api/v1'),
@@ -150,12 +153,18 @@ void main() {
 
   group('Gateway Error Handling and HTML Sanitization Tests', () {
     test('ApiErrorLocalizer filters out raw HTML error responses from proxies/gateways', () {
-      const rawHtml502 = '<!DOCTYPE html>\n<html lang="en">\n<head><title>502</title></head><body>Bad Gateway</body></html>';
+      const rawHtml502 =
+          '<!DOCTYPE html>\n<html lang="en">\n<head><title>502</title></head><body>Bad Gateway</body></html>';
       final localized = ApiErrorLocalizer.localize(rawHtml502);
 
       expect(localized, isNot(contains('<!DOCTYPE')));
       expect(localized, isNot(contains('<html')));
-      expect(localized, equals('Server sedang tidak dapat dijangkau. Silakan coba beberapa saat lagi.'));
+      expect(
+        localized,
+        equals(
+          'Server sedang tidak dapat dijangkau. Silakan coba beberapa saat lagi.',
+        ),
+      );
     });
 
     test('ApiInterceptor converts HTML 502/503/504 responses to clean user-friendly messages', () {

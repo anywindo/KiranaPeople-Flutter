@@ -12,41 +12,46 @@ import 'package:kirana_people/features/profile/widgets/sheets/theme_mode_sheet.d
 
 void main() {
   group('Profile Dialogs & Sheets Tests', () {
-    testWidgets('LogoutConfirmDialog renders title, message, and action buttons', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: Builder(
-                builder: (context) => Consumer(
-                  builder: (context, ref, _) => ElevatedButton(
-                    onPressed: () => LogoutConfirmDialog.show(context, ref),
-                    child: const Text('Open Logout Dialog'),
+    testWidgets(
+      'LogoutConfirmDialog renders title, message, and action buttons',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: Builder(
+                  builder: (context) => Consumer(
+                    builder: (context, ref, _) => ElevatedButton(
+                      onPressed: () => LogoutConfirmDialog.show(context, ref),
+                      child: const Text('Open Logout Dialog'),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.tap(find.text('Open Logout Dialog'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Open Logout Dialog'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Konfirmasi Keluar'), findsOneWidget);
-      expect(
-        find.text('Apakah Anda yakin ingin keluar dari akun ini?'),
-        findsOneWidget,
-      );
-      expect(find.text('Batal'), findsOneWidget);
-      expect(find.text('Keluar'), findsOneWidget);
+        expect(find.text('Konfirmasi Keluar'), findsOneWidget);
+        expect(
+          find.text('Apakah Anda yakin ingin keluar dari akun ini?'),
+          findsOneWidget,
+        );
+        expect(find.text('Batal'), findsOneWidget);
+        expect(find.text('Keluar'), findsOneWidget);
 
-      await tester.tap(find.text('Batal'));
-      await tester.pumpAndSettle();
-      expect(find.text('Konfirmasi Keluar'), findsNothing);
-    });
+        await tester.tap(find.text('Batal'));
+        await tester.pumpAndSettle();
+        expect(find.text('Konfirmasi Keluar'), findsNothing);
+      },
+    );
 
-    testWidgets('PhotoConfirmDialog renders confirm prompt and actions', (tester) async {
+    testWidgets('PhotoConfirmDialog renders confirm prompt and actions', (
+      tester,
+    ) async {
       final dummyFile = File('dummy.jpg');
 
       await tester.pumpWidget(
@@ -78,7 +83,9 @@ void main() {
       expect(find.text('Konfirmasi Foto'), findsNothing);
     });
 
-    testWidgets('PhotoSourceSheet renders gallery and camera options', (tester) async {
+    testWidgets('PhotoSourceSheet renders gallery and camera options', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -104,45 +111,52 @@ void main() {
       expect(find.text('Ambil dengan Kamera'), findsOneWidget);
     });
 
-    testWidgets('EditPhoneSheet renders input field, validation, and submit button', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: Builder(
-                builder: (context) => Consumer(
-                  builder: (context, ref, _) => ElevatedButton(
-                    onPressed: () => EditPhoneSheet.show(context, ref, '08123456789'),
-                    child: const Text('Open Edit Phone Sheet'),
+    testWidgets(
+      'EditPhoneSheet renders input field, validation, and submit button',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: Builder(
+                  builder: (context) => Consumer(
+                    builder: (context, ref, _) => ElevatedButton(
+                      onPressed: () =>
+                          EditPhoneSheet.show(context, ref, '08123456789'),
+                      child: const Text('Open Edit Phone Sheet'),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.tap(find.text('Open Edit Phone Sheet'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Open Edit Phone Sheet'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Ubah Nomor Telepon'), findsOneWidget);
-      expect(find.text('08123456789'), findsOneWidget);
-      expect(find.text('Simpan Nomor'), findsOneWidget);
+        expect(find.text('Ubah Nomor Telepon'), findsOneWidget);
+        expect(find.text('08123456789'), findsOneWidget);
+        expect(find.text('Simpan Nomor'), findsOneWidget);
 
-      // Clear input and test empty validation
-      await tester.enterText(find.byType(TextFormField), '');
-      await tester.tap(find.text('Simpan Nomor'));
-      await tester.pumpAndSettle();
+        // Clear input and test empty validation
+        await tester.enterText(find.byType(TextFormField), '');
+        await tester.tap(find.text('Simpan Nomor'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Nomor telepon tidak boleh kosong'), findsOneWidget);
+        expect(find.text('Nomor telepon tidak boleh kosong'), findsOneWidget);
 
-      // Enter short digits and test validation
-      await tester.enterText(find.byType(TextFormField), '1234');
-      await tester.tap(find.text('Simpan Nomor'));
-      await tester.pumpAndSettle();
+        // Enter short digits and test validation
+        await tester.enterText(find.byType(TextFormField), '1234');
+        await tester.tap(find.text('Simpan Nomor'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Nomor harus terdiri dari 9 hingga 15 digit angka'), findsOneWidget);
-    });
+        expect(
+          find.text('Nomor harus terdiri dari 9 hingga 15 digit angka'),
+          findsOneWidget,
+        );
+      },
+    );
 
     testWidgets('ThemeModeSheet renders all theme options', (tester) async {
       await tester.pumpWidget(
@@ -200,4 +214,3 @@ void main() {
     });
   });
 }
-

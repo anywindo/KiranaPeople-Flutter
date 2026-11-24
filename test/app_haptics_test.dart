@@ -16,7 +16,9 @@ void main() {
       await AppHaptics.success();
     });
 
-    testWidgets('BouncingButton executes on tap with medium haptic level', (tester) async {
+    testWidgets('BouncingButton executes on tap with medium haptic level', (
+      tester,
+    ) async {
       bool tapped = false;
 
       await tester.pumpWidget(
@@ -42,7 +44,9 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('BouncingButton handles selection and error haptic types', (tester) async {
+    testWidgets('BouncingButton handles selection and error haptic types', (
+      tester,
+    ) async {
       bool tapped = false;
 
       await tester.pumpWidget(
@@ -66,4 +70,3 @@ void main() {
     });
   });
 }
-

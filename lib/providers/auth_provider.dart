@@ -115,10 +115,7 @@ class AuthNotifier extends Notifier<AuthState> {
     try {
       final freshProfile = await _repository.getProfile();
       if (!ref.mounted) return;
-      state = state.copyWith(
-        isAuthenticated: true,
-        user: freshProfile,
-      );
+      state = state.copyWith(isAuthenticated: true, user: freshProfile);
     } catch (e) {
       if (!ref.mounted) return;
       final isUnauthorized = e is ApiException && e.statusCode == 401;

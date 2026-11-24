@@ -191,11 +191,7 @@ class ConnectivityNotifier extends Notifier<bool> {
   }
 }
 
-enum ConnectivityBannerStatus {
-  hidden,
-  offline,
-  reconnected,
-}
+enum ConnectivityBannerStatus { hidden, offline, reconnected }
 
 class ConnectivityBannerNotifier extends Notifier<ConnectivityBannerStatus> {
   Timer? _reconnectedTimer;
@@ -237,11 +233,10 @@ final isOfflineProvider = NotifierProvider<ConnectivityNotifier, bool>(
 
 final connectivityBannerProvider =
     NotifierProvider<ConnectivityBannerNotifier, ConnectivityBannerStatus>(
-  ConnectivityBannerNotifier.new,
-);
+      ConnectivityBannerNotifier.new,
+    );
 
 final isOfflineBannerVisibleProvider = Provider<bool>((ref) {
   final status = ref.watch(connectivityBannerProvider);
   return status != ConnectivityBannerStatus.hidden;
 });
-

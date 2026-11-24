@@ -93,10 +93,7 @@ class ShiftInfoCard extends StatelessWidget {
               layoutBuilder: (currentChild, previousChildren) {
                 return Stack(
                   alignment: Alignment.topCenter,
-                  children: <Widget>[
-                    ...previousChildren,
-                    ?currentChild,
-                  ],
+                  children: <Widget>[...previousChildren, ?currentChild],
                 );
               },
               transitionBuilder: (child, animation) {

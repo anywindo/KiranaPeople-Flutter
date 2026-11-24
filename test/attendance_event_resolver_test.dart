@@ -30,81 +30,87 @@ void main() {
       expect(target, equals(AttendanceEventType.startBreak));
     });
 
-    test('resolveTargetAction determines break modes when activeSegment is 1', () {
-      final dataBeforeBreak = TodayAttendanceData(
-        status: 'HADIR',
-        events: [
-          AttendanceEvent(
-            id: 1,
-            eventType: AttendanceEventType.startShift,
-            timestamp: '2026-11-04T08:00:00Z',
-          ),
-        ],
-      );
+    test(
+      'resolveTargetAction determines break modes when activeSegment is 1',
+      () {
+        final dataBeforeBreak = TodayAttendanceData(
+          status: 'HADIR',
+          events: [
+            AttendanceEvent(
+              id: 1,
+              eventType: AttendanceEventType.startShift,
+              timestamp: '2026-11-04T08:00:00Z',
+            ),
+          ],
+        );
 
-      final target1 = AttendanceEventTimeline.resolveTargetAction(
-        data: dataBeforeBreak,
-        activeSegment: 1,
-      );
-      expect(target1, equals(AttendanceEventType.startBreak));
+        final target1 = AttendanceEventTimeline.resolveTargetAction(
+          data: dataBeforeBreak,
+          activeSegment: 1,
+        );
+        expect(target1, equals(AttendanceEventType.startBreak));
 
-      final dataDuringBreak = TodayAttendanceData(
-        status: 'HADIR',
-        events: [
-          AttendanceEvent(
-            id: 1,
-            eventType: AttendanceEventType.startShift,
-            timestamp: '2026-11-04T08:00:00Z',
-          ),
-          AttendanceEvent(
-            id: 2,
-            eventType: AttendanceEventType.startBreak,
-            timestamp: '2026-11-04T12:00:00Z',
-          ),
-        ],
-      );
+        final dataDuringBreak = TodayAttendanceData(
+          status: 'HADIR',
+          events: [
+            AttendanceEvent(
+              id: 1,
+              eventType: AttendanceEventType.startShift,
+              timestamp: '2026-11-04T08:00:00Z',
+            ),
+            AttendanceEvent(
+              id: 2,
+              eventType: AttendanceEventType.startBreak,
+              timestamp: '2026-11-04T12:00:00Z',
+            ),
+          ],
+        );
 
-      final target2 = AttendanceEventTimeline.resolveTargetAction(
-        data: dataDuringBreak,
-        activeSegment: 1,
-      );
-      expect(target2, equals(AttendanceEventType.endBreak));
-    });
+        final target2 = AttendanceEventTimeline.resolveTargetAction(
+          data: dataDuringBreak,
+          activeSegment: 1,
+        );
+        expect(target2, equals(AttendanceEventType.endBreak));
+      },
+    );
 
-    test('AttendanceEventTimeline.fromData correctly extracts times and flags', () {
-      final shift = Shift(
-        id: 1,
-        name: 'Normal Shift',
-        startTime: '08:00',
-        endTime: '17:00',
-        attendanceRuleEnabled: true,
-        attendanceRuleMinutes: 15,
-      );
+    test(
+      'AttendanceEventTimeline.fromData correctly extracts times and flags',
+      () {
+        final shift = Shift(
+          id: 1,
+          name: 'Normal Shift',
+          startTime: '08:00',
+          endTime: '17:00',
+          attendanceRuleEnabled: true,
+          attendanceRuleMinutes: 15,
+        );
 
-      final data = TodayAttendanceData(
-        status: 'HADIR',
-        shift: shift,
-        events: [
-          AttendanceEvent(
-            id: 1,
-            eventType: AttendanceEventType.startShift,
-            timestamp: '2026-11-04T08:05:00',
-          ),
-        ],
-      );
+        final data = TodayAttendanceData(
+          status: 'HADIR',
+          shift: shift,
+          events: [
+            AttendanceEvent(
+              id: 1,
+              eventType: AttendanceEventType.startShift,
+              timestamp: '2026-11-04T08:05:00',
+            ),
+          ],
+        );
 
-      final timeline = AttendanceEventTimeline.fromData(
-        data: data,
-        selectedShift: shift,
-      );
+        final timeline = AttendanceEventTimeline.fromData(
+          data: data,
+          selectedShift: shift,
+        );
 
-      expect(timeline.hasStartedShift, isTrue);
-      expect(timeline.isCheckInLate, isTrue); // 08:05 >= cutoff 07:45 -> late
-      expect(timeline.hasEndedShift, isFalse);
-      expect(timeline.hasStartedBreak, isFalse);
-      expect(timeline.isOnBreak, isFalse);
-      expect(timeline.checkInTime, equals('08:05'));
-    });
+        expect(timeline.hasStartedShift, isTrue);
+        expect(timeline.isCheckInLate, isTrue); // 08:05 >= cutoff 07:45 -> late
+        expect(timeline.hasEndedShift, isFalse);
+        expect(timeline.hasStartedBreak, isFalse);
+        expect(timeline.isOnBreak, isFalse);
+        expect(timeline.checkInTime, equals('08:05'));
+      },
+    );
 
     test('AttendanceEventTimeline.fromData correctly identifies early check-out (13:39 with 16:00 shift)', () {
       final shift = Shift(
@@ -137,12 +143,18 @@ void main() {
       expect(timeline.checkInTime, equals('07:40'));
       expect(timeline.checkOutTime, equals('13:39'));
       expect(timeline.isCheckInLate, isFalse);
-      expect(timeline.isCheckOutEarly, isTrue, reason: '13:39 check out before 16:00 scheduled end must be early');
+      expect(
+        timeline.isCheckOutEarly,
+        isTrue,
+        reason: '13:39 check out before 16:00 scheduled end must be early',
+      );
     });
   });
 
   group('Attendance Dialogs Tests', () {
-    testWidgets('AttendanceLogoutDialog renders and triggers callbacks', (tester) async {
+    testWidgets('AttendanceLogoutDialog renders and triggers callbacks', (
+      tester,
+    ) async {
       bool logoutConfirmed = false;
 
       await tester.pumpWidget(
@@ -165,7 +177,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Keluar Akun'), findsOneWidget);
-      expect(find.text('Apakah Anda yakin ingin keluar dari akun ini?'), findsOneWidget);
+      expect(
+        find.text('Apakah Anda yakin ingin keluar dari akun ini?'),
+        findsOneWidget,
+      );
 
       await tester.tap(find.text('Keluar'));
       await tester.pumpAndSettle();
@@ -173,7 +188,9 @@ void main() {
       expect(logoutConfirmed, isTrue);
     });
 
-    testWidgets('AttendanceErrorDialog renders error message and dismisses', (tester) async {
+    testWidgets('AttendanceErrorDialog renders error message and dismisses', (
+      tester,
+    ) async {
       bool dismissed = false;
 
       await tester.pumpWidget(
@@ -197,7 +214,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Presensi Belum Tersimpan'), findsOneWidget);
-      expect(find.text('Lokasi Anda berada di luar radius kantor.'), findsOneWidget);
+      expect(
+        find.text('Lokasi Anda berada di luar radius kantor.'),
+        findsOneWidget,
+      );
 
       await tester.tap(find.text('Tutup'));
       await tester.pumpAndSettle();

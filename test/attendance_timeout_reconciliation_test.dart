@@ -58,9 +58,7 @@ void main() {
   test('submitEvent auto-reconciles successfully when server timed out but recorded the event', () async {
     final mockRepo = TimeoutMockRepository();
     final container = ProviderContainer(
-      overrides: [
-        attendanceRepositoryProvider.overrideWithValue(mockRepo),
-      ],
+      overrides: [attendanceRepositoryProvider.overrideWithValue(mockRepo)],
     );
     addTearDown(container.dispose);
 
@@ -74,8 +72,11 @@ void main() {
 
     expect(mockRepo.submitCalled, isTrue);
     expect(mockRepo.checkCalled, isTrue);
-    expect(result, isTrue, reason: 'Should return true because the event was already recorded by the server');
+    expect(
+      result,
+      isTrue,
+      reason: 'Should return true because the event was already recorded by the server',
+    );
     expect(container.read(todayAttendanceProvider).submitError, isNull);
   });
 }
-

@@ -133,7 +133,9 @@ class NotificationTestSheet extends StatelessWidget {
                           children: [
                             Text(
                               'Total notifikasi terjadwal: ${pending.length}',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             if (pending.isEmpty)
@@ -143,8 +145,12 @@ class NotificationTestSheet extends StatelessWidget {
                             else
                               ...pending.map(
                                 (p) => Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 4),
-                                  child: Text('• ${p.title ?? "Pengingat"} (#${p.id})'),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 4,
+                                  ),
+                                  child: Text(
+                                    '• ${p.title ?? "Pengingat"} (#${p.id})',
+                                  ),
                                 ),
                               ),
                           ],

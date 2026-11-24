@@ -116,10 +116,7 @@ class MapMarkersLayer extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: const Color(0xFF0284C7),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 1.2,
-                        ),
+                        border: Border.all(color: Colors.white, width: 1.2),
                       ),
                       child: const Text(
                         'Posisi Anda',

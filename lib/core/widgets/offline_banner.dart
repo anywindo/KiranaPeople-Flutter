@@ -157,16 +157,19 @@ class OfflineCardWarning extends ConsumerWidget {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? const Color(0xFF2D1214) : const Color(0xFFFEF2F2);
-    final borderColor =
-        isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFCA5A5);
-    final iconBg =
-        isDark ? const Color(0xFF450A0A) : const Color(0xFFFEE2E2);
-    final iconColor =
-        isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626);
-    final titleColor =
-        isDark ? const Color(0xFFFECACA) : const Color(0xFF991B1B);
-    final textColor =
-        isDark ? const Color(0xFFFCA5A5) : const Color(0xFF7F1D1D);
+    final borderColor = isDark
+        ? const Color(0xFF7F1D1D)
+        : const Color(0xFFFCA5A5);
+    final iconBg = isDark ? const Color(0xFF450A0A) : const Color(0xFFFEE2E2);
+    final iconColor = isDark
+        ? const Color(0xFFF87171)
+        : const Color(0xFFDC2626);
+    final titleColor = isDark
+        ? const Color(0xFFFECACA)
+        : const Color(0xFF991B1B);
+    final textColor = isDark
+        ? const Color(0xFFFCA5A5)
+        : const Color(0xFF7F1D1D);
 
     return Container(
       width: double.infinity,
@@ -186,11 +189,7 @@ class OfflineCardWarning extends ConsumerWidget {
               color: iconBg,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              Icons.wifi_off_rounded,
-              color: iconColor,
-              size: 20,
-            ),
+            child: Icon(Icons.wifi_off_rounded, color: iconColor, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -207,8 +206,7 @@ class OfflineCardWarning extends ConsumerWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  message ??
-                      'Perangkat Anda sedang offline. Presensi & sinkronisasi data memerlukan koneksi internet aktif.',
+                  message ?? 'Perangkat Anda sedang offline. Presensi & sinkronisasi data memerlukan koneksi internet aktif.',
                   style: TextStyle(
                     fontSize: 11.5,
                     color: textColor,
