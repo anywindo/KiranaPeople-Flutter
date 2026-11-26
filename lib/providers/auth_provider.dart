@@ -56,7 +56,7 @@ class AuthNotifier extends Notifier<AuthState> {
   AuthState build() {
     // Register auto-logout on unauthorized (401)
     ApiClient.onUnauthorized = () {
-      logout();
+      logout(skipRemote: true);
     };
 
     // Asynchronously check session on initialization
@@ -99,7 +99,7 @@ class AuthNotifier extends Notifier<AuthState> {
       final isUnauthorized = e is ApiException && e.statusCode == 401;
       if (isUnauthorized) {
         // Expired or revoked token: reset session cleanly to login screen
-        await logout();
+        await logout(skipRemote: true);
         return;
       }
       if (!ref.mounted) return;
@@ -120,7 +120,7 @@ class AuthNotifier extends Notifier<AuthState> {
       if (!ref.mounted) return;
       final isUnauthorized = e is ApiException && e.statusCode == 401;
       if (isUnauthorized) {
-        await logout();
+        await logout(skipRemote: true);
       }
     }
   }
@@ -152,7 +152,7 @@ class AuthNotifier extends Notifier<AuthState> {
 
   bool _isLoggingOut = false;
 
-  Future<void> logout() async {
+  Future<void> logout({bool skipRemote = false}) async {
     if (_isLoggingOut) return;
     _isLoggingOut = true;
 
@@ -177,7 +177,7 @@ class AuthNotifier extends Notifier<AuthState> {
 
       // 4. Clear storage and notify backend
       try {
-        await _repository.logout();
+        await _repository.logout(skipRemote: skipRemote);
       } catch (_) {}
     } finally {
       _isLoggingOut = false;

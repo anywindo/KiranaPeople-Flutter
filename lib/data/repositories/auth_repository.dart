@@ -209,9 +209,11 @@ class AuthRepository {
     return 'Kata sandi Anda berhasil diperbarui. Silakan masuk kembali.';
   }
 
-  Future<void> logout() async {
+  Future<void> logout({bool skipRemote = false}) async {
     try {
-      await _apiClient.post(ApiEndpoints.logout);
+      if (!skipRemote) {
+        await _apiClient.post(ApiEndpoints.logout);
+      }
     } catch (_) {
       // Ignore network failure or already-expired token on logout
     } finally {

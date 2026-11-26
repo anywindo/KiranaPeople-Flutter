@@ -59,7 +59,7 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 | **SEC-20** | `reportSecurityIncident` Targets Non-Existent Backend Route (`/security/incident`) | MASVS-AUTH | CWE-778 | **Low** | ✅ **RESOLVED** |
 | **SEC-21** | Backend `X-Idempotency-Key` Support Unused by Flutter Client | MASVS-RESILIENCE | CWE-362 | **Low** | ✅ **RESOLVED** |
 | **SEC-22** | Unredacted `developer.log` / `debugPrint` Logging in Release Builds | MASVS-STORAGE | CWE-532 | **Low** | ✅ **RESOLVED** |
-| **SEC-23** | Client-Side Password Rule Mismatch & Redundant 401 on `logout()` | MASVS-AUTH | CWE-521 | **Low** | ⚠️ **OPEN** |
+| **SEC-23** | Client-Side Password Rule Mismatch & Redundant 401 on `logout()` | MASVS-AUTH | CWE-521 | **Low** | ✅ **RESOLVED** |
 | **SEC-24** | Minor Hygiene: Hardcoded Host Origin, Release Keystore Fallback, Redundant `setState` | MASVS-CODE | CWE-1188 | **Info** | ⚠️ **OPEN** |
 
 ---
@@ -335,15 +335,15 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 ### [SEC-23] Client-Side Password Rule Mismatch & Redundant 401 on `logout()` *(November 26, 2026)*
 * **Category:** OWASP MASVS-AUTH / CWE-521
 * **Severity:** **Low**
-* **Status:** ⚠️ **OPEN**
+* **Status:** ✅ **RESOLVED**
 * **Locations:**
-  - `lib/features/profile/change_password_dialog.dart` (lines 155–159)
-  - `lib/providers/auth_provider.dart` (lines 58–60, 179–181)
-* **Description:**
-  1. `ChangePasswordDialog` only checks `v.length >= 8`, omitting the uppercase, lowercase, and digit checks enforced by the backend, `OnboardingPasswordScreen`, and `ForgotPasswordSheet`.
-  2. When a `401` triggers `ApiClient.onUnauthorized` → `logout()`, `_repository.logout()` still sends `POST /auth/logout` with the already-invalid token.
-* **Recommended Remediation:**
-  Align `ChangePasswordDialog` validation with `OnboardingPasswordScreen` and pass a flag (e.g. `logout(skipRemote: true)`) when triggered by `onUnauthorized`.
+  - `lib/features/profile/change_password_dialog.dart` (lines 155–169)
+  - `lib/data/repositories/auth_repository.dart` (lines 212–222)
+  - `lib/providers/auth_provider.dart` (lines 58–60, 100–125, 155–185)
+* **Remediation & Verification:**
+  - Updated `ChangePasswordDialog` validator to enforce uppercase, lowercase, and numeric characters in addition to `>= 8` characters.
+  - Added `{bool skipRemote = false}` to `AuthRepository.logout()` and `AuthNotifier.logout()`, passing `skipRemote: true` on `401` auto-logout paths to avoid redundant `POST /auth/logout` requests.
+  - Added tests in `test/profile_dialogs_sheets_test.dart` verifying password complexity rejection and `skipRemote` behavior.
 
 ---
 

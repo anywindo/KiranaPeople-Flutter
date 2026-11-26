@@ -155,6 +155,13 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Kolom ini wajib diisi';
                     if (v.length < 8) return 'Minimal 8 karakter';
+                    if (!v.contains(RegExp(r'[A-Z]')) ||
+                        !v.contains(RegExp(r'[a-z]'))) {
+                      return 'Harus mengandung huruf besar dan kecil';
+                    }
+                    if (!v.contains(RegExp(r'[0-9]'))) {
+                      return 'Harus mengandung angka';
+                    }
                     return null;
                   },
                 ),

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kirana_people/features/profile/change_password_dialog.dart';
 import 'package:kirana_people/features/profile/widgets/dialogs/logout_confirm_dialog.dart';
 import 'package:kirana_people/features/profile/widgets/dialogs/photo_confirm_dialog.dart';
 import 'package:kirana_people/features/profile/widgets/sheets/edit_phone_sheet.dart';
@@ -212,5 +213,32 @@ void main() {
       expect(find.text('Presensi Berhasil'), findsOneWidget);
       expect(find.text('Presensi Gagal (Fallback)'), findsOneWidget);
     });
+
+    testWidgets(
+      'ChangePasswordDialog enforces mixed-case and numeric rules (SEC-23)',
+      (tester) async {
+        await tester.pumpWidget(
+          const ProviderScope(
+            child: MaterialApp(home: Scaffold(body: ChangePasswordDialog())),
+          ),
+        );
+
+        final fields = find.byType(TextFormField);
+        await tester.enterText(fields.at(0), 'OldPass123');
+        await tester.enterText(fields.at(1), 'alllowercase1');
+        await tester.enterText(fields.at(2), 'alllowercase1');
+
+        await tester.tap(find.text('Simpan'));
+        await tester.pump();
+        expect(find.text('Harus mengandung huruf besar dan kecil'), findsOneWidget);
+
+        await tester.enterText(fields.at(1), 'NoNumbersHere');
+        await tester.enterText(fields.at(2), 'NoNumbersHere');
+
+        await tester.tap(find.text('Simpan'));
+        await tester.pump();
+        expect(find.text('Harus mengandung angka'), findsOneWidget);
+      },
+    );
   });
 }
