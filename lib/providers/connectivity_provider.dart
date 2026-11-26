@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/network/api_client.dart';
+import '../core/utils/app_logger.dart';
 import 'attendance_provider.dart';
 import 'history_provider.dart';
 
@@ -70,7 +71,7 @@ class ConnectivityNotifier extends Notifier<bool> {
         }
       });
     } catch (e) {
-      debugPrint(
+      appLog(
         '[ConnectivityProvider] onConnectivityChanged subscription skipped: $e',
       );
     }
@@ -92,7 +93,7 @@ class ConnectivityNotifier extends Notifier<bool> {
         return;
       }
     } catch (e) {
-      debugPrint('[ConnectivityProvider] Physical network check skipped: $e');
+      appLog('[ConnectivityProvider] Physical network check skipped: $e');
     }
 
     try {
@@ -105,7 +106,7 @@ class ConnectivityNotifier extends Notifier<bool> {
         _setOffline(force: force);
       }
     } catch (e) {
-      debugPrint('[ConnectivityProvider] checkConnection error: $e');
+      appLog('[ConnectivityProvider] checkConnection error: $e');
       if (ref.mounted) {
         _setOffline(force: force);
       }
@@ -128,7 +129,7 @@ class ConnectivityNotifier extends Notifier<bool> {
     _lastTransitionTime = now;
 
     state = true;
-    debugPrint(
+    appLog(
       '[ConnectivityProvider] Switched to OFFLINE mode (API unreachable)',
     );
 
@@ -150,7 +151,7 @@ class ConnectivityNotifier extends Notifier<bool> {
     _lastTransitionTime = now;
 
     state = false;
-    debugPrint(
+    appLog(
       '[ConnectivityProvider] Switched to ONLINE mode (API reachable)',
     );
 

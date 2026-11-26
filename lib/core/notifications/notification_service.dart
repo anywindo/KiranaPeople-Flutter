@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -6,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/models/shift_model.dart';
 import '../../data/models/attendance_event_model.dart';
+import '../utils/app_logger.dart';
 import 'notification_channels.dart';
 import 'notification_payload_builder.dart';
 
@@ -86,7 +86,7 @@ class NotificationService {
       await _notificationsPlugin.initialize(
         settings: initSettings,
         onDidReceiveNotificationResponse: (response) {
-          debugPrint('Notification clicked: ${response.payload}');
+          appLog('Notification clicked: ${response.payload}');
         },
       );
 
@@ -117,9 +117,9 @@ class NotificationService {
       }
 
       _isInitialized = true;
-      debugPrint('[NotificationService] Initialized successfully.');
+      appLog('[NotificationService] Initialized successfully.');
     } catch (e) {
-      debugPrint('[NotificationService] Initialization error: $e');
+      appLog('[NotificationService] Initialization error: $e');
     }
   }
 
@@ -146,7 +146,7 @@ class NotificationService {
 
       return (androidGranted ?? iosGranted) ?? true;
     } catch (e) {
-      debugPrint('[NotificationService] Request permission error: $e');
+      appLog('[NotificationService] Request permission error: $e');
       return false;
     }
   }
@@ -425,11 +425,11 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: matchDateTimeComponents,
       );
-      debugPrint(
+      appLog(
         '[NotificationService] Scheduled notification #$id at $scheduledDate (exact)',
       );
     } catch (e) {
-      debugPrint(
+      appLog(
         '[NotificationService] Exact alarm failed for #$id ($e), retrying with inexact mode...',
       );
       try {
@@ -442,11 +442,11 @@ class NotificationService {
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           matchDateTimeComponents: matchDateTimeComponents,
         );
-        debugPrint(
+        appLog(
           '[NotificationService] Scheduled notification #$id at $scheduledDate (inexact)',
         );
       } catch (innerError) {
-        debugPrint(
+        appLog(
           '[NotificationService] Failed to schedule notification #$id: $innerError',
         );
       }
@@ -524,11 +524,11 @@ class NotificationService {
         body: payload.body,
         notificationDetails: NotificationPayloadBuilder.submissionDetails(),
       );
-      debugPrint(
+      appLog(
         '[NotificationService] Submitted attendance notification sent: ${payload.title}',
       );
     } catch (e) {
-      debugPrint(
+      appLog(
         '[NotificationService] Error showing submitted notification: $e',
       );
     }
@@ -558,11 +558,11 @@ class NotificationService {
         body: payload.body,
         notificationDetails: NotificationPayloadBuilder.failureDetails(),
       );
-      debugPrint(
+      appLog(
         '[NotificationService] Failed attendance notification sent: ${payload.title}',
       );
     } catch (e) {
-      debugPrint('[NotificationService] Error showing failed notification: $e');
+      appLog('[NotificationService] Error showing failed notification: $e');
     }
   }
 }

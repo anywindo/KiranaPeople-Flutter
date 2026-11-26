@@ -1,6 +1,6 @@
-import 'dart:developer' as developer;
-
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import '../utils/app_logger.dart';
 
 class SecureStorageService {
   static const _storage = FlutterSecureStorage(
@@ -19,7 +19,7 @@ class SecureStorageService {
     try {
       await _storage.write(key: _keyToken, value: token);
     } catch (e) {
-      developer.log(
+      appLog(
         '[SecureStorage] Error saving token: $e',
         name: 'SecureStorage',
       );
@@ -35,7 +35,7 @@ class SecureStorageService {
       _inMemoryToken = token;
       return token;
     } catch (e) {
-      developer.log(
+      appLog(
         '[SecureStorage] Error reading token: $e',
         name: 'SecureStorage',
       );
@@ -48,7 +48,7 @@ class SecureStorageService {
     try {
       await _storage.delete(key: _keyToken);
     } catch (e) {
-      developer.log(
+      appLog(
         '[SecureStorage] Error deleting token: $e',
         name: 'SecureStorage',
       );
@@ -59,7 +59,7 @@ class SecureStorageService {
     try {
       await _storage.write(key: _keyUserJson, value: userJson);
     } catch (e) {
-      developer.log(
+      appLog(
         '[SecureStorage] Error saving user JSON: $e',
         name: 'SecureStorage',
       );
@@ -70,7 +70,7 @@ class SecureStorageService {
     try {
       return await _storage.read(key: _keyUserJson);
     } catch (e) {
-      developer.log(
+      appLog(
         '[SecureStorage] Error reading user JSON: $e',
         name: 'SecureStorage',
       );
@@ -83,7 +83,7 @@ class SecureStorageService {
     try {
       await _storage.deleteAll();
     } catch (e) {
-      developer.log(
+      appLog(
         '[SecureStorage] Error clearing all: $e',
         name: 'SecureStorage',
       );

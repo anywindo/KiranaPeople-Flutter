@@ -58,7 +58,7 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 | **SEC-19** | Stale Pre-Warmed GPS Position Not Re-Validated in `AttendanceConfirmationView` | MASVS-RESILIENCE | CWE-353 | **Medium** | ✅ **RESOLVED** |
 | **SEC-20** | `reportSecurityIncident` Targets Non-Existent Backend Route (`/security/incident`) | MASVS-AUTH | CWE-778 | **Low** | ✅ **RESOLVED** |
 | **SEC-21** | Backend `X-Idempotency-Key` Support Unused by Flutter Client | MASVS-RESILIENCE | CWE-362 | **Low** | ✅ **RESOLVED** |
-| **SEC-22** | Unredacted `developer.log` / `debugPrint` Logging in Release Builds | MASVS-STORAGE | CWE-532 | **Low** | ⚠️ **OPEN** |
+| **SEC-22** | Unredacted `developer.log` / `debugPrint` Logging in Release Builds | MASVS-STORAGE | CWE-532 | **Low** | ✅ **RESOLVED** |
 | **SEC-23** | Client-Side Password Rule Mismatch & Redundant 401 on `logout()` | MASVS-AUTH | CWE-521 | **Low** | ⚠️ **OPEN** |
 | **SEC-24** | Minor Hygiene: Hardcoded Host Origin, Release Keystore Fallback, Redundant `setState` | MASVS-CODE | CWE-1188 | **Info** | ⚠️ **OPEN** |
 
@@ -318,16 +318,17 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 ### [SEC-22] Unredacted `developer.log` / `debugPrint` Logging in Release Builds *(November 26, 2026)*
 * **Category:** OWASP MASVS-STORAGE / CWE-532 (Insertion of Sensitive Information into Log File)
 * **Severity:** **Low**
-* **Status:** ⚠️ **OPEN**
+* **Status:** ✅ **RESOLVED**
 * **Locations:**
-  - `lib/core/network/api_interceptor.dart` (lines 55–67)
-  - `lib/core/storage/secure_storage_service.dart` (lines 22–89)
-  - `lib/core/notifications/notification_service.dart` (lines 89–565)
-  - `lib/core/security/device_security_service.dart` (lines 151–154)
-* **Description:**
-  Multiple `developer.log(...)` and `debugPrint(...)` calls execute unconditionally without `kDebugMode` guards.
-* **Recommended Remediation:**
-  Wrap non-essential diagnostic logs in `if (kDebugMode)` (or a central logger gated on `kDebugMode`).
+  - `lib/core/utils/app_logger.dart`
+  - `lib/core/network/api_interceptor.dart`, `lib/core/network/api_client.dart`
+  - `lib/core/storage/secure_storage_service.dart`
+  - `lib/core/notifications/notification_service.dart`
+  - `lib/core/security/device_security_service.dart`
+  - `lib/providers/connectivity_provider.dart`
+* **Remediation & Verification:**
+  - Introduced `appLog()` in `lib/core/utils/app_logger.dart` gated strictly on `if (!kDebugMode) return;`.
+  - Replaced all unguarded `developer.log()` and `debugPrint()` calls across `lib/` with `appLog()`, ensuring zero diagnostic logs are emitted in release builds.
 
 ---
 

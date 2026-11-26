@@ -1,4 +1,3 @@
-import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -6,6 +5,7 @@ import 'package:dio/dio.dart';
 
 import '../config/api_config.dart';
 import '../storage/secure_storage_service.dart';
+import '../utils/app_logger.dart';
 import 'api_error_localizer.dart';
 import 'api_exception.dart';
 
@@ -52,7 +52,7 @@ class ApiInterceptor extends Interceptor {
       options.headers['Authorization'] = 'Bearer $token';
     }
 
-    developer.log(
+    appLog(
       '[API Request] ${options.method} ${options.path}',
       name: 'ApiClient',
     );
@@ -61,7 +61,7 @@ class ApiInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    developer.log(
+    appLog(
       '[API Response] ${response.requestOptions.method} ${response.requestOptions.path} (${response.statusCode})',
       name: 'ApiClient',
     );
@@ -73,13 +73,10 @@ class ApiInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     final uri = err.requestOptions.uri;
     if (kDebugMode) {
-      developer.log(
+      appLog(
         '[API Error] ${err.requestOptions.method} $uri -> ${err.type}: ${err.message} (status: ${err.response?.statusCode})',
         name: 'ApiClient',
         error: err,
-      );
-      debugPrint(
-        '[ApiClient Error] ${err.requestOptions.method} $uri -> ${err.type}: ${err.message} (status: ${err.response?.statusCode}) error: ${err.error}',
       );
     }
 

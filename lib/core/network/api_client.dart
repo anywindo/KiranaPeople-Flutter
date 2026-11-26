@@ -1,4 +1,3 @@
-import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -7,6 +6,7 @@ import 'package:dio/io.dart';
 
 import '../config/api_config.dart';
 import '../storage/secure_storage_service.dart';
+import '../utils/app_logger.dart';
 import 'api_exception.dart';
 import 'api_interceptor.dart';
 
@@ -173,7 +173,7 @@ class ApiClient {
           response.statusCode != null && response.statusCode! < 500;
       return isHealthy;
     } catch (e) {
-      developer.log('[ApiClient] Health check failed: $e', name: 'ApiClient');
+      appLog('[ApiClient] Health check failed: $e', name: 'ApiClient');
       return false;
     }
   }

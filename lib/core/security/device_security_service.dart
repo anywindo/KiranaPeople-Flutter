@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '../utils/app_logger.dart';
+
 /// Overall integrity verdict reported to the backend.
 enum IntegrityStatus {
   clean('clean'),
@@ -148,10 +150,10 @@ class DeviceSecurityService {
     } on MissingPluginException {
       report = DeviceSecurityReport.unknown('missing_plugin');
     } on PlatformException catch (e) {
-      debugPrint('[DeviceSecurityService] Platform error: $e');
+      appLog('Platform error: $e', name: 'DeviceSecurityService');
       report = DeviceSecurityReport.unknown('platform_error');
     } catch (e) {
-      debugPrint('[DeviceSecurityService] Unexpected error: $e');
+      appLog('Unexpected error: $e', name: 'DeviceSecurityService');
       report = DeviceSecurityReport.unknown('unexpected_error');
     }
 
