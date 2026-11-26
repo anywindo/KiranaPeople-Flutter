@@ -1,6 +1,6 @@
 # Comprehensive Security Audit Report: Kirana People Flutter Codebase
 
-**Target Codebase:** Kirana People (`kirana_people` v1.0.6)  
+**Target Codebase:** Kirana People (`kirana_people` v1.0.7)  
 **Date of Audit:** November 23, 2026  
 **Framework:** Flutter (Dart 3.13.5+) / Android Gradle Plugin (AGP 9.1.1, Kotlin 1.9+, Java 17) / iOS Runner (Swift)  
 **Audit Standard:** OWASP Mobile Application Security Verification Standard (MASVS v2.0) & OWASP Mobile Top 10 (2024+)  
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-A comprehensive, defense-in-depth security audit of the **Kirana People Flutter application** (version 1.0.6) was conducted. The application is an enterprise workforce management and mobile attendance solution featuring geofencing, camera selfie verification, PDF reporting, and REST API integration with `app.kiranapeople.com`.
+A comprehensive, defense-in-depth security audit of the **Kirana People Flutter application** (version 1.0.7) was conducted. The application is an enterprise workforce management and mobile attendance solution featuring geofencing, camera selfie verification, PDF reporting, and REST API integration with `app.kiranapeople.com`.
 
 The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 - **MASVS-STORAGE:** Secure data storage and biometric cache lifecycle.
