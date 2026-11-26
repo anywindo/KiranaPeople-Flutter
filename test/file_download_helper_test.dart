@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kirana_people/core/config/api_config.dart';
@@ -228,6 +232,44 @@ void main() {
       );
       expect(FileDownloadHelper.isTrustedHost(''), isFalse);
     });
+
+    test(
+      'fetchNetworkBytes strips Authorization header on redirect to external host (SEC-17)',
+      () async {
+        final recordedRequests = <RequestOptions>[];
+        final dio = Dio();
+        dio.httpClientAdapter = _MockRedirectAdapter((options) {
+          recordedRequests.add(options);
+          if (options.uri.host == 'app.kiranapeople.com') {
+            return ResponseBody.fromString(
+              '',
+              302,
+              headers: {
+                'location': ['https://cdn.external-bucket.com/selfie.webp'],
+              },
+            );
+          }
+          return ResponseBody.fromBytes(Uint8List.fromList(utf8.encode('ok')), 200);
+        });
+
+        final bytes = await FileDownloadHelper.fetchNetworkBytes(
+          'https://app.kiranapeople.com/storage/selfies/test.webp',
+          dioClient: dio,
+          overrideToken: 'secret-bearer-token',
+        );
+
+        expect(utf8.decode(bytes), equals('ok'));
+        expect(recordedRequests.length, equals(2));
+        expect(
+          recordedRequests[0].headers['Authorization'],
+          equals('Bearer secret-bearer-token'),
+        );
+        expect(
+          recordedRequests[1].headers.containsKey('Authorization'),
+          isFalse,
+        );
+      },
+    );
   });
 
   group('PhotoPreviewDialog Download Button Tests', () {
@@ -276,5 +318,44 @@ void main() {
       await tester.tap(rotateFinder);
       await tester.pump();
     });
+
+    testWidgets('Tapping download button displays in-dialog notice', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: PhotoPreviewDialog(
+              imageUrl: '',
+              title: 'Foto Uji',
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byIcon(Icons.download_rounded));
+      await tester.pump();
+
+      expect(find.text('URL atau path file tidak valid.'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 4));
+    });
   });
+}
+
+class _MockRedirectAdapter implements HttpClientAdapter {
+  final ResponseBody Function(RequestOptions options) handler;
+
+  _MockRedirectAdapter(this.handler);
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    return handler(options);
+  }
+
+  @override
+  void close({bool force = false}) {}
 }

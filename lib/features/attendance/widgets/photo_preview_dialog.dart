@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/app_haptics.dart';
@@ -44,6 +46,36 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
   int _rotationTurns = 0;
   bool _isDownloading = false;
   bool _isSharing = false;
+  String? _statusMessage;
+  bool _statusIsError = false;
+  Timer? _statusTimer;
+
+  @override
+  void dispose() {
+    _statusTimer?.cancel();
+    super.dispose();
+  }
+
+  void _showNotice(String message, {bool isError = false}) {
+    _statusTimer?.cancel();
+    if (!mounted) return;
+    if (isError) {
+      AppHaptics.error();
+    } else {
+      AppHaptics.success();
+    }
+    setState(() {
+      _statusMessage = message;
+      _statusIsError = isError;
+    });
+    _statusTimer = Timer(const Duration(seconds: 4), () {
+      if (mounted) {
+        setState(() {
+          _statusMessage = null;
+        });
+      }
+    });
+  }
 
   Future<void> _shareMedia() async {
     if (_isSharing || _isDownloading) return;
@@ -63,33 +95,7 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
       });
 
       if (!result.isSuccess && result.errorMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: const Color(0xFFDC2626),
-            content: Row(
-              children: [
-                const Icon(
-                  Icons.error_outline_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    result.errorMessage!,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        _showNotice(result.errorMessage!, isError: true);
       }
     }
   }
@@ -110,38 +116,11 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
         _isDownloading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: result.isSuccess
-              ? const Color(0xFF059669)
-              : const Color(0xFFDC2626),
-          content: Row(
-            children: [
-              Icon(
-                result.isSuccess
-                    ? Icons.check_circle_rounded
-                    : Icons.error_outline_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  result.isSuccess
-                      ? 'Berhasil mengunduh ${result.fileName}'
-                      : (result.errorMessage ?? 'Gagal mengunduh file.'),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 3),
-        ),
+      _showNotice(
+        result.isSuccess
+            ? 'Tersimpan ke folder Download: ${result.fileName}'
+            : (result.errorMessage ?? 'Gagal mengunduh file.'),
+        isError: !result.isSuccess,
       );
     }
   }
@@ -330,14 +309,69 @@ class _PhotoPreviewDialogState extends State<PhotoPreviewDialog> {
                 minHeight: 250,
                 minWidth: double.infinity,
               ),
-              child: InteractiveViewer(
-                minScale: 0.8,
-                maxScale: 4.0,
-                child: AutoOrientedImage(
-                  imageUrl: widget.imageUrl,
-                  manualTurns: _rotationTurns,
-                  fit: BoxFit.contain,
-                ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  InteractiveViewer(
+                    minScale: 0.8,
+                    maxScale: 4.0,
+                    child: AutoOrientedImage(
+                      imageUrl: widget.imageUrl,
+                      manualTurns: _rotationTurns,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  if (_statusMessage != null)
+                    Positioned(
+                      left: 12,
+                      right: 12,
+                      bottom: 12,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _statusIsError
+                                ? const Color(0xFFDC2626)
+                                : const Color(0xFF059669),
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.35),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                _statusIsError
+                                    ? Icons.error_outline_rounded
+                                    : Icons.check_circle_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _statusMessage!,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ),

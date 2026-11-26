@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -97,13 +98,10 @@ class FileDownloadHelper {
     return '$origin/$trimmed';
   }
 
-  /// Determines the appropriate download directory across Android, iOS, and Desktop.
+  /// Determines the appropriate app-scoped download directory across Android, iOS, and Desktop.
+  /// Note: On Android 10+, public Downloads writes use MediaStore via [_saveToAndroidMediaStore] (SEC-18).
   static Future<Directory> getDownloadDirectory() async {
     if (!kIsWeb && Platform.isAndroid) {
-      final publicDownload = Directory('/storage/emulated/0/Download');
-      if (await publicDownload.exists()) {
-        return publicDownload;
-      }
       final downloadsDir = await getDownloadsDirectory();
       if (downloadsDir != null && await downloadsDir.exists()) {
         return downloadsDir;
@@ -161,44 +159,8 @@ class FileDownloadHelper {
         if (cachedFile != null) {
           bytes = await cachedFile.readAsBytes();
         } else {
-          // 2. Fetch directly from network
-          final dio =
-              dioClient ??
-              Dio(
-                BaseOptions(
-                  connectTimeout: const Duration(seconds: 30),
-                  receiveTimeout: const Duration(seconds: 30),
-                  sendTimeout: const Duration(seconds: 30),
-                ),
-              );
-          final headers = <String, dynamic>{};
-          // SECURITY (SEC-15): Only attach authorization header if target host is trusted
-          final baseUrl = await ApiConfig.getBaseUrl();
-          if (isTrustedHost(fullUrl, baseUrl)) {
-            final token = await SecureStorageService().getToken();
-            if (token != null && token.isNotEmpty) {
-              headers['Authorization'] = 'Bearer $token';
-            }
-          }
-
-          final response = await dio.get<List<int>>(
-            fullUrl,
-            options: Options(
-              responseType: ResponseType.bytes,
-              headers: headers,
-              sendTimeout: const Duration(seconds: 30),
-              receiveTimeout: const Duration(seconds: 30),
-            ),
-          );
-
-          if (response.data == null || response.data!.isEmpty) {
-            return FileDownloadResult(
-              isSuccess: false,
-              fileName: fileName,
-              errorMessage: 'Data file kosong atau gagal diunduh.',
-            );
-          }
-          bytes = response.data!;
+          // 2. Fetch directly from network with redirect-safe host verification
+          bytes = await fetchNetworkBytes(fullUrl, dioClient: dioClient);
         }
       } else {
         // Local file
@@ -213,7 +175,19 @@ class FileDownloadHelper {
         bytes = await localFile.readAsBytes();
       }
 
-      // Save to directory with collision avoidance
+      // On Android 10+, save directly to public Downloads via MediaStore (scoped storage safe)
+      if (!kIsWeb && Platform.isAndroid) {
+        final mediaStoreUri = await _saveToAndroidMediaStore(fileName, bytes);
+        if (mediaStoreUri != null) {
+          return FileDownloadResult(
+            isSuccess: true,
+            fileName: fileName,
+            savedPath: mediaStoreUri,
+          );
+        }
+      }
+
+      // Save to app-scoped directory with collision avoidance
       final dir = await getDownloadDirectory();
       final destinationFile = _getUniqueFile(dir.path, fileName);
       await destinationFile.writeAsBytes(bytes, flush: true);
@@ -290,34 +264,11 @@ class FileDownloadHelper {
           await cachedFile.copy(target.path);
           localFilePath = target.path;
         } else {
-          // 2. Fetch directly from network and save to temp file
-          final dio =
-              dioClient ??
-              Dio(
-                BaseOptions(
-                  connectTimeout: const Duration(seconds: 30),
-                  receiveTimeout: const Duration(seconds: 30),
-                  sendTimeout: const Duration(seconds: 30),
-                ),
-              );
-          final headers = <String, dynamic>{};
-          // SECURITY (SEC-15): Only attach authorization header if target host is trusted
-          final baseUrl = await ApiConfig.getBaseUrl();
-          if (isTrustedHost(fullUrl, baseUrl)) {
-            final token = await SecureStorageService().getToken();
-            if (token != null && token.isNotEmpty) {
-              headers['Authorization'] = 'Bearer $token';
-            }
-          }
-
+          // 2. Fetch directly from network with redirect-safe host verification
+          final bytes = await fetchNetworkBytes(fullUrl, dioClient: dioClient);
           final tempDir = await getTemporaryDirectory();
           final tempFile = File('${tempDir.path}/$fileName');
-
-          await dio.download(
-            fullUrl,
-            tempFile.path,
-            options: Options(headers: headers),
-          );
+          await tempFile.writeAsBytes(bytes, flush: true);
 
           if (!await tempFile.exists()) {
             return FileDownloadResult(
@@ -359,6 +310,96 @@ class FileDownloadHelper {
         fileName: fileName,
         errorMessage: e.toString().replaceFirst('Exception: ', ''),
       );
+    }
+  }
+
+  /// Fetches bytes from [initialUrl] while disabling automatic redirects so that
+  /// `Authorization: Bearer` headers are re-evaluated on every redirect hop (SEC-17).
+  @visibleForTesting
+  static Future<List<int>> fetchNetworkBytes(
+    String initialUrl, {
+    Dio? dioClient,
+    String? overrideToken,
+    int maxRedirects = 5,
+  }) async {
+    final dio =
+        dioClient ??
+        Dio(
+          BaseOptions(
+            connectTimeout: const Duration(seconds: 30),
+            receiveTimeout: const Duration(seconds: 30),
+            sendTimeout: const Duration(seconds: 30),
+          ),
+        );
+
+    final baseUrl = await ApiConfig.getBaseUrl();
+    final token = overrideToken ?? await SecureStorageService().getToken();
+
+    var currentUrl = initialUrl;
+    for (var hop = 0; hop <= maxRedirects; hop++) {
+      final headers = <String, dynamic>{};
+      if (token != null &&
+          token.isNotEmpty &&
+          isTrustedHost(currentUrl, baseUrl)) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+
+      final response = await dio.get<List<int>>(
+        currentUrl,
+        options: Options(
+          responseType: ResponseType.bytes,
+          headers: headers,
+          followRedirects: false,
+          validateStatus: (status) => status != null && status < 400,
+          sendTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
+      );
+
+      final status = response.statusCode ?? 200;
+      if (status >= 300 && status < 400) {
+        final location = response.headers.value('location');
+        if (location == null || location.trim().isEmpty) {
+          throw Exception('Respon pengalihan (redirect) tidak valid.');
+        }
+        currentUrl = Uri.parse(currentUrl).resolve(location.trim()).toString();
+        continue;
+      }
+
+      final data = response.data;
+      if (data == null || data.isEmpty) {
+        throw Exception('Data file kosong atau gagal diunduh.');
+      }
+      return data;
+    }
+
+    throw Exception('Terlalu banyak pengalihan (redirect) saat mengunduh file.');
+  }
+
+  static const MethodChannel _filesChannel = MethodChannel(
+    'com.kiranadesainindonesia.kiranapeople/files',
+  );
+
+  static Future<String?> _saveToAndroidMediaStore(
+    String fileName,
+    List<int> bytes,
+  ) async {
+    try {
+      final ext = fileName.split('.').last.toLowerCase();
+      final mimeType = switch (ext) {
+        'webp' => 'image/webp',
+        'png' => 'image/png',
+        'gif' => 'image/gif',
+        'pdf' => 'application/pdf',
+        _ => 'image/jpeg',
+      };
+      return await _filesChannel.invokeMethod<String>('saveToDownloads', {
+        'fileName': fileName,
+        'mimeType': mimeType,
+        'bytes': Uint8List.fromList(bytes),
+      });
+    } catch (_) {
+      return null;
     }
   }
 }

@@ -1,9 +1,12 @@
 package com.kiranadesainindonesia.kirana_people
 
+import android.content.ContentValues
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Debug
+import android.os.Environment
+import android.provider.MediaStore
 import android.provider.Settings
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -23,6 +26,7 @@ import java.security.MessageDigest
  */
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "com.kiranadesainindonesia.kiranapeople/security"
+    private val FILES_CHANNEL = "com.kiranadesainindonesia.kiranapeople/files"
 
     // Static device attributes cached once per process to keep integrity checks under <5ms
     @Volatile private var cachedSignature: String? = null
@@ -58,6 +62,53 @@ class MainActivity : FlutterActivity() {
                 "isDeveloperMode" -> result.success(isDevModeEnabled(context))
                 else -> result.notImplemented()
             }
+        }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, FILES_CHANNEL).setMethodCallHandler { call, result ->
+            if (call.method == "saveToDownloads") {
+                val fileName = call.argument<String>("fileName")
+                val mimeType = call.argument<String>("mimeType") ?: "application/octet-stream"
+                val bytes = call.argument<ByteArray>("bytes")
+                if (fileName.isNullOrBlank() || bytes == null) {
+                    result.error("INVALID_ARGS", "Missing fileName or bytes", null)
+                    return@setMethodCallHandler
+                }
+                Thread {
+                    val saved = saveToMediaStoreDownloads(fileName, mimeType, bytes)
+                    runOnUiThread {
+                        result.success(saved)
+                    }
+                }.start()
+            } else {
+                result.notImplemented()
+            }
+        }
+    }
+
+    private fun saveToMediaStoreDownloads(fileName: String, mimeType: String, bytes: ByteArray): String? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null
+        return try {
+            val resolver = applicationContext.contentResolver
+            val values = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                put(MediaStore.MediaColumns.IS_PENDING, 1)
+            }
+            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return null
+            resolver.openOutputStream(uri)?.use { out ->
+                out.write(bytes)
+                out.flush()
+            } ?: run {
+                resolver.delete(uri, null, null)
+                return null
+            }
+            values.clear()
+            values.put(MediaStore.MediaColumns.IS_PENDING, 0)
+            resolver.update(uri, values, null, null)
+            uri.toString()
+        } catch (_: Exception) {
+            null
         }
     }
 

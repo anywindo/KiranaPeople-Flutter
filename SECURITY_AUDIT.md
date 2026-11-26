@@ -53,8 +53,8 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 | **SEC-14** | Client-Side Account Enumeration Leak in Forgot Password Handler | MASVS-AUTH | CWE-204 | **Low** | ⚠️ **OPEN / TRADE-OFF** |
 | **SEC-15** | Bearer Token Leakage to Untrusted / External Domains in File Downloader | MASVS-NETWORK | CWE-200 | **Medium** | ✅ **RESOLVED** |
 | **SEC-16** | Wildcard Multi-Tenant `*.onrender.com` Trust in `ApiConfig.isTrustedHost()` | MASVS-NETWORK | CWE-200 | **Medium** | ✅ **RESOLVED** |
-| **SEC-17** | Redirect Header Forwarding & Unpinned Raw `Dio` in `FileDownloadHelper` | MASVS-NETWORK | CWE-200 | **Medium** | ⚠️ **OPEN** |
-| **SEC-18** | Android 10+ Scoped Storage Download Path Failure (`FileDownloadHelper`) | MASVS-PLATFORM | CWE-732 | **Medium** | ⚠️ **OPEN** |
+| **SEC-17** | Redirect Header Forwarding & Unpinned Raw `Dio` in `FileDownloadHelper` | MASVS-NETWORK | CWE-200 | **Medium** | ✅ **RESOLVED** |
+| **SEC-18** | Android 10+ Scoped Storage Download Path Failure (`FileDownloadHelper`) | MASVS-PLATFORM | CWE-732 | **Medium** | ✅ **RESOLVED** |
 | **SEC-19** | Stale Pre-Warmed GPS Position Not Re-Validated in `AttendanceConfirmationView` | MASVS-RESILIENCE | CWE-353 | **Medium** | ⚠️ **OPEN** |
 | **SEC-20** | `reportSecurityIncident` Targets Non-Existent Backend Route (`/security/incident`) | MASVS-AUTH | CWE-778 | **Low** | ⚠️ **OPEN** |
 | **SEC-21** | Backend `X-Idempotency-Key` Support Unused by Flutter Client | MASVS-RESILIENCE | CWE-362 | **Low** | ⚠️ **OPEN** |
@@ -250,28 +250,27 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 ### [SEC-17] Redirect Header Forwarding & Unpinned Raw `Dio` in `FileDownloadHelper` *(November 26, 2026)*
 * **Category:** OWASP MASVS-NETWORK / CWE-200 (Information Disclosure)
 * **Severity:** **Medium**
-* **Status:** ⚠️ **OPEN**
-* **Location:** `lib/core/utils/file_download_helper.dart` (lines 165–192, 294–320)
+* **Status:** ✅ **RESOLVED**
+* **Location:** `lib/core/utils/file_download_helper.dart` (lines 150–380)
 * **Description:**
-  When `dioClient` is omitted, `downloadFile()` and `shareFile()` instantiate a bare `Dio(BaseOptions(...))` with default `followRedirects: true` and pass `Authorization: Bearer` headers in `Options`.
-* **Impact:**
-  If a trusted origin responds with a `301`/`302` redirect to an external storage bucket or third-party host, the `Authorization` header can be forwarded across the redirect.
-* **Recommended Remediation:**
-  Disable automatic redirects (`followRedirects: false`, `validateStatus: (s) => s != null && s < 400`) and manually re-check `isTrustedHost()` on redirect `Location` targets before following without `Authorization` on external hosts.
+  When `dioClient` was omitted, `downloadFile()` and `shareFile()` previously instantiated a bare `Dio` with default `followRedirects: true` and `Authorization: Bearer` headers in `Options`, risking forwarding credentials across `301`/`302` redirects to external hosts.
+* **Remediation & Verification:**
+  - Extracted `FileDownloadHelper.fetchNetworkBytes()` with `followRedirects: false` and explicit per-hop `Location` resolution.
+  - Re-evaluates `isTrustedHost()` on every redirect hop so `Authorization: Bearer` is never sent to external redirect targets.
+  - Added automated test in `test/file_download_helper_test.dart` verifying `Authorization` is attached on the trusted hop and stripped on redirect to an external host.
 
 ---
 
 ### [SEC-18] Android 10+ Scoped Storage Download Path Failure (`FileDownloadHelper`) *(November 26, 2026)*
 * **Category:** OWASP MASVS-PLATFORM / CWE-732
 * **Severity:** **Medium**
-* **Status:** ⚠️ **OPEN**
-* **Location:** `lib/core/utils/file_download_helper.dart` (lines 102–106, 217–219)
+* **Status:** ✅ **RESOLVED**
+* **Location:** `lib/core/utils/file_download_helper.dart`, `android/app/src/main/kotlin/com/kiranadesainindonesia/kirana_people/MainActivity.kt`
 * **Description:**
-  `FileDownloadHelper.getDownloadDirectory()` returns `Directory('/storage/emulated/0/Download')` whenever it exists, and `downloadFile()` writes directly via `destinationFile.writeAsBytes(...)`.
-* **Impact:**
-  On Android 11+ (API 30+ scoped storage), direct filesystem writes to `/storage/emulated/0/Download` fail with `PathAccessException` (`EACCES`).
-* **Recommended Remediation:**
-  Use Android `MediaStore` (`Downloads` collection) or save into app-scoped `getExternalFilesDir` / `getApplicationDocumentsDirectory()` and expose via `share_plus` / `MediaScanner`.
+  `FileDownloadHelper.getDownloadDirectory()` previously returned `Directory('/storage/emulated/0/Download')` on Android, causing `File.writeAsBytes()` to fail with `PathAccessException` (`EACCES`) under Android 11+ scoped storage.
+* **Remediation & Verification:**
+  - Added `saveToMediaStoreDownloads()` in `MainActivity.kt` via `com.kiranadesainindonesia.kiranapeople/files` (`MediaStore.Downloads` on Android Q+/API 29+) so downloads save to the user's public Downloads folder without requiring `WRITE_EXTERNAL_STORAGE`.
+  - Removed the direct `/storage/emulated/0/Download` path from `FileDownloadHelper.getDownloadDirectory()`, falling back to app-scoped directories (`getDownloadsDirectory()`, `getExternalStorageDirectory()`, `getApplicationDocumentsDirectory()`).
 
 ---
 
