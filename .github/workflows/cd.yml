@@ -75,7 +75,11 @@ jobs:
             fi
             echo "Release keystore configured successfully."
           else
-            echo "No ANDROID_KEYSTORE_BASE64 secret found. Generating CI fallback signing keystore..."
+            if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+              echo "ERROR: Tagged production release requires ANDROID_KEYSTORE_BASE64 secret (SEC-24)."
+              exit 1
+            fi
+            echo "No ANDROID_KEYSTORE_BASE64 secret found. Generating CI fallback signing keystore for non-tag dispatch..."
             keytool -genkey -v -keystore android/app/ci-fallback-keystore.jks \
               -alias cikey -keyalg RSA -keysize 2048 -validity 10000 \
               -storepass android -keypass android \

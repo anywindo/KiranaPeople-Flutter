@@ -47,6 +47,15 @@ android {
                 storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
                 storePassword = keystoreProperties.getProperty("storePassword")
             } else {
+                val isCi = System.getenv("CI") == "true"
+                val isReleaseTask = gradle.startParameter.taskNames.any {
+                    it.contains("Release", ignoreCase = true)
+                }
+                if (isCi && isReleaseTask) {
+                    throw org.gradle.api.GradleException(
+                        "Release build in CI requires android/key.properties (SEC-24)."
+                    )
+                }
                 // Fallback to debug keystore for local development until key.properties is configured
                 val debugConfig = getByName("debug")
                 val debugStore = debugConfig.storeFile

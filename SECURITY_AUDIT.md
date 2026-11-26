@@ -60,7 +60,7 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 | **SEC-21** | Backend `X-Idempotency-Key` Support Unused by Flutter Client | MASVS-RESILIENCE | CWE-362 | **Low** | ✅ **RESOLVED** |
 | **SEC-22** | Unredacted `developer.log` / `debugPrint` Logging in Release Builds | MASVS-STORAGE | CWE-532 | **Low** | ✅ **RESOLVED** |
 | **SEC-23** | Client-Side Password Rule Mismatch & Redundant 401 on `logout()` | MASVS-AUTH | CWE-521 | **Low** | ✅ **RESOLVED** |
-| **SEC-24** | Minor Hygiene: Hardcoded Host Origin, Release Keystore Fallback, Redundant `setState` | MASVS-CODE | CWE-1188 | **Info** | ⚠️ **OPEN** |
+| **SEC-24** | Minor Hygiene: Hardcoded Host Origin, Release Keystore Fallback, Redundant `setState` | MASVS-CODE | CWE-1188 | **Info** | ✅ **RESOLVED** |
 
 ---
 
@@ -350,11 +350,15 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 ### [SEC-24] Minor Code & Build Hygiene Notes *(November 26, 2026)*
 * **Category:** OWASP MASVS-CODE / CWE-1188
 * **Severity:** **Info**
-* **Status:** ⚠️ **OPEN**
+* **Status:** ✅ **RESOLVED**
 * **Locations:**
-  - `lib/data/models/user_model.dart` (line 86), `lib/data/models/attendance_event_model.dart` (line 85), `lib/core/utils/file_download_helper.dart` (line 93): Relative URLs always resolve against `ApiConfig.cachedHostOrigin`, ignoring custom debug endpoints.
-  - `android/app/build.gradle.kts` (lines 49–67), `.github/workflows/cd.yml` (lines 78–85): Release signing silently falls back to a debug/CI-generated keystore when `key.properties` or `ANDROID_KEYSTORE_BASE64` is missing.
-  - `lib/features/attendance/attendance_confirmation_view.dart` (lines 148–185): `_submitAttendance()` calls `setState(() { _isSubmitting = true; })` redundantly.
+  - `lib/data/models/user_model.dart`, `lib/data/models/attendance_event_model.dart`, `lib/core/utils/file_download_helper.dart`
+  - `android/app/build.gradle.kts`, `.github/workflows/cd.yml`
+  - `lib/features/attendance/attendance_confirmation_view.dart`
+* **Remediation & Verification:**
+  - Updated `UserModel.fullAvatarUrl`, `AttendanceEvent.fullSelfieUrl`, and `FileDownloadHelper.resolveFullUrl()` to use `ApiConfig.getHostOrigin()`, resolving relative URLs against the active debug endpoint in `kDebugMode` and `app.kiranapeople.com` in release builds (verified in `test/dev_api_endpoint_test.dart`).
+  - Hardened `android/app/build.gradle.kts` and `.github/workflows/cd.yml` to fail CI release builds / tagged `v*` releases if `key.properties` or `ANDROID_KEYSTORE_BASE64` is missing.
+  - Redundant `_isSubmitting = true` `setState()` in `AttendanceConfirmationView._submitAttendance()` was removed as part of **SEC-19**.
 
 ---
 

@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:kirana_people/core/config/api_config.dart';
+import 'package:kirana_people/core/utils/file_download_helper.dart';
+import 'package:kirana_people/data/models/attendance_event_model.dart';
+import 'package:kirana_people/data/models/user_model.dart';
 import 'package:kirana_people/features/auth/login_screen.dart';
 import 'package:kirana_people/features/auth/widgets/dev_api_endpoint_card.dart';
 
@@ -58,6 +61,38 @@ void main() {
       expect(await ApiConfig.getBaseUrl(), equals(ApiConfig.defaultBaseUrl));
       expect(ApiConfig.getHostOrigin(), equals(ApiConfig.cachedHostOrigin));
     });
+
+    test(
+      'Relative media URLs resolve against active dev host origin in debug mode (SEC-24)',
+      () async {
+        await ApiConfig.setBaseUrl('http://10.0.2.2:8000/api/v1');
+
+        final user = UserModel(
+          id: 1,
+          name: 'Test',
+          email: 'test@example.com',
+          avatarUrl: 'avatars/test.webp',
+        );
+        final event = AttendanceEvent(
+          eventType: AttendanceEventType.startShift,
+          timestamp: '2026-11-26T08:00:00Z',
+          selfieUrl: 'selfies/test.webp',
+        );
+
+        expect(
+          user.fullAvatarUrl,
+          equals('http://10.0.2.2:8000/storage/avatars/test.webp'),
+        );
+        expect(
+          event.fullSelfieUrl,
+          equals('http://10.0.2.2:8000/storage/selfies/test.webp'),
+        );
+        expect(
+          FileDownloadHelper.resolveFullUrl('selfies/test.webp'),
+          equals('http://10.0.2.2:8000/selfies/test.webp'),
+        );
+      },
+    );
   });
 
   group('DevApiEndpointCard Widget Tests', () {

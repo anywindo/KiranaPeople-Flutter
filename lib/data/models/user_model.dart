@@ -83,7 +83,7 @@ class UserModel {
       return trimmed;
     }
     final cleanPath = trimmed.startsWith('/') ? trimmed.substring(1) : trimmed;
-    final origin = ApiConfig.cachedHostOrigin;
+    final origin = ApiConfig.getHostOrigin();
     if (cleanPath.startsWith('storage/')) {
       return '$origin/$cleanPath';
     }

@@ -91,7 +91,7 @@ class FileDownloadHelper {
       return trimmed; // Local path
     }
     // Relative URL from backend
-    final origin = ApiConfig.cachedHostOrigin;
+    final origin = ApiConfig.getHostOrigin();
     if (trimmed.startsWith('/')) {
       return '$origin$trimmed';
     }
