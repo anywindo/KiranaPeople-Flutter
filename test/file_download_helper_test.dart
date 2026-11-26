@@ -153,6 +153,22 @@ void main() {
         isTrue,
       );
       expect(
+        ApiConfig.isTrustedHost(
+          'https://attacker.onrender.com/storage/photos/test.jpg',
+          null,
+          false,
+        ),
+        isFalse,
+      );
+      expect(
+        ApiConfig.isTrustedHost(
+          'https://app.kiranapeople.com/storage/photos/test.jpg',
+          null,
+          false,
+        ),
+        isTrue,
+      );
+      expect(
         FileDownloadHelper.isTrustedHost('/storage/photos/test.jpg'),
         isTrue,
       );
@@ -171,6 +187,20 @@ void main() {
           'https://terriblenight.onrender.com/api/v1/attendance/today',
         ),
         isTrue,
+      );
+      expect(
+        ApiConfig.isTrustedHost(
+          'https://terriblenight.onrender.com/api/v1/attendance/today',
+          null,
+          false,
+        ),
+        isFalse,
+      );
+      expect(
+        FileDownloadHelper.isTrustedHost(
+          'https://attacker.onrender.com/api/v1/attendance/today',
+        ),
+        isFalse,
       );
       expect(
         ApiConfig.isTrustedHost(

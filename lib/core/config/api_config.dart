@@ -29,9 +29,13 @@ class ApiConfig {
     }
   }
 
-  /// SECURITY (SEC-15): Validates whether a target URL/path belongs to the trusted application API host.
+  /// SECURITY (SEC-15 / SEC-16): Validates whether a target URL/path belongs to the trusted application API host.
   /// Used by interceptors and download helpers to prevent leaking Bearer tokens to untrusted third-party hosts.
-  static bool isTrustedHost(String urlOrPath, [String? currentBaseUrl]) {
+  static bool isTrustedHost(
+    String urlOrPath, [
+    String? currentBaseUrl,
+    bool isDebug = kDebugMode,
+  ]) {
     final trimmed = urlOrPath.trim();
     if (trimmed.isEmpty) return false;
     if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
@@ -67,18 +71,16 @@ class ApiConfig {
         }
       }
 
-      // Check known first-party staging/backend domains
-      if (host.endsWith('.onrender.com') ||
-          host == 'onrender.com' ||
-          host.endsWith('.kiranapeople.com') ||
-          host == 'kiranapeople.com') {
+      // Check known first-party production domains (main API: app.kiranapeople.com)
+      if (host.endsWith('.kiranapeople.com') || host == 'kiranapeople.com') {
         return true;
       }
 
-      if (kDebugMode) {
+      if (isDebug) {
         if (host == 'localhost' ||
             host == '127.0.0.1' ||
             host == '10.0.2.2' ||
+            host == 'terriblenight.onrender.com' ||
             host.endsWith('.test') ||
             host.endsWith('.local') ||
             host.startsWith('192.168.') ||

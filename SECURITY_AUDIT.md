@@ -52,6 +52,15 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 | **SEC-13** | Dev API Configuration UI & Internal IP Leak in Release Mode | MASVS-PLATFORM | CWE-489 | **Low** | ✅ **RESOLVED** |
 | **SEC-14** | Client-Side Account Enumeration Leak in Forgot Password Handler | MASVS-AUTH | CWE-204 | **Low** | ⚠️ **OPEN / TRADE-OFF** |
 | **SEC-15** | Bearer Token Leakage to Untrusted / External Domains in File Downloader | MASVS-NETWORK | CWE-200 | **Medium** | ✅ **RESOLVED** |
+| **SEC-16** | Wildcard Multi-Tenant `*.onrender.com` Trust in `ApiConfig.isTrustedHost()` | MASVS-NETWORK | CWE-200 | **Medium** | ✅ **RESOLVED** |
+| **SEC-17** | Redirect Header Forwarding & Unpinned Raw `Dio` in `FileDownloadHelper` | MASVS-NETWORK | CWE-200 | **Medium** | ⚠️ **OPEN** |
+| **SEC-18** | Android 10+ Scoped Storage Download Path Failure (`FileDownloadHelper`) | MASVS-PLATFORM | CWE-732 | **Medium** | ⚠️ **OPEN** |
+| **SEC-19** | Stale Pre-Warmed GPS Position Not Re-Validated in `AttendanceConfirmationView` | MASVS-RESILIENCE | CWE-353 | **Medium** | ⚠️ **OPEN** |
+| **SEC-20** | `reportSecurityIncident` Targets Non-Existent Backend Route (`/security/incident`) | MASVS-AUTH | CWE-778 | **Low** | ⚠️ **OPEN** |
+| **SEC-21** | Backend `X-Idempotency-Key` Support Unused by Flutter Client | MASVS-RESILIENCE | CWE-362 | **Low** | ⚠️ **OPEN** |
+| **SEC-22** | Unredacted `developer.log` / `debugPrint` Logging in Release Builds | MASVS-STORAGE | CWE-532 | **Low** | ⚠️ **OPEN** |
+| **SEC-23** | Client-Side Password Rule Mismatch & Redundant 401 on `logout()` | MASVS-AUTH | CWE-521 | **Low** | ⚠️ **OPEN** |
+| **SEC-24** | Minor Hygiene: Hardcoded Host Origin, Release Keystore Fallback, Redundant `setState` | MASVS-CODE | CWE-1188 | **Info** | ⚠️ **OPEN** |
 
 ---
 
@@ -225,6 +234,129 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 
 ---
 
+### [SEC-16] Wildcard Multi-Tenant `*.onrender.com` Trust in `ApiConfig.isTrustedHost()` *(November 26, 2026)*
+* **Category:** OWASP MASVS-NETWORK / CWE-200 (Information Disclosure)
+* **Severity:** **Medium**
+* **Status:** ✅ **RESOLVED**
+* **Location:** `lib/core/config/api_config.dart` (lines 34–96)
+* **Description:**
+  `ApiConfig.isTrustedHost()` previously trusted `host.endsWith('.onrender.com') || host == 'onrender.com'` unconditionally, even in release builds (`!kDebugMode`). Because `onrender.com` is a shared multi-tenant PaaS, any third party could host an app on `<attacker>.onrender.com`.
+* **Remediation & Verification:**
+  - Removed the wildcard `.onrender.com` / `onrender.com` check from `ApiConfig.isTrustedHost()`, restricting release builds to `app.kiranapeople.com` / `*.kiranapeople.com` (while `currentBaseUrl` / `_devBaseUrl` still handles any specific dev endpoint in debug mode).
+  - Added regression test in `test/file_download_helper_test.dart` asserting `https://attacker.onrender.com/...` is rejected when `isDebug = false`.
+
+---
+
+### [SEC-17] Redirect Header Forwarding & Unpinned Raw `Dio` in `FileDownloadHelper` *(November 26, 2026)*
+* **Category:** OWASP MASVS-NETWORK / CWE-200 (Information Disclosure)
+* **Severity:** **Medium**
+* **Status:** ⚠️ **OPEN**
+* **Location:** `lib/core/utils/file_download_helper.dart` (lines 165–192, 294–320)
+* **Description:**
+  When `dioClient` is omitted, `downloadFile()` and `shareFile()` instantiate a bare `Dio(BaseOptions(...))` with default `followRedirects: true` and pass `Authorization: Bearer` headers in `Options`.
+* **Impact:**
+  If a trusted origin responds with a `301`/`302` redirect to an external storage bucket or third-party host, the `Authorization` header can be forwarded across the redirect.
+* **Recommended Remediation:**
+  Disable automatic redirects (`followRedirects: false`, `validateStatus: (s) => s != null && s < 400`) and manually re-check `isTrustedHost()` on redirect `Location` targets before following without `Authorization` on external hosts.
+
+---
+
+### [SEC-18] Android 10+ Scoped Storage Download Path Failure (`FileDownloadHelper`) *(November 26, 2026)*
+* **Category:** OWASP MASVS-PLATFORM / CWE-732
+* **Severity:** **Medium**
+* **Status:** ⚠️ **OPEN**
+* **Location:** `lib/core/utils/file_download_helper.dart` (lines 102–106, 217–219)
+* **Description:**
+  `FileDownloadHelper.getDownloadDirectory()` returns `Directory('/storage/emulated/0/Download')` whenever it exists, and `downloadFile()` writes directly via `destinationFile.writeAsBytes(...)`.
+* **Impact:**
+  On Android 11+ (API 30+ scoped storage), direct filesystem writes to `/storage/emulated/0/Download` fail with `PathAccessException` (`EACCES`).
+* **Recommended Remediation:**
+  Use Android `MediaStore` (`Downloads` collection) or save into app-scoped `getExternalFilesDir` / `getApplicationDocumentsDirectory()` and expose via `share_plus` / `MediaScanner`.
+
+---
+
+### [SEC-19] Stale Pre-Warmed GPS Position Not Re-Validated in `AttendanceConfirmationView` *(November 26, 2026)*
+* **Category:** OWASP MASVS-RESILIENCE / CWE-353
+* **Severity:** **Medium**
+* **Status:** ⚠️ **OPEN**
+* **Location:** `lib/features/attendance/attendance_confirmation_view.dart` (lines 72–91, 137–207)
+* **Description:**
+  When `widget.initialPosition` (pre-warmed in `CameraSelfieView`) is provided, `_submitAttendance()` submits it directly without checking its age or re-running `LocationHelper.validatePosition()`.
+* **Impact:**
+  If the employee stays on the confirmation screen for several minutes or activates a mock location provider after selfie capture, a stale coordinate may be submitted.
+* **Recommended Remediation:**
+  Re-run `LocationHelper.validatePosition(_currentPosition!)` and enforce a freshness threshold (e.g. `<= 120s`) in `_submitAttendance()`, calling `_fetchLocation()` if expired.
+
+---
+
+### [SEC-20] `reportSecurityIncident` Targets Non-Existent Backend Route (`/security/incident`) *(November 26, 2026)*
+* **Category:** OWASP MASVS-AUTH / CWE-778 (Insufficient Logging)
+* **Severity:** **Low**
+* **Status:** ⚠️ **OPEN**
+* **Location:** `lib/core/constants/api_endpoints.dart` (line 18), `lib/data/repositories/attendance_repository.dart` (lines 153–179)
+* **Description:**
+  `AttendanceRepository.reportSecurityIncident()` posts integrity incidents to `/api/v1/security/incident`, but the TerribleNight Laravel backend (`routes/api.php`) does not define a `/security/incident` route.
+* **Impact:**
+  Pre-submission compromised-device blocks silently receive HTTP 404 (swallowed in `catch (_) {}`) instead of persisting forensic logs in `audit_logs`.
+* **Recommended Remediation:**
+  Implement `POST /api/v1/security/incident` on the TerribleNight backend (writing to `audit_logs` under `auth:sanctum`) or route telemetry through an existing audited endpoint.
+
+---
+
+### [SEC-21] Backend `X-Idempotency-Key` Support Unused by Flutter Client *(November 26, 2026)*
+* **Category:** OWASP MASVS-RESILIENCE / CWE-362
+* **Severity:** **Low**
+* **Status:** ⚠️ **OPEN**
+* **Location:** `lib/data/repositories/attendance_repository.dart` (lines 113–116)
+* **Description:**
+  The TerribleNight backend (`Api\V1\Employee\AttendanceController::storeEvent`) supports `X-Idempotency-Key` caching, but `submitAttendanceEvent()` does not generate or attach an `X-Idempotency-Key` header.
+* **Recommended Remediation:**
+  Generate a per-attempt UUID/key in `AttendanceConfirmationView` / `TodayAttendanceNotifier` and send it as `X-Idempotency-Key` across retries of the same attendance action.
+
+---
+
+### [SEC-22] Unredacted `developer.log` / `debugPrint` Logging in Release Builds *(November 26, 2026)*
+* **Category:** OWASP MASVS-STORAGE / CWE-532 (Insertion of Sensitive Information into Log File)
+* **Severity:** **Low**
+* **Status:** ⚠️ **OPEN**
+* **Locations:**
+  - `lib/core/network/api_interceptor.dart` (lines 55–67)
+  - `lib/core/storage/secure_storage_service.dart` (lines 22–89)
+  - `lib/core/notifications/notification_service.dart` (lines 89–565)
+  - `lib/core/security/device_security_service.dart` (lines 151–154)
+* **Description:**
+  Multiple `developer.log(...)` and `debugPrint(...)` calls execute unconditionally without `kDebugMode` guards.
+* **Recommended Remediation:**
+  Wrap non-essential diagnostic logs in `if (kDebugMode)` (or a central logger gated on `kDebugMode`).
+
+---
+
+### [SEC-23] Client-Side Password Rule Mismatch & Redundant 401 on `logout()` *(November 26, 2026)*
+* **Category:** OWASP MASVS-AUTH / CWE-521
+* **Severity:** **Low**
+* **Status:** ⚠️ **OPEN**
+* **Locations:**
+  - `lib/features/profile/change_password_dialog.dart` (lines 155–159)
+  - `lib/providers/auth_provider.dart` (lines 58–60, 179–181)
+* **Description:**
+  1. `ChangePasswordDialog` only checks `v.length >= 8`, omitting the uppercase, lowercase, and digit checks enforced by the backend, `OnboardingPasswordScreen`, and `ForgotPasswordSheet`.
+  2. When a `401` triggers `ApiClient.onUnauthorized` → `logout()`, `_repository.logout()` still sends `POST /auth/logout` with the already-invalid token.
+* **Recommended Remediation:**
+  Align `ChangePasswordDialog` validation with `OnboardingPasswordScreen` and pass a flag (e.g. `logout(skipRemote: true)`) when triggered by `onUnauthorized`.
+
+---
+
+### [SEC-24] Minor Code & Build Hygiene Notes *(November 26, 2026)*
+* **Category:** OWASP MASVS-CODE / CWE-1188
+* **Severity:** **Info**
+* **Status:** ⚠️ **OPEN**
+* **Locations:**
+  - `lib/data/models/user_model.dart` (line 86), `lib/data/models/attendance_event_model.dart` (line 85), `lib/core/utils/file_download_helper.dart` (line 93): Relative URLs always resolve against `ApiConfig.cachedHostOrigin`, ignoring custom debug endpoints.
+  - `android/app/build.gradle.kts` (lines 49–67), `.github/workflows/cd.yml` (lines 78–85): Release signing silently falls back to a debug/CI-generated keystore when `key.properties` or `ANDROID_KEYSTORE_BASE64` is missing.
+  - `lib/features/attendance/attendance_confirmation_view.dart` (lines 148–185): `_submitAttendance()` calls `setState(() { _isSubmitting = true; })` redundantly.
+
+---
+
 ## 4. OWASP MASVS v2.0 Compliance Summary
 
 | Domain | Control Description | Evaluation | Notes |
@@ -292,7 +424,7 @@ The automated security and regression test suite confirms that all security asse
 
 ```bash
 $ flutter test
-00:14 +195: All tests passed!
+00:37 +198: All tests passed!
 ```
 
-All 195 tests covering anti-spoofing, certificate validation, biometric cleanup, path traversal neutralization, token leak protection, device integrity, and session lifecycle are passing.
+All 198 tests covering anti-spoofing, certificate validation, biometric cleanup, path traversal neutralization, token leak protection, device integrity, and session lifecycle are passing. `flutter analyze --no-pub` reports zero issues.
