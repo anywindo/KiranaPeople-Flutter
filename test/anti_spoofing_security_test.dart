@@ -12,6 +12,7 @@ import 'package:kirana_people/data/repositories/attendance_repository.dart';
 class MockApiClient extends ApiClient {
   String? lastPath;
   FormData? lastFormData;
+  Map<String, dynamic>? lastHeaders;
   String? lastPostPath;
   dynamic lastPostData;
 
@@ -35,12 +36,14 @@ class MockApiClient extends ApiClient {
   Future<Response> postMultipart(
     String path, {
     required FormData formData,
+    Map<String, dynamic>? headers,
     ProgressCallback? onSendProgress,
     Duration? sendTimeout,
     Duration? receiveTimeout,
   }) async {
     lastPath = path;
     lastFormData = formData;
+    lastHeaders = headers;
     return Response(
       requestOptions: RequestOptions(path: path),
       statusCode: 200,
@@ -78,6 +81,7 @@ void main() {
       expect(fields['event_type'], equals('START_SHIFT'));
       expect(fields['latitude'], equals('-6.914744'));
       expect(fields['longitude'], equals('107.60981'));
+      expect(mockClient.lastHeaders?['X-Idempotency-Key'], isNotEmpty);
       expect(fields['is_mocked'], equals('0'));
       expect(fields['accuracy'], equals('12.5'));
       expect(fields['altitude'], equals('720.0'));

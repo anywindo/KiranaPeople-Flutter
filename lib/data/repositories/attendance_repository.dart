@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,6 +32,12 @@ class AttendanceRepository {
     throw Exception('Gagal memuat status presensi hari ini.');
   }
 
+  static String generateIdempotencyKey(AttendanceEventType eventType) {
+    final ts = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
+    final rand = Random.secure().nextInt(1 << 32).toRadixString(36);
+    return '${eventType.value}_${ts}_$rand';
+  }
+
   Future<void> submitAttendanceEvent({
     required AttendanceEventType eventType,
     required double latitude,
@@ -43,6 +50,7 @@ class AttendanceRepository {
     File? photoFile,
     int? shiftId,
     String? notes,
+    String? idempotencyKey,
   }) async {
     final formDataMap = <String, dynamic>{
       'event_type': eventType.value,
@@ -109,10 +117,16 @@ class AttendanceRepository {
       );
     }
 
+    final resolvedKey =
+        (idempotencyKey != null && idempotencyKey.trim().isNotEmpty)
+        ? idempotencyKey.trim()
+        : generateIdempotencyKey(eventType);
+
     final formData = FormData.fromMap(formDataMap);
     await _apiClient.postMultipart(
       ApiEndpoints.attendanceEvents,
       formData: formData,
+      headers: {'X-Idempotency-Key': resolvedKey},
     );
   }
 

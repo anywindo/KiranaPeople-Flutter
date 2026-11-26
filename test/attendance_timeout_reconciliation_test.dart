@@ -24,6 +24,7 @@ class TimeoutMockRepository extends AttendanceRepository {
     dynamic photoFile,
     int? shiftId,
     String? notes,
+    String? idempotencyKey,
   }) async {
     submitCalled = true;
     // Simulate Dio timeout exception converted by ApiClient

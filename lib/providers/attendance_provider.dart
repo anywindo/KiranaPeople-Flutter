@@ -137,6 +137,7 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
     File? photoFile,
     int? shiftId,
     String? notes,
+    String? idempotencyKey,
   }) async {
     state = state.copyWith(isSubmitting: true, clearError: true);
 
@@ -195,6 +196,7 @@ class TodayAttendanceNotifier extends Notifier<TodayAttendanceState> {
         photoFile: photoFile,
         shiftId: shiftId ?? state.selectedShift?.id,
         notes: notes,
+        idempotencyKey: idempotencyKey,
       );
 
       state = state.copyWith(isSubmitting: false, clearError: true);

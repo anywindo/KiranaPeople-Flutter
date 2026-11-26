@@ -124,6 +124,7 @@ class ApiClient {
   Future<Response> postMultipart(
     String path, {
     required FormData formData,
+    Map<String, dynamic>? headers,
     ProgressCallback? onSendProgress,
     Duration? sendTimeout,
     Duration? receiveTimeout,
@@ -134,6 +135,7 @@ class ApiClient {
         data: formData,
         options: Options(
           contentType: 'multipart/form-data',
+          headers: headers,
           sendTimeout: sendTimeout ?? const Duration(seconds: 60),
           receiveTimeout: receiveTimeout ?? const Duration(seconds: 60),
         ),

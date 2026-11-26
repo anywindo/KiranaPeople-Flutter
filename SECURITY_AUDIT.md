@@ -56,8 +56,8 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 | **SEC-17** | Redirect Header Forwarding & Unpinned Raw `Dio` in `FileDownloadHelper` | MASVS-NETWORK | CWE-200 | **Medium** | ✅ **RESOLVED** |
 | **SEC-18** | Android 10+ Scoped Storage Download Path Failure (`FileDownloadHelper`) | MASVS-PLATFORM | CWE-732 | **Medium** | ✅ **RESOLVED** |
 | **SEC-19** | Stale Pre-Warmed GPS Position Not Re-Validated in `AttendanceConfirmationView` | MASVS-RESILIENCE | CWE-353 | **Medium** | ✅ **RESOLVED** |
-| **SEC-20** | `reportSecurityIncident` Targets Non-Existent Backend Route (`/security/incident`) | MASVS-AUTH | CWE-778 | **Low** | ⚠️ **OPEN** |
-| **SEC-21** | Backend `X-Idempotency-Key` Support Unused by Flutter Client | MASVS-RESILIENCE | CWE-362 | **Low** | ⚠️ **OPEN** |
+| **SEC-20** | `reportSecurityIncident` Targets Non-Existent Backend Route (`/security/incident`) | MASVS-AUTH | CWE-778 | **Low** | ✅ **RESOLVED** |
+| **SEC-21** | Backend `X-Idempotency-Key` Support Unused by Flutter Client | MASVS-RESILIENCE | CWE-362 | **Low** | ✅ **RESOLVED** |
 | **SEC-22** | Unredacted `developer.log` / `debugPrint` Logging in Release Builds | MASVS-STORAGE | CWE-532 | **Low** | ⚠️ **OPEN** |
 | **SEC-23** | Client-Side Password Rule Mismatch & Redundant 401 on `logout()` | MASVS-AUTH | CWE-521 | **Low** | ⚠️ **OPEN** |
 | **SEC-24** | Minor Hygiene: Hardcoded Host Origin, Release Keystore Fallback, Redundant `setState` | MASVS-CODE | CWE-1188 | **Info** | ⚠️ **OPEN** |
@@ -291,26 +291,27 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 ### [SEC-20] `reportSecurityIncident` Targets Non-Existent Backend Route (`/security/incident`) *(November 26, 2026)*
 * **Category:** OWASP MASVS-AUTH / CWE-778 (Insufficient Logging)
 * **Severity:** **Low**
-* **Status:** ⚠️ **OPEN**
-* **Location:** `lib/core/constants/api_endpoints.dart` (line 18), `lib/data/repositories/attendance_repository.dart` (lines 153–179)
+* **Status:** ✅ **RESOLVED**
+* **Location:** `lib/core/constants/api_endpoints.dart` (line 18), `lib/data/repositories/attendance_repository.dart` (lines 153–179), TerribleNight Backend `app/Http/Controllers/Api/V1/SecurityIncidentController.php` & `routes/api.php`
 * **Description:**
-  `AttendanceRepository.reportSecurityIncident()` posts integrity incidents to `/api/v1/security/incident`, but the TerribleNight Laravel backend (`routes/api.php`) does not define a `/security/incident` route.
-* **Impact:**
-  Pre-submission compromised-device blocks silently receive HTTP 404 (swallowed in `catch (_) {}`) instead of persisting forensic logs in `audit_logs`.
-* **Recommended Remediation:**
-  Implement `POST /api/v1/security/incident` on the TerribleNight backend (writing to `audit_logs` under `auth:sanctum`) or route telemetry through an existing audited endpoint.
+  `AttendanceRepository.reportSecurityIncident()` previously posted integrity incidents to `/api/v1/security/incident`, which did not exist on the TerribleNight Laravel backend.
+* **Remediation & Verification:**
+  - Implemented `POST /api/v1/security/incident` (`SecurityIncidentController::store`) on the TerribleNight backend behind `auth:sanctum` and `throttle:attendance-events`, persisting validated telemetry into `audit_logs` (`event = 'security_violation'`).
+  - Added automated tests in TerribleNight `tests/Feature/SecurityIncidentApiTest.php` and verified `test/anti_spoofing_security_test.dart` in Flutter.
 
 ---
 
 ### [SEC-21] Backend `X-Idempotency-Key` Support Unused by Flutter Client *(November 26, 2026)*
 * **Category:** OWASP MASVS-RESILIENCE / CWE-362
 * **Severity:** **Low**
-* **Status:** ⚠️ **OPEN**
-* **Location:** `lib/data/repositories/attendance_repository.dart` (lines 113–116)
+* **Status:** ✅ **RESOLVED**
+* **Locations:** `lib/core/network/api_client.dart`, `lib/data/repositories/attendance_repository.dart`, `lib/providers/attendance_provider.dart`, `lib/features/attendance/attendance_confirmation_view.dart`
 * **Description:**
-  The TerribleNight backend (`Api\V1\Employee\AttendanceController::storeEvent`) supports `X-Idempotency-Key` caching, but `submitAttendanceEvent()` does not generate or attach an `X-Idempotency-Key` header.
-* **Recommended Remediation:**
-  Generate a per-attempt UUID/key in `AttendanceConfirmationView` / `TodayAttendanceNotifier` and send it as `X-Idempotency-Key` across retries of the same attendance action.
+  The TerribleNight backend (`Api\V1\Employee\AttendanceController::storeEvent`) supports `X-Idempotency-Key` caching, but `submitAttendanceEvent()` previously did not generate or attach an `X-Idempotency-Key` header.
+* **Remediation & Verification:**
+  - Added `headers` support to `ApiClient.postMultipart()` and `idempotencyKey` support (with `AttendanceRepository.generateIdempotencyKey()` fallback) to `AttendanceRepository.submitAttendanceEvent()` and `TodayAttendanceNotifier.submitEvent()`.
+  - Updated `AttendanceConfirmationView` to persist `_pendingIdempotencyKey` across retries of the same submission attempt and clear it on success.
+  - Verified `X-Idempotency-Key` transmission in `test/anti_spoofing_security_test.dart`.
 
 ---
 

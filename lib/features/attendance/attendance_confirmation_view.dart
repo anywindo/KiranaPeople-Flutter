@@ -12,6 +12,7 @@ import '../../core/widgets/offline_banner.dart';
 import '../../data/models/attendance_event_model.dart';
 import '../../data/models/attendance_submission_result.dart';
 import '../../data/models/work_location_model.dart';
+import '../../data/repositories/attendance_repository.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/connectivity_provider.dart';
@@ -65,6 +66,7 @@ class _AttendanceConfirmationViewState
   bool _isWithinRadius = false;
   bool _isLoadingLocation = true;
   bool _isSubmitting = false;
+  String? _pendingIdempotencyKey;
 
   @override
   void initState() {
@@ -193,6 +195,10 @@ class _AttendanceConfirmationViewState
       } catch (_) {}
     }
 
+    _pendingIdempotencyKey ??= AttendanceRepository.generateIdempotencyKey(
+      widget.action,
+    );
+
     // Submit attendance event
     final success = await ref
         .read(todayAttendanceProvider.notifier)
@@ -206,6 +212,7 @@ class _AttendanceConfirmationViewState
           isMocked: _currentPosition!.isMocked,
           photoFile: widget.photoFile,
           shiftId: widget.shiftId,
+          idempotencyKey: _pendingIdempotencyKey,
         );
 
     if (!mounted) return;
@@ -216,6 +223,8 @@ class _AttendanceConfirmationViewState
     if (!success) {
       return;
     }
+
+    _pendingIdempotencyKey = null;
 
     double distance = 0.0;
     if (widget.workLocation != null && _currentPosition != null) {
