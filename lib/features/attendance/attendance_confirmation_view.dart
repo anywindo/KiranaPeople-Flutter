@@ -70,57 +70,54 @@ class _AttendanceConfirmationViewState
   void initState() {
     super.initState();
     if (widget.initialPosition != null) {
-      final pos = widget.initialPosition!;
-      double dist = 0.0;
-      bool within = true;
-
-      if (widget.workLocation != null) {
-        dist = Geolocator.distanceBetween(
-          pos.latitude,
-          pos.longitude,
-          widget.workLocation!.latitude,
-          widget.workLocation!.longitude,
+      try {
+        final pos = LocationHelper.validatePosition(
+          widget.initialPosition!,
+          requireFresh: true,
         );
-        within = dist <= widget.workLocation!.radius;
+        _applyValidatedPosition(pos);
+      } catch (_) {
+        _fetchLocation(forceRefresh: true);
       }
-
-      _currentPosition = pos;
-      _isWithinRadius = within;
-      _isLoadingLocation = false;
-      _locationError = null;
     } else {
       _fetchLocation();
     }
   }
 
-  Future<void> _fetchLocation() async {
+  void _applyValidatedPosition(Position pos) {
+    double dist = 0.0;
+    bool within = true;
+
+    if (widget.workLocation != null) {
+      dist = Geolocator.distanceBetween(
+        pos.latitude,
+        pos.longitude,
+        widget.workLocation!.latitude,
+        widget.workLocation!.longitude,
+      );
+      within = dist <= widget.workLocation!.radius;
+    }
+
+    _currentPosition = pos;
+    _isWithinRadius = within;
+    _isLoadingLocation = false;
+    _locationError = null;
+  }
+
+  Future<void> _fetchLocation({bool forceRefresh = false}) async {
     setState(() {
       _isLoadingLocation = true;
       _locationError = null;
     });
 
     try {
-      final pos = await LocationHelper.determinePosition();
+      final pos = await LocationHelper.determinePosition(
+        forceRefresh: forceRefresh,
+      );
       if (!mounted) return;
 
-      double dist = 0.0;
-      bool within = true;
-
-      if (widget.workLocation != null) {
-        dist = Geolocator.distanceBetween(
-          pos.latitude,
-          pos.longitude,
-          widget.workLocation!.latitude,
-          widget.workLocation!.longitude,
-        );
-        within = dist <= widget.workLocation!.radius;
-      }
-
       setState(() {
-        _currentPosition = pos;
-        _isWithinRadius = within;
-        _isLoadingLocation = false;
-        _locationError = null;
+        _applyValidatedPosition(pos);
       });
     } catch (e) {
       if (!mounted) return;
@@ -149,8 +146,18 @@ class _AttendanceConfirmationViewState
       _isSubmitting = true;
     });
 
-    if (_currentPosition == null) {
-      await _fetchLocation();
+    // Re-validate cached/pre-warmed GPS fix before submission (SEC-19)
+    bool needsFreshPosition = _currentPosition == null;
+    if (!needsFreshPosition) {
+      try {
+        LocationHelper.validatePosition(_currentPosition!, requireFresh: true);
+      } catch (_) {
+        needsFreshPosition = true;
+      }
+    }
+
+    if (needsFreshPosition) {
+      await _fetchLocation(forceRefresh: true);
       if (!mounted) return;
       if (_currentPosition == null) {
         setState(() {
@@ -178,11 +185,6 @@ class _AttendanceConfirmationViewState
       );
       return;
     }
-
-    AppHaptics.medium();
-    setState(() {
-      _isSubmitting = true;
-    });
 
     // Await downsampling in isolate if still running
     if (widget.imageProcessFuture != null) {
@@ -238,6 +240,7 @@ class _AttendanceConfirmationViewState
   }
 
   void _openMap() {
+    if (_isSubmitting) return;
     if (_currentPosition == null) {
       final err = _locationError?.toLowerCase() ?? '';
       final SnackBarAction? action;
@@ -283,45 +286,95 @@ class _AttendanceConfirmationViewState
   Widget build(BuildContext context) {
     final user = ref.watch(authProvider).user;
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Column(
-          children: [
-            ConfirmationAppBar(
-              action: widget.action,
-              onRetake: widget.onRetake,
-              onCancel: () => Navigator.pop(context),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: ConfirmationPhotoCard(
-                  photoFile: widget.photoFile,
-                  currentPosition: _currentPosition,
-                  isLoadingLocation: _isLoadingLocation,
-                  isWithinRadius: _isWithinRadius,
-                  locationError: _locationError,
-                  workLocation: widget.workLocation,
-                  user: user,
-                  onOpenMap: _openMap,
+    return PopScope(
+      canPop: !_isSubmitting,
+      child: Stack(
+        children: [
+          AbsorbPointer(
+            absorbing: _isSubmitting,
+            child: Scaffold(
+              backgroundColor: Colors.black,
+              body: SafeArea(
+                child: Column(
+                  children: [
+                    ConfirmationAppBar(
+                      action: widget.action,
+                      onRetake: widget.onRetake,
+                      onCancel: () => Navigator.pop(context),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: ConfirmationPhotoCard(
+                          photoFile: widget.photoFile,
+                          currentPosition: _currentPosition,
+                          isLoadingLocation: _isLoadingLocation,
+                          isWithinRadius: _isWithinRadius,
+                          locationError: _locationError,
+                          workLocation: widget.workLocation,
+                          user: user,
+                          onOpenMap: _openMap,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: OfflineCardWarning(
+                        message:
+                            'Koneksi internet terputus. Pastikan data seluler atau Wi-Fi aktif agar presensi dapat dikirim.',
+                      ),
+                    ),
+                    ConfirmationActionButtons(
+                      isSubmitting: _isSubmitting,
+                      onRetake: widget.onRetake,
+                      onSubmit: _submitAttendance,
+                    ),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: OfflineCardWarning(
-                message: 'Koneksi internet terputus. Pastikan data seluler atau Wi-Fi aktif agar presensi dapat dikirim.',
+          ),
+          if (_isSubmitting)
+            Positioned.fill(
+              child: AbsorbPointer(
+                child: ColoredBox(
+                  color: Colors.black.withValues(alpha: 0.55),
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 20,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E293B),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            strokeWidth: 3,
+                            color: AppColors.primary,
+                          ),
+                          SizedBox(height: 14),
+                          Text(
+                            'Mengirim presensi...',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
-            ConfirmationActionButtons(
-              isSubmitting: _isSubmitting,
-              onRetake: widget.onRetake,
-              onSubmit: _submitAttendance,
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }

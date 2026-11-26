@@ -254,11 +254,18 @@ class LocationHelper {
     return validated;
   }
 
+  /// Maximum age allowed for a pre-warmed or cached GPS fix before re-fetching (SEC-07 / SEC-19).
+  static const Duration maxPositionAge = Duration(seconds: 120);
+
   /// Validates security and integrity of a GPS position fix:
   /// - Blocks Mock Locations (Fake GPS spoofing)
   /// - Validates non-negative accuracy radius
   /// - Protects against device clock manipulation / future timestamps
-  static Position validatePosition(Position position) {
+  /// - Optionally enforces freshness ([requireFresh]) against [maxPositionAge]
+  static Position validatePosition(
+    Position position, {
+    bool requireFresh = false,
+  }) {
     if (position.isMocked) {
       _cachedPosition = null;
       _cachedAt = null;
@@ -278,6 +285,15 @@ class LocationHelper {
     if (position.timestamp.difference(now).inSeconds > 60) {
       throw Exception(
         'Waktu perangkat tidak sinkron. Harap aktifkan pengaturan waktu otomatis sistem.',
+      );
+    }
+
+    if (requireFresh &&
+        now.difference(position.timestamp).abs() > maxPositionAge) {
+      _cachedPosition = null;
+      _cachedAt = null;
+      throw Exception(
+        'Lokasi GPS sudah kedaluwarsa. Mengambil ulang koordinat terkini.',
       );
     }
 

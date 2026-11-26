@@ -55,7 +55,7 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 | **SEC-16** | Wildcard Multi-Tenant `*.onrender.com` Trust in `ApiConfig.isTrustedHost()` | MASVS-NETWORK | CWE-200 | **Medium** | ✅ **RESOLVED** |
 | **SEC-17** | Redirect Header Forwarding & Unpinned Raw `Dio` in `FileDownloadHelper` | MASVS-NETWORK | CWE-200 | **Medium** | ✅ **RESOLVED** |
 | **SEC-18** | Android 10+ Scoped Storage Download Path Failure (`FileDownloadHelper`) | MASVS-PLATFORM | CWE-732 | **Medium** | ✅ **RESOLVED** |
-| **SEC-19** | Stale Pre-Warmed GPS Position Not Re-Validated in `AttendanceConfirmationView` | MASVS-RESILIENCE | CWE-353 | **Medium** | ⚠️ **OPEN** |
+| **SEC-19** | Stale Pre-Warmed GPS Position Not Re-Validated in `AttendanceConfirmationView` | MASVS-RESILIENCE | CWE-353 | **Medium** | ✅ **RESOLVED** |
 | **SEC-20** | `reportSecurityIncident` Targets Non-Existent Backend Route (`/security/incident`) | MASVS-AUTH | CWE-778 | **Low** | ⚠️ **OPEN** |
 | **SEC-21** | Backend `X-Idempotency-Key` Support Unused by Flutter Client | MASVS-RESILIENCE | CWE-362 | **Low** | ⚠️ **OPEN** |
 | **SEC-22** | Unredacted `developer.log` / `debugPrint` Logging in Release Builds | MASVS-STORAGE | CWE-532 | **Low** | ⚠️ **OPEN** |
@@ -277,14 +277,14 @@ The audit evaluated the codebase against all 8 domains of **OWASP MASVS v2.0**:
 ### [SEC-19] Stale Pre-Warmed GPS Position Not Re-Validated in `AttendanceConfirmationView` *(November 26, 2026)*
 * **Category:** OWASP MASVS-RESILIENCE / CWE-353
 * **Severity:** **Medium**
-* **Status:** ⚠️ **OPEN**
-* **Location:** `lib/features/attendance/attendance_confirmation_view.dart` (lines 72–91, 137–207)
+* **Status:** ✅ **RESOLVED**
+* **Location:** `lib/core/utils/location_helper.dart` (lines 257–302), `lib/features/attendance/attendance_confirmation_view.dart` (lines 70–180)
 * **Description:**
-  When `widget.initialPosition` (pre-warmed in `CameraSelfieView`) is provided, `_submitAttendance()` submits it directly without checking its age or re-running `LocationHelper.validatePosition()`.
-* **Impact:**
-  If the employee stays on the confirmation screen for several minutes or activates a mock location provider after selfie capture, a stale coordinate may be submitted.
-* **Recommended Remediation:**
-  Re-run `LocationHelper.validatePosition(_currentPosition!)` and enforce a freshness threshold (e.g. `<= 120s`) in `_submitAttendance()`, calling `_fetchLocation()` if expired.
+  When `widget.initialPosition` (pre-warmed in `CameraSelfieView`) was provided, `_submitAttendance()` previously submitted it directly without checking its age or re-running `LocationHelper.validatePosition()`.
+* **Remediation & Verification:**
+  - Added `requireFresh: true` support (enforcing `LocationHelper.maxPositionAge` of 120s) to `LocationHelper.validatePosition()`.
+  - Updated `AttendanceConfirmationView.initState()` and `_submitAttendance()` to validate `_currentPosition` with `requireFresh: true` and force a fresh GPS fix (`_fetchLocation(forceRefresh: true)`) if stale or invalid.
+  - Added unit test in `test/location_helper_test.dart` verifying stale positions (> 120s) are rejected when `requireFresh: true`.
 
 ---
 

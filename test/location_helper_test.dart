@@ -89,6 +89,27 @@ void main() {
         );
       },
     );
+
+    test(
+      'throws Exception when requireFresh is true and position is older than 120s (SEC-19)',
+      () {
+        final staleTime = DateTime.now().subtract(
+          const Duration(seconds: 125),
+        );
+        final stalePos = createTestPosition(timestamp: staleTime);
+
+        expect(
+          () => LocationHelper.validatePosition(stalePos, requireFresh: true),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains('kedaluwarsa'),
+            ),
+          ),
+        );
+      },
+    );
   });
 
   group('LocationHelper caching & power optimization', () {
